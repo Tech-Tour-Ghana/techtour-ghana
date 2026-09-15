@@ -118,6 +118,138 @@ export async function requestPasswordReset(
   return { success: true, message: "Password reset link sent to your email." };
 }
 
+export interface DashboardStats {
+  tours_booked: number;
+  orders_placed: number;
+  member_since?: string;
+}
+
+export interface Order {
+  id: string;
+  order_number: string;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  currency: string;
+  status: string;
+  payment_status: string;
+  shipping_address: string;
+  shipping_city: string;
+  shipping_region: string;
+  shipping_country: string;
+  phone_number: string;
+  tracking_number: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Payment {
+  id: string;
+  reference: string;
+  amount: number;
+  currency: string;
+  status: string;
+  channel: string;
+  created_at: string;
+  paid_at: string | null;
+}
+
+export interface TourBooking {
+  id: string;
+  booking_reference: string;
+  tour_name: string;
+  tour_location: string;
+  duration_days: number;
+  booking_date: string;
+  participants: number;
+  total_price: number;
+  currency: string;
+  status: string;
+}
+
+/** The account area's own reads. RLS scopes every query to the caller's own rows (0013: <table>_select_own). */
+export async function getUserOrders(): Promise<Order[]> {
+  const supabase = createBrowserClient();
+  const { data, error } = await supabase
+    .from('orders')
+    .select('id, order_number, quantity, unit_price, total_price, currency, order_status, payment_status, shipping_address, shipping_city, shipping_region, shipping_country, phone_number, tracking_number, created_at, updated_at, market_products(title)')
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    order_number: row.order_number,
+    product_name: row.market_products?.title ?? 'Unknown product',
+    quantity: row.quantity,
+    unit_price: row.unit_price,
+    total_price: row.total_price,
+    currency: row.currency,
+    status: row.order_status,
+    payment_status: row.payment_status,
+    shipping_address: row.shipping_address,
+    shipping_city: row.shipping_city,
+    shipping_region: row.shipping_region,
+    shipping_country: row.shipping_country,
+    phone_number: row.phone_number,
+    tracking_number: row.tracking_number,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  }));
+}
+
+/**
+ * paystack_transactions has table level SELECT revoked (0013): only the
+ * columns named here are grantable, select=* is refused.
+ */
+export async function getUserPayments(): Promise<Payment[]> {
+  const supabase = createBrowserClient();
+  const { data, error } = await supabase
+    .from('paystack_transactions')
+    .select('id, reference, amount, currency, status, channel, created_at, paid_at')
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+  return data;
+}
+
+export async function getUserTours(): Promise<TourBooking[]> {
+  const supabase = createBrowserClient();
+  const { data, error } = await supabase
+    .from('bookings')
+    .select('id, booking_reference, participants, total_price, currency, status, tour_schedules(start_date), tours(title, location, duration_days)')
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    booking_reference: row.booking_reference,
+    tour_name: row.tours?.title ?? 'Unknown tour',
+    tour_location: row.tours?.location ?? '',
+    duration_days: row.tours?.duration_days ?? 0,
+    booking_date: row.tour_schedules?.start_date ?? '',
+    participants: row.participants,
+    total_price: row.total_price,
+    currency: row.currency,
+    status: row.status,
+  }));
+}
+
+export async function getDashboardStats(): Promise<DashboardStats> {
+  const supabase = createBrowserClient();
+  const [{ count: toursBooked }, { count: ordersPlaced }] = await Promise.all([
+    supabase.from('bookings').select('id', { count: 'exact', head: true }),
+    supabase.from('orders').select('id', { count: 'exact', head: true }),
+  ]);
+
+  return {
+    tours_booked: toursBooked ?? 0,
+    orders_placed: ordersPlaced ?? 0,
+  };
+}
+
 export async function logoutUser(): Promise<{ success: boolean }> {
   const supabase = createBrowserClient();
   const { error } = await supabase.auth.signOut();
