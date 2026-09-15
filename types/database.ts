@@ -1,7 +1,11 @@
 // Database types for the live Supabase project. Do not edit by hand.
 //
-// The public schema is currently empty, so Tables is empty. Regenerate this
-// file whenever a migration lands, with:
+// STALE. This file still describes an empty schema. Migrations 0001 to 0004
+// have since created the identity and tours tables, and the remaining domains
+// land next. It is regenerated once, when task 1.5 finishes, rather than after
+// every domain, because nothing reads these types until phase 3.
+//
+// Regenerate with:
 //
 //   npx supabase gen types typescript --project-id <ref> > types/database.ts
 //
