@@ -1,3 +1,119 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Design tokens from design.md part A2. These are the values recovered by
+   counting every hex literal in the old codebase, not the ones the old
+   Tailwind config declared, which never appeared in the rendered site. */
+:root {
+  --color-primary: #139ea2;
+  --color-primary-hover: #0d7a7d;
+  --color-accent: #e6a64d;
+  --color-accent-hover: #d4953a;
+  --color-ink: #1a1a2e;
+  --color-ink-raised: #222244;
+
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  --bg: #ffffff;
+  --bg-subtle: #f9f9f9;
+  --surface: #ffffff;
+  --text: #111827;
+  --text-muted: #6b7280;
+  --text-subtle: #9ca3af;
+  --border: #e5e7eb;
+}
+
+[data-theme="dim"] {
+  --bg: #121212;
+  --bg-subtle: #1a1a1a;
+  --surface: #1e1e1e;
+  --text: #e0e0e0;
+  --text-muted: #909090;
+  --text-subtle: #707070;
+  --border: #2a2a2a;
+}
+
+[data-theme="dark"] {
+  --bg: #0d0d0d;
+  --bg-subtle: #1a1a1a;
+  --surface: #1a1a1a;
+  --text: #e8e8e8;
+  --text-muted: #a0a0b0;
+  --text-subtle: #b0b0b0;
+  --border: #333333;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dim"]) {
+    --bg: #0d0d0d;
+    --bg-subtle: #1a1a1a;
+    --surface: #1a1a1a;
+    --text: #e8e8e8;
+    --text-muted: #a0a0b0;
+    --text-subtle: #b0b0b0;
+    --border: #333333;
+  }
+}
+
+@layer base {
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+  }
+
+  /* The existing focus ring, kept as design.md A7 requires. It is never
+     removed without a replacement. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid #02818a;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply mx-auto w-full px-4 sm:px-6 lg:px-8;
+    max-width: 1280px;
+  }
+}
+
+/* design.md A7. The slide and fade animations are suppressed under reduced
+   motion rather than merely shortened. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* The glass treatment from design.md A5. The site's most distinctive visual
+   signature. The @supports fallback matters: without backdrop blur the panel
+   must become opaque, or the text on it is unreadable. */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.75rem;
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .glass-panel {
+    backdrop-filter: blur(10px);
+  }
+}
+
+@supports not (backdrop-filter: blur(10px)) {
+  .glass-panel {
+    background: var(--color-ink-raised);
+  }
+}
