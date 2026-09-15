@@ -1,40 +1,33 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-
-import { Footer } from "@/components/layout/Footer";
-import { Navbar } from "@/components/layout/Navbar";
+import "./globals.css";
+import AppShell from "@/components/AppShell";
 import { env } from "@/lib/env";
 
-import "./globals.css";
+const inter = Inter({ subsets: ["latin"] });
 
-const inter = Inter({ subsets: ["latin"], display: "swap" });
-
-// This stays a Server Component. The Metadata API below only works in one, so
-// making the root layout a Client Component would stop every page in the app
-// from emitting a title, description or canonical tag. If a provider is needed
-// later it goes in its own Client Component, not here.
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
-  title: {
-    default: "TechTour Ghana, tours and travel across Ghana",
-    template: "%s | TechTour Ghana",
-  },
-  description:
-    "Guided tours, artisan goods and study abroad services across Ghana. Heritage sites, rainforest, savannah and coast, booked with local guides.",
-  alternates: { canonical: "/" },
+  title: "TechTour Ghana",
+  // No canonical here. Metadata set in the root layout is inherited by every
+  // route, so a canonical of "/" would tell search engines that every page is
+  // a duplicate of the homepage. Each page sets its own canonical instead.
   openGraph: {
-    type: "website",
-    siteName: "TechTour Ghana",
-    locale: "en_GH",
-    url: "/",
-    title: "TechTour Ghana, tours and travel across Ghana",
-    description:
-      "Guided tours, artisan goods and study abroad services across Ghana.",
-  },
-  twitter: {
-    card: "summary_large_image",
     title: "TechTour Ghana",
-    description: "Guided tours, artisan goods and study abroad services across Ghana.",
+    url: "/",
+    siteName: "TechTour Ghana",
+    type: "website",
+  },
+  icons: {
+    // The old layout also linked /images/logo-40x40.png.ico, a file that never
+    // existed in the old site, so every visit requested something missing.
+    // These entries point only at logo files present in public/images.
+    icon: [
+      { url: "/images/logo-40x40.png", type: "image/png" },
+      { url: "/images/logo-40x4.png", type: "image/png" },
+    ],
+    shortcut: [{ url: "/images/logo-40x40.png", type: "image/png" }],
+    apple: "/images/logo-40x40.png",
   },
 };
 
@@ -46,17 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-black"
-        >
-          Skip to content
-        </a>
-        <Navbar />
-        <main id="main" className="min-h-screen">
-          {children}
-        </main>
-        <Footer />
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

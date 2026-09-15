@@ -209,16 +209,47 @@ RLS is enabled on every table. There is no exception.
 
 - Public content tables, meaning tours, products, destinations, and all site
   content, allow anonymous `SELECT` where `is_active` is true.
-- User owned rows, meaning bookings, orders, and profiles, are readable and
-  writable only by the owner, matched on `auth.uid()`.
+- User owned rows are readable by their owner, matched on `auth.uid()`. A
+  profile is also updatable by its owner, with `is_admin` pinned so a user
+  cannot grant themselves admin.
+- **Financial records are never written by a client**, owner included.
+  Bookings, orders, vacation bookings and Paystack transactions are created by
+  server code that recomputes the price from the database, per `design.md` B6.
+  A client insert policy would let a browser choose its own total. Cancellation
+  runs server side too, because it releases schedule spots and may need a
+  refund, which a bare row update cannot do.
 - Writes to content tables require an admin claim.
-- Analytics tables accept inserts from anyone and are readable only by admins.
+- Inbound message tables, such as the contact form and newsletter, accept
+  inserts from anyone and are readable only by admins, with staff workflow
+  columns pinned on insert.
+- Behavioural analytics tables accept inserts from anyone, with `user_id`
+  forced to null or the caller's own id. Analytics tables that carry money or
+  personal data do not, and neither does the daily rollup, because a client
+  could otherwise inflate revenue figures. All client analytics is untrusted
+  telemetry: RLS cannot rate limit, and timestamps and actions are whatever
+  the client sent.
+
+### Column privileges
+
+**RLS is row level, not column level.** A policy that lets a role read a row
+exposes every column of it. To hide a column, revoke table level `SELECT` from
+`anon` and `authenticated`, then grant `SELECT` back by name on the columns
+that may be read. A column level revoke on its own does nothing, because
+Supabase grants table level `SELECT` on public tables by default and that
+grant already covers every column. This form fails closed: a column added
+later stays hidden until it is added to the grant. It is applied to
+`tour_reviews`, hiding reviewer email and moderation notes, and to
+`paystack_transactions`, hiding the reusable card token.
 
 ### Service role key
 
-The Supabase service role key bypasses RLS. It is used only in Route Handlers
-that require it, specifically the Paystack webhook. It is never imported into
-a Client Component and never reaches the browser bundle.
+The Supabase service role key bypasses RLS. It is used only in server code
+that has no user session to act for, or that must write rows no client may
+write: the Paystack webhook, creating bookings and orders after recomputing
+their totals, recording email delivery, and the analytics rollup job. Where a
+write can be expressed as a single database operation, a `security definer`
+function is preferred over the service role, per `design.md` B8. The key is
+never imported into a Client Component and never reaches the browser bundle.
 
 ### Payments
 
