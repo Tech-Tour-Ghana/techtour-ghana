@@ -138,18 +138,14 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
       }
 
       if (response.status && response.data) {
-        if (paymentMethod === 'card' || paymentMethod === 'bank_transfer') {
-          localStorage.setItem('pending_payment_reference', response.data.reference);
-          localStorage.setItem('pending_payment_order', JSON.stringify(orderDetails));
-          window.location.href = response.data.authorization_url;
-        } else {
-          setProcessing(false);
-          onSuccess(response.data.reference, response);
-          alert(`✅ Payment initiated! You will receive a confirmation SMS on ${mobilePhone} from your mobile money provider.`);
-          setTimeout(() => {
-            onClose();
-          }, 3000);
-        }
+        // Every method redirects to Paystack's hosted checkout: mobile money
+        // there still needs an OTP step this modal never collects, so a
+        // synchronous "success" here would be reported before the charge
+        // actually completes. Paystack's own page handles that step and
+        // sends the browser back to /market/payment/verify either way.
+        localStorage.setItem('pending_payment_reference', response.data.reference);
+        localStorage.setItem('pending_payment_order', JSON.stringify(orderDetails));
+        window.location.href = response.data.authorization_url;
       } else {
         setError(response.message || 'Payment initialization failed. Please try again.');
         setProcessing(false);
