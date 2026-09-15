@@ -2,9 +2,12 @@ import "server-only";
 
 // Supabase client for code with no user session to act on behalf of. Uses the
 // service role key, which bypasses row level security entirely, so its use is
-// restricted to exactly one caller: the Paystack webhook (architecture.md
-// section 6, design.md B7). Everything else must use lib/supabase/server or
-// lib/supabase/client, where RLS is the enforcement boundary.
+// restricted to the small set of server routes that legitimately act outside
+// any one user's RLS grants: the Paystack initialize, verify and webhook
+// routes, which price a cart and write orders that orders_insert (admin only,
+// 0013) would otherwise refuse (architecture.md section 6, design.md B7).
+// Everything else must use lib/supabase/server or lib/supabase/client, where
+// RLS is the enforcement boundary.
 //
 // The "server-only" import is what makes this structurally impossible to
 // import from client code, the same guard lib/env.server.ts uses: a file that

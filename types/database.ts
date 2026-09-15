@@ -1,8 +1,3 @@
-// Database types for the live Supabase project. Do not edit by hand.
-//
-// Regenerate whenever a migration lands, and commit the result:
-//   npx supabase gen types typescript --project-id <ref> > types/database.ts
-
 export type Json =
   | string
   | number
@@ -1621,6 +1616,7 @@ export type Database = {
           order_number: string
           order_status: Database["public"]["Enums"]["order_status"]
           payment_status: Database["public"]["Enums"]["payment_status"]
+          paystack_transaction_id: string | null
           phone_number: string
           product_id: string
           quantity: number
@@ -1644,6 +1640,7 @@ export type Database = {
           order_number?: string
           order_status?: Database["public"]["Enums"]["order_status"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          paystack_transaction_id?: string | null
           phone_number?: string
           product_id: string
           quantity?: number
@@ -1667,6 +1664,7 @@ export type Database = {
           order_number?: string
           order_status?: Database["public"]["Enums"]["order_status"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          paystack_transaction_id?: string | null
           phone_number?: string
           product_id?: string
           quantity?: number
@@ -1682,6 +1680,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_paystack_transaction_id_fkey"
+            columns: ["paystack_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "paystack_transactions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_product_id_fkey"
             columns: ["product_id"]

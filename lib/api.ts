@@ -63,6 +63,61 @@ export async function getAuthStatus(): Promise<AuthStatusResponse> {
   };
 }
 
+/** Signs in with Supabase Auth. Message text matches what the ported login page expects to show inline. */
+export async function loginUser(
+  email: string,
+  password: string,
+): Promise<{ success: boolean; message?: string }> {
+  const supabase = createBrowserClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return { success: false, message: error.message };
+  return { success: true };
+}
+
+/**
+ * Signs up with Supabase Auth. first_name/last_name land in auth metadata,
+ * which public.handle_new_user (0002) reads to seed the profiles row.
+ *
+ * needsVerification is true when Supabase requires email confirmation before
+ * a session exists, which is the normal project setting and is what the
+ * ported register page's "check your email" modal is for.
+ */
+export async function registerUser(params: {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+}): Promise<{ success: boolean; message?: string; needsVerification: boolean }> {
+  const supabase = createBrowserClient();
+  const { data, error } = await supabase.auth.signUp({
+    email: params.email,
+    password: params.password,
+    options: {
+      data: { first_name: params.first_name, last_name: params.last_name },
+      emailRedirectTo:
+        typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : undefined,
+    },
+  });
+
+  if (error) return { success: false, message: error.message, needsVerification: false };
+  return { success: true, needsVerification: !data.session };
+}
+
+/** Sends a Supabase password reset email. The link lands on /auth/callback, which forwards to /auth/update-password. */
+export async function requestPasswordReset(
+  email: string,
+): Promise<{ success: boolean; message?: string }> {
+  const supabase = createBrowserClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo:
+      typeof window !== "undefined"
+        ? `${window.location.origin}/auth/callback?next=/auth/update-password`
+        : undefined,
+  });
+  if (error) return { success: false, message: error.message };
+  return { success: true, message: "Password reset link sent to your email." };
+}
+
 export async function logoutUser(): Promise<{ success: boolean }> {
   const supabase = createBrowserClient();
   const { error } = await supabase.auth.signOut();
