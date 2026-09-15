@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import BackToTop from '@/components/BackToTop';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -23,40 +23,21 @@ import {
   faTwitter,
   faLinkedin,
   faYoutube,
+  faTiktok,
+  faWhatsapp,
 } from '@fortawesome/free-brands-svg-icons';
 import { ServiceTheme } from '@/components/ServiceTheme';
 import { createBrowserClient } from '@/lib/supabase/client';
 
-const contactMethods = [
-  {
-    icon: faEnvelope,
-    title: 'Email Us',
-    description: 'We typically respond within 24 hours',
-    value: 'hello@techtourghana.com',
-    href: 'mailto:hello@techtourghana.com',
-  },
-  {
-    icon: faPhone,
-    title: 'Call Us',
-    description: 'Mon-Fri, 8AM - 6PM GMT',
-    value: '+233 (0) 30 123 4567',
-    href: 'tel:+233301234567',
-  },
-  {
-    icon: faLocationDot,
-    title: 'Visit Us',
-    description: 'Our head office',
-    value: 'Accra, Ghana',
-    href: '#',
-  },
-  {
-    icon: faHeadset,
-    title: '24/7 Support',
-    description: 'For active bookings only',
-    value: 'support@techtourghana.com',
-    href: 'mailto:support@techtourghana.com',
-  },
-];
+const SOCIAL_ICONS: Record<string, typeof faFacebook> = {
+  facebook: faFacebook,
+  instagram: faInstagram,
+  twitter: faTwitter,
+  linkedin: faLinkedin,
+  youtube: faYoutube,
+  tiktok: faTiktok,
+  whatsapp: faWhatsapp,
+};
 
 const departmentContacts = [
   {
@@ -79,13 +60,18 @@ const departmentContacts = [
   },
 ];
 
-const socialLinks = [
-  { icon: faFacebook, href: '#', label: 'Facebook' },
-  { icon: faInstagram, href: '#', label: 'Instagram' },
-  { icon: faTwitter, href: '#', label: 'Twitter' },
-  { icon: faLinkedin, href: '#', label: 'LinkedIn' },
-  { icon: faYoutube, href: '#', label: 'YouTube' },
-];
+interface ContactInfo {
+  email: string;
+  mainPhone: string;
+  supportPhone: string;
+  address: string;
+  hours: string;
+}
+
+interface SocialLink {
+  platform: string;
+  url: string;
+}
 
 export default function ContactUsPage() {
   const [formData, setFormData] = useState({
@@ -96,6 +82,67 @@ export default function ContactUsPage() {
     message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+
+  // Real contact details and social links, same tables the footer uses -
+  // the old hardcoded copy here didn't even match the real footer content.
+  useEffect(() => {
+    const supabase = createBrowserClient();
+    supabase
+      .from('footer_contacts')
+      .select('icon, text')
+      .order('sort_order')
+      .then(({ data }) => {
+        if (!data) return;
+        const findByIcon = (icon: string) => data.find((c) => c.icon === icon)?.text ?? '';
+        setContactInfo({
+          address: findByIcon('📍'),
+          mainPhone: data.filter((c) => c.icon === '📞')[0]?.text ?? '',
+          supportPhone: data.filter((c) => c.icon === '📞')[1]?.text ?? '',
+          email: findByIcon('✉️'),
+          hours: findByIcon('🕒'),
+        });
+      });
+    supabase
+      .from('social_links')
+      .select('platform, url')
+      .order('sort_order')
+      .then(({ data }) => setSocialLinks(data ?? []));
+  }, []);
+
+  const contactMethods = contactInfo
+    ? [
+        {
+          icon: faEnvelope,
+          title: 'Email Us',
+          description: 'We typically respond within 24 hours',
+          value: contactInfo.email,
+          href: `mailto:${contactInfo.email}`,
+        },
+        {
+          icon: faPhone,
+          title: 'Call Us',
+          description: 'Mon - Sun, 7AM - 10PM',
+          value: contactInfo.mainPhone,
+          href: `tel:${contactInfo.mainPhone.replace(/[^\d+]/g, '')}`,
+        },
+        {
+          icon: faLocationDot,
+          title: 'Visit Us',
+          description: 'Our head office',
+          value: contactInfo.address,
+          href: null,
+        },
+        {
+          icon: faHeadset,
+          title: '24/7 Support',
+          description: 'For active bookings',
+          value: contactInfo.supportPhone,
+          href: `tel:${contactInfo.supportPhone.replace(/[^\d+]/g, '')}`,
+        },
+      ]
+    : [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,16 +189,27 @@ export default function ContactUsPage() {
         <section className="contact-methods-section">
           <div className="contact-methods-container">
             <div className="contact-methods-grid">
-              {contactMethods.map((method, idx) => (
-                <a key={idx} href={method.href} className="contact-method-card">
-                  <div className="contact-method-icon">
-                    <FontAwesomeIcon icon={method.icon} />
+              {contactMethods.map((method, idx) => {
+                const content = (
+                  <>
+                    <div className="contact-method-icon">
+                      <FontAwesomeIcon icon={method.icon} />
+                    </div>
+                    <h3 className="contact-method-title">{method.title}</h3>
+                    <p className="contact-method-description">{method.description}</p>
+                    <span className="contact-method-value">{method.value}</span>
+                  </>
+                );
+                return method.href ? (
+                  <a key={idx} href={method.href} className="contact-method-card">
+                    {content}
+                  </a>
+                ) : (
+                  <div key={idx} className="contact-method-card">
+                    {content}
                   </div>
-                  <h3 className="contact-method-title">{method.title}</h3>
-                  <p className="contact-method-description">{method.description}</p>
-                  <span className="contact-method-value">{method.value}</span>
-                </a>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
@@ -178,8 +236,7 @@ export default function ContactUsPage() {
                     </div>
                     <div>
                       <h4>Head Office</h4>
-                      <p>Airport City, Accra</p>
-                      <p>Greater Accra Region, Ghana</p>
+                      <p>{contactInfo?.address || 'Accra, Ghana'}</p>
                     </div>
                   </div>
 
@@ -189,8 +246,7 @@ export default function ContactUsPage() {
                     </div>
                     <div>
                       <h4>Office Hours</h4>
-                      <p>Monday - Friday: 8AM - 6PM GMT</p>
-                      <p>Saturday: 9AM - 2PM GMT</p>
+                      <p>{contactInfo?.hours || 'Mon - Sun: 7:00 AM - 10:00 PM'}</p>
                     </div>
                   </div>
                 </div>
@@ -222,11 +278,13 @@ export default function ContactUsPage() {
                     {socialLinks.map((social, idx) => (
                       <a
                         key={idx}
-                        href={social.href}
-                        aria-label={social.label}
+                        href={social.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={social.platform}
                         className="contact-social-btn"
                       >
-                        <FontAwesomeIcon icon={social.icon} />
+                        <FontAwesomeIcon icon={SOCIAL_ICONS[social.platform] || faFacebook} />
                       </a>
                     ))}
                   </div>

@@ -343,7 +343,7 @@ export default function OurStoryPage() {
               TechTour Ghana journey.
             </p>
             <div className="story-cta-actions">
-              <Link href="/contact" className="story-cta-btn primary">
+              <Link href="/about/contact-us" className="story-cta-btn primary">
                 Get in Touch
                 <FontAwesomeIcon icon={faArrowRight} />
               </Link>

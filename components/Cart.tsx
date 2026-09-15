@@ -14,6 +14,7 @@ import {
   faLock
 } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from '@/context/ThemeContext';
+import { getAuthStatus } from '@/lib/api';
 
 interface Currency {
   code: string;
@@ -137,22 +138,24 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
   };
 
   // ===== PROCEED TO CHECKOUT =====
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     const cartItems = getCartItems ? getCartItems() : [];
     const total = getCartTotal ? getCartTotal() : 0;
-    
+
     if (cartItems.length === 0) {
       alert('Your cart is empty. Please add items before proceeding to payment.');
       return;
     }
-    
-    const token = localStorage.getItem('access_token');
-    if (!token) {
+
+    // Session lives in an httpOnly cookie under Supabase Auth; there is no
+    // access_token in localStorage to check anymore.
+    const { is_authenticated } = await getAuthStatus();
+    if (!is_authenticated) {
       alert('Please log in to proceed to payment.');
       window.location.href = '/auth/login';
       return;
     }
-    
+
     // Close the cart
     closeCart();
     
