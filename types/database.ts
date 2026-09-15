@@ -1,8 +1,13 @@
-// Generated from the live Supabase schema. Do not edit by hand.
-// Regenerate whenever a migration lands, and commit the result.
+// Database types for the live Supabase project. Do not edit by hand.
 //
-// The public schema is currently empty, so Tables is empty. It fills in once
-// the migrations under supabase/migrations are applied.
+// The public schema is currently empty, so Tables is empty. Regenerate this
+// file whenever a migration lands, with:
+//
+//   npx supabase gen types typescript --project-id <ref> > types/database.ts
+//
+// and commit the result. The helper types below are verbatim generator
+// output, so regenerating replaces this file wholesale and hand trimming the
+// currently unused ones would only make the next diff noisy.
 
 export type Json =
   | string
