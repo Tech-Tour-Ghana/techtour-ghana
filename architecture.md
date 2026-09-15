@@ -242,8 +242,14 @@ Cloudflare DNS  ->  Vercel  ->  Supabase
                       +-- Resend, outbound email
 ```
 
-- Cloudflare holds the zone. Apex and `www` point at Vercel with the orange
-  proxy cloud disabled, so Vercel can issue and renew certificates.
+The production domain is **`techtourghana.com`**. Every canonical URL, sitemap
+entry, structured data reference, redirect target and email link uses it. There
+is no second public hostname.
+
+- Cloudflare holds the zone for `techtourghana.com`. The apex and `www` point at
+  Vercel with the orange proxy cloud disabled, so Vercel can issue and renew
+  certificates. One of the two is canonical and the other redirects to it, so
+  the same page is never reachable at two addresses.
 - Vercel deploys on push. `main` is production, every other branch gets a
   preview URL.
 - Supabase runs one project with two environments, production and a branch for
@@ -259,7 +265,7 @@ Cloudflare DNS  ->  Vercel  ->  Supabase
 | `PAYSTACK_SECRET_KEY` | Server only | Transaction initialise and verify |
 | `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Client | Inline checkout |
 | `RESEND_API_KEY` | Server only | Transactional email |
-| `NEXT_PUBLIC_SITE_URL` | Client and server | Redirects and email links |
+| `NEXT_PUBLIC_SITE_URL` | Client and server | Canonical origin. `https://techtourghana.com` in production, `http://localhost:3000` locally |
 
 All of these are parsed through a Zod schema at startup. A missing or malformed
 variable fails the build rather than surfacing at runtime.
