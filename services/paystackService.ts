@@ -5,11 +5,9 @@
 // tab and use it to initialise, verify or refund transactions on the account.
 //
 // Initialising and verifying a transaction requires the secret key, so both
-// must happen on the server, where the total is also recomputed from the
-// database rather than trusted from the browser. Until that server route
-// exists, these methods return Paystack's own failure shape, so the modal takes
-// its existing error path and nothing is charged. Every other method is
-// unchanged.
+// now go through this app's own Route Handlers (app/api/paystack/*), which
+// hold the key server side and recompute the total from market_products
+// rather than trusting the browser. Every other method is unchanged.
 
 import { paystackConfig, BRAND_COLORS } from '@/config/paystack';
 
@@ -43,9 +41,6 @@ interface VerifyPaymentResponse {
     channel: string[];
   };
 }
-
-const PAYMENT_UNAVAILABLE =
-  'Online payment is not available yet. Please contact us to complete your order.';
 
 class PaystackService {
   private publicKey: string;
@@ -82,33 +77,23 @@ class PaystackService {
       phone: string;
     };
   }): Promise<InitializePaymentResponse> {
-    return {
-      status: false,
-      message: PAYMENT_UNAVAILABLE,
-      data: {
-        authorization_url: '',
-        access_code: '',
-        reference: params.reference ?? '',
-      },
-    };
+    const response = await fetch('/api/paystack/initialize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: params.email,
+        phone: params.mobile_money?.phone,
+        paymentMethod: params.mobile_money ? 'mobile_money' : 'card',
+        metadata: params.metadata,
+      }),
+    });
+
+    return (await response.json()) as InitializePaymentResponse;
   }
 
   async verifyPayment(reference: string): Promise<VerifyPaymentResponse> {
-    return {
-      status: false,
-      message: PAYMENT_UNAVAILABLE,
-      data: {
-        id: 0,
-        reference,
-        amount: 0,
-        currency: 'GHS',
-        status: 'failed',
-        metadata: {},
-        customer: { email: '' },
-        created_at: '',
-        channel: [],
-      },
-    };
+    const response = await fetch(`/api/paystack/verify?reference=${encodeURIComponent(reference)}`);
+    return (await response.json()) as VerifyPaymentResponse;
   }
 
   async processMobileMoney(data: {

@@ -1,154 +1,77 @@
 'use client';
 
+// Records page views for the admin analytics dashboard. Earlier versions of
+// this component posted to a Django endpoint that no longer exists, which
+// left every page view logging a 404 in the console.
+//
+// Page views go through app/api/analytics/events, which validates the event
+// with Zod before writing (design.md B: parse, don't validate). Opening a
+// session writes straight to analytics_sessions instead: RLS already pins
+// what an anonymous insert may write there (0013), and a second Route
+// Handler for one insert this shape would just repeat that policy in code.
+
 import { useEffect, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { createBrowserClient } from '@/lib/supabase/client';
 
-const API_URL = '/api';
-const IS_PRODUCTION = true;
+function getSessionId(): string {
+  const key = 'analytics_session_id';
+  let sessionId = localStorage.getItem(key);
+  if (!sessionId) {
+    sessionId = `session_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+    localStorage.setItem(key, sessionId);
+  }
+  return sessionId;
+}
 
 export default function AnalyticsTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const sessionIdRef = useRef<string | null>(null);
   const lastPageRef = useRef<string>('');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      let sessionId = localStorage.getItem('analytics_session_id');
-      if (!sessionId) {
-        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem('analytics_session_id', sessionId);
-      }
-      sessionIdRef.current = sessionId;
-    }
+    if (typeof window === 'undefined') return;
+
+    const supabase = createBrowserClient();
+    const sessionId = getSessionId();
+
+    supabase.auth.getUser().then(({ data }) => {
+      supabase
+        .from('analytics_sessions')
+        .insert({ session_id: sessionId, user_id: data.user?.id ?? null })
+        .then(({ error }) => {
+          // 23505: this session_id was already opened, by this tab or an
+          // earlier one. Not a failure, the row already exists.
+          if (error && error.code !== '23505') {
+            console.warn('Analytics session tracking failed:', error.message);
+          }
+        });
+    });
   }, []);
 
   useEffect(() => {
-    if (!pathname || !IS_PRODUCTION) return;
-    
+    if (!pathname) return;
+
     const currentPage = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '');
-    
     if (currentPage === lastPageRef.current) return;
     lastPageRef.current = currentPage;
 
     const timer = setTimeout(() => {
-      trackActivity(currentPage, 'view');
+      fetch('/api/analytics/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'view',
+          page: currentPage,
+          sessionId: getSessionId(),
+        }),
+      }).catch(() => {
+        // Silent: telemetry must never surface an error to the visitor.
+      });
     }, 500);
 
     return () => clearTimeout(timer);
   }, [pathname, searchParams]);
-
-  const trackActivity = async (page: string, action: string, data?: any) => {
-    if (!IS_PRODUCTION) return;
-
-    try {
-      const response = await fetch(`${API_URL}/analytics/track-activity/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          page_visited: page,
-          action: action,
-          data: data || {},
-          session_id: sessionIdRef.current || 'unknown',
-        }),
-      });
-
-      if (!response.ok) {
-        console.warn('Analytics tracking failed:', response.status);
-      }
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Analytics error:', error);
-      }
-    }
-  };
-
-  const trackPurchase = async (productName: string, productId: number, amount: number, quantity?: number) => {
-    if (!IS_PRODUCTION) return;
-
-    try {
-      const response = await fetch(`${API_URL}/analytics/track-purchase/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          product_name: productName,
-          product_id: productId,
-          amount: amount,
-          quantity: quantity || 1,
-          user_id: localStorage.getItem('user_id') || null,
-          session_id: sessionIdRef.current || 'unknown',
-        }),
-      });
-
-      if (!response.ok) {
-        console.warn('Purchase tracking failed:', response.status);
-      }
-    } catch (error) {
-      // Silent fail
-    }
-  };
-
-  const trackBooking = async (tourName: string, tourId: number, bookingDate: string, participants: number, totalAmount: number) => {
-    if (!IS_PRODUCTION) return;
-
-    try {
-      const response = await fetch(`${API_URL}/analytics/track-booking/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tour_name: tourName,
-          tour_id: tourId,
-          booking_date: bookingDate,
-          participants: participants,
-          total_amount: totalAmount,
-          user_id: localStorage.getItem('user_id') || null,
-          session_id: sessionIdRef.current || 'unknown',
-        }),
-      });
-
-      if (!response.ok) {
-        console.warn('Booking tracking failed:', response.status);
-      }
-    } catch (error) {
-      // Silent fail
-    }
-  };
-
-  const trackContact = async (name: string, email: string, subject: string, message: string, phone?: string) => {
-    if (!IS_PRODUCTION) return;
-
-    try {
-      const response = await fetch(`${API_URL}/analytics/submit-contact/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name,
-          email: email,
-          phone: phone || '',
-          subject: subject,
-          message: message,
-          session_id: sessionIdRef.current || 'unknown',
-        }),
-      });
-
-      if (!response.ok) {
-        console.warn('Contact tracking failed:', response.status);
-      }
-    } catch (error) {
-      // Silent fail
-    }
-  };
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      (window as any).__analytics = {
-        trackActivity,
-        trackPurchase,
-        trackBooking,
-        trackContact,
-      };
-    }
-  }, []);
 
   return null;
 }
