@@ -21,11 +21,7 @@ import { env } from "@/lib/env";
 import type { Database } from "@/types/database";
 
 export function createAdminClient() {
-  // getServerEnv()'s inferred return type carries `| undefined` from the
-  // module-level parse result, but by the time this runs the module has
-  // already thrown at import if parsing failed, so the value here is always
-  // defined.
-  const serverEnv = getServerEnv()!;
+  const serverEnv = getServerEnv();
 
   return createSupabaseClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, serverEnv.SUPABASE_SERVICE_ROLE_KEY, {
     auth: {

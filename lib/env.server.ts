@@ -14,7 +14,11 @@ import "server-only";
 // lib/env.schema.ts directly. That is what keeps these variables covered at
 // build time.
 
+import type { z } from "zod";
+
 import { serverSchema, collect, FAILURE_HEADER } from "./env.schema";
+
+type ServerEnv = z.infer<typeof serverSchema>;
 
 const issues: string[] = [];
 
@@ -32,7 +36,12 @@ if (!parsed) {
   throw new Error([FAILURE_HEADER, ...issues].join("\n"));
 }
 
+// Annotated so the narrowing above survives into getServerEnv. Without this
+// the inferred type keeps the undefined arm, and every caller has to assert
+// it away, which is the sort of lie that hides a real bug later.
+const serverEnv: ServerEnv = parsed;
+
 /** Server-only environment variables. Never importable from client code. */
-export function getServerEnv() {
-  return parsed;
+export function getServerEnv(): ServerEnv {
+  return serverEnv;
 }
