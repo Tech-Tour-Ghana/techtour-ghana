@@ -99,8 +99,19 @@ middleware.ts          Session refresh and route protection
 
 ## 5. Data model
 
-The dump in `docs/old-database-to-transfer-to-supabase/` contains 81 tables.
-Roughly half are framework plumbing and are not migrated.
+The dump in `docs/old-database-to-transfer-to-supabase/` contains 85 tables,
+85 primary keys, 37 unique constraints, 59 foreign keys, and 106 indexes.
+Roughly half the tables are framework plumbing and are not migrated.
+
+The archive is a `pg_dump` custom format file. Its table of contents stores
+all DDL as readable text, which is recoverable without `pg_restore` and has
+been extracted to `extracted-schema.sql` beside it. The row data is
+compressed and is not recoverable without `pg_restore`.
+
+Note that the Django foreign keys carry almost no delete behaviour at the
+database level. Only 4 of the 59 declare `ON DELETE`, because Django enforced
+those rules in Python instead. The new schema therefore chooses delete
+behaviour deliberately rather than inheriting it.
 
 ### Discarded
 
@@ -154,7 +165,30 @@ secrets move into Supabase Auth and are dropped from the application table.
 
 **Analytics.** `analytics_useractivity`, `analytics_usersession`,
 `analytics_userlike`, `analytics_socialshare`, `analytics_tourbooking`,
-`analytics_marketpurchase`, `analytics_contactsubmission`.
+`analytics_marketpurchase`, `analytics_contactsubmission`,
+`analytics_useranalytics`.
+
+### Deferred to phase 6, with the admin dashboard
+
+These exist in the dump and are neither discarded nor migrated in phase 1.
+They configure or record staff tooling, which does not ship until the admin
+dashboard is rebuilt. They stay in the archive until then.
+
+`admin_dashboard_companysettings`, `admin_dashboard_sidebarsection`,
+`admin_dashboard_sidebaritem`, `admin_dashboard_frontendsidebaritem`,
+`accounts_admin_notification`, `pages_adminactivitylog`.
+
+### Email templating, superseded
+
+`pages_emailtemplate`, `pages_emailtemplate_default_attachments`,
+`pages_emailattachment`, and `analytics_emailtemplate` stored email bodies and
+attachments for the SendGrid integration. Resend owns templates now, so the
+content does not migrate. Template copy should be read out of the archive
+before it is retired, since it is the only record of the wording.
+
+`pages_emaillog` and `analytics_emaillog` are delivery logs. They migrate as a
+single `email_log` table, because a record of what was sent to whom is worth
+keeping across the transition.
 
 ### Conventions
 
