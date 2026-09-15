@@ -1,12 +1,13 @@
 {
-  "name": "app",
+  "name": "techtour-ghana",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "next": "15.5.25",
@@ -15,7 +16,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@types/node": "^20",
+    "@types/node": "^22.20.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.6.0",
