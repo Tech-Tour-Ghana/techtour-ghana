@@ -250,6 +250,70 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   };
 }
 
+export interface Profile {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  bio: string;
+  avatar_url: string | null;
+  created_at: string;
+  email_notifications: boolean;
+  sms_notifications: boolean;
+  marketing_emails: boolean;
+}
+
+export async function getProfile(): Promise<Profile | null> {
+  const supabase = createBrowserClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return null;
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('first_name, last_name, email, phone_number, bio, avatar_url, created_at, email_notifications, sms_notifications, marketing_emails')
+    .eq('id', auth.user.id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return {
+    ...data,
+    phone_number: data.phone_number ?? '',
+    bio: data.bio ?? '',
+  };
+}
+
+export async function updateProfile(
+  fields: Partial<Pick<Profile, 'first_name' | 'last_name' | 'phone_number' | 'bio'>>,
+): Promise<{ success: boolean; message?: string }> {
+  const supabase = createBrowserClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return { success: false, message: 'Not authenticated' };
+
+  const { error } = await supabase.from('profiles').update(fields).eq('id', auth.user.id);
+  if (error) return { success: false, message: error.message };
+  return { success: true };
+}
+
+export async function updateNotificationPreferences(
+  fields: Partial<Pick<Profile, 'email_notifications' | 'sms_notifications' | 'marketing_emails'>>,
+): Promise<{ success: boolean; message?: string }> {
+  const supabase = createBrowserClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return { success: false, message: 'Not authenticated' };
+
+  const { error } = await supabase.from('profiles').update(fields).eq('id', auth.user.id);
+  if (error) return { success: false, message: error.message };
+  return { success: true };
+}
+
+/** Changes the signed-in user's password. The old site required re-entering the current password server-side; Supabase Auth verifies the active session instead. */
+export async function changePassword(newPassword: string): Promise<{ success: boolean; message?: string }> {
+  const supabase = createBrowserClient();
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) return { success: false, message: error.message };
+  return { success: true };
+}
+
 export async function logoutUser(): Promise<{ success: boolean }> {
   const supabase = createBrowserClient();
   const { error } = await supabase.auth.signOut();

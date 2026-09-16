@@ -299,7 +299,7 @@ export default function OnsiteTourismPage() {
                         <p className="onsite-cta-text">
                             Tell us your dream experience and we'll craft a custom itinerary just for you.
                         </p>
-                        <Link href="/contact" className="onsite-cta-btn">
+                        <Link href="/about/contact-us" className="onsite-cta-btn">
                             Request Custom Tour
                             <FontAwesomeIcon icon={faArrowRight} />
                         </Link>

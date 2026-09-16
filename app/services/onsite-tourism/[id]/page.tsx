@@ -402,7 +402,7 @@ export default function SiteDetailPage() {
                 </p>
 
                 <div className="booking-contact">
-                  <p>Need help? <a href="/contact">Talk to us</a></p>
+                  <p>Need help? <a href="/about/contact-us">Talk to us</a></p>
                 </div>
               </div>
 

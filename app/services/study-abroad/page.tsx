@@ -353,7 +353,7 @@ export default function StudyAbroadPage() {
             <p className="study-cta-text">
               Book a free consultation with our study abroad experts and get personalized guidance.
             </p>
-            <Link href="/contact" className="study-cta-btn">
+            <Link href="/about/contact-us" className="study-cta-btn">
               Book Free Consultation
               <FontAwesomeIcon icon={faArrowRight} />
             </Link>

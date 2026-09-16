@@ -628,7 +628,7 @@ export default function UniversityDetailPage() {
 
                 <div className="booking-contact">
                   <p>
-                    Need help? <a href="/contact">Talk to an advisor</a>
+                    Need help? <a href="/about/contact-us">Talk to an advisor</a>
                   </p>
                 </div>
               </div>
