@@ -103,7 +103,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
 
   const handleLogout = async () => {
     await logoutUser();
-    router.push('/auth/login');
+    router.push('/admin/login');
   };
 
   const getInitials = () => {
