@@ -20,6 +20,7 @@ import {
   faPaperPlane,
   faChartLine,
   faCog,
+  faImages,
   faArrowLeft,
   faSun,
   faMoon,
@@ -60,6 +61,12 @@ const NAV_GROUPS = [
       { icon: faUsersCog, label: 'Users', href: '/admin/users' },
       { icon: faEnvelope, label: 'Contact Messages', href: '/admin/contacts' },
       { icon: faPaperPlane, label: 'Newsletter', href: '/admin/newsletter' },
+    ],
+  },
+  {
+    group: 'Assets',
+    items: [
+      { icon: faImages, label: 'Media Library', href: '/admin/media' },
     ],
   },
   {

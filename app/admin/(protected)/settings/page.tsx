@@ -6,6 +6,7 @@ import { faSpinner, faSave } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
+import UrlWithPicker from '@/components/admin/UrlWithPicker';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -97,15 +98,15 @@ export default function SettingsAdminPage() {
             <h2 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Branding</h2>
             <div className="grid grid-cols-2 gap-4">
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Logo URL</label>
-                <input className={inputClass} style={inputStyle} value={settingsForm.logo_url ?? ''} onChange={(e) => setField('logo_url', e.target.value)} /></div>
+                <UrlWithPicker inputStyle={inputStyle} value={settingsForm.logo_url ?? ''} onChange={v => setField('logo_url', v)} /></div>
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Favicon URL</label>
-                <input className={inputClass} style={inputStyle} value={settingsForm.favicon_url ?? ''} onChange={(e) => setField('favicon_url', e.target.value)} /></div>
+                <UrlWithPicker inputStyle={inputStyle} value={settingsForm.favicon_url ?? ''} onChange={v => setField('favicon_url', v)} /></div>
             </div>
 
             <h2 className="text-sm font-semibold pt-2" style={{ color: themeStyles.textPrimary }}>Login Page</h2>
             <div className="space-y-3">
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Background URL</label>
-                <input className={inputClass} style={inputStyle} value={settingsForm.login_background_url ?? ''} onChange={(e) => setField('login_background_url', e.target.value)} /></div>
+                <UrlWithPicker inputStyle={inputStyle} value={settingsForm.login_background_url ?? ''} onChange={v => setField('login_background_url', v)} /></div>
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Headline</label>
                 <input className={inputClass} style={inputStyle} value={settingsForm.login_headline ?? ''} onChange={(e) => setField('login_headline', e.target.value)} /></div>
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Description</label>
@@ -115,7 +116,7 @@ export default function SettingsAdminPage() {
             <h2 className="text-sm font-semibold pt-2" style={{ color: themeStyles.textPrimary }}>Register Page</h2>
             <div className="space-y-3">
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Background URL</label>
-                <input className={inputClass} style={inputStyle} value={settingsForm.register_background_url ?? ''} onChange={(e) => setField('register_background_url', e.target.value)} /></div>
+                <UrlWithPicker inputStyle={inputStyle} value={settingsForm.register_background_url ?? ''} onChange={v => setField('register_background_url', v)} /></div>
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Headline</label>
                 <input className={inputClass} style={inputStyle} value={settingsForm.register_headline ?? ''} onChange={(e) => setField('register_headline', e.target.value)} /></div>
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Description</label>

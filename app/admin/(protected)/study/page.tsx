@@ -6,6 +6,7 @@ import {
   faPlus, faPencil, faTrash, faSpinner, faCheck, faTimes, faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
+import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
 
@@ -283,7 +284,7 @@ function DestinationsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
 
               <div className="space-y-1">
                 <label style={labelStyle}>Image URL</label>
-                <input className={inputClass} style={inputStyle} value={form.image_url} onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))} placeholder="https://..." />
+                <UrlWithPicker inputStyle={inputStyle} value={form.image_url} onChange={v => setForm(f => ({ ...f, image_url: v }))} />
               </div>
 
               <label className="flex items-center gap-2 cursor-pointer select-none">
