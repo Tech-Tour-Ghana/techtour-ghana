@@ -138,7 +138,7 @@ export default function AdminDashboardPage() {
                 <div key={row.id} className="px-5 py-3 flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-medium" style={{ color: themeStyles.textPrimary }}>{row.action}</p>
-                    <p className="text-xs mt-0.5" style={{ color: themeStyles.textSecondary }}>{row.page_visited || '—'}</p>
+                    <p className="text-xs mt-0.5" style={{ color: themeStyles.textSecondary }}>{row.page_visited || '-'}</p>
                   </div>
                   <p className="text-xs flex-shrink-0" style={{ color: themeStyles.textMuted }}>
                     {new Date(row.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}

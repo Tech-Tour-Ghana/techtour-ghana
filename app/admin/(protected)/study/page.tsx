@@ -431,7 +431,7 @@ function ScholarshipsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
                     <tr key={r.id} className="border-b last:border-b-0 transition hover:bg-black/5" style={{ borderColor: themeStyles.border }}>
                       <td className="px-4 py-3">
                         <p className="font-medium" style={{ color: themeStyles.textPrimary }}>{r.title}</p>
-                        <p className="text-xs" style={{ color: themeStyles.textMuted }}>{r.amount || '—'}</p>
+                        <p className="text-xs" style={{ color: themeStyles.textMuted }}>{r.amount || '-'}</p>
                       </td>
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: lc.bg, color: lc.fg }}>

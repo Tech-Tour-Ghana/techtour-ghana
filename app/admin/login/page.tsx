@@ -64,7 +64,7 @@ export default function AdminLoginPage() {
             <FontAwesomeIcon icon={faShieldHalved} className="text-white text-lg" />
           </div>
           <h1 className="text-white text-lg font-semibold tracking-tight">Admin Portal</h1>
-          <p className="text-xs" style={{ color: '#6B7280' }}>TechTour Ghana — restricted access</p>
+          <p className="text-xs" style={{ color: '#6B7280' }}>TechTour Ghana, restricted access</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -82,7 +82,7 @@ export default function AdminLoginPage() {
               style={{
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.1)',
-                // @ts-expect-error — CSS custom property for focus ring
+                // @ts-expect-error - CSS custom property for focus ring
                 '--tw-ring-color': BRAND,
               }}
             />

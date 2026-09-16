@@ -87,7 +87,7 @@ export default function AdminNewsletterPage() {
   const activeCount = subscribers.filter((s) => s.is_active).length;
 
   const fmtDate = (s: string | null) =>
-    s ? new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+    s ? new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
 
   const sourceStyle = (src: Source | null) =>
     src && src in SOURCE_STYLES ? SOURCE_STYLES[src] : SOURCE_STYLES.other;
@@ -149,7 +149,7 @@ export default function AdminNewsletterPage() {
                         style={{ borderColor: themeStyles.border }}
                       >
                         <td className="px-4 py-3 font-medium" style={{ color: themeStyles.textPrimary }}>{sub.email}</td>
-                        <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{sub.country || '—'}</td>
+                        <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{sub.country || '-'}</td>
                         <td className="px-4 py-3">
                           <span
                             className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize"

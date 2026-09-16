@@ -215,11 +215,11 @@ export default function AdminAnalyticsPage() {
                     {recentActivity.map((row) => (
                       <tr key={row.id} className="border-b last:border-b-0" style={{ borderColor: themeStyles.border }}>
                         <td className="px-5 py-3 font-mono text-xs" style={{ color: themeStyles.textMuted }}>
-                          {row.user_id ? `${row.user_id.slice(0, 8)}…` : '—'}
+                          {row.user_id ? `${row.user_id.slice(0, 8)}…` : '-'}
                         </td>
                         <td className="px-5 py-3 font-medium" style={{ color: themeStyles.textPrimary }}>{row.action}</td>
                         <td className="px-5 py-3 max-w-xs truncate" style={{ color: themeStyles.textSecondary }} title={row.page_visited}>
-                          {row.page_visited || '—'}
+                          {row.page_visited || '-'}
                         </td>
                         <td className="px-5 py-3 text-xs whitespace-nowrap" style={{ color: themeStyles.textMuted }}>
                           {new Date(row.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
