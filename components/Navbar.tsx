@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTimes, faCaretDown, faSun, faMoon,
   faUser, faSignOutAlt, faChevronDown,
-  faCog, faDashboard, faSearch, faHandPeace
+  faCog, faDashboard, faSearch, faHandPeace, faShieldHalved
 } from '@fortawesome/free-solid-svg-icons';
 import './Navbar.css';
 import { getAuthStatus, logoutUser, User } from '@/lib/api';
@@ -500,6 +500,14 @@ const Navbar = () => {
                         <Link href="/auth/settings" className="nav-dropdown-link" onClick={() => setIsUserDropdownOpen(false)}>
                           <FontAwesomeIcon icon={faCog} /> Settings
                         </Link>
+                        {user.is_admin && (
+                          <>
+                            <div className="nav-divider"></div>
+                            <Link href="/admin" className="nav-dropdown-link" onClick={() => setIsUserDropdownOpen(false)}>
+                              <FontAwesomeIcon icon={faShieldHalved} /> Admin Dashboard
+                            </Link>
+                          </>
+                        )}
                         <div className="nav-divider"></div>
                         <button onClick={handleLogout} className="nav-dropdown-link nav-logout">
                           <FontAwesomeIcon icon={faSignOutAlt} /> Logout
@@ -630,6 +638,11 @@ const Navbar = () => {
                 <Link href="/auth/settings" className="mobile-link-btn" onClick={closeMobileMenu}>
                   <FontAwesomeIcon icon={faCog} /> Settings
                 </Link>
+                {user.is_admin && (
+                  <Link href="/admin" className="mobile-link-btn" onClick={closeMobileMenu}>
+                    <FontAwesomeIcon icon={faShieldHalved} /> Admin Dashboard
+                  </Link>
+                )}
                 <button onClick={() => { handleLogout(); closeMobileMenu(); }} className="mobile-logout-btn">
                   <FontAwesomeIcon icon={faSignOutAlt} /> Logout
                 </button>

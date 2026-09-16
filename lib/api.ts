@@ -17,6 +17,7 @@ export interface User {
   last_name: string;
   full_name: string;
   display_name: string;
+  is_admin: boolean;
   created_at?: string;
 }
 
@@ -40,7 +41,7 @@ export async function getAuthStatus(): Promise<AuthStatusResponse> {
   const authUser = data.user;
   const { data: profile } = await supabase
     .from("profiles")
-    .select("first_name, last_name, created_at")
+    .select("first_name, last_name, is_admin, created_at")
     .eq("id", authUser.id)
     .maybeSingle();
 
@@ -58,6 +59,7 @@ export async function getAuthStatus(): Promise<AuthStatusResponse> {
       last_name: last,
       full_name: full,
       display_name: full || email.split("@")[0] || "User",
+      is_admin: profile?.is_admin ?? false,
       created_at: profile?.created_at,
     },
   };

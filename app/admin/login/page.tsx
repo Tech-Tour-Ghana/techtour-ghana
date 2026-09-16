@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShieldHalved, faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
@@ -23,7 +23,6 @@ export default function AdminLoginPage() {
 }
 
 function AdminLoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -67,7 +66,7 @@ function AdminLoginForm() {
       return;
     }
 
-    router.push('/admin');
+    window.location.href = '/admin';
   }
 
   async function handleGoogle() {
