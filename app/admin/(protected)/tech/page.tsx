@@ -13,6 +13,7 @@ import {
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
+import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
 
@@ -514,7 +515,7 @@ export default function AdminTechPage() {
                 </Field>
               </div>
               <Field label="Image URL">
-                <input style={inputStyle} value={innovationModal.data.image_url ?? ''} onChange={e => setInnovationModal(s => ({ ...s, data: { ...s.data, image_url: e.target.value } }))} />
+                <UrlWithPicker inputStyle={inputStyle} value={innovationModal.data.image_url ?? ''} onChange={v => setInnovationModal(s => ({ ...s, data: { ...s.data, image_url: v } }))} />
               </Field>
               <Field label="Icon (emoji or CSS class)">
                 <input style={inputStyle} value={innovationModal.data.icon ?? ''} onChange={e => setInnovationModal(s => ({ ...s, data: { ...s.data, icon: e.target.value } }))} />
@@ -640,7 +641,7 @@ export default function AdminTechPage() {
                 <input style={inputStyle} value={resourceModal.data.url ?? ''} onChange={e => setResourceModal(s => ({ ...s, data: { ...s.data, url: e.target.value } }))} />
               </Field>
               <Field label="Thumbnail URL">
-                <input style={inputStyle} value={resourceModal.data.thumbnail_url ?? ''} onChange={e => setResourceModal(s => ({ ...s, data: { ...s.data, thumbnail_url: e.target.value } }))} />
+                <UrlWithPicker inputStyle={inputStyle} value={resourceModal.data.thumbnail_url ?? ''} onChange={v => setResourceModal(s => ({ ...s, data: { ...s.data, thumbnail_url: v } }))} />
               </Field>
               <Field label="Active">
                 <div className="flex items-center gap-2 mt-1">

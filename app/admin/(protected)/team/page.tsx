@@ -13,6 +13,7 @@ import {
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
+import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
 
@@ -475,7 +476,7 @@ export default function AdminTeamPage() {
                 <textarea rows={3} style={{ ...inputStyle, resize: 'vertical' }} value={memberModal.data.bio} onChange={e => setMemberModal(s => ({ ...s, data: { ...s.data, bio: e.target.value } }))} />
               </Field>
               <Field label="Image Path">
-                <input style={inputStyle} value={memberModal.data.image_path ?? ''} onChange={e => setMemberModal(s => ({ ...s, data: { ...s.data, image_path: e.target.value || null } }))} />
+                <UrlWithPicker inputStyle={inputStyle} value={memberModal.data.image_path ?? ''} onChange={v => setMemberModal(s => ({ ...s, data: { ...s.data, image_path: v || null } }))} />
               </Field>
               <Field label="LinkedIn URL">
                 <input style={inputStyle} value={memberModal.data.linkedin} onChange={e => setMemberModal(s => ({ ...s, data: { ...s.data, linkedin: e.target.value } }))} />

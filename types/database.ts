@@ -1460,6 +1460,71 @@ export type Database = {
           },
         ]
       }
+      media_assets: {
+        Row: {
+          created_at: string | null
+          folder_id: string
+          id: string
+          mime_type: string | null
+          name: string
+          public_url: string
+          size_bytes: number | null
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string | null
+          folder_id: string
+          id?: string
+          mime_type?: string | null
+          name: string
+          public_url: string
+          size_bytes?: number | null
+          storage_path: string
+        }
+        Update: {
+          created_at?: string | null
+          folder_id?: string
+          id?: string
+          mime_type?: string | null
+          name?: string
+          public_url?: string
+          size_bytes?: number | null
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_assets_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "media_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_folders: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       navbar_dropdowns: {
         Row: {
           created_at: string
