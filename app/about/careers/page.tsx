@@ -31,7 +31,7 @@ import './careers.css';
    TYPES
    ============================================================ */
 
-export interface Job {
+interface Job {
   id: number;
   title: string;
   department: string;
@@ -48,7 +48,7 @@ type ViewMode = 'grid' | 'list';
    DATA
    ============================================================ */
 
-export const openPositions: Job[] = [
+const openPositions: Job[] = [
   {
     id: 1,
     title: 'Senior Frontend Engineer',
@@ -210,7 +210,7 @@ const perks = [
   },
 ];
 
-export const departmentColors: Record<string, string> = {
+const departmentColors: Record<string, string> = {
   Engineering: '#139EA2',
   Product: '#E6A64D',
   Marketing: '#8B5CF6',
