@@ -229,9 +229,9 @@ export default function AdminArtisansPage() {
                         <p className="text-xs" style={{ color: themeStyles.textMuted }}>{a.slug}</p>
                       </td>
                       <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>
-                        {[a.title, a.craft_type].filter(Boolean).join(' · ') || '—'}
+                        {[a.title, a.craft_type].filter(Boolean).join(' · ') || '-'}
                       </td>
-                      <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{a.location || '—'}</td>
+                      <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{a.location || '-'}</td>
                       <td className="px-4 py-3">
                         <span
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"

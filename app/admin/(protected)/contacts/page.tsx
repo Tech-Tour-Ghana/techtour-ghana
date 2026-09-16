@@ -166,11 +166,11 @@ export default function AdminContactsPage() {
                         style={{ borderColor: themeStyles.border }}
                       >
                         <td className="px-4 py-3">
-                          <p className="font-medium" style={{ color: themeStyles.textPrimary }}>{msg.name || '—'}</p>
+                          <p className="font-medium" style={{ color: themeStyles.textPrimary }}>{msg.name || '-'}</p>
                         </td>
                         <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{msg.email}</td>
                         <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>
-                          {msg.subject ? (msg.subject.length > 50 ? msg.subject.slice(0, 50) + '…' : msg.subject) : '—'}
+                          {msg.subject ? (msg.subject.length > 50 ? msg.subject.slice(0, 50) + '…' : msg.subject) : '-'}
                         </td>
                         <td className="px-4 py-3">
                           <span
@@ -258,10 +258,10 @@ export default function AdminContactsPage() {
             </div>
             <div className="px-6 py-5 space-y-3">
               {[
-                { label: 'Name', value: viewMsg.name || '—' },
+                { label: 'Name', value: viewMsg.name || '-' },
                 { label: 'Email', value: viewMsg.email },
-                { label: 'Phone', value: viewMsg.phone || '—' },
-                { label: 'Subject', value: viewMsg.subject || '—' },
+                { label: 'Phone', value: viewMsg.phone || '-' },
+                { label: 'Subject', value: viewMsg.subject || '-' },
                 { label: 'Received', value: fmtDate(viewMsg.created_at) },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between text-sm gap-4">

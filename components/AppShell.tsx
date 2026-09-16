@@ -46,6 +46,7 @@ export default function AppShell({
   const isFullPageOnly = pathname?.startsWith('/market/payment/verify') ||
                          pathname?.startsWith('/market/checkout') ||
                          pathname?.startsWith('/auth/') ||
+                         pathname?.startsWith('/admin') ||
                          pathname === '/market/payment/success' ||
                          pathname === '/market/payment/failed';
 

@@ -438,7 +438,7 @@ export default function AdminMarketPage() {
                         className={inputClass}
                         style={inputStyle}
                       >
-                        <option value="">— None —</option>
+                        <option value="">None</option>
                         {categories.map((c) => (
                           <option key={c.id} value={c.id}>{c.name}</option>
                         ))}

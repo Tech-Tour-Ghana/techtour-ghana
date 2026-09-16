@@ -387,7 +387,7 @@ export default function AdminTechPage() {
                     <tr key={ev.id} style={{ borderBottom: `1px solid ${ts.border}` }} className="transition" onMouseEnter={e => (e.currentTarget.style.background = ts.rowHover)} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                       <td className="px-5 py-2.5 font-medium" style={{ color: ts.textPrimary }}>{ev.title}</td>
                       <td className="px-5 py-2.5" style={{ color: ts.textSecondary }}>{ev.event_type}</td>
-                      <td className="px-5 py-2.5" style={{ color: ts.textSecondary }}>{ev.starts_at ?? '—'}</td>
+                      <td className="px-5 py-2.5" style={{ color: ts.textSecondary }}>{ev.starts_at ?? '-'}</td>
                       <td className="px-5 py-2.5"><Badge active={ev.is_active} /></td>
                       <td className="px-5 py-2.5">
                         <div className="flex gap-2">
@@ -444,7 +444,7 @@ export default function AdminTechPage() {
                   ) : resources.map((r) => (
                     <tr key={r.id} style={{ borderBottom: `1px solid ${ts.border}` }} className="transition" onMouseEnter={e => (e.currentTarget.style.background = ts.rowHover)} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                       <td className="px-5 py-2.5 font-medium" style={{ color: ts.textPrimary }}>{r.title}</td>
-                      <td className="px-5 py-2.5" style={{ color: ts.textSecondary }}>{r.resource_type ?? '—'}</td>
+                      <td className="px-5 py-2.5" style={{ color: ts.textSecondary }}>{r.resource_type ?? '-'}</td>
                       <td className="px-5 py-2.5"><Badge active={r.is_active} /></td>
                       <td className="px-5 py-2.5">
                         <div className="flex gap-2">

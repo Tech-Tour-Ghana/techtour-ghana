@@ -537,7 +537,7 @@ export default function AdminTeamPage() {
                     value={openingModal.data.category_id ?? ''}
                     onChange={e => setOpeningModal(s => ({ ...s, data: { ...s.data, category_id: e.target.value || null } }))}
                   >
-                    <option value="">— None —</option>
+                    <option value="">None</option>
                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </Field>

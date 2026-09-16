@@ -90,7 +90,7 @@ export default function AdminUsersPage() {
   });
 
   const fullName = (u: Profile) =>
-    [u.first_name, u.last_name].filter(Boolean).join(' ') || '—';
+    [u.first_name, u.last_name].filter(Boolean).join(' ') || '-';
 
   return (
     <AdminLayout title="Users" subtitle="Manage user accounts">
@@ -153,8 +153,8 @@ export default function AdminUsersPage() {
                         <td className="px-4 py-3">
                           <p className="font-medium" style={{ color: themeStyles.textPrimary }}>{fullName(u)}</p>
                         </td>
-                        <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{u.email || '—'}</td>
-                        <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{u.phone_number || '—'}</td>
+                        <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{u.email || '-'}</td>
+                        <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{u.phone_number || '-'}</td>
                         <td className="px-4 py-3">
                           <span
                             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
@@ -257,8 +257,8 @@ export default function AdminUsersPage() {
             <div className="px-6 py-5 space-y-3">
               {[
                 { label: 'Name', value: fullName(viewUser) },
-                { label: 'Email', value: viewUser.email || '—' },
-                { label: 'Phone', value: viewUser.phone_number || '—' },
+                { label: 'Email', value: viewUser.email || '-' },
+                { label: 'Phone', value: viewUser.phone_number || '-' },
                 { label: 'User ID', value: viewUser.id },
                 { label: 'Role', value: viewUser.is_admin ? 'Admin' : 'User' },
                 { label: 'Status', value: viewUser.is_active ? 'Active' : 'Suspended' },
