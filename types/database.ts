@@ -358,6 +358,7 @@ export type Database = {
           data: Json
           id: string
           ip_address: unknown
+          is_test: boolean
           legacy_id: number | null
           page_visited: string
           session_id: string
@@ -371,6 +372,7 @@ export type Database = {
           data?: Json
           id?: string
           ip_address?: unknown
+          is_test?: boolean
           legacy_id?: number | null
           page_visited?: string
           session_id?: string
@@ -384,6 +386,7 @@ export type Database = {
           data?: Json
           id?: string
           ip_address?: unknown
+          is_test?: boolean
           legacy_id?: number | null
           page_visited?: string
           session_id?: string
@@ -1870,6 +1873,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_paystack_transaction_id_fkey"
+            columns: ["paystack_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_paid_checkouts"
+            referencedColumns: ["checkout_id"]
+          },
           {
             foreignKeyName: "orders_paystack_transaction_id_fkey"
             columns: ["paystack_transaction_id"]
@@ -3491,9 +3501,105 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      analytics_paid_checkouts: {
+        Row: {
+          amount: number | null
+          checkout_id: string | null
+          currency: Database["public"]["Enums"]["currency_code"] | null
+          paid_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          checkout_id?: string | null
+          currency?: Database["public"]["Enums"]["currency_code"] | null
+          paid_at?: never
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          checkout_id?: string | null
+          currency?: Database["public"]["Enums"]["currency_code"] | null
+          paid_at?: never
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paystack_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_valid_views: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          page_visited: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          page_visited?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          page_visited?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_user_activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      analytics_growth: { Args: { cur: number; prev: number }; Returns: Json }
+      analytics_kpis: { Args: { p_from: string; p_to: string }; Returns: Json }
+      analytics_require_admin: { Args: never; Returns: undefined }
+      analytics_timeseries: {
+        Args: { p_from: string; p_metric: string; p_to: string }
+        Returns: {
+          date: string
+          value: number
+        }[]
+      }
+      analytics_top_products: {
+        Args: { p_from: string; p_limit?: number; p_to: string }
+        Returns: {
+          checkouts: number
+          product_id: string
+          revenue: number
+          title: string
+          units_sold: number
+        }[]
+      }
+      analytics_weekday_activity: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          is_peak: boolean
+          name: string
+          page_views: number
+          weekday: number
+        }[]
+      }
+      analytics_window_metrics: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {

@@ -1,8 +1,18 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
+import { env } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { parseAnalyticsEvent } from "@/lib/validation/analytics";
+
+// Events from anywhere but the production host (localhost, Vercel previews)
+// are stored but flagged, so the analytics views leave them out.
+const productionHost = new URL(env.NEXT_PUBLIC_SITE_URL).hostname.replace(/^www\./, "");
+
+function isTestHost(host: string | null): boolean {
+  if (!host) return true;
+  return (host.split(":")[0] ?? "").replace(/^www\./, "") !== productionHost;
+}
 
 export async function POST(request: Request) {
   try {
@@ -15,6 +25,7 @@ export async function POST(request: Request) {
       session_id: event.sessionId,
       user_id: auth.user?.id ?? null,
       user_agent: request.headers.get("user-agent") ?? "",
+      is_test: isTestHost(request.headers.get("host")),
     });
 
     if (error) {
