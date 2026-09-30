@@ -779,3 +779,62 @@ body:has(.dashboard-layout-wrapper) {
 .has-navbar {
   padding-top: 0 !important;
 }
+
+/* ===== Admin design tokens =====
+   One place for the admin and dashboard values that used to be repeated as
+   inline hex in every page. Scoped by the --adm- prefix so nothing on the
+   public site is affected. The dim values match what AdminLayout already used
+   (#0A0A0A page, #1A1A1A cards). Brand teal and orange are unchanged. */
+:root {
+  --adm-bg: #F0F4F8;
+  --adm-card: #FFFFFF;
+  --adm-elevated: #FFFFFF;
+  --adm-border: #E5E7EB;
+  --adm-track: #EEF1F4;
+  --adm-text: #111827;
+  --adm-text-2: #4B5563;
+  --adm-muted: #9CA3AF;
+  --adm-primary: #139EA2;
+  --adm-primary-soft: rgba(19, 158, 162, 0.12);
+  --adm-accent: #E6A64D;
+  --adm-success: #10B981;
+  --adm-success-soft: rgba(16, 185, 129, 0.12);
+  --adm-error: #EF4444;
+  --adm-error-soft: rgba(239, 68, 68, 0.12);
+  --adm-radius-card: 16px;
+  --adm-radius-control: 10px;
+  --adm-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 6px 18px rgba(16, 24, 40, 0.05);
+  --adm-overlay: rgba(15, 23, 42, 0.45);
+}
+
+[data-theme="dim"] {
+  --adm-bg: #0A0A0A;
+  --adm-card: #1A1A1A;
+  --adm-elevated: #222222;
+  --adm-border: rgba(255, 255, 255, 0.08);
+  --adm-track: rgba(255, 255, 255, 0.07);
+  --adm-text: #FFFFFF;
+  --adm-text-2: #B0B0B0;
+  --adm-muted: #6B7280;
+  --adm-primary-soft: rgba(19, 158, 162, 0.22);
+  --adm-success-soft: rgba(16, 185, 129, 0.2);
+  --adm-error-soft: rgba(239, 68, 68, 0.2);
+  --adm-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.35);
+  --adm-overlay: rgba(0, 0, 0, 0.6);
+}
+
+/* Skeleton shimmer for admin loading states. Motion is dropped for users who
+   ask for reduced motion. */
+@keyframes adm-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.adm-skeleton {
+  background: linear-gradient(90deg, var(--adm-track) 25%, var(--adm-border) 50%, var(--adm-track) 75%);
+  background-size: 200% 100%;
+  animation: adm-shimmer 1.6s ease-in-out infinite;
+  border-radius: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .adm-skeleton { animation: none; }
+}

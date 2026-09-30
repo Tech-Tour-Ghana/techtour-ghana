@@ -104,7 +104,11 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
   const { isDimMode, toggleTheme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close the mobile menu after navigating.
+  useEffect(() => setNavOpen(false), [pathname]);
 
   useEffect(() => {
     getAuthStatus().then((status) => {
@@ -134,20 +138,23 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
   };
 
   const themeStyles = {
-    background: isDimMode ? '#0A0A0A' : '#F0F4F8',
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    topBarBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
+    // Values now come from the --adm-* tokens in globals.css, the same ones the
+    // analytics dashboard uses, so admin pages stop repeating inline hex.
+    background: 'var(--adm-bg)',
+    cardBg: 'var(--adm-card)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    topBarBg: 'var(--adm-card)',
   };
 
   return (
     <div className="fixed inset-0 flex" style={{ background: themeStyles.background }}>
       {/* Sidebar */}
+      {navOpen && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setNavOpen(false)} aria-hidden />}
       <div
-        className="w-64 flex-shrink-0 h-full overflow-y-auto flex flex-col"
+        className={`fixed inset-y-0 left-0 z-40 w-64 flex-shrink-0 overflow-y-auto flex flex-col transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0 ${navOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{
           background: 'linear-gradient(180deg, #0A0A0A, #111111)',
           borderRight: '1px solid rgba(255,255,255,0.06)',
@@ -219,10 +226,18 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
-          className="flex items-center justify-between px-6 py-3 border-b flex-shrink-0"
+          className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b flex-shrink-0"
           style={{ background: themeStyles.topBarBg, borderColor: themeStyles.border }}
         >
-          <div>
+          <button
+            onClick={() => setNavOpen(true)}
+            className="lg:hidden w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textSecondary }}
+            aria-label="Open menu"
+          >
+            <FontAwesomeIcon icon={faBars} className="w-3.5 h-3.5" />
+          </button>
+          <div className="min-w-0 flex-1">
             <h1 className="text-lg font-bold" style={{ color: themeStyles.textPrimary }}>{title}</h1>
             {subtitle && <p className="text-xs" style={{ color: themeStyles.textSecondary }}>{subtitle}</p>}
           </div>
@@ -278,7 +293,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {children}
         </div>
       </div>
