@@ -36,6 +36,8 @@ import {
   faCommentDots,
   faNewspaper,
   faMapLocationDot,
+  faAnglesLeft,
+  faAnglesRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from '@/context/ThemeContext';
 import { getAuthStatus, logoutUser, type User } from '@/lib/api';
@@ -104,7 +106,48 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
   const { isDimMode, toggleTheme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
+  // Desktop only: collapse the sidebar to an icon rail. The mobile drawer is
+  // always full width. The choice is remembered per browser.
+  const [collapsed, setCollapsed] = useState(false);
+  useEffect(() => {
+    try {
+      setCollapsed(localStorage.getItem('admin_sidebar_collapsed') === '1');
+    } catch {
+      // Storage blocked, start expanded.
+    }
+  }, []);
+  const toggleCollapsed = () => {
+    const next = !collapsed;
+    setCollapsed(next);
+    try {
+      localStorage.setItem('admin_sidebar_collapsed', next ? '1' : '0');
+    } catch {
+      // Not persisted, still applies for this visit.
+    }
+  };
+  // Hidden on desktop when collapsed, but always shown in the mobile drawer.
+  const hideWhenRail = collapsed ? 'lg:hidden' : '';
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close the mobile menu after navigating.
+  useEffect(() => setNavOpen(false), [pathname]);
+
+  // The shell is a fixed full-screen layer that scrolls its own content, but
+  // the public site's global CSS (Navbar.css) still pads <body> by the navbar
+  // height on every page. That made the document taller than the window, so a
+  // second, page-level scrollbar appeared beside the content's. Lock the
+  // document scroll while the shell is mounted and put it back on the way out.
+  useEffect(() => {
+    const html = document.documentElement;
+    const previous = { html: html.style.overflow, body: document.body.style.overflow };
+    html.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      html.style.overflow = previous.html;
+      document.body.style.overflow = previous.body;
+    };
+  }, []);
 
   useEffect(() => {
     getAuthStatus().then((status) => {
@@ -134,32 +177,39 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
   };
 
   const themeStyles = {
-    background: isDimMode ? '#0A0A0A' : '#F0F4F8',
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    topBarBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
+    // Values now come from the --adm-* tokens in globals.css, the same ones the
+    // analytics dashboard uses, so admin pages stop repeating inline hex.
+    background: 'var(--adm-bg)',
+    cardBg: 'var(--adm-card)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    topBarBg: 'var(--adm-card)',
   };
 
   return (
     <div className="fixed inset-0 flex" style={{ background: themeStyles.background }}>
       {/* Sidebar */}
+      {navOpen && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setNavOpen(false)} aria-hidden />}
       <div
-        className="w-64 flex-shrink-0 h-full overflow-y-auto flex flex-col"
+        className={`fixed inset-y-0 left-0 z-40 w-64 flex-shrink-0 overflow-y-auto overflow-x-hidden flex flex-col transition-[transform,width] duration-200 lg:static lg:z-auto lg:translate-x-0 ${collapsed ? 'lg:w-[72px]' : 'lg:w-64'} ${navOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{
           background: 'linear-gradient(180deg, #0A0A0A, #111111)',
           borderRight: '1px solid rgba(255,255,255,0.06)',
+          // Slim, dark scrollbar for the menu on short screens instead of the
+          // default light one.
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(255,255,255,0.18) transparent',
         }}
       >
         {/* Brand */}
-        <div className="px-4 py-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+        <div className={`px-4 py-4 border-b ${collapsed ? 'lg:px-0 lg:flex lg:flex-col lg:items-center' : ''}`} style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: BRAND_COLORS.tropicalTeal }}>
               <FontAwesomeIcon icon={faShieldHalved} className="text-white text-xs" />
             </div>
-            <div>
+            <div className={hideWhenRail}>
               <span className="text-white font-bold text-sm block leading-tight">ADMIN</span>
               <span className="text-xs" style={{ color: BRAND_COLORS.sandyOrange }}>TechTour Ghana</span>
             </div>
@@ -168,20 +218,24 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
             href="/"
             className="flex items-center gap-2 mt-3 text-xs transition-colors hover:text-white"
             style={{ color: 'rgba(255,255,255,0.35)' }}
+            title="Back to Site"
           >
             <FontAwesomeIcon icon={faArrowLeft} className="w-3 h-3" />
-            Back to Site
+            <span className={hideWhenRail}>Back to Site</span>
           </Link>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className={`flex-1 p-3 space-y-1 ${collapsed ? 'lg:px-2' : ''}`}>
           {NAV_GROUPS.map(({ group, items }) => (
             <div key={group ?? '__top'}>
               {group && (
-                <p className="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                  {group}
-                </p>
+                <>
+                  <p className={`px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest ${hideWhenRail}`} style={{ color: 'rgba(255,255,255,0.25)' }}>
+                    {group}
+                  </p>
+                  {collapsed && <div className="hidden lg:block my-2 mx-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }} />}
+                </>
               )}
               {items.map((item) => {
                 const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
@@ -189,16 +243,18 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150"
+                    title={item.label}
+                    aria-label={item.label}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 ${collapsed ? 'lg:justify-center lg:px-0' : ''}`}
                     style={{
                       background: isActive ? `${BRAND_COLORS.tropicalTeal}22` : 'transparent',
                       color: isActive ? BRAND_COLORS.tropicalTeal : 'rgba(255,255,255,0.55)',
                     }}
                   >
                     <FontAwesomeIcon icon={item.icon} className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span>{item.label}</span>
+                    <span className={hideWhenRail}>{item.label}</span>
                     {isActive && (
-                      <FontAwesomeIcon icon={faChevronRight} className="w-2.5 h-2.5 ml-auto" style={{ color: BRAND_COLORS.tropicalTeal }} />
+                      <FontAwesomeIcon icon={faChevronRight} className={`w-2.5 h-2.5 ml-auto ${hideWhenRail}`} style={{ color: BRAND_COLORS.tropicalTeal }} />
                     )}
                   </Link>
                 );
@@ -209,8 +265,8 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
 
         <div className="p-3 border-t text-center" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
           <p className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
-            <FontAwesomeIcon icon={faGlobeAfrica} className="mr-1" />
-            TechTour Ghana Admin Panel
+            <FontAwesomeIcon icon={faGlobeAfrica} className={collapsed ? 'lg:mr-0 mr-1' : 'mr-1'} />
+            <span className={hideWhenRail}>TechTour Ghana Admin Panel</span>
           </p>
         </div>
       </div>
@@ -219,10 +275,28 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
-          className="flex items-center justify-between px-6 py-3 border-b flex-shrink-0"
+          className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b flex-shrink-0"
           style={{ background: themeStyles.topBarBg, borderColor: themeStyles.border }}
         >
-          <div>
+          <button
+            onClick={() => setNavOpen(true)}
+            className="lg:hidden w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textSecondary }}
+            aria-label="Open menu"
+          >
+            <FontAwesomeIcon icon={faBars} className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={toggleCollapsed}
+            className="hidden lg:flex w-8 h-8 rounded-lg items-center justify-center flex-shrink-0 transition hover:scale-105"
+            style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textSecondary }}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-expanded={!collapsed}
+          >
+            <FontAwesomeIcon icon={collapsed ? faAnglesRight : faAnglesLeft} className="w-3.5 h-3.5" />
+          </button>
+          <div className="min-w-0 flex-1">
             <h1 className="text-lg font-bold" style={{ color: themeStyles.textPrimary }}>{title}</h1>
             {subtitle && <p className="text-xs" style={{ color: themeStyles.textSecondary }}>{subtitle}</p>}
           </div>
@@ -278,7 +352,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {children}
         </div>
       </div>
