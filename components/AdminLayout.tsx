@@ -110,6 +110,22 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
   // Close the mobile menu after navigating.
   useEffect(() => setNavOpen(false), [pathname]);
 
+  // The shell is a fixed full-screen layer that scrolls its own content, but
+  // the public site's global CSS (Navbar.css) still pads <body> by the navbar
+  // height on every page. That made the document taller than the window, so a
+  // second, page-level scrollbar appeared beside the content's. Lock the
+  // document scroll while the shell is mounted and put it back on the way out.
+  useEffect(() => {
+    const html = document.documentElement;
+    const previous = { html: html.style.overflow, body: document.body.style.overflow };
+    html.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      html.style.overflow = previous.html;
+      document.body.style.overflow = previous.body;
+    };
+  }, []);
+
   useEffect(() => {
     getAuthStatus().then((status) => {
       if (status.is_authenticated && status.user) setUser(status.user);
@@ -158,6 +174,10 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
         style={{
           background: 'linear-gradient(180deg, #0A0A0A, #111111)',
           borderRight: '1px solid rgba(255,255,255,0.06)',
+          // Slim, dark scrollbar for the menu on short screens instead of the
+          // default light one.
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(255,255,255,0.18) transparent',
         }}
       >
         {/* Brand */}
