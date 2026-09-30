@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner, faSave } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 
@@ -23,7 +22,6 @@ interface SiteSettings {
 }
 
 export default function SettingsAdminPage() {
-  const { isDimMode } = useTheme();
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [settingsForm, setSettingsForm] = useState<Partial<SiteSettings>>({});
   const [savingSettings, setSavingSettings] = useState(false);
@@ -43,13 +41,13 @@ export default function SettingsAdminPage() {
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+    cardBg: 'var(--adm-card)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    inputBg: 'var(--adm-bg)',
+    inputBorder: 'var(--adm-border)',
   };
 
   const inputClass = 'w-full px-3 py-2 rounded-lg border text-sm focus:outline-none';
@@ -90,7 +88,7 @@ export default function SettingsAdminPage() {
 
   return (
     <AdminLayout title="Settings" subtitle="Site configuration">
-      <div className="rounded-xl p-6 space-y-5" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+      <div className="rounded-xl p-6 space-y-5" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
         {!siteSettings ? (
           <p className="text-sm" style={{ color: themeStyles.textMuted }}>No site settings row found.</p>
         ) : (

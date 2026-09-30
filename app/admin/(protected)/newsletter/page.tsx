@@ -11,8 +11,8 @@ import {
   faUserCheck,
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
+import { ListSkeleton, EmptyBlock } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -35,19 +35,18 @@ const SOURCE_STYLES: Record<Source, { bg: string; color: string }> = {
 };
 
 export default function AdminNewsletterPage() {
-  const { isDimMode } = useTheme();
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+    cardBg: 'var(--adm-card)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    inputBg: 'var(--adm-bg)',
+    inputBorder: 'var(--adm-border)',
   };
 
   const fetchSubscribers = useCallback(async () => {
@@ -104,7 +103,7 @@ export default function AdminNewsletterPage() {
             <div
               key={label}
               className="rounded-xl px-4 py-3 flex items-center gap-3"
-              style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}
+              style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}
             >
               <div
                 className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -121,13 +120,11 @@ export default function AdminNewsletterPage() {
         </div>
 
         {/* Table */}
-        <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+        <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
           {loading ? (
-            <div className="flex items-center justify-center h-40">
-              <FontAwesomeIcon icon={faSpinner} className="w-6 h-6 animate-spin" style={{ color: BRAND_COLORS.tropicalTeal }} />
-            </div>
+            <ListSkeleton />
           ) : subscribers.length === 0 ? (
-            <p className="p-6 text-sm text-center" style={{ color: themeStyles.textMuted }}>No subscribers yet.</p>
+            <EmptyBlock title="No subscribers yet." />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

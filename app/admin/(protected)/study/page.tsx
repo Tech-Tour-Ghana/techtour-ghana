@@ -9,6 +9,7 @@ import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
+import { ListSkeleton, EmptyBlock, Tabs } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -67,13 +68,13 @@ export default function AdminStudyPage() {
   const [tab, setTab] = useState<'destinations' | 'scholarships'>('destinations');
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+    cardBg: 'var(--adm-card)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    inputBg: 'var(--adm-bg)',
+    inputBorder: 'var(--adm-border)',
   };
 
   const inputClass = 'w-full rounded-lg px-3 py-2 text-sm outline-none transition focus:ring-2';
@@ -87,18 +88,7 @@ export default function AdminStudyPage() {
   return (
     <AdminLayout title="Study Abroad" subtitle="Manage study destinations and scholarships">
       <div className="space-y-4">
-        <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: themeStyles.inputBg, border: `1px solid ${themeStyles.border}` }}>
-          {(['destinations', 'scholarships'] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className="px-4 py-1.5 rounded-lg text-sm font-medium capitalize transition"
-              style={tab === t ? { background: BRAND_COLORS.tropicalTeal, color: '#FFFFFF' } : { color: themeStyles.textSecondary }}
-            >
-              {t === 'destinations' ? 'Destinations' : 'Scholarships'}
-            </button>
-          ))}
-        </div>
+        <Tabs value={tab} onChange={setTab} tabs={[{ key: 'destinations' as const, label: 'Destinations' }, { key: 'scholarships' as const, label: 'Scholarships' }]} />
 
         {tab === 'destinations'
           ? <DestinationsTab themeStyles={themeStyles} isDimMode={isDimMode} inputClass={inputClass} inputStyle={inputStyle} labelStyle={labelStyle} />
@@ -197,20 +187,18 @@ function DestinationsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
         </button>
       </div>
 
-      <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+      <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
         {loading ? (
-          <div className="flex items-center justify-center h-40">
-            <FontAwesomeIcon icon={faSpinner} className="w-6 h-6 animate-spin" style={{ color: BRAND_COLORS.tropicalTeal }} />
-          </div>
+          <ListSkeleton />
         ) : rows.length === 0 ? (
-          <p className="p-6 text-sm text-center" style={{ color: themeStyles.textMuted }}>No destinations yet.</p>
+          <EmptyBlock title="No destinations yet." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b" style={{ borderColor: themeStyles.border }}>
                   {['Country', 'Flag', 'Slug', 'Active', 'Actions'].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold" style={{ color: themeStyles.textMuted }}>{h}</th>
+                    <th key={h} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: themeStyles.textMuted }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -225,7 +213,7 @@ function DestinationsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
                         style={r.is_active
                           ? { background: '#10B98122', color: '#10B981' }
-                          : { background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textMuted }
+                          : { background: 'var(--adm-track)', color: themeStyles.textMuted }
                         }
                       >
                         <FontAwesomeIcon icon={r.is_active ? faCheck : faTimes} className="w-2.5 h-2.5" />
@@ -252,7 +240,7 @@ function DestinationsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
             <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 z-10" style={{ borderColor: themeStyles.border, background: themeStyles.cardBg }}>
               <h2 className="text-base font-bold" style={{ color: themeStyles.textPrimary }}>{editingId ? 'Edit Destination' : 'Add Destination'}</h2>
               <button onClick={closeModal} className="w-8 h-8 rounded-lg flex items-center justify-center transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textMuted }}>
@@ -408,20 +396,18 @@ function ScholarshipsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
         </button>
       </div>
 
-      <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+      <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
         {loading ? (
-          <div className="flex items-center justify-center h-40">
-            <FontAwesomeIcon icon={faSpinner} className="w-6 h-6 animate-spin" style={{ color: BRAND_COLORS.tropicalTeal }} />
-          </div>
+          <ListSkeleton />
         ) : rows.length === 0 ? (
-          <p className="p-6 text-sm text-center" style={{ color: themeStyles.textMuted }}>No scholarships yet.</p>
+          <EmptyBlock title="No scholarships yet." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b" style={{ borderColor: themeStyles.border }}>
                   {['Title', 'Level', 'Deadline', 'Active', 'Actions'].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold" style={{ color: themeStyles.textMuted }}>{h}</th>
+                    <th key={h} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: themeStyles.textMuted }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -445,7 +431,7 @@ function ScholarshipsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
                           style={r.is_active
                             ? { background: '#10B98122', color: '#10B981' }
-                            : { background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textMuted }
+                            : { background: 'var(--adm-track)', color: themeStyles.textMuted }
                           }
                         >
                           <FontAwesomeIcon icon={r.is_active ? faCheck : faTimes} className="w-2.5 h-2.5" />
@@ -473,7 +459,7 @@ function ScholarshipsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
             <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 z-10" style={{ borderColor: themeStyles.border, background: themeStyles.cardBg }}>
               <h2 className="text-base font-bold" style={{ color: themeStyles.textPrimary }}>{editingId ? 'Edit Scholarship' : 'Add Scholarship'}</h2>
               <button onClick={closeModal} className="w-8 h-8 rounded-lg flex items-center justify-center transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textMuted }}>

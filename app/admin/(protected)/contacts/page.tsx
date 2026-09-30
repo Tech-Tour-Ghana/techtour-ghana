@@ -12,8 +12,8 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
+import { ListSkeleton, EmptyBlock, Tabs } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -31,7 +31,6 @@ interface ContactMessage {
 type FilterTab = 'all' | 'unread' | 'read';
 
 export default function AdminContactsPage() {
-  const { isDimMode } = useTheme();
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -39,13 +38,13 @@ export default function AdminContactsPage() {
   const [viewMsg, setViewMsg] = useState<ContactMessage | null>(null);
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+    cardBg: 'var(--adm-card)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    inputBg: 'var(--adm-bg)',
+    inputBorder: 'var(--adm-border)',
   };
 
   const fetchMessages = useCallback(async () => {
@@ -108,51 +107,21 @@ export default function AdminContactsPage() {
     <AdminLayout title="Contact Messages" subtitle="Inbox of contact form submissions">
       <div className="space-y-4">
         {/* Filter tabs */}
-        <div className="flex items-center gap-1">
-          {TABS.map(({ key, label }) => {
-            const active = tab === key;
-            return (
-              <button
-                key={key}
-                onClick={() => setTab(key)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition"
-                style={{
-                  background: active ? BRAND_COLORS.tropicalTeal : (isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6'),
-                  color: active ? '#FFFFFF' : themeStyles.textSecondary,
-                }}
-              >
-                {label}
-                <span
-                  className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold"
-                  style={{
-                    background: active ? 'rgba(255,255,255,0.25)' : (isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'),
-                    color: active ? '#FFFFFF' : themeStyles.textMuted,
-                  }}
-                >
-                  {counts[key]}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <Tabs value={tab} onChange={setTab} tabs={TABS.map(({ key, label }) => ({ key, label, count: counts[key] }))} />
 
         {/* Table */}
-        <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+        <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
           {loading ? (
-            <div className="flex items-center justify-center h-40">
-              <FontAwesomeIcon icon={faSpinner} className="w-6 h-6 animate-spin" style={{ color: BRAND_COLORS.tropicalTeal }} />
-            </div>
+            <ListSkeleton />
           ) : filtered.length === 0 ? (
-            <p className="p-6 text-sm text-center" style={{ color: themeStyles.textMuted }}>
-              No messages found.
-            </p>
+            <EmptyBlock title="No messages found." />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b" style={{ borderColor: themeStyles.border }}>
                     {['Name', 'Email', 'Subject', 'Status', 'Date', 'Actions'].map((h) => (
-                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold" style={{ color: themeStyles.textMuted }}>{h}</th>
+                      <th key={h} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: themeStyles.textMuted }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -176,7 +145,7 @@ export default function AdminContactsPage() {
                           <span
                             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
                             style={msg.is_read
-                              ? { background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textMuted }
+                              ? { background: 'var(--adm-track)', color: themeStyles.textMuted }
                               : { background: `${BRAND_COLORS.sandyOrange}22`, color: BRAND_COLORS.sandyOrange }
                             }
                           >
@@ -244,7 +213,7 @@ export default function AdminContactsPage() {
         >
           <div
             className="w-full max-w-lg rounded-2xl shadow-2xl"
-            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}
+            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}
           >
             <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: themeStyles.border }}>
               <h2 className="text-base font-bold" style={{ color: themeStyles.textPrimary }}>Message Details</h2>

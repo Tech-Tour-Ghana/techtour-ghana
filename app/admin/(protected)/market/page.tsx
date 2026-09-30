@@ -12,8 +12,8 @@ import {
   faTags,
 } from '@fortawesome/free-solid-svg-icons';
 import AdminLayout from '@/components/AdminLayout';
+import { ListSkeleton, Tabs, EmptyBlock } from '@/components/admin/ui';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { useTheme } from '@/context/ThemeContext';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -70,7 +70,6 @@ const EMPTY_CATEGORY: Omit<Category, 'id'> = {
 };
 
 export default function AdminMarketPage() {
-  const { isDimMode } = useTheme();
   const [tab, setTab] = useState<Tab>('products');
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -85,13 +84,13 @@ export default function AdminMarketPage() {
   const [categoryForm, setCategoryForm] = useState<Omit<Category, 'id'>>(EMPTY_CATEGORY);
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+    cardBg: 'var(--adm-card)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    inputBg: 'var(--adm-bg)',
+    inputBorder: 'var(--adm-border)',
   };
 
   const supabase = createBrowserClient();
@@ -227,26 +226,10 @@ export default function AdminMarketPage() {
     <AdminLayout title="Market Products" subtitle="Manage products and categories">
       <div className="space-y-4">
         {/* Tabs */}
-        <div className="flex items-center gap-2">
-          {(['products', 'categories'] as Tab[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition"
-              style={{
-                background: tab === t ? BRAND_COLORS.tropicalTeal : themeStyles.cardBg,
-                color: tab === t ? '#FFFFFF' : themeStyles.textSecondary,
-                border: `1px solid ${tab === t ? BRAND_COLORS.tropicalTeal : themeStyles.border}`,
-              }}
-            >
-              <FontAwesomeIcon icon={t === 'products' ? faBox : faTags} className="w-3.5 h-3.5" />
-              {t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
-          ))}
-        </div>
+        <Tabs value={tab} onChange={setTab} tabs={[{ key: 'products' as Tab, label: 'Products' }, { key: 'categories' as Tab, label: 'Categories' }]} />
 
         {/* Table card */}
-        <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+        <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
           <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: themeStyles.border }}>
             <h2 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>
               {tab === 'products' ? 'Products' : 'Categories'}
@@ -262,22 +245,20 @@ export default function AdminMarketPage() {
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center h-32">
-              <FontAwesomeIcon icon={faSpinner} className="w-6 h-6 animate-spin" style={{ color: BRAND_COLORS.tropicalTeal }} />
-            </div>
+            <ListSkeleton />
           ) : tab === 'products' ? (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
                     {['Title', 'Price', 'Stock', 'Status', 'Actions'].map((h) => (
-                      <th key={h} className="px-5 py-2.5 text-left text-xs font-semibold" style={{ color: themeStyles.textMuted }}>{h}</th>
+                      <th key={h} className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: themeStyles.textMuted }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y" style={{ borderColor: themeStyles.border }}>
                   {products.length === 0 ? (
-                    <tr><td colSpan={5} className="px-5 py-8 text-center text-xs" style={{ color: themeStyles.textMuted }}>No products yet.</td></tr>
+                    <tr><td colSpan={5}><EmptyBlock title="No products yet." /></td></tr>
                   ) : products.map((p) => (
                     <tr key={p.id}>
                       <td className="px-5 py-3 font-medium" style={{ color: themeStyles.textPrimary }}>{p.title}</td>
@@ -305,13 +286,13 @@ export default function AdminMarketPage() {
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
                     {['Name', 'Sort Order', 'Status', 'Actions'].map((h) => (
-                      <th key={h} className="px-5 py-2.5 text-left text-xs font-semibold" style={{ color: themeStyles.textMuted }}>{h}</th>
+                      <th key={h} className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: themeStyles.textMuted }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y" style={{ borderColor: themeStyles.border }}>
                   {categories.length === 0 ? (
-                    <tr><td colSpan={4} className="px-5 py-8 text-center text-xs" style={{ color: themeStyles.textMuted }}>No categories yet.</td></tr>
+                    <tr><td colSpan={4}><EmptyBlock title="No categories yet." /></td></tr>
                   ) : categories.map((c) => (
                     <tr key={c.id}>
                       <td className="px-5 py-3 font-medium" style={{ color: themeStyles.textPrimary }}>{c.name}</td>
@@ -345,7 +326,7 @@ export default function AdminMarketPage() {
         >
           <div
             className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl"
-            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}
+            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}
           >
             {/* Modal header */}
             <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: themeStyles.border }}>

@@ -6,8 +6,8 @@ import {
   faPlus, faPen, faTrash, faSpinner, faChevronDown, faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
+import { Tabs } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -24,7 +24,6 @@ interface FooterContact { id: string; icon: string; text: string; sort_order: nu
 const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export default function NavigationPage() {
-  const { isDimMode } = useTheme();
   const [tab, setTab] = useState<Tab>('navbar');
   const [menus, setMenus] = useState<NavMenu[]>([]);
   const [dropdowns, setDropdowns] = useState<NavDropdown[]>([]);
@@ -62,13 +61,13 @@ export default function NavigationPage() {
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+    cardBg: 'var(--adm-card)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    inputBg: 'var(--adm-bg)',
+    inputBorder: 'var(--adm-border)',
   };
 
   const inputClass = 'w-full px-3 py-2 rounded-lg border text-sm focus:outline-none';
@@ -162,15 +161,7 @@ export default function NavigationPage() {
   return (
     <AdminLayout title="Navigation" subtitle="Manage navbar and footer content">
       {/* Tab bar */}
-      <div className="flex gap-1 mb-6 rounded-xl p-1" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
-        {TABS.map((t) => (
-          <button key={t.key} onClick={() => setTab(t.key)}
-            className="px-4 py-2 rounded-lg text-xs font-medium transition flex-1"
-            style={{ background: tab === t.key ? BRAND_COLORS.tropicalTeal : 'transparent', color: tab === t.key ? '#fff' : themeStyles.textSecondary }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <div className="mb-6"><Tabs value={tab} onChange={setTab} tabs={TABS.map((t) => ({ key: t.key, label: t.label }))} /></div>
 
       {/* Navbar Menus tab */}
       {tab === 'navbar' && (
@@ -184,7 +175,7 @@ export default function NavigationPage() {
             </button>
           </div>
 
-          <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
             {menus.map((menu) => (
               <div key={menu.id}>
                 <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: themeStyles.border }}>
@@ -204,7 +195,7 @@ export default function NavigationPage() {
                 </div>
 
                 {expandedMenu === menu.id && (
-                  <div className="pl-8" style={{ background: isDimMode ? 'rgba(255,255,255,0.02)' : '#F9FAFB' }}>
+                  <div className="pl-8" style={{ background: 'var(--adm-track)' }}>
                     <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: themeStyles.border }}>
                       <p className="text-xs font-medium" style={{ color: themeStyles.textMuted }}>Dropdown items</p>
                       <button onClick={() => setModal({ type: 'dropdown_add', data: { parent_menu_id: menu.id, label: '', url: '', sort_order: 0, is_active: true } })}
@@ -249,7 +240,7 @@ export default function NavigationPage() {
                 <FontAwesomeIcon icon={faPlus} className="w-3 h-3" /> Add Link
               </button>
             </div>
-            <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+            <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
               <table className="w-full text-xs">
                 <thead><tr style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
                   {['Title', 'URL', 'Category', 'Order', 'Status', ''].map((h) => (
@@ -282,7 +273,7 @@ export default function NavigationPage() {
                 <FontAwesomeIcon icon={faPlus} className="w-3 h-3" /> Add Social
               </button>
             </div>
-            <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+            <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
               <table className="w-full text-xs">
                 <thead><tr style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
                   {['Platform', 'URL', 'Order', 'Status', ''].map((h) => (
@@ -314,7 +305,7 @@ export default function NavigationPage() {
                 <FontAwesomeIcon icon={faPlus} className="w-3 h-3" /> Add Legal Link
               </button>
             </div>
-            <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+            <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
               <table className="w-full text-xs">
                 <thead><tr style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
                   {['Title', 'URL', 'Order', 'Status', ''].map((h) => (
@@ -343,7 +334,7 @@ export default function NavigationPage() {
         <div className="space-y-6">
           {/* Footer settings */}
           {footerSettings && (
-            <div className="rounded-xl p-5" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+            <div className="rounded-xl p-5" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Footer Settings</h2>
                 <button onClick={() => setModal({ type: 'footer_settings', data: { ...footerSettings } })}
@@ -370,7 +361,7 @@ export default function NavigationPage() {
                 <FontAwesomeIcon icon={faPlus} className="w-3 h-3" /> Add Contact
               </button>
             </div>
-            <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+            <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
               <table className="w-full text-xs">
                 <thead><tr style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
                   {['Icon', 'Text', 'Order', 'Status', ''].map((h) => (

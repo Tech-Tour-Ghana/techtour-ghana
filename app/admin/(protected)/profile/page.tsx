@@ -6,8 +6,8 @@ import {
   faCamera, faSpinner, faCheck, faSave, faUserCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
+import { ListSkeleton } from '@/components/admin/ui';
 
 const BRAND = '#139EA2';
 
@@ -24,7 +24,6 @@ interface Profile {
 
 export default function AdminProfilePage() {
   const supabase = createBrowserClient();
-  const { isDimMode } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -36,13 +35,13 @@ export default function AdminProfilePage() {
   const [saved, setSaved] = useState(false);
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.06)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9FAFB',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+    cardBg: 'var(--adm-card)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    inputBg: 'var(--adm-track)',
+    inputBorder: 'var(--adm-border)',
   };
 
   const inputStyle: React.CSSProperties = {
@@ -126,18 +125,16 @@ export default function AdminProfilePage() {
   return (
     <AdminLayout title="My Profile" subtitle="Edit your account details and photo">
       {loading ? (
-        <div className="flex items-center justify-center h-40">
-          <FontAwesomeIcon icon={faSpinner} className="w-6 h-6 animate-spin" style={{ color: BRAND }} />
-        </div>
+        <ListSkeleton />
       ) : (
         <div className="max-w-2xl space-y-6">
 
           {/* Avatar card */}
           <div className="rounded-2xl p-6 flex items-center gap-6"
-            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
             <div className="relative flex-shrink-0">
               <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center"
-                style={{ background: isDimMode ? '#2A2A2A' : '#F3F4F6' }}>
+                style={{ background: 'var(--adm-elevated)' }}>
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
@@ -177,7 +174,7 @@ export default function AdminProfilePage() {
 
           {/* Profile fields */}
           <div className="rounded-2xl p-6 space-y-4"
-            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
             <h3 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Profile Details</h3>
 
             <div className="grid grid-cols-2 gap-4">
