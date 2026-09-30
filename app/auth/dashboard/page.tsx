@@ -1,18 +1,15 @@
 // Ported from docs/old-sites/techtour-frontend/app/auth/dashboard/page.tsx.
-// Markup and styling are unchanged. getDashboardStats (lib/api.ts) counts
-// the caller's own bookings and orders directly through Supabase; the old
-// study_applications and wishlist_count fields are dropped along with the
-// stat cards that showed them, since neither ever had a real backend (see
-// the comment in components/DashboardLayout.tsx). recent_orders is dropped
-// for the same reason profile_complete is: both were computed server side
-// in Python and have no equivalent here without reintroducing that logic,
-// and the orders list itself already exists at /auth/orders.
+// Markup and styling are unchanged. getDashboardStats (lib/api.ts) gathers
+// the counts, profile completeness and recent orders directly through
+// Supabase, replacing the single Django stats endpoint. The old endpoint
+// hardcoded profile completeness at 80% plus bonuses, here it is the share of
+// profile fields actually filled in.
 
 'use client';
 
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarCheck, faShoppingBag, faShieldAlt, faGlobeAfrica } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarCheck, faShoppingBag, faShieldAlt, faGlobeAfrica, faCheckCircle, faGraduationCap, faHeart, faClock } from '@fortawesome/free-solid-svg-icons';
 import { getAuthStatus, getDashboardStats, type User, type DashboardStats } from '@/lib/api';
 import { useTheme } from '@/context/ThemeContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -89,6 +86,10 @@ export default function DashboardPage() {
             <p className="text-white/80 text-sm mt-1">Here&apos;s a summary of your activity on TechTour Ghana.</p>
             <div className="flex items-center gap-4 mt-3 flex-wrap">
               <span className="text-xs bg-white/20 px-3 py-1 rounded-full">
+                <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
+                Profile {stats?.profile_complete || 0}% complete
+              </span>
+              <span className="text-xs bg-white/20 px-3 py-1 rounded-full">
                 <FontAwesomeIcon icon={faShieldAlt} className="mr-1" />
                 Verified Member
               </span>
@@ -97,10 +98,49 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={faCalendarCheck} label="Tours Booked" value={stats?.tours_booked || 0} color={BRAND_COLORS.tropicalTeal} />
-        <StatCard icon={faShoppingBag} label="Orders Placed" value={stats?.orders_placed || 0} color={BRAND_COLORS.sandyOrange} />
+        <StatCard icon={faShoppingBag} label="Purchases" value={stats?.orders_placed || 0} color={BRAND_COLORS.sandyOrange} />
+        <StatCard icon={faGraduationCap} label="Study Apps" value={stats?.study_applications || 0} color="#8B5CF6" />
+        <StatCard icon={faHeart} label="Wishlist" value={stats?.wishlist_count || 0} color="#EF4444" />
       </div>
+
+      {stats && stats.recent_orders.length > 0 && (
+        <div className="mt-6">
+          <h3 className="text-lg font-bold mb-4" style={{ color: themeStyles.textPrimary }}>
+            <FontAwesomeIcon icon={faClock} className="mr-2" style={{ color: BRAND_COLORS.tropicalTeal }} />
+            Recent Orders
+          </h3>
+          <div className="space-y-3">
+            {stats.recent_orders.map((order) => (
+              <div
+                key={order.id}
+                className="rounded-2xl p-4 flex items-center justify-between"
+                style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}
+              >
+                <div>
+                  <p className="font-medium" style={{ color: themeStyles.textPrimary }}>{order.product_name}</p>
+                  <p className="text-xs" style={{ color: themeStyles.textMuted }}>
+                    #{order.order_number} • {new Date(order.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold" style={{ color: BRAND_COLORS.tropicalTeal }}>
+                    ₵{order.total_price.toFixed(2)}
+                  </span>
+                  <span className={`px-2 py-0.5 text-xs rounded-full ${
+                    order.status === 'delivered' ? 'bg-green-500/10 text-green-500' :
+                    order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :
+                    'bg-blue-500/10 text-blue-500'
+                  }`}>
+                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mt-8 text-center">
         <p className="text-xs" style={{ color: themeStyles.textMuted }}>

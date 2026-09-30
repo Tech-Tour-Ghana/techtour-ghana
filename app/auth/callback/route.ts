@@ -17,7 +17,8 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
-      return NextResponse.redirect(new URL(`/auth/login?error=auth_failed`, url.origin));
+      const failure = next.startsWith("/auth/confirm-email") ? "/auth/confirm-email?error=1" : "/auth/login?error=auth_failed";
+      return NextResponse.redirect(new URL(failure, url.origin));
     }
   }
 
