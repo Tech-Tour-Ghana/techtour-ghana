@@ -20,6 +20,8 @@ export const serverSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   PAYSTACK_SECRET_KEY: z.string().min(1),
   RESEND_API_KEY: z.string().min(1),
+  // Optional: where new contact messages are forwarded. Unset means no forward.
+  CONTACT_NOTIFY_EMAIL: z.email().optional(),
 });
 
 export const FAILURE_HEADER =

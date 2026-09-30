@@ -230,12 +230,13 @@ const Footer = () => {
     }
 
     try {
-      // No .select() after the insert: anonymous users have no select policy.
-      const { error: insertError } = await createBrowserClient()
-        .from('newsletter_subscribers')
-        .insert({ email: newsletterEmail.trim(), source: 'footer' });
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newsletterEmail.trim() }),
+      });
 
-      if (!insertError) {
+      if (res.ok) {
         setNewsletterSubmitted(true);
         setNewsletterSuccessMsg('Thank you for subscribing! Check your email for a welcome message.');
         setNewsletterEmail('');
@@ -243,7 +244,7 @@ const Footer = () => {
           setNewsletterSubmitted(false);
           setNewsletterSuccessMsg('');
         }, 8000);
-      } else if (insertError.code === '23505') {
+      } else if (res.status === 409) {
         setNewsletterError('This email is already subscribed.');
       } else {
         setNewsletterError('Subscription failed. Please try again.');

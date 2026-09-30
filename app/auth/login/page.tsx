@@ -15,6 +15,7 @@ import Image from 'next/image';
 import { loginUser } from '@/lib/api';
 import { createBrowserClient } from '@/lib/supabase/client';
 import Toast from '@/components/Toast';
+import { safeNext } from '@/lib/utils/safe-next';
 
 export default function LoginClient() {
   const router = useRouter();
@@ -111,7 +112,7 @@ export default function LoginClient() {
 
     const result = await loginUser(email, password);
     if (result.success) {
-      router.push('/');
+      router.push(safeNext(new URLSearchParams(window.location.search).get('next')));
       router.refresh();
     } else {
       setLoginError(result.message || 'Invalid email or password');
@@ -123,7 +124,7 @@ export default function LoginClient() {
     const supabase = createBrowserClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(safeNext(new URLSearchParams(window.location.search).get('next')))}` },
     });
     if (error) {
       setToast({ message: 'Google sign-in is not available yet. Please use email and password.', type: 'warning' });

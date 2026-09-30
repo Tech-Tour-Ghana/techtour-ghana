@@ -13,6 +13,8 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { sendEmail } from "@/lib/email/send.server";
+import { orderConfirmation } from "@/lib/email/templates";
 import type { Database } from "@/types/database";
 
 type Transaction = Database["public"]["Tables"]["paystack_transactions"]["Row"];
@@ -83,6 +85,18 @@ export async function settleSuccessfulTransaction(
     // Every other error is real and must surface.
     if (orderError && orderError.code !== "23505") throw orderError;
   }
+
+  // Runs once per reference: the pending-only update above returns no row on
+  // any repeat call, so a duplicate webhook or a verify poll cannot resend.
+  await sendEmail({
+    to: transaction.email,
+    ...orderConfirmation({
+      name: transaction.name,
+      reference: transaction.reference,
+      amount: transaction.amount,
+      currency: transaction.currency,
+    }),
+  });
 
   return { settled: true };
 }

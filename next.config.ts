@@ -29,6 +29,7 @@ collect(
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
+    CONTACT_NOTIFY_EMAIL: process.env.CONTACT_NOTIFY_EMAIL || undefined,
   },
   issues,
 );
