@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, reportError } from '@/components/admin/ui';
+import { Button, ListSkeleton, Modal, reportError } from '@/components/admin/ui';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faFolder, faFolderPlus, faUpload, faTrash, faCopy,
-  faSpinner, faTimes, faImage, faFilePdf, faFileVideo, faFile,
+  faSpinner, faImage, faFilePdf, faFileVideo, faFile,
   faCheck, faPencil, faImages,
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -46,6 +46,7 @@ export default function MediaLibraryPage() {
   const [uploading, setUploading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
+  const [folderError, setFolderError] = useState('');
 
   const [folderModal, setFolderModal] = useState<{ open: boolean; id: string | null; name: string; description: string }>({
     open: false, id: null, name: '', description: '',
@@ -90,15 +91,18 @@ export default function MediaLibraryPage() {
 
   const activeFolder = folders.find(f => f.id === activeFolderId) ?? null;
 
+  const closeFolderModal = () => { setFolderError(''); setFolderModal({ open: false, id: null, name: '', description: '' }); };
+
   async function saveFolder() {
     if (!folderModal.name.trim()) return;
     setSavingFolder(true);
+    setFolderError('');
     const slug = toSlug(folderModal.name);
     const { error } = folderModal.id
       ? await supabase.from('media_folders').update({ name: folderModal.name, description: folderModal.description || null }).eq('id', folderModal.id)
       : await supabase.from('media_folders').insert({ name: folderModal.name, slug, description: folderModal.description || null });
     setSavingFolder(false);
-    if (error) { setNotice('Could not save the folder. The name may already be in use.'); return; }
+    if (error) { setFolderError('Could not save the folder. The name may already be in use.'); return; }
     setFolderModal({ open: false, id: null, name: '', description: '' });
     fetchFolders();
   }
@@ -348,79 +352,57 @@ export default function MediaLibraryPage() {
         </div>
       </div>
 
-      {/* Folder modal */}
       {folderModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.6)' }}>
-          <div className="w-full max-w-sm rounded-2xl shadow-2xl p-6 space-y-4"
-            style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold" style={{ color: ts.textPrimary }}>
-                {folderModal.id ? 'Rename Folder' : 'New Folder'}
-              </h3>
-              <button onClick={() => setFolderModal({ open: false, id: null, name: '', description: '' })}
-                style={{ color: ts.textMuted }}>
-                <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
-              </button>
-            </div>
+        <Modal
+          title={folderModal.id ? 'Rename Folder' : 'New Folder'}
+          maxWidth="max-w-sm"
+          onClose={closeFolderModal}
+          footer={
+            <>
+              <Button variant="secondary" onClick={closeFolderModal}>Cancel</Button>
+              <Button onClick={saveFolder} disabled={savingFolder || !folderModal.name.trim()}>
+                {folderModal.id ? 'Save' : 'Create Folder'}
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-4">
             <div>
               <label className="block text-xs font-medium mb-1.5" style={{ color: ts.textSecondary }}>Name *</label>
               <input style={inputStyle} value={folderModal.name}
-                onChange={e => setFolderModal(s => ({ ...s, name: e.target.value }))}
+                onChange={e => setFolderModal(m => ({ ...m, name: e.target.value }))}
                 onKeyDown={e => e.key === 'Enter' && saveFolder()}
                 placeholder="e.g. Tour Images" autoFocus />
             </div>
             <div>
               <label className="block text-xs font-medium mb-1.5" style={{ color: ts.textSecondary }}>Description</label>
               <input style={inputStyle} value={folderModal.description}
-                onChange={e => setFolderModal(s => ({ ...s, description: e.target.value }))}
+                onChange={e => setFolderModal(m => ({ ...m, description: e.target.value }))}
                 placeholder="Optional note about this folder" />
             </div>
-            <div className="flex justify-end gap-3 pt-1">
-              <button onClick={() => setFolderModal({ open: false, id: null, name: '', description: '' })}
-                className="px-4 py-2 rounded-lg text-xs font-medium"
-                style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                Cancel
-              </button>
-              <button onClick={saveFolder} disabled={savingFolder || !folderModal.name.trim()}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white disabled:opacity-60"
-                style={{ background: BRAND }}>
-                {savingFolder && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
-                {folderModal.id ? 'Save' : 'Create Folder'}
-              </button>
-            </div>
+            {folderError && <p role="alert" className="text-xs" style={{ color: 'var(--adm-error)' }}>{folderError}</p>}
           </div>
-        </div>
+        </Modal>
       )}
 
-      {/* Delete confirmation */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.6)' }}>
-          <div className="w-full max-w-sm rounded-2xl shadow-2xl p-6 space-y-4"
-            style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <h3 className="text-sm font-semibold" style={{ color: ts.textPrimary }}>
-              Delete {deleteConfirm.type === 'folder' ? 'Folder' : 'File'}?
-            </h3>
-            <p className="text-xs" style={{ color: ts.textSecondary }}>
-              {deleteConfirm.type === 'folder'
-                ? `Deleting "${deleteConfirm.label}" will permanently remove the folder and all files inside it.`
-                : `"${deleteConfirm.label}" will be permanently deleted from storage.`}
-            </p>
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setDeleteConfirm(null)}
-                className="px-4 py-2 rounded-lg text-xs font-medium"
-                style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                Cancel
-              </button>
-              <button onClick={confirmDelete}
-                className="px-4 py-2 rounded-lg text-xs font-medium text-white"
-                style={{ background: 'var(--adm-error)' }}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <Modal
+          title={`Delete ${deleteConfirm.type === 'folder' ? 'Folder' : 'File'}?`}
+          maxWidth="max-w-sm"
+          onClose={() => setDeleteConfirm(null)}
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+              <Button variant="danger" onClick={confirmDelete}>Delete</Button>
+            </>
+          }
+        >
+          <p className="text-xs" style={{ color: ts.textSecondary }}>
+            {deleteConfirm.type === 'folder'
+              ? `Deleting "${deleteConfirm.label}" will permanently remove the folder and all files inside it.`
+              : `"${deleteConfirm.label}" will be permanently deleted from storage.`}
+          </p>
+        </Modal>
       )}
     </AdminLayout>
   );
