@@ -97,15 +97,6 @@ body:has(.mm-root:not(.mm-preview)) .footer { display: none !important; }
   animation: mm-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Brand stripe along the top edge. */
-.mm-card::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 5px;
-  background: linear-gradient(90deg, var(--mm-primary) 0 33%, var(--mm-gold) 33% 66%, #d64545 66% 83%, #2e9e5b 83% 100%);
-}
-
 @keyframes mm-rise {
   from { opacity: 0; transform: translateY(18px) scale(0.98); }
   to { opacity: 1; transform: none; }
