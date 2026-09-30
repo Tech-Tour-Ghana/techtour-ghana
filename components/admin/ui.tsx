@@ -248,6 +248,7 @@ export function Modal({
   children,
   footer,
   maxWidth = 'max-w-lg',
+  flush = false,
 }: {
   title: string;
   subtitle?: string;
@@ -255,6 +256,8 @@ export function Modal({
   children: ReactNode;
   footer?: ReactNode;
   maxWidth?: string;
+  /** Fill the dialog with the content (fixed height, no body padding), for panes like the media picker. */
+  flush?: boolean;
 }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -272,7 +275,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`flex max-h-[90vh] w-full flex-col ${maxWidth}`}
+        className={`flex w-full flex-col ${flush ? 'h-[80vh] max-h-[90vh]' : 'max-h-[90vh]'} ${maxWidth}`}
         style={{ background: 'var(--adm-card)', border: '1px solid var(--adm-border)', borderRadius: 'var(--adm-radius-card)', boxShadow: 'var(--adm-shadow)', color: 'var(--adm-text)' }}
       >
         <div className="flex items-center justify-between border-b px-6 py-4" style={{ borderColor: 'var(--adm-border)' }}>
@@ -284,7 +287,7 @@ export function Modal({
             <FontAwesomeIcon icon={faXmark} className="h-3.5 w-3.5" />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
+        <div className={flush ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'flex-1 overflow-y-auto px-6 py-5'}>{children}</div>
         {footer && <div className="flex justify-end gap-2 border-t px-6 py-4" style={{ borderColor: 'var(--adm-border)' }}>{footer}</div>}
       </div>
     </div>

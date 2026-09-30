@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { BRAND, IconButton, TableCard, Tabs, rowClass, useAdminTheme, Modal } from '@/components/admin/ui';
+import { IconButton, TableCard, Tabs, rowClass, useAdminTheme, Modal, Button } from '@/components/admin/ui';
 
 interface EmailRow {
   id: string;
@@ -114,7 +114,9 @@ export default function AdminEmailsPage() {
         <Modal title={view.subject} subtitle={`To ${view.recipient}`} maxWidth="max-w-2xl" onClose={() => setView(null)}
           footer={
             <>
-              <button onClick={() => setView(null)} className="px-4 py-2 rounded-lg text-sm font-medium text-white" style={{ background: BRAND.teal }}>Close</button>
+              <Button onClick={() => setView(null)}>
+Close
+</Button>
             
             </>
           }

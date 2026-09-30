@@ -7,7 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs, ListSkeleton, reportError, Modal } from '@/components/admin/ui';
+import { Tabs, ListSkeleton, reportError, Modal, Button } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -21,7 +21,6 @@ interface LegalLink { id: string; label: string; url: string; sort_order: number
 interface FooterSettings { id: string; company_name: string; tagline: string; copyright_text: string; }
 interface FooterContact { id: string; icon: string; text: string; sort_order: number; is_active: boolean; }
 
-const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export default function NavigationPage() {
   const [tab, setTab] = useState<Tab>('navbar');
@@ -388,14 +387,12 @@ export default function NavigationPage() {
         <Modal title={`${modal.type.includes('add') ? 'Add' : 'Edit'}${' '} ${modal.type.includes('menu') ? 'Menu' : modal.type.includes('dropdown') ? 'Dropdown Item' : modal.type.includes('footer_link') ? 'Footer Link' : modal.type.includes('social') ? 'Social Link' : modal.type.includes('legal') ? 'Legal Link' : modal.type.includes('footer_settings') ? 'Footer Settings' : 'Footer Contact'}`} maxWidth="max-w-md" onClose={() => setModal(null)}
           footer={
             <>
-              <button onClick={saveModal} disabled={saving}
-                className="flex-1 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
-                style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
-                {saving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : 'Save'}
-              </button>
-              <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-lg text-xs font-medium" style={{ background: themeStyles.border, color: themeStyles.textSecondary }}>
-                Cancel
-              </button>
+              <Button className="flex-1" onClick={saveModal} disabled={saving}>
+{saving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : 'Save'}
+</Button>
+              <Button variant="secondary" className="flex-1" onClick={() => setModal(null)}>
+Cancel
+</Button>
             
             </>
           }

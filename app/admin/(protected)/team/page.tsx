@@ -14,7 +14,7 @@ import {
 import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs, EmptyBlock, ListSkeleton, reportError, Modal } from '@/components/admin/ui';
+import { Tabs, EmptyBlock, ListSkeleton, reportError, Modal, Button } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -424,13 +424,13 @@ export default function AdminTeamPage() {
         <Modal title={memberModal.id ? 'Edit Team Member' : 'Add Team Member'} maxWidth="max-w-lg" onClose={() => setMemberModal({ open: false, data: blankMember(), id: null })}
           footer={
             <>
-                <button onClick={() => setMemberModal({ open: false, data: blankMember(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                  Cancel
-                </button>
-                <button onClick={saveMember} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
-                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
+                <Button variant="secondary" onClick={() => setMemberModal({ open: false, data: blankMember(), id: null })}>
+Cancel
+</Button>
+                <Button onClick={saveMember} disabled={saving}>
+{saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
                   {memberModal.id ? 'Save Changes' : 'Add Member'}
-                </button>
+</Button>
               
             </>
           }
@@ -480,13 +480,13 @@ export default function AdminTeamPage() {
         <Modal title={openingModal.id ? 'Edit Job Opening' : 'Add Job Opening'} maxWidth="max-w-lg" onClose={() => setOpeningModal({ open: false, data: blankOpening(), id: null })}
           footer={
             <>
-                <button onClick={() => setOpeningModal({ open: false, data: blankOpening(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                  Cancel
-                </button>
-                <button onClick={saveOpening} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
-                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
+                <Button variant="secondary" onClick={() => setOpeningModal({ open: false, data: blankOpening(), id: null })}>
+Cancel
+</Button>
+                <Button onClick={saveOpening} disabled={saving}>
+{saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
                   {openingModal.id ? 'Save Changes' : 'Add Opening'}
-                </button>
+</Button>
               
             </>
           }
@@ -556,13 +556,13 @@ export default function AdminTeamPage() {
         <Modal title={categoryModal.id ? 'Edit Category' : 'Add Category'} maxWidth="max-w-md" onClose={() => setCategoryModal({ open: false, data: blankCategory(), id: null })}
           footer={
             <>
-                <button onClick={() => setCategoryModal({ open: false, data: blankCategory(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                  Cancel
-                </button>
-                <button onClick={saveCategory} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
-                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
+                <Button variant="secondary" onClick={() => setCategoryModal({ open: false, data: blankCategory(), id: null })}>
+Cancel
+</Button>
+                <Button onClick={saveCategory} disabled={saving}>
+{saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
                   {categoryModal.id ? 'Save Changes' : 'Add Category'}
-                </button>
+</Button>
               
             </>
           }
