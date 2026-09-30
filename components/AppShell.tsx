@@ -47,6 +47,7 @@ export default function AppShell({
                          pathname?.startsWith('/market/checkout') ||
                          pathname?.startsWith('/auth/') ||
                          pathname?.startsWith('/admin') ||
+                         pathname === '/maintenance' ||
                          pathname === '/market/payment/success' ||
                          pathname === '/market/payment/failed';
 

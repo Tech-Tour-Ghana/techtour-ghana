@@ -2435,6 +2435,11 @@ export type Database = {
           login_features: string
           login_headline: string
           logo_url: string
+          maintenance_contact_email: string
+          maintenance_enabled: boolean
+          maintenance_eta: string | null
+          maintenance_message: string
+          maintenance_title: string
           register_background_url: string
           register_description: string
           register_features: string
@@ -2458,6 +2463,11 @@ export type Database = {
           login_features?: string
           login_headline?: string
           logo_url?: string
+          maintenance_contact_email?: string
+          maintenance_enabled?: boolean
+          maintenance_eta?: string | null
+          maintenance_message?: string
+          maintenance_title?: string
           register_background_url?: string
           register_description?: string
           register_features?: string
@@ -2481,6 +2491,11 @@ export type Database = {
           login_features?: string
           login_headline?: string
           logo_url?: string
+          maintenance_contact_email?: string
+          maintenance_enabled?: boolean
+          maintenance_eta?: string | null
+          maintenance_message?: string
+          maintenance_title?: string
           register_background_url?: string
           register_description?: string
           register_features?: string
