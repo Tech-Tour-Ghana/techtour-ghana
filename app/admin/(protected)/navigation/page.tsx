@@ -7,7 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs } from '@/components/admin/ui';
+import { Tabs, ListSkeleton, reportError, Modal } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -84,30 +84,30 @@ export default function NavigationPage() {
     const b = (v: unknown) => (v == null ? true : Boolean(v));
     if (type === 'menu_edit' || type === 'menu_add') {
       const row = { label: s(data.label), url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) await supabase.from('navbar_menus').update(row).eq('id', String(data.id));
-      else await supabase.from('navbar_menus').insert(row);
+      if (data.id) reportError((await supabase.from('navbar_menus').update(row).eq('id', String(data.id))).error);
+      else reportError((await supabase.from('navbar_menus').insert(row)).error);
     } else if (type === 'dropdown_edit' || type === 'dropdown_add') {
       const row = { parent_menu_id: s(data.parent_menu_id), label: s(data.label), url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) await supabase.from('navbar_dropdowns').update(row).eq('id', String(data.id));
-      else await supabase.from('navbar_dropdowns').insert(row);
+      if (data.id) reportError((await supabase.from('navbar_dropdowns').update(row).eq('id', String(data.id))).error);
+      else reportError((await supabase.from('navbar_dropdowns').insert(row)).error);
     } else if (type === 'footer_link_edit' || type === 'footer_link_add') {
       const row = { label: s(data.label), url: s(data.url), category: (s(data.category) || 'company') as 'destinations' | 'services' | 'company' | 'support', sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) await supabase.from('footer_quick_links').update(row).eq('id', String(data.id));
-      else await supabase.from('footer_quick_links').insert(row);
+      if (data.id) reportError((await supabase.from('footer_quick_links').update(row).eq('id', String(data.id))).error);
+      else reportError((await supabase.from('footer_quick_links').insert(row)).error);
     } else if (type === 'social_edit' || type === 'social_add') {
       const row = { platform: (s(data.platform) || 'other') as 'facebook' | 'twitter' | 'instagram' | 'linkedin' | 'youtube' | 'tiktok' | 'whatsapp' | 'other', url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) await supabase.from('social_links').update(row).eq('id', String(data.id));
-      else await supabase.from('social_links').insert(row);
+      if (data.id) reportError((await supabase.from('social_links').update(row).eq('id', String(data.id))).error);
+      else reportError((await supabase.from('social_links').insert(row)).error);
     } else if (type === 'legal_edit' || type === 'legal_add') {
       const row = { label: s(data.label), url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) await supabase.from('legal_links').update(row).eq('id', String(data.id));
-      else await supabase.from('legal_links').insert(row);
+      if (data.id) reportError((await supabase.from('legal_links').update(row).eq('id', String(data.id))).error);
+      else reportError((await supabase.from('legal_links').insert(row)).error);
     } else if (type === 'footer_settings') {
-      if (data.id) await supabase.from('footer_settings').update({ company_name: s(data.company_name), tagline: s(data.tagline), copyright_text: s(data.copyright_text) }).eq('id', String(data.id));
+      if (data.id) reportError((await supabase.from('footer_settings').update({ company_name: s(data.company_name), tagline: s(data.tagline), copyright_text: s(data.copyright_text) }).eq('id', String(data.id))).error);
     } else if (type === 'footer_contact_edit' || type === 'footer_contact_add') {
       const row = { icon: s(data.icon), text: s(data.text), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) await supabase.from('footer_contacts').update(row).eq('id', String(data.id));
-      else await supabase.from('footer_contacts').insert(row);
+      if (data.id) reportError((await supabase.from('footer_contacts').update(row).eq('id', String(data.id))).error);
+      else reportError((await supabase.from('footer_contacts').insert(row)).error);
     }
 
     await fetchAll();
@@ -118,7 +118,7 @@ export default function NavigationPage() {
   async function del(table: 'navbar_menus' | 'navbar_dropdowns' | 'footer_quick_links' | 'social_links' | 'legal_links' | 'footer_contacts', id: string) {
     if (!window.confirm('Delete this item?')) return;
     const supabase = createBrowserClient();
-    await supabase.from(table).delete().eq('id', id);
+    reportError((await supabase.from(table).delete().eq('id', id)).error);
     fetchAll();
   }
 
@@ -151,9 +151,7 @@ export default function NavigationPage() {
   if (loading) {
     return (
       <AdminLayout title="Navigation" subtitle="Manage navbar and footer content">
-        <div className="flex items-center justify-center h-48">
-          <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }} />
-        </div>
+        <ListSkeleton />
       </AdminLayout>
     );
   }
@@ -387,15 +385,22 @@ export default function NavigationPage() {
 
       {/* Modal */}
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setModal(null)}>
-          <div className="w-full max-w-md rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto" style={{ background: themeStyles.cardBg }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-bold" style={{ color: themeStyles.textPrimary }}>
-              {modal.type.includes('add') ? 'Add' : 'Edit'}{' '}
-              {modal.type.includes('menu') ? 'Menu' : modal.type.includes('dropdown') ? 'Dropdown Item' :
-               modal.type.includes('footer_link') ? 'Footer Link' : modal.type.includes('social') ? 'Social Link' :
-               modal.type.includes('legal') ? 'Legal Link' : modal.type.includes('footer_settings') ? 'Footer Settings' : 'Footer Contact'}
-            </h3>
-
+        <Modal title={`${modal.type.includes('add') ? 'Add' : 'Edit'}${' '} ${modal.type.includes('menu') ? 'Menu' : modal.type.includes('dropdown') ? 'Dropdown Item' : modal.type.includes('footer_link') ? 'Footer Link' : modal.type.includes('social') ? 'Social Link' : modal.type.includes('legal') ? 'Legal Link' : modal.type.includes('footer_settings') ? 'Footer Settings' : 'Footer Contact'}`} maxWidth="max-w-md" onClose={() => setModal(null)}
+          footer={
+            <>
+              <button onClick={saveModal} disabled={saving}
+                className="flex-1 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
+                style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
+                {saving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : 'Save'}
+              </button>
+              <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-lg text-xs font-medium" style={{ background: themeStyles.border, color: themeStyles.textSecondary }}>
+                Cancel
+              </button>
+            
+            </>
+          }
+        >
+<div className="space-y-4">
             {/* Menu fields */}
             {(modal.type === 'menu_add' || modal.type === 'menu_edit') && <>
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Label</label>
@@ -490,18 +495,10 @@ export default function NavigationPage() {
               </label>
             </>}
 
-            <div className="flex gap-2 pt-2">
-              <button onClick={saveModal} disabled={saving}
-                className="flex-1 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
-                style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
-                {saving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : 'Save'}
-              </button>
-              <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-lg text-xs font-medium" style={{ background: themeStyles.border, color: themeStyles.textSecondary }}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+            
+          
+</div>
+        </Modal>
       )}
     </AdminLayout>
   );

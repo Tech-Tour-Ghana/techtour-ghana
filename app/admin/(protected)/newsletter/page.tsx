@@ -12,7 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock } from '@/components/admin/ui';
+import { ListSkeleton, EmptyBlock, reportError } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -78,7 +78,7 @@ export default function AdminNewsletterPage() {
     if (!window.confirm(`Remove ${sub.email} from the newsletter? This cannot be undone.`)) return;
     setBusyId(sub.id);
     const supabase = createBrowserClient();
-    await supabase.from('newsletter_subscribers').delete().eq('id', sub.id);
+    reportError((await supabase.from('newsletter_subscribers').delete().eq('id', sub.id)).error);
     setSubscribers((prev) => prev.filter((s) => s.id !== sub.id));
     setBusyId(null);
   }

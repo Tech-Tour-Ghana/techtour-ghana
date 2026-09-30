@@ -9,13 +9,12 @@ import {
   faUsers,
   faBriefcase,
   faTags,
-  faTimes,
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs, EmptyBlock } from '@/components/admin/ui';
+import { Tabs, EmptyBlock, ListSkeleton, reportError, Modal } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -134,19 +133,19 @@ export default function AdminTeamPage() {
 
   const deleteMember = async (id: string, name: string) => {
     if (!window.confirm(`Delete team member "${name}"?`)) return;
-    await supabase.from('team_members').delete().eq('id', id);
+    reportError((await supabase.from('team_members').delete().eq('id', id)).error);
     fetchAll();
   };
 
   const deleteCategory = async (id: string, name: string) => {
     if (!window.confirm(`Delete category "${name}"?`)) return;
-    await supabase.from('job_categories').delete().eq('id', id);
+    reportError((await supabase.from('job_categories').delete().eq('id', id)).error);
     fetchAll();
   };
 
   const deleteOpening = async (id: string, title: string) => {
     if (!window.confirm(`Delete job opening "${title}"?`)) return;
-    await supabase.from('job_openings').delete().eq('id', id);
+    reportError((await supabase.from('job_openings').delete().eq('id', id)).error);
     fetchAll();
   };
 
@@ -156,9 +155,9 @@ export default function AdminTeamPage() {
     setSaving(true);
     const d = memberModal.data;
     if (memberModal.id) {
-      await supabase.from('team_members').update(d).eq('id', memberModal.id);
+      reportError((await supabase.from('team_members').update(d).eq('id', memberModal.id)).error);
     } else {
-      await supabase.from('team_members').insert(d);
+      reportError((await supabase.from('team_members').insert(d)).error);
     }
     setSaving(false);
     setMemberModal({ open: false, data: blankMember(), id: null });
@@ -169,9 +168,9 @@ export default function AdminTeamPage() {
     setSaving(true);
     const d = categoryModal.data;
     if (categoryModal.id) {
-      await supabase.from('job_categories').update(d).eq('id', categoryModal.id);
+      reportError((await supabase.from('job_categories').update(d).eq('id', categoryModal.id)).error);
     } else {
-      await supabase.from('job_categories').insert(d);
+      reportError((await supabase.from('job_categories').insert(d)).error);
     }
     setSaving(false);
     setCategoryModal({ open: false, data: blankCategory(), id: null });
@@ -182,9 +181,9 @@ export default function AdminTeamPage() {
     setSaving(true);
     const d = openingModal.data;
     if (openingModal.id) {
-      await supabase.from('job_openings').update(d).eq('id', openingModal.id);
+      reportError((await supabase.from('job_openings').update(d).eq('id', openingModal.id)).error);
     } else {
-      await supabase.from('job_openings').insert(d);
+      reportError((await supabase.from('job_openings').insert(d)).error);
     }
     setSaving(false);
     setOpeningModal({ open: false, data: blankOpening(), id: null });
@@ -225,9 +224,7 @@ export default function AdminTeamPage() {
   if (loading) {
     return (
       <AdminLayout title="Team & Careers" subtitle="Manage team members and job openings">
-        <div className="flex items-center justify-center h-48">
-          <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }} />
-        </div>
+        <ListSkeleton />
       </AdminLayout>
     );
   }
@@ -424,17 +421,21 @@ export default function AdminTeamPage() {
           Modal: Team Member
       ═══════════════════════════════════════════════ */}
       {memberModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: ts.border }}>
-              <h3 className="font-semibold text-sm" style={{ color: ts.textPrimary }}>
-                {memberModal.id ? 'Edit Team Member' : 'Add Team Member'}
-              </h3>
-              <button onClick={() => setMemberModal({ open: false, data: blankMember(), id: null })} style={{ color: ts.textMuted }}>
-                <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-5">
+        <Modal title={memberModal.id ? 'Edit Team Member' : 'Add Team Member'} maxWidth="max-w-lg" onClose={() => setMemberModal({ open: false, data: blankMember(), id: null })}
+          footer={
+            <>
+                <button onClick={() => setMemberModal({ open: false, data: blankMember(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
+                  Cancel
+                </button>
+                <button onClick={saveMember} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
+                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
+                  {memberModal.id ? 'Save Changes' : 'Add Member'}
+                </button>
+              
+            </>
+          }
+        >
+<div className="">
               <div className="grid grid-cols-2 gap-x-4">
                 <Field label="Name *">
                   <input style={inputStyle} value={memberModal.data.name} onChange={e => setMemberModal(s => ({ ...s, data: { ...s.data, name: e.target.value } }))} />
@@ -466,35 +467,31 @@ export default function AdminTeamPage() {
                   </div>
                 </Field>
               </div>
-              <div className="flex justify-end gap-3 mt-2">
-                <button onClick={() => setMemberModal({ open: false, data: blankMember(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                  Cancel
-                </button>
-                <button onClick={saveMember} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
-                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
-                  {memberModal.id ? 'Save Changes' : 'Add Member'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+              
+            
+</div>
+        </Modal>
       )}
 
       {/* ═══════════════════════════════════════════════
           Modal: Job Opening
       ═══════════════════════════════════════════════ */}
       {openingModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: ts.border }}>
-              <h3 className="font-semibold text-sm" style={{ color: ts.textPrimary }}>
-                {openingModal.id ? 'Edit Job Opening' : 'Add Job Opening'}
-              </h3>
-              <button onClick={() => setOpeningModal({ open: false, data: blankOpening(), id: null })} style={{ color: ts.textMuted }}>
-                <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-5">
+        <Modal title={openingModal.id ? 'Edit Job Opening' : 'Add Job Opening'} maxWidth="max-w-lg" onClose={() => setOpeningModal({ open: false, data: blankOpening(), id: null })}
+          footer={
+            <>
+                <button onClick={() => setOpeningModal({ open: false, data: blankOpening(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
+                  Cancel
+                </button>
+                <button onClick={saveOpening} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
+                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
+                  {openingModal.id ? 'Save Changes' : 'Add Opening'}
+                </button>
+              
+            </>
+          }
+        >
+<div className="">
               <Field label="Title *">
                 <input
                   style={inputStyle}
@@ -546,35 +543,31 @@ export default function AdminTeamPage() {
                   <label htmlFor="o-active" className="text-xs cursor-pointer" style={{ color: ts.textSecondary }}>Visible on site</label>
                 </div>
               </Field>
-              <div className="flex justify-end gap-3 mt-2">
-                <button onClick={() => setOpeningModal({ open: false, data: blankOpening(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                  Cancel
-                </button>
-                <button onClick={saveOpening} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
-                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
-                  {openingModal.id ? 'Save Changes' : 'Add Opening'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+              
+            
+</div>
+        </Modal>
       )}
 
       {/* ═══════════════════════════════════════════════
           Modal: Job Category
       ═══════════════════════════════════════════════ */}
       {categoryModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
-          <div className="w-full max-w-md rounded-2xl shadow-2xl" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: ts.border }}>
-              <h3 className="font-semibold text-sm" style={{ color: ts.textPrimary }}>
-                {categoryModal.id ? 'Edit Category' : 'Add Category'}
-              </h3>
-              <button onClick={() => setCategoryModal({ open: false, data: blankCategory(), id: null })} style={{ color: ts.textMuted }}>
-                <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-5">
+        <Modal title={categoryModal.id ? 'Edit Category' : 'Add Category'} maxWidth="max-w-md" onClose={() => setCategoryModal({ open: false, data: blankCategory(), id: null })}
+          footer={
+            <>
+                <button onClick={() => setCategoryModal({ open: false, data: blankCategory(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
+                  Cancel
+                </button>
+                <button onClick={saveCategory} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
+                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
+                  {categoryModal.id ? 'Save Changes' : 'Add Category'}
+                </button>
+              
+            </>
+          }
+        >
+<div className="">
               <Field label="Name *">
                 <input
                   style={inputStyle}
@@ -594,18 +587,10 @@ export default function AdminTeamPage() {
                   <label htmlFor="c-active" className="text-xs cursor-pointer" style={{ color: ts.textSecondary }}>Visible on site</label>
                 </div>
               </Field>
-              <div className="flex justify-end gap-3 mt-2">
-                <button onClick={() => setCategoryModal({ open: false, data: blankCategory(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                  Cancel
-                </button>
-                <button onClick={saveCategory} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
-                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
-                  {categoryModal.id ? 'Save Changes' : 'Add Category'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+              
+            
+</div>
+        </Modal>
       )}
     </AdminLayout>
   );

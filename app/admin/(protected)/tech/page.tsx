@@ -9,13 +9,12 @@ import {
   faMicrochip,
   faCalendarAlt,
   faBookOpen,
-  faTimes,
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs, EmptyBlock } from '@/components/admin/ui';
+import { Tabs, EmptyBlock, ListSkeleton, reportError, Modal } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -166,19 +165,19 @@ export default function AdminTechPage() {
 
   const deleteInnovation = async (id: string, title: string) => {
     if (!window.confirm(`Delete innovation "${title}"?`)) return;
-    await supabase.from('tech_innovations').delete().eq('id', id);
+    reportError((await supabase.from('tech_innovations').delete().eq('id', id)).error);
     fetchAll();
   };
 
   const deleteEvent = async (id: string, title: string) => {
     if (!window.confirm(`Delete event "${title}"?`)) return;
-    await supabase.from('tech_events').delete().eq('id', id);
+    reportError((await supabase.from('tech_events').delete().eq('id', id)).error);
     fetchAll();
   };
 
   const deleteResource = async (id: string, title: string) => {
     if (!window.confirm(`Delete resource "${title}"?`)) return;
-    await supabase.from('tech_resources').delete().eq('id', id);
+    reportError((await supabase.from('tech_resources').delete().eq('id', id)).error);
     fetchAll();
   };
 
@@ -188,9 +187,9 @@ export default function AdminTechPage() {
     setSaving(true);
     const d = innovationModal.data;
     if (innovationModal.id) {
-      await supabase.from('tech_innovations').update(d).eq('id', innovationModal.id);
+      reportError((await supabase.from('tech_innovations').update(d).eq('id', innovationModal.id)).error);
     } else {
-      await supabase.from('tech_innovations').insert(d);
+      reportError((await supabase.from('tech_innovations').insert(d)).error);
     }
     setSaving(false);
     setInnovationModal({ open: false, data: blankInnovation(), id: null });
@@ -201,9 +200,9 @@ export default function AdminTechPage() {
     setSaving(true);
     const d = eventModal.data;
     if (eventModal.id) {
-      await supabase.from('tech_events').update(d).eq('id', eventModal.id);
+      reportError((await supabase.from('tech_events').update(d).eq('id', eventModal.id)).error);
     } else {
-      await supabase.from('tech_events').insert(d);
+      reportError((await supabase.from('tech_events').insert(d)).error);
     }
     setSaving(false);
     setEventModal({ open: false, data: blankEvent(), id: null });
@@ -214,9 +213,9 @@ export default function AdminTechPage() {
     setSaving(true);
     const d = resourceModal.data;
     if (resourceModal.id) {
-      await supabase.from('tech_resources').update(d).eq('id', resourceModal.id);
+      reportError((await supabase.from('tech_resources').update(d).eq('id', resourceModal.id)).error);
     } else {
-      await supabase.from('tech_resources').insert(d);
+      reportError((await supabase.from('tech_resources').insert(d)).error);
     }
     setSaving(false);
     setResourceModal({ open: false, data: blankResource(), id: null });
@@ -254,9 +253,7 @@ export default function AdminTechPage() {
   if (loading) {
     return (
       <AdminLayout title="Tech Hub" subtitle="Manage tech innovations, events and resources">
-        <div className="flex items-center justify-center h-48">
-          <div className="w-8 h-8 border-4 rounded-full animate-spin" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }} />
-        </div>
+        <ListSkeleton />
       </AdminLayout>
     );
   }
@@ -452,17 +449,21 @@ export default function AdminTechPage() {
           Modal: Innovation
       ═══════════════════════════════════════════════ */}
       {innovationModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: ts.border }}>
-              <h3 className="font-semibold text-sm" style={{ color: ts.textPrimary }}>
-                {innovationModal.id ? 'Edit Innovation' : 'Add Innovation'}
-              </h3>
-              <button onClick={() => setInnovationModal({ open: false, data: blankInnovation(), id: null })} style={{ color: ts.textMuted }}>
-                <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-5">
+        <Modal title={innovationModal.id ? 'Edit Innovation' : 'Add Innovation'} maxWidth="max-w-lg" onClose={() => setInnovationModal({ open: false, data: blankInnovation(), id: null })}
+          footer={
+            <>
+                <button onClick={() => setInnovationModal({ open: false, data: blankInnovation(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
+                  Cancel
+                </button>
+                <button onClick={saveInnovation} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
+                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
+                  {innovationModal.id ? 'Save Changes' : 'Add Innovation'}
+                </button>
+              
+            </>
+          }
+        >
+<div className="">
               <Field label="Title *">
                 <input
                   style={inputStyle}
@@ -500,35 +501,31 @@ export default function AdminTechPage() {
                   <label htmlFor="inn-active" className="text-xs cursor-pointer" style={{ color: ts.textSecondary }}>Visible on site</label>
                 </div>
               </Field>
-              <div className="flex justify-end gap-3 mt-2">
-                <button onClick={() => setInnovationModal({ open: false, data: blankInnovation(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                  Cancel
-                </button>
-                <button onClick={saveInnovation} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
-                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
-                  {innovationModal.id ? 'Save Changes' : 'Add Innovation'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+              
+            
+</div>
+        </Modal>
       )}
 
       {/* ═══════════════════════════════════════════════
           Modal: Event
       ═══════════════════════════════════════════════ */}
       {eventModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: ts.border }}>
-              <h3 className="font-semibold text-sm" style={{ color: ts.textPrimary }}>
-                {eventModal.id ? 'Edit Event' : 'Add Event'}
-              </h3>
-              <button onClick={() => setEventModal({ open: false, data: blankEvent(), id: null })} style={{ color: ts.textMuted }}>
-                <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-5">
+        <Modal title={eventModal.id ? 'Edit Event' : 'Add Event'} maxWidth="max-w-lg" onClose={() => setEventModal({ open: false, data: blankEvent(), id: null })}
+          footer={
+            <>
+                <button onClick={() => setEventModal({ open: false, data: blankEvent(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
+                  Cancel
+                </button>
+                <button onClick={saveEvent} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
+                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
+                  {eventModal.id ? 'Save Changes' : 'Add Event'}
+                </button>
+              
+            </>
+          }
+        >
+<div className="">
               <Field label="Title *">
                 <input
                   style={inputStyle}
@@ -564,35 +561,31 @@ export default function AdminTechPage() {
                   <label htmlFor="ev-active" className="text-xs cursor-pointer" style={{ color: ts.textSecondary }}>Visible on site</label>
                 </div>
               </Field>
-              <div className="flex justify-end gap-3 mt-2">
-                <button onClick={() => setEventModal({ open: false, data: blankEvent(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                  Cancel
-                </button>
-                <button onClick={saveEvent} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
-                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
-                  {eventModal.id ? 'Save Changes' : 'Add Event'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+              
+            
+</div>
+        </Modal>
       )}
 
       {/* ═══════════════════════════════════════════════
           Modal: Resource
       ═══════════════════════════════════════════════ */}
       {resourceModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: ts.border }}>
-              <h3 className="font-semibold text-sm" style={{ color: ts.textPrimary }}>
-                {resourceModal.id ? 'Edit Resource' : 'Add Resource'}
-              </h3>
-              <button onClick={() => setResourceModal({ open: false, data: blankResource(), id: null })} style={{ color: ts.textMuted }}>
-                <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-5">
+        <Modal title={resourceModal.id ? 'Edit Resource' : 'Add Resource'} maxWidth="max-w-lg" onClose={() => setResourceModal({ open: false, data: blankResource(), id: null })}
+          footer={
+            <>
+                <button onClick={() => setResourceModal({ open: false, data: blankResource(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
+                  Cancel
+                </button>
+                <button onClick={saveResource} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
+                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
+                  {resourceModal.id ? 'Save Changes' : 'Add Resource'}
+                </button>
+              
+            </>
+          }
+        >
+<div className="">
               <Field label="Title *">
                 <input
                   style={inputStyle}
@@ -623,18 +616,10 @@ export default function AdminTechPage() {
                   <label htmlFor="res-active" className="text-xs cursor-pointer" style={{ color: ts.textSecondary }}>Visible on site</label>
                 </div>
               </Field>
-              <div className="flex justify-end gap-3 mt-2">
-                <button onClick={() => setResourceModal({ open: false, data: blankResource(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                  Cancel
-                </button>
-                <button onClick={saveResource} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
-                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
-                  {resourceModal.id ? 'Save Changes' : 'Add Resource'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+              
+            
+</div>
+        </Modal>
       )}
     </AdminLayout>
   );

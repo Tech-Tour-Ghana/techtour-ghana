@@ -6,13 +6,12 @@ import {
   faPlus,
   faPencil,
   faTrash,
-  faTimes,
   faSpinner,
   faBox,
   faTags,
 } from '@fortawesome/free-solid-svg-icons';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, Tabs, EmptyBlock } from '@/components/admin/ui';
+import { ListSkeleton, Tabs, EmptyBlock, reportError, Modal } from '@/components/admin/ui';
 import { createBrowserClient } from '@/lib/supabase/client';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
@@ -166,9 +165,9 @@ export default function AdminMarketPage() {
       artisan_id: productForm.artisan_id || null,
     };
     if (editingProduct) {
-      await supabase.from('market_products').update(payload).eq('id', editingProduct.id);
+      reportError((await supabase.from('market_products').update(payload).eq('id', editingProduct.id)).error);
     } else {
-      await supabase.from('market_products').insert(payload);
+      reportError((await supabase.from('market_products').insert(payload)).error);
     }
     setSaving(false);
     closeModal();
@@ -179,9 +178,9 @@ export default function AdminMarketPage() {
     setSaving(true);
     const payload = { ...categoryForm, description: categoryForm.description || undefined };
     if (editingCategory) {
-      await supabase.from('market_categories').update(payload).eq('id', editingCategory.id);
+      reportError((await supabase.from('market_categories').update(payload).eq('id', editingCategory.id)).error);
     } else {
-      await supabase.from('market_categories').insert(payload);
+      reportError((await supabase.from('market_categories').insert(payload)).error);
     }
     setSaving(false);
     closeModal();
@@ -190,13 +189,13 @@ export default function AdminMarketPage() {
 
   async function deleteProduct(id: string) {
     if (!window.confirm('Delete this product? This cannot be undone.')) return;
-    await supabase.from('market_products').delete().eq('id', id);
+    reportError((await supabase.from('market_products').delete().eq('id', id)).error);
     fetchAll();
   }
 
   async function deleteCategory(id: string) {
     if (!window.confirm('Delete this category? This cannot be undone.')) return;
-    await supabase.from('market_categories').delete().eq('id', id);
+    reportError((await supabase.from('market_categories').delete().eq('id', id)).error);
     fetchAll();
   }
 
@@ -319,27 +318,32 @@ export default function AdminMarketPage() {
 
       {/* Modal */}
       {modalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-        >
-          <div
-            className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl"
-            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}
-          >
-            {/* Modal header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: themeStyles.border }}>
-              <h3 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>
-                {isProductModal
+        <Modal title={isProductModal
                   ? (editingProduct ? 'Edit Product' : 'Add Product')
-                  : (editingCategory ? 'Edit Category' : 'Add Category')}
-              </h3>
-              <button onClick={closeModal} className="p-1.5 rounded-lg hover:opacity-70 transition" style={{ color: themeStyles.textMuted }}>
-                <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
+                  : (editingCategory ? 'Edit Category' : 'Add Category')} maxWidth="max-w-lg" onClose={() => closeModal()}
+          footer={
+            <>
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 rounded-lg text-xs font-medium transition hover:opacity-80"
+                style={{ background: themeStyles.inputBg, border: `1px solid ${themeStyles.inputBorder}`, color: themeStyles.textSecondary }}
+              >
+                Cancel
               </button>
-            </div>
-
+              <button
+                onClick={isProductModal ? saveProduct : saveCategory}
+                disabled={saving}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition hover:opacity-90 disabled:opacity-50"
+                style={{ background: BRAND_COLORS.tropicalTeal, color: '#FFFFFF' }}
+              >
+                {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
+                {saving ? 'Saving…' : 'Save'}
+              </button>
+            
+            </>
+          }
+        >
+<div className="space-y-4">
             {/* Modal body */}
             <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
               {isProductModal ? (
@@ -506,26 +510,10 @@ export default function AdminMarketPage() {
             </div>
 
             {/* Modal footer */}
-            <div className="flex items-center justify-end gap-3 px-5 py-4 border-t" style={{ borderColor: themeStyles.border }}>
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 rounded-lg text-xs font-medium transition hover:opacity-80"
-                style={{ background: themeStyles.inputBg, border: `1px solid ${themeStyles.inputBorder}`, color: themeStyles.textSecondary }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={isProductModal ? saveProduct : saveCategory}
-                disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition hover:opacity-90 disabled:opacity-50"
-                style={{ background: BRAND_COLORS.tropicalTeal, color: '#FFFFFF' }}
-              >
-                {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
-                {saving ? 'Saving…' : 'Save'}
-              </button>
-            </div>
-          </div>
-        </div>
+            
+          
+</div>
+        </Modal>
       )}
     </AdminLayout>
   );

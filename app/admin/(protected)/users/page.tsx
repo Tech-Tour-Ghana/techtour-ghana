@@ -16,7 +16,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock } from '@/components/admin/ui';
+import { ListSkeleton, EmptyBlock, reportError, Modal } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -63,7 +63,7 @@ export default function AdminUsersPage() {
   async function toggleActive(user: Profile) {
     setTogglingId(user.id);
     const supabase = createBrowserClient();
-    await supabase.from('profiles').update({ is_active: !user.is_active }).eq('id', user.id);
+    reportError((await supabase.from('profiles').update({ is_active: !user.is_active }).eq('id', user.id)).error);
     setUsers((prev) => prev.map((u) => u.id === user.id ? { ...u, is_active: !u.is_active } : u));
     if (viewUser?.id === user.id) setViewUser((v) => v ? { ...v, is_active: !v.is_active } : v);
     setTogglingId(null);
@@ -75,7 +75,7 @@ export default function AdminUsersPage() {
     if (!window.confirm(`Are you sure you want to ${action} ${name}?`)) return;
     setTogglingId(user.id);
     const supabase = createBrowserClient();
-    await supabase.from('profiles').update({ is_admin: !user.is_admin }).eq('id', user.id);
+    reportError((await supabase.from('profiles').update({ is_admin: !user.is_admin }).eq('id', user.id)).error);
     setUsers((prev) => prev.map((u) => u.id === user.id ? { ...u, is_admin: !u.is_admin } : u));
     if (viewUser?.id === user.id) setViewUser((v) => v ? { ...v, is_admin: !v.is_admin } : v);
     setTogglingId(null);
@@ -230,42 +230,9 @@ export default function AdminUsersPage() {
 
       {/* Profile info modal */}
       {viewUser && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) setViewUser(null); }}
-        >
-          <div
-            className="w-full max-w-md rounded-2xl shadow-2xl"
-            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}
-          >
-            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: themeStyles.border }}>
-              <h2 className="text-base font-bold" style={{ color: themeStyles.textPrimary }}>User Profile</h2>
-              <button
-                onClick={() => setViewUser(null)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center transition hover:opacity-70"
-                style={{ background: themeStyles.inputBg, color: themeStyles.textMuted }}
-              >
-                <FontAwesomeIcon icon={faXmark} className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="px-6 py-5 space-y-3">
-              {[
-                { label: 'Name', value: fullName(viewUser) },
-                { label: 'Email', value: viewUser.email || '-' },
-                { label: 'Phone', value: viewUser.phone_number || '-' },
-                { label: 'User ID', value: viewUser.id },
-                { label: 'Role', value: viewUser.is_admin ? 'Admin' : 'User' },
-                { label: 'Status', value: viewUser.is_active ? 'Active' : 'Suspended' },
-                { label: 'Joined', value: new Date(viewUser.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between text-sm gap-4">
-                  <span className="font-medium flex-shrink-0" style={{ color: themeStyles.textMuted }}>{label}</span>
-                  <span className="text-right break-all" style={{ color: themeStyles.textPrimary }}>{value}</span>
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-end gap-3 px-6 py-4 border-t" style={{ borderColor: themeStyles.border }}>
+        <Modal title="User Profile" maxWidth="max-w-md" onClose={() => setViewUser(null)}
+          footer={
+            <>
               <button
                 onClick={() => toggleAdmin(viewUser)}
                 disabled={togglingId === viewUser.id}
@@ -292,9 +259,31 @@ export default function AdminUsersPage() {
               >
                 Close
               </button>
+            
+            </>
+          }
+        >
+<div className="space-y-4">
+            <div className="px-6 py-5 space-y-3">
+              {[
+                { label: 'Name', value: fullName(viewUser) },
+                { label: 'Email', value: viewUser.email || '-' },
+                { label: 'Phone', value: viewUser.phone_number || '-' },
+                { label: 'User ID', value: viewUser.id },
+                { label: 'Role', value: viewUser.is_admin ? 'Admin' : 'User' },
+                { label: 'Status', value: viewUser.is_active ? 'Active' : 'Suspended' },
+                { label: 'Joined', value: new Date(viewUser.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between text-sm gap-4">
+                  <span className="font-medium flex-shrink-0" style={{ color: themeStyles.textMuted }}>{label}</span>
+                  <span className="text-right break-all" style={{ color: themeStyles.textPrimary }}>{value}</span>
+                </div>
+              ))}
             </div>
-          </div>
-        </div>
+            
+          
+</div>
+        </Modal>
       )}
     </AdminLayout>
   );

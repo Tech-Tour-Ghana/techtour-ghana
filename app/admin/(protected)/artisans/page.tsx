@@ -10,11 +10,10 @@ import {
   faStar,
   faCheck,
   faTimes,
-  faXmark,
-} from '@fortawesome/free-solid-svg-icons';
+  } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock } from '@/components/admin/ui';
+import { ListSkeleton, EmptyBlock, reportError, Modal } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -153,9 +152,9 @@ export default function AdminArtisansPage() {
     };
 
     if (editingId) {
-      await supabase.from('artisans').update(payload).eq('id', editingId);
+      reportError((await supabase.from('artisans').update(payload).eq('id', editingId)).error);
     } else {
-      await supabase.from('artisans').insert(payload);
+      reportError((await supabase.from('artisans').insert(payload)).error);
     }
 
     setSaving(false);
@@ -167,7 +166,7 @@ export default function AdminArtisansPage() {
   async function handleDelete(a: Artisan) {
     if (!window.confirm(`Delete "${a.name}"? This cannot be undone.`)) return;
     const supabase = createBrowserClient();
-    await supabase.from('artisans').delete().eq('id', a.id);
+    reportError((await supabase.from('artisans').delete().eq('id', a.id)).error);
     setLoading(true);
     fetch();
   }
@@ -280,25 +279,26 @@ export default function AdminArtisansPage() {
 
       {/* Modal */}
       {modalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-        >
-          <div
-            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
-            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}
-          >
-            {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 z-10" style={{ borderColor: themeStyles.border, background: themeStyles.cardBg }}>
-              <h2 className="text-base font-bold" style={{ color: themeStyles.textPrimary }}>
-                {editingId ? 'Edit Artisan' : 'Add New Artisan'}
-              </h2>
-              <button onClick={closeModal} className="w-8 h-8 rounded-lg flex items-center justify-center transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textMuted }}>
-                <FontAwesomeIcon icon={faXmark} className="w-4 h-4" />
+        <Modal title={editingId ? 'Edit Artisan' : 'Add New Artisan'} maxWidth="max-w-2xl" onClose={() => closeModal()}
+          footer={
+            <>
+              <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textSecondary }}>
+                Cancel
               </button>
-            </div>
-
+              <button
+                onClick={handleSave}
+                disabled={saving || !form.name.trim()}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+                style={{ background: BRAND_COLORS.tropicalTeal }}
+              >
+                {saving && <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />}
+                {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Artisan'}
+              </button>
+            
+            </>
+          }
+        >
+<div className="space-y-4">
             {/* Modal body */}
             <div className="px-6 py-5 space-y-4">
               {/* Name + Slug */}
@@ -444,22 +444,10 @@ export default function AdminArtisansPage() {
             </div>
 
             {/* Modal footer */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t" style={{ borderColor: themeStyles.border }}>
-              <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textSecondary }}>
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving || !form.name.trim()}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-                style={{ background: BRAND_COLORS.tropicalTeal }}
-              >
-                {saving && <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />}
-                {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Artisan'}
-              </button>
-            </div>
-          </div>
-        </div>
+            
+          
+</div>
+        </Modal>
       )}
     </AdminLayout>
   );

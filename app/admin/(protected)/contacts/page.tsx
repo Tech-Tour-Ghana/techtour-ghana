@@ -9,11 +9,10 @@ import {
   faEnvelope,
   faTrash,
   faEye,
-  faXmark,
-} from '@fortawesome/free-solid-svg-icons';
+  } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock, Tabs } from '@/components/admin/ui';
+import { ListSkeleton, EmptyBlock, Tabs, reportError, Modal } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -78,7 +77,7 @@ export default function AdminContactsPage() {
     if (!window.confirm(`Delete message from ${from}? This cannot be undone.`)) return;
     setBusyId(msg.id);
     const supabase = createBrowserClient();
-    await supabase.from('contact_messages').delete().eq('id', msg.id);
+    reportError((await supabase.from('contact_messages').delete().eq('id', msg.id)).error);
     setMessages((prev) => prev.filter((m) => m.id !== msg.id));
     if (viewMsg?.id === msg.id) setViewMsg(null);
     setBusyId(null);
@@ -206,49 +205,9 @@ export default function AdminContactsPage() {
 
       {/* Message detail modal */}
       {viewMsg && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) setViewMsg(null); }}
-        >
-          <div
-            className="w-full max-w-lg rounded-2xl shadow-2xl"
-            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}
-          >
-            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: themeStyles.border }}>
-              <h2 className="text-base font-bold" style={{ color: themeStyles.textPrimary }}>Message Details</h2>
-              <button
-                onClick={() => setViewMsg(null)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center transition hover:opacity-70"
-                style={{ background: themeStyles.inputBg, color: themeStyles.textMuted }}
-              >
-                <FontAwesomeIcon icon={faXmark} className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="px-6 py-5 space-y-3">
-              {[
-                { label: 'Name', value: viewMsg.name || '-' },
-                { label: 'Email', value: viewMsg.email },
-                { label: 'Phone', value: viewMsg.phone || '-' },
-                { label: 'Subject', value: viewMsg.subject || '-' },
-                { label: 'Received', value: fmtDate(viewMsg.created_at) },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between text-sm gap-4">
-                  <span className="font-medium flex-shrink-0" style={{ color: themeStyles.textMuted }}>{label}</span>
-                  <span className="text-right break-all" style={{ color: themeStyles.textPrimary }}>{value}</span>
-                </div>
-              ))}
-              <div className="pt-2">
-                <p className="text-xs font-medium mb-1" style={{ color: themeStyles.textMuted }}>Message</p>
-                <p
-                  className="text-sm whitespace-pre-wrap rounded-lg p-3"
-                  style={{ background: themeStyles.inputBg, color: themeStyles.textPrimary, border: `1px solid ${themeStyles.inputBorder}` }}
-                >
-                  {viewMsg.message}
-                </p>
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 px-6 py-4 border-t" style={{ borderColor: themeStyles.border }}>
+        <Modal title="Message Details" maxWidth="max-w-lg" onClose={() => setViewMsg(null)}
+          footer={
+            <>
               <button
                 onClick={() => toggleRead(viewMsg)}
                 disabled={busyId === viewMsg.id}
@@ -272,9 +231,38 @@ export default function AdminContactsPage() {
               >
                 Close
               </button>
+            
+            </>
+          }
+        >
+<div className="space-y-4">
+            <div className="px-6 py-5 space-y-3">
+              {[
+                { label: 'Name', value: viewMsg.name || '-' },
+                { label: 'Email', value: viewMsg.email },
+                { label: 'Phone', value: viewMsg.phone || '-' },
+                { label: 'Subject', value: viewMsg.subject || '-' },
+                { label: 'Received', value: fmtDate(viewMsg.created_at) },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between text-sm gap-4">
+                  <span className="font-medium flex-shrink-0" style={{ color: themeStyles.textMuted }}>{label}</span>
+                  <span className="text-right break-all" style={{ color: themeStyles.textPrimary }}>{value}</span>
+                </div>
+              ))}
+              <div className="pt-2">
+                <p className="text-xs font-medium mb-1" style={{ color: themeStyles.textMuted }}>Message</p>
+                <p
+                  className="text-sm whitespace-pre-wrap rounded-lg p-3"
+                  style={{ background: themeStyles.inputBg, color: themeStyles.textPrimary, border: `1px solid ${themeStyles.inputBorder}` }}
+                >
+                  {viewMsg.message}
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
+            
+          
+</div>
+        </Modal>
       )}
     </AdminLayout>
   );

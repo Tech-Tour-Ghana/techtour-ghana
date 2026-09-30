@@ -290,3 +290,8 @@ export function Modal({
     </div>
   );
 }
+
+/** Tell the admin when a write failed instead of letting the form close as if it worked. */
+export function reportError(error: { message: string } | null | undefined) {
+  if (error) window.alert(`That didn't save: ${error.message}`);
+}

@@ -3,13 +3,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faPlus, faPencil, faTrash, faSpinner, faCheck, faTimes, faXmark,
-} from '@fortawesome/free-solid-svg-icons';
+  faPlus, faPencil, faTrash, faSpinner, faCheck, faTimes, } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock, Tabs } from '@/components/admin/ui';
+import { ListSkeleton, EmptyBlock, Tabs, reportError, Modal } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -153,9 +152,9 @@ function DestinationsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
       is_active: form.is_active,
     };
     if (editingId) {
-      await supabase.from('study_destinations').update(payload).eq('id', editingId);
+      reportError((await supabase.from('study_destinations').update(payload).eq('id', editingId)).error);
     } else {
-      await supabase.from('study_destinations').insert(payload);
+      reportError((await supabase.from('study_destinations').insert(payload)).error);
     }
     setSaving(false);
     closeModal();
@@ -166,7 +165,7 @@ function DestinationsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
   async function handleDelete(r: Destination) {
     if (!window.confirm(`Delete "${r.country_name}"? This cannot be undone.`)) return;
     const supabase = createBrowserClient();
-    await supabase.from('study_destinations').delete().eq('id', r.id);
+    reportError((await supabase.from('study_destinations').delete().eq('id', r.id)).error);
     setLoading(true);
     fetchRows();
   }
@@ -239,15 +238,24 @@ function DestinationsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
-            <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 z-10" style={{ borderColor: themeStyles.border, background: themeStyles.cardBg }}>
-              <h2 className="text-base font-bold" style={{ color: themeStyles.textPrimary }}>{editingId ? 'Edit Destination' : 'Add Destination'}</h2>
-              <button onClick={closeModal} className="w-8 h-8 rounded-lg flex items-center justify-center transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textMuted }}>
-                <FontAwesomeIcon icon={faXmark} className="w-4 h-4" />
+        <Modal title={editingId ? 'Edit Destination' : 'Add Destination'} maxWidth="max-w-lg" onClose={() => closeModal()}
+          footer={
+            <>
+              <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textSecondary }}>Cancel</button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !form.country_name.trim()}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+                style={{ background: BRAND_COLORS.tropicalTeal }}
+              >
+                {saving && <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />}
+                {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Destination'}
               </button>
-            </div>
-
+            
+            </>
+          }
+        >
+<div className="space-y-4">
             <div className="px-6 py-5 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
@@ -287,20 +295,10 @@ function DestinationsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
               </label>
             </div>
 
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t" style={{ borderColor: themeStyles.border }}>
-              <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textSecondary }}>Cancel</button>
-              <button
-                onClick={handleSave}
-                disabled={saving || !form.country_name.trim()}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-                style={{ background: BRAND_COLORS.tropicalTeal }}
-              >
-                {saving && <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />}
-                {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Destination'}
-              </button>
-            </div>
-          </div>
-        </div>
+            
+          
+</div>
+        </Modal>
       )}
     </>
   );
@@ -362,9 +360,9 @@ function ScholarshipsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
       is_active: form.is_active,
     };
     if (editingId) {
-      await supabase.from('scholarships').update(payload).eq('id', editingId);
+      reportError((await supabase.from('scholarships').update(payload).eq('id', editingId)).error);
     } else {
-      await supabase.from('scholarships').insert(payload);
+      reportError((await supabase.from('scholarships').insert(payload)).error);
     }
     setSaving(false);
     closeModal();
@@ -375,7 +373,7 @@ function ScholarshipsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
   async function handleDelete(r: Scholarship) {
     if (!window.confirm(`Delete "${r.title}"? This cannot be undone.`)) return;
     const supabase = createBrowserClient();
-    await supabase.from('scholarships').delete().eq('id', r.id);
+    reportError((await supabase.from('scholarships').delete().eq('id', r.id)).error);
     setLoading(true);
     fetchRows();
   }
@@ -458,15 +456,24 @@ function ScholarshipsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
-            <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 z-10" style={{ borderColor: themeStyles.border, background: themeStyles.cardBg }}>
-              <h2 className="text-base font-bold" style={{ color: themeStyles.textPrimary }}>{editingId ? 'Edit Scholarship' : 'Add Scholarship'}</h2>
-              <button onClick={closeModal} className="w-8 h-8 rounded-lg flex items-center justify-center transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textMuted }}>
-                <FontAwesomeIcon icon={faXmark} className="w-4 h-4" />
+        <Modal title={editingId ? 'Edit Scholarship' : 'Add Scholarship'} maxWidth="max-w-2xl" onClose={() => closeModal()}
+          footer={
+            <>
+              <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textSecondary }}>Cancel</button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !form.title.trim() || !form.destination_id}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+                style={{ background: BRAND_COLORS.tropicalTeal }}
+              >
+                {saving && <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />}
+                {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Scholarship'}
               </button>
-            </div>
-
+            
+            </>
+          }
+        >
+<div className="space-y-4">
             <div className="px-6 py-5 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
@@ -539,20 +546,10 @@ function ScholarshipsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t" style={{ borderColor: themeStyles.border }}>
-              <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textSecondary }}>Cancel</button>
-              <button
-                onClick={handleSave}
-                disabled={saving || !form.title.trim() || !form.destination_id}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-                style={{ background: BRAND_COLORS.tropicalTeal }}
-              >
-                {saving && <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />}
-                {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Scholarship'}
-              </button>
-            </div>
-          </div>
-        </div>
+            
+          
+</div>
+        </Modal>
       )}
     </>
   );
