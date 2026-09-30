@@ -65,9 +65,9 @@ export default function RichTextEditor({ value, onChange, onPickImage, linkItems
       entity_encoding: 'raw' as const,
       browser_spellcheck: true,
       // Images must come from the Media Library, never pasted or dropped as base64.
+      // With no upload handler configured the dialog has no Upload tab either.
       paste_data_images: false,
       automatic_uploads: false,
-      images_upload_handler: () => Promise.reject(new Error('Insert images from the Media Library.')),
       file_picker_types: 'image',
       file_picker_callback: (
         callback: (url: string, meta?: Record<string, string>) => void,

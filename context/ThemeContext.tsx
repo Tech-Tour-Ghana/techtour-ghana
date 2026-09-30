@@ -57,13 +57,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  // Don't render children until theme is loaded to prevent flash
-  if (!isMounted) {
-    return null;
-  }
-
+  // The page is rendered on the server so search engines and social crawlers get
+  // real content, but it stays invisible until the saved theme is known. That is
+  // the same no-flash behaviour as before, without an empty HTML document.
   return (
     <ThemeContext.Provider value={{ isDimMode, toggleTheme }}>
+      {!isMounted && <style>{'body{visibility:hidden}'}</style>}
       {children}
     </ThemeContext.Provider>
   );
