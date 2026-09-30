@@ -6,23 +6,29 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCheckCircle, faChevronLeft, faChevronRight, faGem, faHeart, faMapMarkerAlt, faMinus, faPlus,
+  faArrowLeft, faCheckCircle, faChevronLeft, faChevronRight, faGem, faHeart, faMapMarkerAlt, faMinus, faPlus,
   faShieldAlt, faShoppingCart, faStar, faStarHalfAlt, faTruck, faUndo, faUser,
 } from '@fortawesome/free-solid-svg-icons';
 
+import { CrumbLabel } from '@/components/SiteBreadcrumbs';
 import { useCart } from '@/context/CartContext';
 import { getAuthStatus, getWishlistProductIds, setWishlisted } from '@/lib/api';
-import { CURRENCIES, MARKET_COLORS, getColorSwatch, type Currency, type MarketProduct } from './shared';
+import { CURRENCIES, useCurrencies, type Currency } from '@/lib/currency';
+import { MARKET_COLORS, getColorSwatch, type MarketProduct } from './shared';
 
 type Tab = 'details' | 'shipping' | 'artisan';
 
 export default function ProductDetail({ product, related }: { product: MarketProduct; related: MarketProduct[] }) {
   const { addItem, getItemCount, openCart } = useCart();
+  const router = useRouter();
 
   const [dim, setDim] = useState(false);
-  const [currency, setCurrency] = useState<Currency>(CURRENCIES[0]!);
+  const [pickedCurrency, setCurrency] = useState<Currency>(CURRENCIES[0]!);
+  const { currencies: liveCurrencies } = useCurrencies();
+  const currency = liveCurrencies.find((c) => c.code === pickedCurrency.code) ?? pickedCurrency;
   const [signedIn, setSignedIn] = useState(false);
   const [wishlisted, setWishlistedState] = useState(false);
   const [index, setIndex] = useState(0);
@@ -140,11 +146,12 @@ export default function ProductDetail({ product, related }: { product: MarketPro
   return (
     <div className="min-h-screen" style={{ background: c.background, color: c.textPrimary }}>
       <div className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6">
-        <nav aria-label="Breadcrumb" className="mb-4 text-xs" style={{ color: c.textMuted }}>
-          <Link href="/market" className="hover:underline">Market</Link>
-          {product.category_name && <> / <span>{product.category_name}</span></>}
-          {' / '}<span style={{ color: c.textSecondary }}>{product.title}</span>
-        </nav>
+        <CrumbLabel label={product.title} />
+        <button type="button" onClick={() => (window.history.length > 1 ? router.back() : router.push('/market'))}
+          className="mb-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition hover:opacity-80"
+          style={{ border: `1px solid ${c.border}`, color: c.textSecondary, background: c.backgroundCard }}>
+          <FontAwesomeIcon icon={faArrowLeft} className="h-3 w-3" />Back
+        </button>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
           {/* Gallery */}
@@ -187,10 +194,20 @@ export default function ProductDetail({ product, related }: { product: MarketPro
                 </div>
               )}
               <h1 className="text-xl font-bold leading-snug sm:text-2xl">{product.title}</h1>
-              <div className="mt-2 flex items-baseline gap-3">
+              <div className="mt-2 flex flex-wrap items-baseline gap-3">
                 <span className="text-3xl font-bold" style={{ color: onSale ? c.secondary : accent }}>{money(onSale ? product.discount_price! : product.price)}</span>
                 {onSale && <span className="text-sm line-through" style={{ color: c.textMuted }}>{money(product.price)}</span>}
+                <select aria-label="Currency" value={currency.code} onChange={(e) => {
+                    const next = liveCurrencies.find((x) => x.code === e.target.value);
+                    if (!next) return;
+                    setCurrency(next);
+                    try { localStorage.setItem('selectedCurrency', JSON.stringify(next)); window.dispatchEvent(new CustomEvent('currencyChanged', { detail: { currency: next } })); } catch { /* storage blocked */ }
+                  }}
+                  className="ml-auto rounded-lg px-2 py-1 text-xs" style={{ border: `1px solid ${c.border}`, background: c.backgroundCard, color: c.textSecondary }}>
+                  {liveCurrencies.map((x) => <option key={x.code} value={x.code}>{x.symbol} {x.code}</option>)}
+                </select>
               </div>
+              {currency.code !== 'GHS' && <p className="mt-1 text-[11px]" style={{ color: c.textMuted }}>Approximate price. You are charged in Ghana cedis (₵{(onSale ? product.discount_price! : product.price).toFixed(2)}). <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" className="underline">Rates By Exchange Rate API</a></p>}
 
               <div className="mt-4 flex flex-wrap gap-3">
                 <button type="button" disabled={!product.is_in_stock} onClick={() => add(false)}

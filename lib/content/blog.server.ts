@@ -2,7 +2,7 @@ import type { PostSummary } from '@/components/content/PostList';
 import { createClient } from '@/lib/supabase/server';
 import { BLOG_CATEGORIES, type BlogCategory } from './blog';
 
-export const POSTS_PER_PAGE = 8;
+export const POSTS_PER_PAGE = 5;
 
 /** One page of published posts (optionally one category) plus the per-category counts for the sidebar. */
 export async function getBlogListing(category: BlogCategory | undefined, rawPage: string | undefined) {

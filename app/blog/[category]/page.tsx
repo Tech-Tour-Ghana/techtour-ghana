@@ -31,9 +31,9 @@ export default async function BlogCategoryPage({ params, searchParams }: Params 
   const { label, blurb } = BLOG_CATEGORIES[category];
   return (
     <ContentShell wide title={label} titleAccent="" description={blurb}>
-      <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
         <CategoryNav active={category} counts={counts} />
-        <div>
+        <div className="min-w-0">
           <PostList posts={posts} />
           <Pagination page={page} pages={pages} basePath={`/blog/${category}`} />
         </div>
