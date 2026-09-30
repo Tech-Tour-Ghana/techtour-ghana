@@ -8,7 +8,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { BRAND, IconButton, TableCard, Toggle, fmtDate, rowClass, useAdminTheme } from '@/components/admin/ui';
+import { notify } from '@/components/admin/toast';
+import { BRAND, IconButton, TableCard, Toggle, fmtDate, rowClass, useAdminTheme, confirmAction } from '@/components/admin/ui';
 import type { Database } from '@/types/database';
 
 type Testimonial = Database['public']['Tables']['testimonials']['Row'];
@@ -31,14 +32,14 @@ export default function AdminTestimonialsPage() {
 
   async function patch(id: string, change: Partial<Testimonial>) {
     const { error } = await createBrowserClient().from('testimonials').update(change).eq('id', id);
-    if (error) return window.alert(`Could not update: ${error.message}`);
+    if (error) return notify(`Could not update: ${error.message}`);
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...change } : r)));
   }
 
   async function remove(id: string) {
-    if (!window.confirm('Delete this testimonial? This cannot be undone.')) return;
+    if (!(await confirmAction({ message: 'Delete this testimonial? This cannot be undone.', danger: true }))) return;
     const { error } = await createBrowserClient().from('testimonials').delete().eq('id', id);
-    if (error) return window.alert(`Could not delete: ${error.message}`);
+    if (error) return notify(`Could not delete: ${error.message}`);
     setRows((prev) => prev.filter((r) => r.id !== id));
   }
 
@@ -52,7 +53,7 @@ export default function AdminTestimonialsPage() {
       rating: form.rating,
     });
     setSaving(false);
-    if (error) return window.alert(`Could not add: ${error.message}`);
+    if (error) return notify(`Could not add: ${error.message}`);
     setForm(EMPTY);
     load();
   }

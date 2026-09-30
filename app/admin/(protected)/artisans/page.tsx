@@ -9,14 +9,12 @@ import {
   faSpinner,
   faStar,
   faCheck,
-  faTimes,
+  faXmark,
   } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
-import { ListSkeleton, EmptyBlock, reportError, Modal, Button } from '@/components/admin/ui';
-
-const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
+import { Avatar, Button, IconButton, Modal, SearchInput, StatusPill, TableCard, Toolbar, confirmAction, reportError, rowClass } from '@/components/admin/ui';
 
 interface Artisan {
   id: string;
@@ -74,6 +72,7 @@ export default function AdminArtisansPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
+  const [search, setSearch] = useState('');
 
   const themeStyles = {
     cardBg: 'var(--adm-card)',
@@ -153,9 +152,9 @@ export default function AdminArtisansPage() {
     };
 
     if (editingId) {
-      reportError((await supabase.from('artisans').update(payload).eq('id', editingId)).error);
+      if (reportError((await supabase.from('artisans').update(payload).eq('id', editingId)).error)) { setSaving(false); return; }
     } else {
-      reportError((await supabase.from('artisans').insert(payload)).error);
+      if (reportError((await supabase.from('artisans').insert(payload)).error)) { setSaving(false); return; }
     }
 
     setSaving(false);
@@ -165,12 +164,15 @@ export default function AdminArtisansPage() {
   }
 
   async function handleDelete(a: Artisan) {
-    if (!window.confirm(`Delete "${a.name}"? This cannot be undone.`)) return;
+    if (!(await confirmAction({ message: `Delete "${a.name}"? This cannot be undone.`, danger: true }))) return;
     const supabase = createBrowserClient();
-    reportError((await supabase.from('artisans').delete().eq('id', a.id)).error);
+    if (reportError((await supabase.from('artisans').delete().eq('id', a.id)).error)) { return; }
     setLoading(true);
     fetch();
   }
+
+  const q = search.trim().toLowerCase();
+  const visible = artisans.filter((a) => !q || [a.name, a.craft_type, a.location, a.title].some((t) => (t ?? '').toLowerCase().includes(q)));
 
   const inputClass = 'w-full rounded-lg px-3 py-2 text-sm outline-none transition focus:ring-2';
   const inputStyle = {
@@ -182,101 +184,48 @@ export default function AdminArtisansPage() {
 
   return (
     <AdminLayout title="Artisans" subtitle="Manage artisan profiles">
-      <div className="space-y-4">
-        {/* Header row */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm" style={{ color: themeStyles.textMuted }}>
-            {artisans.length} artisan{artisans.length !== 1 ? 's' : ''}
-          </p>
-          <button
-            onClick={openAdd}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition hover:opacity-90"
-            style={{ background: BRAND_COLORS.tropicalTeal }}
-          >
-            <FontAwesomeIcon icon={faPlus} className="w-3.5 h-3.5" />
-            Add New Artisan
-          </button>
-        </div>
+      <Toolbar
+        actions={<Button onClick={openAdd}><FontAwesomeIcon icon={faPlus} className="mr-2 h-3 w-3" />Add new artisan</Button>}
+      >
+        <SearchInput className="min-w-[14rem] flex-1 sm:max-w-sm" value={search} onChange={setSearch} placeholder="Search name, craft or location" label="Search artisans" />
+        <span className="text-xs" style={{ color: 'var(--adm-muted)' }}>{visible.length} of {artisans.length} artisan{artisans.length !== 1 ? 's' : ''}</span>
+      </Toolbar>
 
-        {/* Table */}
-        <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
-          {loading ? (
-            <ListSkeleton />
-          ) : artisans.length === 0 ? (
-            <EmptyBlock title="No artisans yet. Add one to get started." />
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b" style={{ borderColor: themeStyles.border }}>
-                    {['Name', 'Title / Craft', 'Location', 'Active', 'Featured', 'Actions'].map((h) => (
-                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold" style={{ color: themeStyles.textMuted }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {artisans.map((a) => (
-                    <tr
-                      key={a.id}
-                      className="border-b last:border-b-0 transition hover:bg-black/5"
-                      style={{ borderColor: themeStyles.border }}
-                    >
-                      <td className="px-4 py-3">
-                        <p className="font-medium" style={{ color: themeStyles.textPrimary }}>{a.name}</p>
-                        <p className="text-xs" style={{ color: themeStyles.textMuted }}>{a.slug}</p>
-                      </td>
-                      <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>
-                        {[a.title, a.craft_type].filter(Boolean).join(' · ') || '-'}
-                      </td>
-                      <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{a.location || '-'}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                          style={a.is_active
-                            ? { background: '#10B98122', color: '#10B981' }
-                            : { background: 'var(--adm-track)', color: themeStyles.textMuted }
-                          }
-                        >
-                          <FontAwesomeIcon icon={a.is_active ? faCheck : faTimes} className="w-2.5 h-2.5" />
-                          {a.is_active ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        {a.is_featured && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: `${BRAND_COLORS.sandyOrange}22`, color: BRAND_COLORS.sandyOrange }}>
-                            <FontAwesomeIcon icon={faStar} className="w-2.5 h-2.5" />
-                            Featured
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => openEdit(a)}
-                            className="w-7 h-7 rounded-lg flex items-center justify-center transition hover:opacity-80"
-                            style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}
-                            title="Edit"
-                          >
-                            <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(a)}
-                            className="w-7 h-7 rounded-lg flex items-center justify-center transition hover:opacity-80"
-                            style={{ background: '#EF444422', color: '#EF4444' }}
-                            title="Delete"
-                          >
-                            <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
+      <TableCard
+        loading={loading}
+        empty={visible.length === 0}
+        emptyTitle={artisans.length === 0 ? 'No artisans yet' : 'No artisans match'}
+        emptyBody={artisans.length === 0 ? 'Add an artisan to get started.' : 'Try a different search.'}
+        headers={['Artisan', 'Craft', 'Location', 'Status', '']}
+      >
+        {visible.map((a) => (
+          <tr key={a.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+            <td className="px-4 py-3">
+              <div className="flex items-center gap-3">
+                <Avatar name={a.name} src={a.profile_image_url} size={36} />
+                <div className="min-w-0">
+                  <p className="truncate font-medium" style={{ color: 'var(--adm-text)' }}>{a.name}</p>
+                  <p className="truncate text-xs" style={{ color: 'var(--adm-muted)' }}>{a.title || a.slug}</p>
+                </div>
+              </div>
+            </td>
+            <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{a.craft_type || '-'}</td>
+            <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{a.location || '-'}</td>
+            <td className="px-4 py-3">
+              <div className="flex flex-wrap gap-1.5">
+                <StatusPill tone={a.is_active ? 'success' : 'neutral'} icon={a.is_active ? faCheck : faXmark}>{a.is_active ? 'Active' : 'Inactive'}</StatusPill>
+                {a.is_featured && <StatusPill tone="warning" icon={faStar}>Featured</StatusPill>}
+              </div>
+            </td>
+            <td className="px-4 py-3">
+              <div className="flex gap-2">
+                <IconButton title="Edit" onClick={() => openEdit(a)}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></IconButton>
+                <IconButton title="Delete" color="var(--adm-error)" onClick={() => handleDelete(a)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </TableCard>
 
       {/* Modal */}
       {modalOpen && (
@@ -296,11 +245,11 @@ Cancel
         >
 <div className="space-y-4">
             {/* Modal body */}
-            <div className="px-6 py-5 space-y-4">
+            <div className="space-y-4">
               {/* Name + Slug */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label style={labelStyle}>Name <span style={{ color: '#EF4444' }}>*</span></label>
+                  <label style={labelStyle}>Name <span style={{ color: 'var(--adm-error)' }}>*</span></label>
                   <input
                     className={inputClass}
                     style={inputStyle}
@@ -426,8 +375,8 @@ Cancel
                     <div
                       className="w-4 h-4 rounded flex items-center justify-center transition"
                       style={{
-                        background: form[key as keyof FormData] ? BRAND_COLORS.tropicalTeal : themeStyles.inputBg,
-                        border: `1px solid ${form[key as keyof FormData] ? BRAND_COLORS.tropicalTeal : themeStyles.inputBorder}`,
+                        background: form[key as keyof FormData] ? 'var(--adm-primary)' : themeStyles.inputBg,
+                        border: `1px solid ${form[key as keyof FormData] ? 'var(--adm-primary)' : themeStyles.inputBorder}`,
                       }}
                       onClick={() => setForm((f) => ({ ...f, [key]: !f[key as keyof FormData] }))}
                     >

@@ -7,9 +7,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, reportError } from '@/components/admin/ui';
+import { Button, ListSkeleton, reportError } from '@/components/admin/ui';
 
-const BRAND = '#139EA2';
+const BRAND = 'var(--adm-primary)';
 
 interface Profile {
   id: string;
@@ -103,7 +103,7 @@ export default function AdminProfilePage() {
     const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
     if (upErr) setError('Could not upload the photo. Please try again.');
     else {
-      reportError((await supabase.from('profiles').update({ avatar_path: path, avatar_url: null }).eq('id', profile.id)).error);
+      if (reportError((await supabase.from('profiles').update({ avatar_path: path, avatar_url: null }).eq('id', profile.id)).error)) { setUploading(false); return; }
       const { data: signed } = await supabase.storage.from('avatars').createSignedUrl(path, 3600);
       if (signed) setAvatarPreview(signed.signedUrl);
       setProfile(prev => prev ? { ...prev, avatar_path: path } : prev);
@@ -185,16 +185,16 @@ export default function AdminProfilePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs mb-1.5" style={{ color: themeStyles.textSecondary }}>First name</label>
-                <input
+                <label className="block text-xs mb-1.5" htmlFor="pf-first" style={{ color: themeStyles.textSecondary }}>First name</label>
+                <input id="pf-first"
                   style={inputStyle}
                   value={form.first_name}
                   onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))}
                 />
               </div>
               <div>
-                <label className="block text-xs mb-1.5" style={{ color: themeStyles.textSecondary }}>Last name</label>
-                <input
+                <label className="block text-xs mb-1.5" htmlFor="pf-last" style={{ color: themeStyles.textSecondary }}>Last name</label>
+                <input id="pf-last"
                   style={inputStyle}
                   value={form.last_name}
                   onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))}
@@ -203,13 +203,13 @@ export default function AdminProfilePage() {
             </div>
 
             <div>
-              <label className="block text-xs mb-1.5" style={{ color: themeStyles.textSecondary }}>Email</label>
-              <input style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} value={profile?.email ?? ''} readOnly />
+              <label className="block text-xs mb-1.5" htmlFor="pf-email" style={{ color: themeStyles.textSecondary }}>Email</label>
+              <input id="pf-email" style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} value={profile?.email ?? ''} readOnly />
             </div>
 
             <div>
-              <label className="block text-xs mb-1.5" style={{ color: themeStyles.textSecondary }}>Phone number</label>
-              <input
+              <label className="block text-xs mb-1.5" htmlFor="pf-phone" style={{ color: themeStyles.textSecondary }}>Phone number</label>
+              <input id="pf-phone"
                 style={inputStyle}
                 value={form.phone_number}
                 placeholder="+233 xx xxx xxxx"
@@ -218,8 +218,8 @@ export default function AdminProfilePage() {
             </div>
 
             <div>
-              <label className="block text-xs mb-1.5" style={{ color: themeStyles.textSecondary }}>Bio</label>
-              <textarea
+              <label className="block text-xs mb-1.5" htmlFor="pf-bio" style={{ color: themeStyles.textSecondary }}>Bio</label>
+              <textarea id="pf-bio"
                 style={{ ...inputStyle, resize: 'vertical', minHeight: 80 }}
                 value={form.bio}
                 placeholder="Short bio..."
@@ -228,19 +228,10 @@ export default function AdminProfilePage() {
             </div>
 
             {error && <p role="alert" className="text-xs" style={{ color: 'var(--adm-error)' }}>{error}</p>}
-            <button
-              onClick={handleSave}
-              disabled={saving || saved}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-medium text-white disabled:opacity-70"
-              style={{ background: saved ? 'var(--adm-success)' : 'var(--adm-primary)' }}
-            >
-              {saving
-                ? <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />
-                : saved
-                  ? <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5" />
-                  : <FontAwesomeIcon icon={faSave} className="w-3.5 h-3.5" />}
-              {saved ? 'Saved' : 'Save changes'}
-            </button>
+            <Button onClick={handleSave} disabled={saving || saved}>
+              <FontAwesomeIcon icon={saved ? faCheck : faSave} className="mr-2 h-3 w-3" />
+              {saving ? 'Saving…' : saved ? 'Saved' : 'Save changes'}
+            </Button>
           </div>
 
         </div>

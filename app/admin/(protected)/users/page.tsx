@@ -1,24 +1,20 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+// Customer and staff accounts. Making someone an admin or suspending them is
+// confirmed first, applied only when the database accepts it, and blocked for
+// your own account so you cannot lock yourself out.
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faSpinner,
-  faCheck,
-  faTimes,
-  faShieldHalved,
-  faShield,
-  faBan,
-  faUnlock,
-  faSearch,
-  faInfoCircle,
-  faXmark,
-} from '@fortawesome/free-solid-svg-icons';
+import { faBan, faCheck, faCircleInfo, faShield, faShieldHalved, faUnlock, faXmark } from '@fortawesome/free-solid-svg-icons';
+
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock, reportError, Modal, Button } from '@/components/admin/ui';
-
-const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
+import { notify } from '@/components/admin/toast';
+import {
+  Avatar, Button, IconButton, Modal, SearchInput, StatusPill, TableCard, Toolbar,
+  confirmAction, fieldStyle, fmtDate, rowClass,
+} from '@/components/admin/ui';
 
 interface Profile {
   id: string;
@@ -31,241 +27,167 @@ interface Profile {
   created_at: string;
 }
 
+type Filter = 'all' | 'admins' | 'suspended';
+
+const nameOf = (u: Profile) => [u.first_name, u.last_name].filter(Boolean).join(' ') || u.email || 'Unnamed user';
+
 export default function AdminUsersPage() {
+  const supabase = useMemo(() => createBrowserClient(), []);
   const [users, setUsers] = useState<Profile[]>([]);
+  const [me, setMe] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const [busyId, setBusyId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<Filter>('all');
   const [viewUser, setViewUser] = useState<Profile | null>(null);
 
-  const themeStyles = {
-    cardBg: 'var(--adm-card)',
-    textPrimary: 'var(--adm-text)',
-    textSecondary: 'var(--adm-text-2)',
-    textMuted: 'var(--adm-muted)',
-    border: 'var(--adm-border)',
-    inputBg: 'var(--adm-bg)',
-    inputBorder: 'var(--adm-border)',
-  };
-
-  const fetchUsers = useCallback(async () => {
-    const supabase = createBrowserClient();
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, first_name, last_name, email, phone_number, is_admin, is_active, created_at')
-      .order('created_at', { ascending: false });
-    setUsers((data as Profile[]) ?? []);
+  const load = useCallback(async () => {
+    const [list, auth] = await Promise.all([
+      supabase.from('profiles').select('id, first_name, last_name, email, phone_number, is_admin, is_active, created_at').order('created_at', { ascending: false }),
+      supabase.auth.getUser(),
+    ]);
+    setMe(auth.data.user?.id ?? null);
+    if (list.error) setError('Could not load users.');
+    else { setUsers(list.data ?? []); setError(''); }
     setLoading(false);
-  }, []);
+  }, [supabase]);
 
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+  useEffect(() => { load(); }, [load]);
 
-  async function toggleActive(user: Profile) {
-    setTogglingId(user.id);
-    const supabase = createBrowserClient();
-    reportError((await supabase.from('profiles').update({ is_active: !user.is_active }).eq('id', user.id)).error);
-    setUsers((prev) => prev.map((u) => u.id === user.id ? { ...u, is_active: !u.is_active } : u));
-    if (viewUser?.id === user.id) setViewUser((v) => v ? { ...v, is_active: !v.is_active } : v);
-    setTogglingId(null);
+  async function change(user: Profile, patch: Partial<Pick<Profile, 'is_admin' | 'is_active'>>, done: string) {
+    setBusyId(user.id);
+    const { error: err } = await supabase.from('profiles').update(patch).eq('id', user.id);
+    setBusyId(null);
+    if (err) return notify('Could not update this account. Please try again.');
+    const next = { ...user, ...patch };
+    setUsers((prev) => prev.map((u) => (u.id === user.id ? next : u)));
+    setViewUser((v) => (v?.id === user.id ? next : v));
+    notify(done, 'success');
   }
 
   async function toggleAdmin(user: Profile) {
-    const action = user.is_admin ? 'remove admin access from' : 'grant admin access to';
-    const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email || 'this user';
-    if (!window.confirm(`Are you sure you want to ${action} ${name}?`)) return;
-    setTogglingId(user.id);
-    const supabase = createBrowserClient();
-    reportError((await supabase.from('profiles').update({ is_admin: !user.is_admin }).eq('id', user.id)).error);
-    setUsers((prev) => prev.map((u) => u.id === user.id ? { ...u, is_admin: !u.is_admin } : u));
-    if (viewUser?.id === user.id) setViewUser((v) => v ? { ...v, is_admin: !v.is_admin } : v);
-    setTogglingId(null);
+    if (user.id === me) return notify('You cannot change your own admin access.');
+    const grant = !user.is_admin;
+    const ok = await confirmAction({
+      title: grant ? 'Make this person an admin?' : 'Remove admin access?',
+      message: grant
+        ? `${nameOf(user)} will be able to see and change everything in the admin area, including other users.`
+        : `${nameOf(user)} will lose access to the admin area.`,
+      confirmLabel: grant ? 'Make admin' : 'Remove admin',
+      danger: !grant,
+    });
+    if (ok) await change(user, { is_admin: grant }, grant ? 'Admin access granted.' : 'Admin access removed.');
   }
 
-  const filtered = users.filter((u) => {
-    if (!search.trim()) return true;
-    const q = search.toLowerCase();
-    const name = [u.first_name, u.last_name].filter(Boolean).join(' ').toLowerCase();
-    return name.includes(q) || (u.email ?? '').toLowerCase().includes(q);
-  });
+  async function toggleActive(user: Profile) {
+    if (user.id === me) return notify('You cannot suspend your own account.');
+    const suspend = user.is_active;
+    const ok = await confirmAction({
+      title: suspend ? 'Suspend this account?' : 'Reactivate this account?',
+      message: suspend ? `${nameOf(user)} will no longer be able to use their account.` : `${nameOf(user)} will be able to sign in and use their account again.`,
+      confirmLabel: suspend ? 'Suspend' : 'Reactivate',
+      danger: suspend,
+    });
+    if (ok) await change(user, { is_active: !suspend }, suspend ? 'Account suspended.' : 'Account reactivated.');
+  }
 
-  const fullName = (u: Profile) =>
-    [u.first_name, u.last_name].filter(Boolean).join(' ') || '-';
+  const q = search.trim().toLowerCase();
+  const visible = users.filter((u) => {
+    if (filter === 'admins' && !u.is_admin) return false;
+    if (filter === 'suspended' && u.is_active) return false;
+    return !q || nameOf(u).toLowerCase().includes(q) || (u.email ?? '').toLowerCase().includes(q) || (u.phone_number ?? '').includes(q);
+  });
+  const counts = { admins: users.filter((u) => u.is_admin).length, suspended: users.filter((u) => !u.is_active).length };
 
   return (
     <AdminLayout title="Users" subtitle="Manage user accounts">
-      <div className="space-y-4">
-        {/* Header row */}
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <p className="text-sm" style={{ color: themeStyles.textMuted }}>
-            {filtered.length} of {users.length} user{users.length !== 1 ? 's' : ''}
-          </p>
-          <div
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm w-64"
-            style={{ background: themeStyles.inputBg, border: `1px solid ${themeStyles.inputBorder}` }}
-          >
-            <FontAwesomeIcon icon={faSearch} className="w-3.5 h-3.5 flex-shrink-0" style={{ color: themeStyles.textMuted }} />
-            <input
-              type="text"
-              placeholder="Search by name or email…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 bg-transparent outline-none text-sm"
-              style={{ color: themeStyles.textPrimary }}
-            />
-            {search && (
-              <button onClick={() => setSearch('')} style={{ color: themeStyles.textMuted }}>
-                <FontAwesomeIcon icon={faXmark} className="w-3 h-3" />
-              </button>
-            )}
-          </div>
-        </div>
+      <Toolbar>
+        <SearchInput className="min-w-[14rem] flex-1 sm:max-w-sm" value={search} onChange={setSearch} placeholder="Search name, email or phone" label="Search users" />
+        <select aria-label="Filter users" value={filter} onChange={(e) => setFilter(e.target.value as Filter)} className="px-3 py-2 text-sm" style={fieldStyle}>
+          <option value="all">All users ({users.length})</option>
+          <option value="admins">Admins ({counts.admins})</option>
+          <option value="suspended">Suspended ({counts.suspended})</option>
+        </select>
+      </Toolbar>
 
-        {/* Table */}
-        <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
-          {loading ? (
-            <ListSkeleton />
-          ) : filtered.length === 0 ? (
-            <EmptyBlock title={search ? 'No users match your search' : 'No users yet'} body={search ? 'Try a different name or email.' : undefined} />
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b" style={{ borderColor: themeStyles.border }}>
-                    {['Name', 'Email', 'Phone', 'Admin', 'Status', 'Joined', 'Actions'].map((h) => (
-                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold" style={{ color: themeStyles.textMuted }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((u) => {
-                    const busy = togglingId === u.id;
-                    return (
-                      <tr
-                        key={u.id}
-                        className="border-b last:border-b-0 transition hover:bg-black/5"
-                        style={{ borderColor: themeStyles.border }}
-                      >
-                        <td className="px-4 py-3">
-                          <p className="font-medium" style={{ color: themeStyles.textPrimary }}>{fullName(u)}</p>
-                        </td>
-                        <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{u.email || '-'}</td>
-                        <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{u.phone_number || '-'}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                            style={u.is_admin
-                              ? { background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }
-                              : { background: 'var(--adm-track)', color: themeStyles.textMuted }
-                            }
-                          >
-                            <FontAwesomeIcon icon={u.is_admin ? faShieldHalved : faShield} className="w-2.5 h-2.5" />
-                            {u.is_admin ? 'Admin' : 'User'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                            style={u.is_active
-                              ? { background: '#10B98122', color: '#10B981' }
-                              : { background: '#EF444422', color: '#EF4444' }
-                            }
-                          >
-                            <FontAwesomeIcon icon={u.is_active ? faCheck : faTimes} className="w-2.5 h-2.5" />
-                            {u.is_active ? 'Active' : 'Suspended'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-xs" style={{ color: themeStyles.textMuted }}>
-                          {new Date(u.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            {/* View */}
-                            <button
-                              onClick={() => setViewUser(u)}
-                              className="w-7 h-7 rounded-lg flex items-center justify-center transition hover:opacity-80"
-                              style={{ background: `${BRAND_COLORS.sandyOrange}22`, color: BRAND_COLORS.sandyOrange }}
-                              title="View profile"
-                              disabled={busy}
-                            >
-                              <FontAwesomeIcon icon={faInfoCircle} className="w-3 h-3" />
-                            </button>
-                            {/* Toggle admin */}
-                            <button
-                              onClick={() => toggleAdmin(u)}
-                              className="w-7 h-7 rounded-lg flex items-center justify-center transition hover:opacity-80"
-                              style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}
-                              title={u.is_admin ? 'Remove admin' : 'Make admin'}
-                              disabled={busy}
-                            >
-                              {busy ? (
-                                <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />
-                              ) : (
-                                <FontAwesomeIcon icon={u.is_admin ? faShield : faShieldHalved} className="w-3 h-3" />
-                              )}
-                            </button>
-                            {/* Toggle active */}
-                            <button
-                              onClick={() => toggleActive(u)}
-                              className="w-7 h-7 rounded-lg flex items-center justify-center transition hover:opacity-80"
-                              style={u.is_active
-                                ? { background: '#EF444422', color: '#EF4444' }
-                                : { background: '#10B98122', color: '#10B981' }
-                              }
-                              title={u.is_active ? 'Suspend user' : 'Activate user'}
-                              disabled={busy}
-                            >
-                              <FontAwesomeIcon icon={u.is_active ? faBan : faUnlock} className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
+      {error ? (
+        <p role="alert" className="rounded-[var(--adm-radius-control)] p-4 text-sm" style={{ background: 'var(--adm-error-soft)', color: 'var(--adm-error)' }}>{error}</p>
+      ) : (
+        <TableCard
+          loading={loading}
+          empty={visible.length === 0}
+          emptyTitle={users.length === 0 ? 'No users yet' : 'No users match'}
+          emptyBody={users.length === 0 ? undefined : 'Try a different search or filter.'}
+          headers={['User', 'Phone', 'Role', 'Status', 'Joined', '']}
+        >
+          {visible.map((u) => {
+            const isMe = u.id === me;
+            const busy = busyId === u.id;
+            return (
+              <tr key={u.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar name={nameOf(u)} />
+                    <div className="min-w-0">
+                      <p className="truncate font-medium" style={{ color: 'var(--adm-text)' }}>{nameOf(u)}{isMe && <span className="ml-2 text-[11px] font-normal" style={{ color: 'var(--adm-muted)' }}>(you)</span>}</p>
+                      <p className="truncate text-xs" style={{ color: 'var(--adm-muted)' }}>{u.email || '-'}</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{u.phone_number || '-'}</td>
+                <td className="px-4 py-3"><StatusPill tone={u.is_admin ? 'info' : 'neutral'} icon={u.is_admin ? faShieldHalved : faShield}>{u.is_admin ? 'Admin' : 'User'}</StatusPill></td>
+                <td className="px-4 py-3"><StatusPill tone={u.is_active ? 'success' : 'danger'} icon={u.is_active ? faCheck : faXmark}>{u.is_active ? 'Active' : 'Suspended'}</StatusPill></td>
+                <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-muted)' }}>{fmtDate(u.created_at)}</td>
+                <td className="px-4 py-3">
+                  <div className="flex gap-2">
+                    <IconButton title="View profile" color="var(--adm-text-2)" onClick={() => setViewUser(u)}><FontAwesomeIcon icon={faCircleInfo} className="h-3 w-3" /></IconButton>
+                    <IconButton title={u.is_admin ? 'Remove admin' : 'Make admin'} disabled={busy || isMe} onClick={() => toggleAdmin(u)}><FontAwesomeIcon icon={u.is_admin ? faShield : faShieldHalved} className="h-3 w-3" /></IconButton>
+                    <IconButton title={u.is_active ? 'Suspend user' : 'Reactivate user'} color={u.is_active ? 'var(--adm-error)' : 'var(--adm-success)'} disabled={busy || isMe} onClick={() => toggleActive(u)}><FontAwesomeIcon icon={u.is_active ? faBan : faUnlock} className="h-3 w-3" /></IconButton>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </TableCard>
+      )}
 
-      {/* Profile info modal */}
       {viewUser && (
-        <Modal title="User Profile" maxWidth="max-w-md" onClose={() => setViewUser(null)}
+        <Modal
+          title="User profile"
+          maxWidth="max-w-md"
+          onClose={() => setViewUser(null)}
           footer={
             <>
-              <Button variant="secondary" onClick={() => toggleAdmin(viewUser)} disabled={togglingId === viewUser.id}>
-{viewUser.is_admin ? 'Remove Admin' : 'Make Admin'}
-</Button>
-              <Button variant={viewUser.is_active ? 'danger' : 'secondary'} onClick={() => toggleActive(viewUser)} disabled={togglingId === viewUser.id}>
-{viewUser.is_active ? 'Suspend User' : 'Activate User'}
-</Button>
-              <Button variant="secondary" onClick={() => setViewUser(null)}>
-Close
-</Button>
-            
+              <Button variant="secondary" onClick={() => toggleAdmin(viewUser)} disabled={busyId === viewUser.id || viewUser.id === me}>{viewUser.is_admin ? 'Remove admin' : 'Make admin'}</Button>
+              <Button variant={viewUser.is_active ? 'danger' : 'secondary'} onClick={() => toggleActive(viewUser)} disabled={busyId === viewUser.id || viewUser.id === me}>{viewUser.is_active ? 'Suspend' : 'Reactivate'}</Button>
+              <Button variant="secondary" onClick={() => setViewUser(null)}>Close</Button>
             </>
           }
         >
-<div className="space-y-4">
-            <div className="px-6 py-5 space-y-3">
-              {[
-                { label: 'Name', value: fullName(viewUser) },
-                { label: 'Email', value: viewUser.email || '-' },
-                { label: 'Phone', value: viewUser.phone_number || '-' },
-                { label: 'User ID', value: viewUser.id },
-                { label: 'Role', value: viewUser.is_admin ? 'Admin' : 'User' },
-                { label: 'Status', value: viewUser.is_active ? 'Active' : 'Suspended' },
-                { label: 'Joined', value: new Date(viewUser.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between text-sm gap-4">
-                  <span className="font-medium flex-shrink-0" style={{ color: themeStyles.textMuted }}>{label}</span>
-                  <span className="text-right break-all" style={{ color: themeStyles.textPrimary }}>{value}</span>
-                </div>
-              ))}
+          <div className="mb-4 flex items-center gap-3">
+            <Avatar name={nameOf(viewUser)} size={48} />
+            <div className="min-w-0">
+              <p className="truncate text-base font-bold" style={{ color: 'var(--adm-text)' }}>{nameOf(viewUser)}</p>
+              <div className="mt-1 flex gap-2">
+                <StatusPill tone={viewUser.is_admin ? 'info' : 'neutral'}>{viewUser.is_admin ? 'Admin' : 'User'}</StatusPill>
+                <StatusPill tone={viewUser.is_active ? 'success' : 'danger'}>{viewUser.is_active ? 'Active' : 'Suspended'}</StatusPill>
+              </div>
             </div>
-            
-          
-</div>
+          </div>
+          <dl className="space-y-2 text-sm">
+            {[
+              ['Email', viewUser.email || '-'],
+              ['Phone', viewUser.phone_number || '-'],
+              ['Joined', new Date(viewUser.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })],
+              ['User ID', viewUser.id],
+            ].map(([k, v]) => (
+              <div key={k} className="flex justify-between gap-4">
+                <dt className="flex-shrink-0 font-medium" style={{ color: 'var(--adm-muted)' }}>{k}</dt>
+                <dd className="break-all text-right" style={{ color: 'var(--adm-text)' }}>{v}</dd>
+              </div>
+            ))}
+          </dl>
         </Modal>
       )}
     </AdminLayout>

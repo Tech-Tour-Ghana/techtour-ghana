@@ -1,20 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faSpinner,
-  faCheck,
-  faTimes,
-  faTrash,
-  faUsers,
-  faUserCheck,
-} from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faDownload, faTrash, faUserCheck, faUserMinus, faUsers, faXmark } from '@fortawesome/free-solid-svg-icons';
+
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock, reportError } from '@/components/admin/ui';
-
-const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
+import { notify } from '@/components/admin/toast';
+import {
+  Button, IconButton, SearchInput, StatTile, StatusPill, TableCard, Toolbar,
+  confirmAction, downloadCsv, fieldStyle, fmtDate, rowClass, type Tone,
+} from '@/components/admin/ui';
 
 type Source = 'footer' | 'popup' | 'landing' | 'other';
 
@@ -27,189 +23,109 @@ interface Subscriber {
   created_at: string;
 }
 
-const SOURCE_STYLES: Record<Source, { bg: string; color: string }> = {
-  footer:  { bg: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal },
-  popup:   { bg: `${BRAND_COLORS.sandyOrange}22`, color: BRAND_COLORS.sandyOrange },
-  landing: { bg: '#8B5CF622', color: '#8B5CF6' },
-  other:   { bg: '#6B728022', color: '#6B7280' },
-};
+const SOURCE_TONE: Record<Source, Tone> = { footer: 'info', popup: 'warning', landing: 'neutral', other: 'neutral' };
 
 export default function AdminNewsletterPage() {
+  const supabase = useMemo(() => createBrowserClient(), []);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<'all' | 'active' | 'unsubscribed'>('all');
 
-  const themeStyles = {
-    cardBg: 'var(--adm-card)',
-    textPrimary: 'var(--adm-text)',
-    textSecondary: 'var(--adm-text-2)',
-    textMuted: 'var(--adm-muted)',
-    border: 'var(--adm-border)',
-    inputBg: 'var(--adm-bg)',
-    inputBorder: 'var(--adm-border)',
-  };
-
-  const fetchSubscribers = useCallback(async () => {
-    const supabase = createBrowserClient();
-    const { data } = await supabase
+  const load = useCallback(async () => {
+    const { data, error: err } = await supabase
       .from('newsletter_subscribers')
       .select('id, email, country, source, is_active, created_at')
       .order('created_at', { ascending: false });
-    setSubscribers((data as Subscriber[]) ?? []);
+    if (err) setError('Could not load subscribers.');
+    else { setSubscribers((data as Subscriber[]) ?? []); setError(''); }
     setLoading(false);
-  }, []);
+  }, [supabase]);
 
-  useEffect(() => { fetchSubscribers(); }, [fetchSubscribers]);
+  useEffect(() => { load(); }, [load]);
 
   async function toggleActive(sub: Subscriber) {
     setBusyId(sub.id);
-    const supabase = createBrowserClient();
-    await supabase
-      .from('newsletter_subscribers')
-      .update({ is_active: !sub.is_active })
-      .eq('id', sub.id);
-    setSubscribers((prev) =>
-      prev.map((s) => s.id === sub.id ? { ...s, is_active: !s.is_active } : s)
-    );
+    const { error: err } = await supabase.from('newsletter_subscribers').update({ is_active: !sub.is_active }).eq('id', sub.id);
     setBusyId(null);
+    if (err) return notify('Could not update the subscriber.');
+    setSubscribers((prev) => prev.map((s) => (s.id === sub.id ? { ...s, is_active: !s.is_active } : s)));
   }
 
-  async function deleteSub(sub: Subscriber) {
-    if (!window.confirm(`Remove ${sub.email} from the newsletter? This cannot be undone.`)) return;
+  async function remove(sub: Subscriber) {
+    if (!(await confirmAction({ message: `Remove ${sub.email} from the newsletter? This cannot be undone.`, danger: true, confirmLabel: 'Remove' }))) return;
     setBusyId(sub.id);
-    const supabase = createBrowserClient();
-    reportError((await supabase.from('newsletter_subscribers').delete().eq('id', sub.id)).error);
-    setSubscribers((prev) => prev.filter((s) => s.id !== sub.id));
+    const { error: err } = await supabase.from('newsletter_subscribers').delete().eq('id', sub.id);
     setBusyId(null);
+    if (err) return notify('Could not remove the subscriber.');
+    setSubscribers((prev) => prev.filter((s) => s.id !== sub.id));
+    notify('Subscriber removed.', 'success');
   }
 
+  const q = search.trim().toLowerCase();
+  const visible = subscribers.filter((s) => {
+    if (filter === 'active' && !s.is_active) return false;
+    if (filter === 'unsubscribed' && s.is_active) return false;
+    return !q || s.email.toLowerCase().includes(q) || (s.country ?? '').toLowerCase().includes(q);
+  });
   const activeCount = subscribers.filter((s) => s.is_active).length;
-
-  const fmtDate = (s: string | null) =>
-    s ? new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
-
-  const sourceStyle = (src: Source | null) =>
-    src && src in SOURCE_STYLES ? SOURCE_STYLES[src] : SOURCE_STYLES.other;
 
   return (
     <AdminLayout title="Newsletter" subtitle="Manage newsletter subscribers">
-      <div className="space-y-4">
-        {/* Summary stat cards */}
-        <div className="grid grid-cols-2 gap-4 max-w-sm">
-          {[
-            { icon: faUsers, label: 'Total Subscribers', value: subscribers.length, color: BRAND_COLORS.tropicalTeal },
-            { icon: faUserCheck, label: 'Active', value: activeCount, color: '#10B981' },
-          ].map(({ icon, label, value, color }) => (
-            <div
-              key={label}
-              className="rounded-xl px-4 py-3 flex items-center gap-3"
-              style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}
-            >
-              <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: `${color}22` }}
-              >
-                <FontAwesomeIcon icon={icon} className="w-4 h-4" style={{ color }} />
-              </div>
-              <div>
-                <p className="text-xl font-bold leading-tight" style={{ color: themeStyles.textPrimary }}>{value}</p>
-                <p className="text-xs" style={{ color: themeStyles.textMuted }}>{label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Table */}
-        <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
-          {loading ? (
-            <ListSkeleton />
-          ) : subscribers.length === 0 ? (
-            <EmptyBlock title="No subscribers yet." />
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b" style={{ borderColor: themeStyles.border }}>
-                    {['Email', 'Name', 'Source', 'Status', 'Subscribed', 'Actions'].map((h) => (
-                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold" style={{ color: themeStyles.textMuted }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {subscribers.map((sub) => {
-                    const busy = busyId === sub.id;
-                    const srcStyle = sourceStyle(sub.source);
-                    return (
-                      <tr
-                        key={sub.id}
-                        className="border-b last:border-b-0 transition hover:bg-black/5"
-                        style={{ borderColor: themeStyles.border }}
-                      >
-                        <td className="px-4 py-3 font-medium" style={{ color: themeStyles.textPrimary }}>{sub.email}</td>
-                        <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{sub.country || '-'}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize"
-                            style={{ background: srcStyle.bg, color: srcStyle.color }}
-                          >
-                            {sub.source || 'other'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                            style={sub.is_active
-                              ? { background: '#10B98122', color: '#10B981' }
-                              : { background: '#EF444422', color: '#EF4444' }
-                            }
-                          >
-                            <FontAwesomeIcon icon={sub.is_active ? faCheck : faTimes} className="w-2.5 h-2.5" />
-                            {sub.is_active ? 'Active' : 'Unsubscribed'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-xs" style={{ color: themeStyles.textMuted }}>
-                          {fmtDate(sub.created_at)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            {/* Toggle active */}
-                            <button
-                              onClick={() => toggleActive(sub)}
-                              className="w-7 h-7 rounded-lg flex items-center justify-center transition hover:opacity-80"
-                              style={sub.is_active
-                                ? { background: '#EF444422', color: '#EF4444' }
-                                : { background: '#10B98122', color: '#10B981' }
-                              }
-                              title={sub.is_active ? 'Unsubscribe' : 'Reactivate'}
-                              disabled={busy}
-                            >
-                              {busy ? (
-                                <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />
-                              ) : (
-                                <FontAwesomeIcon icon={sub.is_active ? faTimes : faCheck} className="w-3 h-3" />
-                              )}
-                            </button>
-                            {/* Delete */}
-                            <button
-                              onClick={() => deleteSub(sub)}
-                              className="w-7 h-7 rounded-lg flex items-center justify-center transition hover:opacity-80"
-                              style={{ background: '#EF444422', color: '#EF4444' }}
-                              title="Delete"
-                              disabled={busy}
-                            >
-                              <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+      <div className="mb-4 grid max-w-md grid-cols-2 gap-3">
+        <StatTile icon={faUsers} label="Total subscribers" value={subscribers.length} tone="info" />
+        <StatTile icon={faUserCheck} label="Active" value={activeCount} tone="success" />
       </div>
+
+      <Toolbar
+        actions={
+          <Button variant="secondary" disabled={visible.length === 0} onClick={() => downloadCsv('newsletter-subscribers.csv', ['Email', 'Country', 'Source', 'Status', 'Subscribed'], visible.map((s) => [s.email, s.country, s.source ?? 'other', s.is_active ? 'Active' : 'Unsubscribed', s.created_at]))}>
+            <FontAwesomeIcon icon={faDownload} className="mr-2 h-3 w-3" />Export CSV
+          </Button>
+        }
+      >
+        <SearchInput className="min-w-[14rem] flex-1 sm:max-w-sm" value={search} onChange={setSearch} placeholder="Search email or country" label="Search subscribers" />
+        <select aria-label="Filter subscribers" value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)} className="px-3 py-2 text-sm" style={fieldStyle}>
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="unsubscribed">Unsubscribed</option>
+        </select>
+      </Toolbar>
+
+      {error ? (
+        <p role="alert" className="rounded-[var(--adm-radius-control)] p-4 text-sm" style={{ background: 'var(--adm-error-soft)', color: 'var(--adm-error)' }}>{error}</p>
+      ) : (
+        <TableCard
+          loading={loading}
+          empty={visible.length === 0}
+          emptyTitle={subscribers.length === 0 ? 'No subscribers yet' : 'No subscribers match'}
+          emptyBody={subscribers.length === 0 ? 'People who sign up in the site footer appear here.' : 'Try a different search or filter.'}
+          headers={['Email', 'Country', 'Source', 'Status', 'Subscribed', '']}
+        >
+          {visible.map((sub) => {
+            const busy = busyId === sub.id;
+            return (
+              <tr key={sub.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+                <td className="px-4 py-3 font-medium" style={{ color: 'var(--adm-text)' }}>{sub.email}</td>
+                <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{sub.country || '-'}</td>
+                <td className="px-4 py-3"><StatusPill tone={SOURCE_TONE[sub.source ?? 'other'] ?? 'neutral'}><span className="capitalize">{sub.source || 'other'}</span></StatusPill></td>
+                <td className="px-4 py-3"><StatusPill tone={sub.is_active ? 'success' : 'danger'} icon={sub.is_active ? faCheck : faXmark}>{sub.is_active ? 'Active' : 'Unsubscribed'}</StatusPill></td>
+                <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-muted)' }}>{fmtDate(sub.created_at)}</td>
+                <td className="px-4 py-3">
+                  <div className="flex gap-2">
+                    <IconButton title={sub.is_active ? 'Unsubscribe' : 'Reactivate'} color={sub.is_active ? 'var(--adm-error)' : 'var(--adm-success)'} disabled={busy} onClick={() => toggleActive(sub)}>
+                      <FontAwesomeIcon icon={sub.is_active ? faUserMinus : faCheck} className="h-3 w-3" />
+                    </IconButton>
+                    <IconButton title="Remove" color="var(--adm-error)" disabled={busy} onClick={() => remove(sub)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </TableCard>
+      )}
     </AdminLayout>
   );
 }

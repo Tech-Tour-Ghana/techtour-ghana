@@ -10,7 +10,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { BRAND, IconButton, StatusSelect, TableCard, fmtDate, rowClass, useAdminTheme } from '@/components/admin/ui';
+import { notify } from '@/components/admin/toast';
+import { BRAND, IconButton, StatusSelect, TableCard, fmtDate, rowClass, useAdminTheme, confirmAction } from '@/components/admin/ui';
 
 const STATUSES = ['pending', 'approved', 'rejected', 'completed'] as const;
 type Status = (typeof STATUSES)[number];
@@ -66,21 +67,21 @@ export default function AdminApplicationsPage() {
       start_date: form.start_date || null,
       duration: form.duration.trim(),
     });
-    if (error) return window.alert(`Could not add: ${error.message}`);
+    if (error) return notify(`Could not add: ${error.message}`);
     setForm(EMPTY);
     load();
   }
 
   async function setStatus(id: string, status: Status) {
     const { error } = await createBrowserClient().from('study_applications').update({ status }).eq('id', id);
-    if (error) return window.alert(`Could not update: ${error.message}`);
+    if (error) return notify(`Could not update: ${error.message}`);
     setApps((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
   }
 
   async function remove(id: string) {
-    if (!window.confirm('Delete this application? This cannot be undone.')) return;
+    if (!(await confirmAction({ message: 'Delete this application? This cannot be undone.', danger: true }))) return;
     const { error } = await createBrowserClient().from('study_applications').delete().eq('id', id);
-    if (error) return window.alert(`Could not delete: ${error.message}`);
+    if (error) return notify(`Could not delete: ${error.message}`);
     setApps((prev) => prev.filter((a) => a.id !== id));
   }
 

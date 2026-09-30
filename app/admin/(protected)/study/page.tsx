@@ -3,14 +3,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faPlus, faPencil, faTrash, faSpinner, faCheck, faTimes, } from '@fortawesome/free-solid-svg-icons';
+  faPlus, faPencil, faTrash, faSpinner, faCheck, } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock, Tabs, reportError, Modal, Button } from '@/components/admin/ui';
-
-const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
+import { Button, IconButton, Modal, SearchInput, StatusPill, TableCard, Tabs, Toolbar, confirmAction, reportError, rowClass, type Tone } from '@/components/admin/ui';
 
 function toSlug(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -55,12 +53,7 @@ const LEVEL_LABELS: Record<Scholarship['level'], string> = {
   bachelor: 'Bachelor', master: 'Master', phd: 'PhD', all: 'All Levels',
 };
 
-const LEVEL_COLORS: Record<Scholarship['level'], { bg: string; fg: string }> = {
-  bachelor: { bg: '#3B82F622', fg: '#3B82F6' },
-  master:   { bg: '#8B5CF622', fg: '#8B5CF6' },
-  phd:      { bg: '#EC489922', fg: '#EC4899' },
-  all:      { bg: '#10B98122', fg: '#10B981' },
-};
+const LEVEL_TONE: Record<Scholarship['level'], Tone> = { bachelor: 'info', master: 'warning', phd: 'danger', all: 'success' };
 
 export default function AdminStudyPage() {
   const { isDimMode } = useTheme();
@@ -152,9 +145,9 @@ function DestinationsTab({ themeStyles, inputClass, inputStyle, labelStyle }: Ta
       is_active: form.is_active,
     };
     if (editingId) {
-      reportError((await supabase.from('study_destinations').update(payload).eq('id', editingId)).error);
+      if (reportError((await supabase.from('study_destinations').update(payload).eq('id', editingId)).error)) { setSaving(false); return; }
     } else {
-      reportError((await supabase.from('study_destinations').insert(payload)).error);
+      if (reportError((await supabase.from('study_destinations').insert(payload)).error)) { setSaving(false); return; }
     }
     setSaving(false);
     closeModal();
@@ -163,79 +156,46 @@ function DestinationsTab({ themeStyles, inputClass, inputStyle, labelStyle }: Ta
   }
 
   async function handleDelete(r: Destination) {
-    if (!window.confirm(`Delete "${r.country_name}"? This cannot be undone.`)) return;
+    if (!(await confirmAction({ message: `Delete "${r.country_name}"? This cannot be undone.`, danger: true }))) return;
     const supabase = createBrowserClient();
-    reportError((await supabase.from('study_destinations').delete().eq('id', r.id)).error);
+    if (reportError((await supabase.from('study_destinations').delete().eq('id', r.id)).error)) { return; }
     setLoading(true);
     fetchRows();
   }
 
+  const [search, setSearch] = useState('');
+  const q = search.trim().toLowerCase();
+  const visible = rows.filter((r) => !q || String(r.country_name).toLowerCase().includes(q));
+
   return (
     <>
-      <div className="flex items-center justify-between">
-        <p className="text-sm" style={{ color: themeStyles.textMuted }}>
-          {rows.length} destination{rows.length !== 1 ? 's' : ''}
-        </p>
-        <button
-          onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition hover:opacity-90"
-          style={{ background: BRAND_COLORS.tropicalTeal }}
-        >
-          <FontAwesomeIcon icon={faPlus} className="w-3.5 h-3.5" />
-          Add Destination
-        </button>
-      </div>
+      <Toolbar
+        actions={<Button onClick={openAdd}><FontAwesomeIcon icon={faPlus} className="mr-2 h-3 w-3" />Add destination</Button>}
+      >
+        <SearchInput className="min-w-[12rem] flex-1 sm:max-w-xs" value={search} onChange={setSearch} placeholder="Search destinations" label="Search destinations" />
+        <span className="text-xs" style={{ color: 'var(--adm-muted)' }}>{visible.length} of {rows.length}</span>
+      </Toolbar>
 
-      <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
-        {loading ? (
-          <ListSkeleton />
-        ) : rows.length === 0 ? (
-          <EmptyBlock title="No destinations yet." />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b" style={{ borderColor: themeStyles.border }}>
-                  {['Country', 'Flag', 'Slug', 'Active', 'Actions'].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: themeStyles.textMuted }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id} className="border-b last:border-b-0 transition hover:bg-black/5" style={{ borderColor: themeStyles.border }}>
-                    <td className="px-4 py-3 font-medium" style={{ color: themeStyles.textPrimary }}>{r.country_name}</td>
-                    <td className="px-4 py-3 text-xl">{r.flag}</td>
-                    <td className="px-4 py-3 text-xs" style={{ color: themeStyles.textMuted }}>{r.slug}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                        style={r.is_active
-                          ? { background: '#10B98122', color: '#10B981' }
-                          : { background: 'var(--adm-track)', color: themeStyles.textMuted }
-                        }
-                      >
-                        <FontAwesomeIcon icon={r.is_active ? faCheck : faTimes} className="w-2.5 h-2.5" />
-                        {r.is_active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => openEdit(r)} className="w-7 h-7 rounded-lg flex items-center justify-center transition hover:opacity-80" style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}>
-                          <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
-                        </button>
-                        <button onClick={() => handleDelete(r)} className="w-7 h-7 rounded-lg flex items-center justify-center transition hover:opacity-80" style={{ background: '#EF444422', color: '#EF4444' }}>
-                          <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <TableCard loading={loading} empty={visible.length === 0} emptyTitle={rows.length === 0 ? 'No destinations yet' : 'No destinations match'} headers={['Country', 'Slug', 'Status', '']}>
+        {visible.map((r) => (
+          <tr key={r.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+            <td className="px-4 py-3">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl leading-none" aria-hidden>{r.flag}</span>
+                <span className="font-medium" style={{ color: 'var(--adm-text)' }}>{r.country_name}</span>
+              </div>
+            </td>
+            <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-muted)' }}>{r.slug}</td>
+            <td className="px-4 py-3"><StatusPill tone={r.is_active ? 'success' : 'neutral'}>{r.is_active ? 'Active' : 'Inactive'}</StatusPill></td>
+            <td className="px-4 py-3">
+              <div className="flex gap-2">
+                <IconButton title="Edit" onClick={() => openEdit(r)}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></IconButton>
+                <IconButton title="Delete" color="var(--adm-error)" onClick={() => handleDelete(r)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </TableCard>
 
       {modalOpen && (
         <Modal title={editingId ? 'Edit Destination' : 'Add Destination'} maxWidth="max-w-lg" onClose={() => closeModal()}
@@ -253,10 +213,10 @@ Cancel
           }
         >
 <div className="space-y-4">
-            <div className="px-6 py-5 space-y-4">
+            <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label style={labelStyle}>Country Name <span style={{ color: '#EF4444' }}>*</span></label>
+                  <label style={labelStyle}>Country Name <span style={{ color: 'var(--adm-error)' }}>*</span></label>
                   <input className={inputClass} style={inputStyle} value={form.country_name} onChange={(e) => handleCountryName(e.target.value)} placeholder="e.g. United Kingdom" />
                 </div>
                 <div className="space-y-1">
@@ -283,7 +243,7 @@ Cancel
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <div
                   className="w-4 h-4 rounded flex items-center justify-center transition"
-                  style={{ background: form.is_active ? BRAND_COLORS.tropicalTeal : themeStyles.inputBg, border: `1px solid ${form.is_active ? BRAND_COLORS.tropicalTeal : themeStyles.inputBorder}` }}
+                  style={{ background: form.is_active ? 'var(--adm-primary)' : themeStyles.inputBg, border: `1px solid ${form.is_active ? 'var(--adm-primary)' : themeStyles.inputBorder}` }}
                   onClick={() => setForm((f) => ({ ...f, is_active: !f.is_active }))}
                 >
                   {form.is_active && <FontAwesomeIcon icon={faCheck} className="w-2.5 h-2.5 text-white" />}
@@ -357,9 +317,9 @@ function ScholarshipsTab({ themeStyles, inputClass, inputStyle, labelStyle }: Ta
       is_active: form.is_active,
     };
     if (editingId) {
-      reportError((await supabase.from('scholarships').update(payload).eq('id', editingId)).error);
+      if (reportError((await supabase.from('scholarships').update(payload).eq('id', editingId)).error)) { setSaving(false); return; }
     } else {
-      reportError((await supabase.from('scholarships').insert(payload)).error);
+      if (reportError((await supabase.from('scholarships').insert(payload)).error)) { setSaving(false); return; }
     }
     setSaving(false);
     closeModal();
@@ -368,89 +328,45 @@ function ScholarshipsTab({ themeStyles, inputClass, inputStyle, labelStyle }: Ta
   }
 
   async function handleDelete(r: Scholarship) {
-    if (!window.confirm(`Delete "${r.title}"? This cannot be undone.`)) return;
+    if (!(await confirmAction({ message: `Delete "${r.title}"? This cannot be undone.`, danger: true }))) return;
     const supabase = createBrowserClient();
-    reportError((await supabase.from('scholarships').delete().eq('id', r.id)).error);
+    if (reportError((await supabase.from('scholarships').delete().eq('id', r.id)).error)) { return; }
     setLoading(true);
     fetchRows();
   }
 
+  const [search, setSearch] = useState('');
+  const q = search.trim().toLowerCase();
+  const visible = rows.filter((r) => !q || String(r.title).toLowerCase().includes(q));
+
   return (
     <>
-      <div className="flex items-center justify-between">
-        <p className="text-sm" style={{ color: themeStyles.textMuted }}>
-          {rows.length} scholarship{rows.length !== 1 ? 's' : ''}
-        </p>
-        <button
-          onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition hover:opacity-90"
-          style={{ background: BRAND_COLORS.tropicalTeal }}
-        >
-          <FontAwesomeIcon icon={faPlus} className="w-3.5 h-3.5" />
-          Add Scholarship
-        </button>
-      </div>
+      <Toolbar
+        actions={<Button onClick={openAdd}><FontAwesomeIcon icon={faPlus} className="mr-2 h-3 w-3" />Add scholarship</Button>}
+      >
+        <SearchInput className="min-w-[12rem] flex-1 sm:max-w-xs" value={search} onChange={setSearch} placeholder="Search scholarships" label="Search scholarships" />
+        <span className="text-xs" style={{ color: 'var(--adm-muted)' }}>{visible.length} of {rows.length}</span>
+      </Toolbar>
 
-      <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
-        {loading ? (
-          <ListSkeleton />
-        ) : rows.length === 0 ? (
-          <EmptyBlock title="No scholarships yet." />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b" style={{ borderColor: themeStyles.border }}>
-                  {['Title', 'Level', 'Deadline', 'Active', 'Actions'].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: themeStyles.textMuted }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => {
-                  const lc = LEVEL_COLORS[r.level];
-                  return (
-                    <tr key={r.id} className="border-b last:border-b-0 transition hover:bg-black/5" style={{ borderColor: themeStyles.border }}>
-                      <td className="px-4 py-3">
-                        <p className="font-medium" style={{ color: themeStyles.textPrimary }}>{r.title}</p>
-                        <p className="text-xs" style={{ color: themeStyles.textMuted }}>{r.amount || '-'}</p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: lc.bg, color: lc.fg }}>
-                          {LEVEL_LABELS[r.level]}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3" style={{ color: themeStyles.textSecondary }}>{formatDeadline(r.deadline)}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                          style={r.is_active
-                            ? { background: '#10B98122', color: '#10B981' }
-                            : { background: 'var(--adm-track)', color: themeStyles.textMuted }
-                          }
-                        >
-                          <FontAwesomeIcon icon={r.is_active ? faCheck : faTimes} className="w-2.5 h-2.5" />
-                          {r.is_active ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => openEdit(r)} className="w-7 h-7 rounded-lg flex items-center justify-center transition hover:opacity-80" style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}>
-                            <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
-                          </button>
-                          <button onClick={() => handleDelete(r)} className="w-7 h-7 rounded-lg flex items-center justify-center transition hover:opacity-80" style={{ background: '#EF444422', color: '#EF4444' }}>
-                            <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <TableCard loading={loading} empty={visible.length === 0} emptyTitle={rows.length === 0 ? 'No scholarships yet' : 'No scholarships match'} headers={['Scholarship', 'Level', 'Deadline', 'Status', '']}>
+        {visible.map((r) => (
+          <tr key={r.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+            <td className="px-4 py-3">
+              <p className="font-medium" style={{ color: 'var(--adm-text)' }}>{r.title}</p>
+              <p className="text-xs" style={{ color: 'var(--adm-muted)' }}>{r.amount || '-'}</p>
+            </td>
+            <td className="px-4 py-3"><StatusPill tone={LEVEL_TONE[r.level]}>{LEVEL_LABELS[r.level]}</StatusPill></td>
+            <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{formatDeadline(r.deadline)}</td>
+            <td className="px-4 py-3"><StatusPill tone={r.is_active ? 'success' : 'neutral'}>{r.is_active ? 'Active' : 'Inactive'}</StatusPill></td>
+            <td className="px-4 py-3">
+              <div className="flex gap-2">
+                <IconButton title="Edit" onClick={() => openEdit(r)}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></IconButton>
+                <IconButton title="Delete" color="var(--adm-error)" onClick={() => handleDelete(r)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </TableCard>
 
       {modalOpen && (
         <Modal title={editingId ? 'Edit Scholarship' : 'Add Scholarship'} maxWidth="max-w-2xl" onClose={() => closeModal()}
@@ -468,10 +384,10 @@ Cancel
           }
         >
 <div className="space-y-4">
-            <div className="px-6 py-5 space-y-4">
+            <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label style={labelStyle}>Title <span style={{ color: '#EF4444' }}>*</span></label>
+                  <label style={labelStyle}>Title <span style={{ color: 'var(--adm-error)' }}>*</span></label>
                   <input className={inputClass} style={inputStyle} value={form.title} onChange={(e) => handleTitle(e.target.value)} placeholder="e.g. Commonwealth Scholarship" />
                 </div>
                 <div className="space-y-1">
@@ -481,7 +397,7 @@ Cancel
               </div>
 
               <div className="space-y-1">
-                <label style={labelStyle}>Destination <span style={{ color: '#EF4444' }}>*</span></label>
+                <label style={labelStyle}>Destination <span style={{ color: 'var(--adm-error)' }}>*</span></label>
                 <select className={inputClass} style={inputStyle} value={form.destination_id} onChange={(e) => setForm((f) => ({ ...f, destination_id: e.target.value }))}>
                   <option value="">Select destination…</option>
                   {destinations.map((d) => (
@@ -506,7 +422,7 @@ Cancel
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label style={labelStyle}>Deadline <span style={{ color: '#EF4444' }}>*</span></label>
+                  <label style={labelStyle}>Deadline <span style={{ color: 'var(--adm-error)' }}>*</span></label>
                   <input type="date" className={inputClass} style={inputStyle} value={form.deadline} onChange={(e) => setForm((f) => ({ ...f, deadline: e.target.value }))} />
                 </div>
               </div>
@@ -520,7 +436,7 @@ Cancel
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <div
                     className="w-4 h-4 rounded flex items-center justify-center transition"
-                    style={{ background: form.is_active ? BRAND_COLORS.tropicalTeal : themeStyles.inputBg, border: `1px solid ${form.is_active ? BRAND_COLORS.tropicalTeal : themeStyles.inputBorder}` }}
+                    style={{ background: form.is_active ? 'var(--adm-primary)' : themeStyles.inputBg, border: `1px solid ${form.is_active ? 'var(--adm-primary)' : themeStyles.inputBorder}` }}
                     onClick={() => setForm((f) => ({ ...f, is_active: !f.is_active }))}
                   >
                     {form.is_active && <FontAwesomeIcon icon={faCheck} className="w-2.5 h-2.5 text-white" />}
@@ -530,7 +446,7 @@ Cancel
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <div
                     className="w-4 h-4 rounded flex items-center justify-center transition"
-                    style={{ background: form.is_featured ? BRAND_COLORS.sandyOrange : themeStyles.inputBg, border: `1px solid ${form.is_featured ? BRAND_COLORS.sandyOrange : themeStyles.inputBorder}` }}
+                    style={{ background: form.is_featured ? 'var(--adm-accent)' : themeStyles.inputBg, border: `1px solid ${form.is_featured ? 'var(--adm-accent)' : themeStyles.inputBorder}` }}
                     onClick={() => setForm((f) => ({ ...f, is_featured: !f.is_featured }))}
                   >
                     {form.is_featured && <FontAwesomeIcon icon={faCheck} className="w-2.5 h-2.5 text-white" />}

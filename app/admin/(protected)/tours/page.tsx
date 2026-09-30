@@ -10,8 +10,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
+import { notify } from '@/components/admin/toast';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
-import { BRAND, IconButton, StatusSelect, TableCard, Tabs, Toggle, fmtDate, rowClass, useAdminTheme } from '@/components/admin/ui';
+import { BRAND, IconButton, StatusSelect, TableCard, Tabs, Toggle, fmtDate, rowClass, useAdminTheme, confirmAction } from '@/components/admin/ui';
 import type { Database } from '@/types/database';
 
 type Tab = 'tours' | 'categories' | 'schedules' | 'bookings' | 'reviews';
@@ -63,7 +64,7 @@ export default function AdminToursPage() {
   useEffect(() => { load(); }, [load]);
 
   const tourTitle = (id: string) => tours.find((x) => x.id === id)?.title ?? '-';
-  const fail = (msg: string) => window.alert(msg);
+  const fail = (msg: string) => notify(msg);
 
   async function toggleTour(tour: Tour, key: 'is_active' | 'is_featured') {
     const patch = key === 'is_active' ? { is_active: !tour.is_active } : { is_featured: !tour.is_featured };
@@ -73,7 +74,7 @@ export default function AdminToursPage() {
   }
 
   async function remove(table: 'tours' | 'tour_categories' | 'tour_schedules' | 'tour_reviews', id: string) {
-    if (!window.confirm('Delete this item? This cannot be undone.')) return;
+    if (!(await confirmAction({ message: 'Delete this item? This cannot be undone.', danger: true }))) return;
     const { error } = await supabase.from(table).delete().eq('id', id);
     if (error) return fail(error.message);
     load();

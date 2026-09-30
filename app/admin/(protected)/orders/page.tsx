@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
+import { notify } from '@/components/admin/toast';
 import { StatusSelect, TableCard, Tabs, fmtDate, rowClass, useAdminTheme } from '@/components/admin/ui';
 import type { Database } from '@/types/database';
 
@@ -48,7 +49,7 @@ export default function AdminOrdersPage() {
   async function update(id: string, patch: { order_status?: OrderStatus; tracking_number?: string }) {
     const { error } = await createBrowserClient().from('orders').update(patch).eq('id', id);
     if (error) {
-      window.alert(`Could not update the order: ${error.message}`);
+      notify(`Could not update the order: ${error.message}`);
       return;
     }
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, ...patch } : o)));

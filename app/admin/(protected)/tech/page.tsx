@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
@@ -14,9 +14,7 @@ import {
 import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs, EmptyBlock, ListSkeleton, reportError, Modal, Button } from '@/components/admin/ui';
-
-const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
+import { Button, IconButton, ListSkeleton, Modal, SearchInput, StatusPill, TableCard, Tabs, Toolbar, confirmAction, fmtDate, reportError, rowClass, type Tone } from '@/components/admin/ui';
 
 const toSlug = (str: string) =>
   str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -106,20 +104,15 @@ const blankResource = (): Omit<TechResource, 'id'> => ({
 
 // ─── Category / status colour chips ──────────────────────────────────────────
 
-const CATEGORY_COLORS: Record<string, string> = {
-  ai: '#8B5CF6', vr: '#EC4899', cloud: '#3B82F6', mobile: '#F59E0B',
-  blockchain: '#F97316', iot: '#10B981', web3: '#6366F1', other: '#6B7280',
-};
+const CATEGORY_TONE: Record<string, Tone> = { ai: 'info', vr: 'warning', cloud: 'info', mobile: 'success', blockchain: 'warning', iot: 'success', web3: 'info', other: 'neutral' };
 
-const STATUS_COLORS: Record<string, string> = {
-  active: '#10B981', development: BRAND_COLORS.sandyOrange,
-  completed: '#3B82F6', planned: '#6B7280',
-};
+const STATUS_TONE: Record<string, Tone> = { active: 'success', development: 'warning', completed: 'info' };
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function AdminTechPage() {
   const [tab, setTab] = useState<Tab>('innovations');
+  const [search, setSearch] = useState('');
 
   const [innovations, setInnovations] = useState<TechInnovation[]>([]);
   const [events, setEvents] = useState<TechEvent[]>([]);
@@ -131,7 +124,7 @@ export default function AdminTechPage() {
   const [eventModal, setEventModal] = useState<{ open: boolean; data: Omit<TechEvent, 'id'>; id: string | null }>({ open: false, data: blankEvent(), id: null });
   const [resourceModal, setResourceModal] = useState<{ open: boolean; data: Omit<TechResource, 'id'>; id: string | null }>({ open: false, data: blankResource(), id: null });
 
-  const supabase = createBrowserClient();
+  const supabase = useMemo(() => createBrowserClient(), []);
 
   const ts = {
     cardBg: 'var(--adm-card)',
@@ -157,27 +150,27 @@ export default function AdminTechPage() {
     setEvents((ev.data ?? []) as unknown as TechEvent[]);
     setResources((res.data ?? []) as unknown as TechResource[]);
     setLoading(false);
-  }, []); // ponytail: supabase ref is stable
+  }, [supabase]); // ponytail: supabase ref is stable
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
   // ── Delete helpers ─────────────────────────────────────────────────────────
 
   const deleteInnovation = async (id: string, title: string) => {
-    if (!window.confirm(`Delete innovation "${title}"?`)) return;
-    reportError((await supabase.from('tech_innovations').delete().eq('id', id)).error);
+    if (!(await confirmAction({ message: `Delete innovation "${title}"?`, danger: true }))) return;
+    if (reportError((await supabase.from('tech_innovations').delete().eq('id', id)).error)) { return; }
     fetchAll();
   };
 
   const deleteEvent = async (id: string, title: string) => {
-    if (!window.confirm(`Delete event "${title}"?`)) return;
-    reportError((await supabase.from('tech_events').delete().eq('id', id)).error);
+    if (!(await confirmAction({ message: `Delete event "${title}"?`, danger: true }))) return;
+    if (reportError((await supabase.from('tech_events').delete().eq('id', id)).error)) { return; }
     fetchAll();
   };
 
   const deleteResource = async (id: string, title: string) => {
-    if (!window.confirm(`Delete resource "${title}"?`)) return;
-    reportError((await supabase.from('tech_resources').delete().eq('id', id)).error);
+    if (!(await confirmAction({ message: `Delete resource "${title}"?`, danger: true }))) return;
+    if (reportError((await supabase.from('tech_resources').delete().eq('id', id)).error)) { return; }
     fetchAll();
   };
 
@@ -187,9 +180,9 @@ export default function AdminTechPage() {
     setSaving(true);
     const d = innovationModal.data;
     if (innovationModal.id) {
-      reportError((await supabase.from('tech_innovations').update(d).eq('id', innovationModal.id)).error);
+      if (reportError((await supabase.from('tech_innovations').update(d).eq('id', innovationModal.id)).error)) { setSaving(false); return; }
     } else {
-      reportError((await supabase.from('tech_innovations').insert(d)).error);
+      if (reportError((await supabase.from('tech_innovations').insert(d)).error)) { setSaving(false); return; }
     }
     setSaving(false);
     setInnovationModal({ open: false, data: blankInnovation(), id: null });
@@ -200,9 +193,9 @@ export default function AdminTechPage() {
     setSaving(true);
     const d = eventModal.data;
     if (eventModal.id) {
-      reportError((await supabase.from('tech_events').update(d).eq('id', eventModal.id)).error);
+      if (reportError((await supabase.from('tech_events').update(d).eq('id', eventModal.id)).error)) { setSaving(false); return; }
     } else {
-      reportError((await supabase.from('tech_events').insert(d)).error);
+      if (reportError((await supabase.from('tech_events').insert(d)).error)) { setSaving(false); return; }
     }
     setSaving(false);
     setEventModal({ open: false, data: blankEvent(), id: null });
@@ -213,9 +206,9 @@ export default function AdminTechPage() {
     setSaving(true);
     const d = resourceModal.data;
     if (resourceModal.id) {
-      reportError((await supabase.from('tech_resources').update(d).eq('id', resourceModal.id)).error);
+      if (reportError((await supabase.from('tech_resources').update(d).eq('id', resourceModal.id)).error)) { setSaving(false); return; }
     } else {
-      reportError((await supabase.from('tech_resources').insert(d)).error);
+      if (reportError((await supabase.from('tech_resources').insert(d)).error)) { setSaving(false); return; }
     }
     setSaving(false);
     setResourceModal({ open: false, data: blankResource(), id: null });
@@ -223,18 +216,6 @@ export default function AdminTechPage() {
   };
 
   // ── Shared UI bits ─────────────────────────────────────────────────────────
-
-  const Badge = ({ active }: { active: boolean }) => (
-    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: active ? '#10B98122' : '#EF444422', color: active ? '#10B981' : '#EF4444' }}>
-      {active ? 'Active' : 'Inactive'}
-    </span>
-  );
-
-  const ColourChip = ({ label, color }: { label: string; color: string }) => (
-    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize" style={{ background: `${color}22`, color }}>
-      {label}
-    </span>
-  );
 
   const inputStyle: React.CSSProperties = {
     background: ts.inputBg, border: `1px solid ${ts.inputBorder}`, color: ts.textPrimary,
@@ -258,6 +239,12 @@ export default function AdminTechPage() {
     );
   }
 
+  const q = search.trim().toLowerCase();
+  const has = (...t: (string | null | undefined)[]) => !q || t.some((x) => (x ?? '').toLowerCase().includes(q));
+  const vInnovations = innovations.filter((n) => has(n.title, n.category, n.status));
+  const vEvents = events.filter((e) => has(e.title, e.event_type, e.location));
+  const vResources = resources.filter((r) => has(r.title, r.resource_type));
+
   const tabs: { key: Tab; label: string; icon: typeof faMicrochip; count: number }[] = [
     { key: 'innovations', label: 'Innovations', icon: faMicrochip, count: innovations.length },
     { key: 'events', label: 'Events', icon: faCalendarAlt, count: events.length },
@@ -266,184 +253,72 @@ export default function AdminTechPage() {
 
   return (
     <AdminLayout title="Tech Hub" subtitle="Manage tech innovations, events and resources">
-      <div className="space-y-5">
+      <Toolbar
+        actions={
+          <Button onClick={() => (tab === 'innovations' ? setInnovationModal({ open: true, data: blankInnovation(), id: null }) : tab === 'events' ? setEventModal({ open: true, data: blankEvent(), id: null }) : setResourceModal({ open: true, data: blankResource(), id: null }))}>
+            <FontAwesomeIcon icon={faPlus} className="mr-2 h-3 w-3" />{tab === 'innovations' ? 'Add innovation' : tab === 'events' ? 'Add event' : 'Add resource'}
+          </Button>
+        }
+      >
+        <Tabs value={tab} onChange={(t) => { setTab(t); setSearch(''); }} tabs={tabs.map((t) => ({ key: t.key, label: t.label, count: t.count }))} />
+        <SearchInput className="min-w-[12rem] flex-1 sm:max-w-xs" value={search} onChange={setSearch} placeholder="Search" label="Search" />
+      </Toolbar>
 
-        {/* Tab bar */}
-        <Tabs value={tab} onChange={setTab} tabs={tabs.map((t) => ({ key: t.key, label: t.label, count: t.count }))} />
+      {tab === 'innovations' && (
+        <TableCard loading={false} empty={vInnovations.length === 0} emptyTitle={innovations.length === 0 ? 'No innovations yet' : 'No innovations match'} headers={['Innovation', 'Category', 'Stage', 'Visible', '']}>
+          {vInnovations.map((n) => (
+            <tr key={n.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+              <td className="px-4 py-3 font-medium" style={{ color: 'var(--adm-text)' }}>{n.title}</td>
+              <td className="px-4 py-3"><StatusPill tone={CATEGORY_TONE[n.category] ?? 'neutral'}><span className="capitalize">{n.category}</span></StatusPill></td>
+              <td className="px-4 py-3"><StatusPill tone={STATUS_TONE[n.status] ?? 'neutral'}><span className="capitalize">{n.status}</span></StatusPill></td>
+              <td className="px-4 py-3"><StatusPill tone={n.is_active ? 'success' : 'neutral'}>{n.is_active ? 'Visible' : 'Hidden'}</StatusPill></td>
+              <td className="px-4 py-3">
+                <div className="flex gap-2">
+                  <IconButton title="Edit" onClick={() => setInnovationModal({ open: true, data: { title: n.title, slug: n.slug, description: n.description, category: n.category, status: n.status, icon: n.icon, image_url: n.image_url, is_active: n.is_active }, id: n.id })}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></IconButton>
+                  <IconButton title="Delete" color="var(--adm-error)" onClick={() => deleteInnovation(n.id, n.title)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </TableCard>
+      )}
 
-        {/* ── Innovations ── */}
-        {tab === 'innovations' && (
-          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: ts.border }}>
-              <h2 className="text-sm font-semibold" style={{ color: ts.textPrimary }}>Tech Innovations</h2>
-              <button
-                onClick={() => setInnovationModal({ open: true, data: blankInnovation(), id: null })}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white transition hover:opacity-90"
-                style={{ background: BRAND_COLORS.tropicalTeal }}
-              >
-                <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
-                Add New
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${ts.border}` }}>
-                    {['Title', 'Category', 'Status', 'Visible', 'Actions'].map((h) => (
-                      <th key={h} className="px-5 py-2.5 text-left font-semibold" style={{ color: ts.textMuted }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {innovations.length === 0 ? (
-                    <tr><td colSpan={5}><EmptyBlock title="No innovations yet." /></td></tr>
-                  ) : innovations.map((n) => (
-                    <tr key={n.id} style={{ borderBottom: `1px solid ${ts.border}` }} className="transition" onMouseEnter={e => (e.currentTarget.style.background = ts.rowHover)} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                      <td className="px-5 py-2.5 font-medium" style={{ color: ts.textPrimary }}>{n.title}</td>
-                      <td className="px-5 py-2.5"><ColourChip label={n.category} color={CATEGORY_COLORS[n.category] ?? '#6B7280'} /></td>
-                      <td className="px-5 py-2.5"><ColourChip label={n.status} color={STATUS_COLORS[n.status] ?? '#6B7280'} /></td>
-                      <td className="px-5 py-2.5"><Badge active={n.is_active} /></td>
-                      <td className="px-5 py-2.5">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setInnovationModal({ open: true, data: { title: n.title, slug: n.slug, description: n.description, category: n.category, status: n.status, icon: n.icon, image_url: n.image_url, is_active: n.is_active }, id: n.id })}
-                            className="p-1.5 rounded-lg transition hover:opacity-80"
-                            style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}
-                          >
-                            <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
-                          </button>
-                          <button
-                            onClick={() => deleteInnovation(n.id, n.title)}
-                            className="p-1.5 rounded-lg transition hover:opacity-80"
-                            style={{ background: '#EF444422', color: '#EF4444' }}
-                          >
-                            <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+      {tab === 'events' && (
+        <TableCard loading={false} empty={vEvents.length === 0} emptyTitle={events.length === 0 ? 'No events yet' : 'No events match'} headers={['Event', 'Type', 'Starts', 'Visible', '']}>
+          {vEvents.map((ev) => (
+            <tr key={ev.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+              <td className="px-4 py-3 font-medium" style={{ color: 'var(--adm-text)' }}>{ev.title}</td>
+              <td className="px-4 py-3 text-xs capitalize" style={{ color: 'var(--adm-text-2)' }}>{ev.event_type}</td>
+              <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{ev.starts_at ? fmtDate(ev.starts_at) : '-'}</td>
+              <td className="px-4 py-3"><StatusPill tone={ev.is_active ? 'success' : 'neutral'}>{ev.is_active ? 'Visible' : 'Hidden'}</StatusPill></td>
+              <td className="px-4 py-3">
+                <div className="flex gap-2">
+                  <IconButton title="Edit" onClick={() => setEventModal({ open: true, data: { title: ev.title, slug: ev.slug, description: ev.description, event_type: ev.event_type, starts_at: ev.starts_at, ends_at: ev.ends_at, location: ev.location, is_active: ev.is_active }, id: ev.id })}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></IconButton>
+                  <IconButton title="Delete" color="var(--adm-error)" onClick={() => deleteEvent(ev.id, ev.title)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </TableCard>
+      )}
 
-        {/* ── Events ── */}
-        {tab === 'events' && (
-          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: ts.border }}>
-              <h2 className="text-sm font-semibold" style={{ color: ts.textPrimary }}>Tech Events</h2>
-              <button
-                onClick={() => setEventModal({ open: true, data: blankEvent(), id: null })}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white transition hover:opacity-90"
-                style={{ background: BRAND_COLORS.tropicalTeal }}
-              >
-                <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
-                Add New
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${ts.border}` }}>
-                    {['Title', 'Type', 'Start Date', 'Visible', 'Actions'].map((h) => (
-                      <th key={h} className="px-5 py-2.5 text-left font-semibold" style={{ color: ts.textMuted }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {events.length === 0 ? (
-                    <tr><td colSpan={5}><EmptyBlock title="No events yet." /></td></tr>
-                  ) : events.map((ev) => (
-                    <tr key={ev.id} style={{ borderBottom: `1px solid ${ts.border}` }} className="transition" onMouseEnter={e => (e.currentTarget.style.background = ts.rowHover)} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                      <td className="px-5 py-2.5 font-medium" style={{ color: ts.textPrimary }}>{ev.title}</td>
-                      <td className="px-5 py-2.5" style={{ color: ts.textSecondary }}>{ev.event_type}</td>
-                      <td className="px-5 py-2.5" style={{ color: ts.textSecondary }}>{ev.starts_at ?? '-'}</td>
-                      <td className="px-5 py-2.5"><Badge active={ev.is_active} /></td>
-                      <td className="px-5 py-2.5">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setEventModal({ open: true, data: { title: ev.title, slug: ev.slug, description: ev.description, event_type: ev.event_type, starts_at: ev.starts_at, ends_at: ev.ends_at, location: ev.location, is_active: ev.is_active }, id: ev.id })}
-                            className="p-1.5 rounded-lg transition hover:opacity-80"
-                            style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}
-                          >
-                            <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
-                          </button>
-                          <button
-                            onClick={() => deleteEvent(ev.id, ev.title)}
-                            className="p-1.5 rounded-lg transition hover:opacity-80"
-                            style={{ background: '#EF444422', color: '#EF4444' }}
-                          >
-                            <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* ── Resources ── */}
-        {tab === 'resources' && (
-          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: ts.border }}>
-              <h2 className="text-sm font-semibold" style={{ color: ts.textPrimary }}>Tech Resources</h2>
-              <button
-                onClick={() => setResourceModal({ open: true, data: blankResource(), id: null })}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white transition hover:opacity-90"
-                style={{ background: BRAND_COLORS.tropicalTeal }}
-              >
-                <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
-                Add New
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${ts.border}` }}>
-                    {['Title', 'Type', 'Visible', 'Actions'].map((h) => (
-                      <th key={h} className="px-5 py-2.5 text-left font-semibold" style={{ color: ts.textMuted }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {resources.length === 0 ? (
-                    <tr><td colSpan={4}><EmptyBlock title="No resources yet." /></td></tr>
-                  ) : resources.map((r) => (
-                    <tr key={r.id} style={{ borderBottom: `1px solid ${ts.border}` }} className="transition" onMouseEnter={e => (e.currentTarget.style.background = ts.rowHover)} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                      <td className="px-5 py-2.5 font-medium" style={{ color: ts.textPrimary }}>{r.title}</td>
-                      <td className="px-5 py-2.5" style={{ color: ts.textSecondary }}>{r.resource_type ?? '-'}</td>
-                      <td className="px-5 py-2.5"><Badge active={r.is_active} /></td>
-                      <td className="px-5 py-2.5">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setResourceModal({ open: true, data: { title: r.title, slug: r.slug, description: r.description, resource_type: r.resource_type, url: r.url, thumbnail_url: r.thumbnail_url, is_active: r.is_active }, id: r.id })}
-                            className="p-1.5 rounded-lg transition hover:opacity-80"
-                            style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}
-                          >
-                            <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
-                          </button>
-                          <button
-                            onClick={() => deleteResource(r.id, r.title)}
-                            className="p-1.5 rounded-lg transition hover:opacity-80"
-                            style={{ background: '#EF444422', color: '#EF4444' }}
-                          >
-                            <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>
+      {tab === 'resources' && (
+        <TableCard loading={false} empty={vResources.length === 0} emptyTitle={resources.length === 0 ? 'No resources yet' : 'No resources match'} headers={['Resource', 'Type', 'Visible', '']}>
+          {vResources.map((r) => (
+            <tr key={r.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+              <td className="px-4 py-3 font-medium" style={{ color: 'var(--adm-text)' }}>{r.title}</td>
+              <td className="px-4 py-3 text-xs capitalize" style={{ color: 'var(--adm-text-2)' }}>{r.resource_type ?? '-'}</td>
+              <td className="px-4 py-3"><StatusPill tone={r.is_active ? 'success' : 'neutral'}>{r.is_active ? 'Visible' : 'Hidden'}</StatusPill></td>
+              <td className="px-4 py-3">
+                <div className="flex gap-2">
+                  <IconButton title="Edit" onClick={() => setResourceModal({ open: true, data: { title: r.title, slug: r.slug, description: r.description, resource_type: r.resource_type, url: r.url, thumbnail_url: r.thumbnail_url, is_active: r.is_active }, id: r.id })}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></IconButton>
+                  <IconButton title="Delete" color="var(--adm-error)" onClick={() => deleteResource(r.id, r.title)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </TableCard>
+      )}
 
       {/* ═══════════════════════════════════════════════
           Modal: Innovation
@@ -497,7 +372,7 @@ Cancel
               </Field>
               <Field label="Active">
                 <div className="flex items-center gap-2 mt-1">
-                  <input type="checkbox" id="inn-active" checked={innovationModal.data.is_active} onChange={e => setInnovationModal(s => ({ ...s, data: { ...s.data, is_active: e.target.checked } }))} className="w-4 h-4 cursor-pointer" style={{ accentColor: BRAND_COLORS.tropicalTeal }} />
+                  <input type="checkbox" id="inn-active" checked={innovationModal.data.is_active} onChange={e => setInnovationModal(s => ({ ...s, data: { ...s.data, is_active: e.target.checked } }))} className="w-4 h-4 cursor-pointer" style={{ accentColor: 'var(--adm-primary)' }} />
                   <label htmlFor="inn-active" className="text-xs cursor-pointer" style={{ color: ts.textSecondary }}>Visible on site</label>
                 </div>
               </Field>
@@ -557,7 +432,7 @@ Cancel
               </Field>
               <Field label="Active">
                 <div className="flex items-center gap-2 mt-1">
-                  <input type="checkbox" id="ev-active" checked={eventModal.data.is_active} onChange={e => setEventModal(s => ({ ...s, data: { ...s.data, is_active: e.target.checked } }))} className="w-4 h-4 cursor-pointer" style={{ accentColor: BRAND_COLORS.tropicalTeal }} />
+                  <input type="checkbox" id="ev-active" checked={eventModal.data.is_active} onChange={e => setEventModal(s => ({ ...s, data: { ...s.data, is_active: e.target.checked } }))} className="w-4 h-4 cursor-pointer" style={{ accentColor: 'var(--adm-primary)' }} />
                   <label htmlFor="ev-active" className="text-xs cursor-pointer" style={{ color: ts.textSecondary }}>Visible on site</label>
                 </div>
               </Field>
@@ -612,7 +487,7 @@ Cancel
               </Field>
               <Field label="Active">
                 <div className="flex items-center gap-2 mt-1">
-                  <input type="checkbox" id="res-active" checked={resourceModal.data.is_active} onChange={e => setResourceModal(s => ({ ...s, data: { ...s.data, is_active: e.target.checked } }))} className="w-4 h-4 cursor-pointer" style={{ accentColor: BRAND_COLORS.tropicalTeal }} />
+                  <input type="checkbox" id="res-active" checked={resourceModal.data.is_active} onChange={e => setResourceModal(s => ({ ...s, data: { ...s.data, is_active: e.target.checked } }))} className="w-4 h-4 cursor-pointer" style={{ accentColor: 'var(--adm-primary)' }} />
                   <label htmlFor="res-active" className="text-xs cursor-pointer" style={{ color: ts.textSecondary }}>Visible on site</label>
                 </div>
               </Field>
