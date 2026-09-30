@@ -30,6 +30,12 @@ import {
   faChevronRight,
   faGlobeAfrica,
   faUserCircle,
+  faRoute,
+  faCartShopping,
+  faQuoteLeft,
+  faCommentDots,
+  faNewspaper,
+  faMapLocationDot,
 } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from '@/context/ThemeContext';
 import { getAuthStatus, logoutUser, type User } from '@/lib/api';
@@ -47,20 +53,26 @@ const NAV_GROUPS = [
   {
     group: 'Content',
     items: [
+      { icon: faRoute, label: 'Tours', href: '/admin/tours' },
       { icon: faBox, label: 'Market Products', href: '/admin/market' },
       { icon: faHammer, label: 'Artisans', href: '/admin/artisans' },
       { icon: faUsers, label: 'Team & Careers', href: '/admin/team' },
       { icon: faMicrochip, label: 'Tech Hub', href: '/admin/tech' },
       { icon: faGraduationCap, label: 'Study Abroad', href: '/admin/study' },
       { icon: faLayerGroup, label: 'Homepage', href: '/admin/homepage' },
+      { icon: faQuoteLeft, label: 'Testimonials', href: '/admin/testimonials' },
+      { icon: faNewspaper, label: 'Blog', href: '/admin/blog' },
+      { icon: faMapLocationDot, label: 'Destinations', href: '/admin/destinations' },
       { icon: faBars, label: 'Navigation', href: '/admin/navigation' },
     ],
   },
   {
     group: 'Operations',
     items: [
+      { icon: faCartShopping, label: 'Orders', href: '/admin/orders' },
       { icon: faUsersCog, label: 'Users', href: '/admin/users' },
       { icon: faEnvelope, label: 'Contact Messages', href: '/admin/contacts' },
+      { icon: faCommentDots, label: 'Feedback', href: '/admin/feedback' },
       { icon: faPaperPlane, label: 'Newsletter', href: '/admin/newsletter' },
     ],
   },

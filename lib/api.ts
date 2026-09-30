@@ -97,7 +97,7 @@ export async function registerUser(params: {
     options: {
       data: { first_name: params.first_name, last_name: params.last_name },
       emailRedirectTo:
-        typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : undefined,
+        typeof window !== "undefined" ? `${window.location.origin}/auth/callback?next=/auth/confirm-email` : undefined,
     },
   });
 
@@ -123,6 +123,10 @@ export async function requestPasswordReset(
 export interface DashboardStats {
   tours_booked: number;
   orders_placed: number;
+  study_applications: number;
+  wishlist_count: number;
+  profile_complete: number;
+  recent_orders: Order[];
   member_since?: string;
 }
 
@@ -241,14 +245,23 @@ export async function getUserTours(): Promise<TourBooking[]> {
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const supabase = createBrowserClient();
-  const [{ count: toursBooked }, { count: ordersPlaced }] = await Promise.all([
-    supabase.from('bookings').select('id', { count: 'exact', head: true }),
-    supabase.from('orders').select('id', { count: 'exact', head: true }),
-  ]);
+  const count = (table: 'bookings' | 'orders' | 'study_applications' | 'wishlist_items') =>
+    supabase.from(table).select('id', { count: 'exact', head: true });
+
+  const [{ count: toursBooked }, { count: ordersPlaced }, { count: studyApps }, { count: wishlisted }, profile, orders] =
+    await Promise.all([count('bookings'), count('orders'), count('study_applications'), count('wishlist_items'), getProfile(), getUserOrders()]);
+
+  // Share of the profile fields a user can fill in that are filled.
+  const fields = profile ? [profile.first_name, profile.last_name, profile.phone_number, profile.bio, profile.avatar_url] : [];
+  const profileComplete = fields.length ? Math.round((fields.filter(Boolean).length / fields.length) * 100) : 0;
 
   return {
     tours_booked: toursBooked ?? 0,
     orders_placed: ordersPlaced ?? 0,
+    study_applications: studyApps ?? 0,
+    wishlist_count: wishlisted ?? 0,
+    profile_complete: profileComplete,
+    recent_orders: orders.slice(0, 3),
   };
 }
 
@@ -328,4 +341,177 @@ export async function logoutUser(): Promise<{ success: boolean }> {
   }
 
   return { success: !error };
+}
+
+export interface WishlistItem {
+  id: string;
+  product_id: string;
+  title: string;
+  price: number;
+  image_url: string;
+  added_at: string;
+}
+
+export interface StudyApplication {
+  id: string;
+  program_name: string;
+  university: string;
+  location: string;
+  start_date: string;
+  status: string;
+  duration: string;
+  created_at: string;
+}
+
+// RLS (0016) scopes both tables to the signed in user, so no user filter here.
+export async function getUserWishlist(): Promise<WishlistItem[]> {
+  const supabase = createBrowserClient();
+  const { data, error } = await supabase
+    .from('wishlist_items')
+    .select('id, product_id, created_at, market_products(title, price, discount_price, image_url)')
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    product_id: row.product_id,
+    title: row.market_products?.title ?? 'Unknown product',
+    price: row.market_products?.discount_price ?? row.market_products?.price ?? 0,
+    image_url: row.market_products?.image_url ?? '',
+    added_at: row.created_at,
+  }));
+}
+
+export async function getWishlistProductIds(): Promise<string[]> {
+  const { data } = await createBrowserClient().from('wishlist_items').select('product_id');
+  return (data ?? []).map((row) => row.product_id);
+}
+
+/** Adds or removes a product. Returns false if signed out or the write failed. */
+export async function setWishlisted(productId: string, wishlisted: boolean): Promise<boolean> {
+  const supabase = createBrowserClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return false;
+
+  const { error } = wishlisted
+    ? await supabase.from('wishlist_items').upsert(
+        { user_id: auth.user.id, product_id: productId },
+        { onConflict: 'user_id,product_id', ignoreDuplicates: true },
+      )
+    : await supabase.from('wishlist_items').delete().eq('product_id', productId);
+  return !error;
+}
+
+export async function removeWishlistItem(id: string): Promise<boolean> {
+  const { error } = await createBrowserClient().from('wishlist_items').delete().eq('id', id);
+  return !error;
+}
+
+export async function getUserStudy(): Promise<StudyApplication[]> {
+  const { data, error } = await createBrowserClient()
+    .from('study_applications')
+    .select('id, program_name, university, location, start_date, status, duration, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+  return data.map((row) => ({ ...row, start_date: row.start_date ?? '' }));
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  date: string;
+  read: boolean;
+  type: 'order' | 'tour' | 'promotion' | 'wishlist' | 'general';
+}
+
+// RLS (0017) scopes notifications to the signed in user.
+export async function getNotifications(): Promise<Notification[]> {
+  const { data, error } = await createBrowserClient()
+    .from('notifications')
+    .select('id, title, message, created_at, is_read, type')
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+  return data.map((row) => ({
+    id: row.id,
+    title: row.title,
+    message: row.message,
+    date: row.created_at,
+    read: row.is_read,
+    type: row.type as Notification['type'],
+  }));
+}
+
+/** Marks one notification read, or every unread one when no id is given. */
+export async function markNotificationsRead(id?: string): Promise<boolean> {
+  let query = createBrowserClient().from('notifications').update({ is_read: true });
+  query = id ? query.eq('id', id) : query.eq('is_read', false);
+  const { error } = await query;
+  return !error;
+}
+
+/** Re-checks the current password before changing it, Supabase does not. */
+export async function changePasswordWithCurrent(
+  currentPassword: string,
+  newPassword: string,
+): Promise<{ success: boolean; message?: string }> {
+  const supabase = createBrowserClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user?.email) return { success: false, message: 'Not authenticated' };
+
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: auth.user.email,
+    password: currentPassword,
+  });
+  if (verifyError) return { success: false, message: 'Current password is incorrect' };
+  return changePassword(newPassword);
+}
+
+/** The user's verified authenticator app factor, if they have set one up. */
+export async function getTotpFactorId(): Promise<string | null> {
+  const { data } = await createBrowserClient().auth.mfa.listFactors();
+  return data?.totp[0]?.id ?? null;
+}
+
+export async function enrollTotp(): Promise<{ id: string; qrCode: string; secret: string } | { error: string }> {
+  const supabase = createBrowserClient();
+  // A half finished earlier enrolment blocks a new one, clear it first.
+  const { data: factors } = await supabase.auth.mfa.listFactors();
+  for (const factor of factors?.all ?? []) {
+    if (factor.factor_type === 'totp' && factor.status === 'unverified') {
+      await supabase.auth.mfa.unenroll({ factorId: factor.id });
+    }
+  }
+  const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Authenticator app' });
+  if (error || !data) return { error: error?.message ?? 'Could not start two-factor setup' };
+  return { id: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret };
+}
+
+export async function verifyTotp(factorId: string, code: string): Promise<{ success: boolean; message?: string }> {
+  const { error } = await createBrowserClient().auth.mfa.challengeAndVerify({ factorId, code });
+  return error ? { success: false, message: error.message } : { success: true };
+}
+
+export async function disableTotp(factorId: string): Promise<{ success: boolean; message?: string }> {
+  const { error } = await createBrowserClient().auth.mfa.unenroll({ factorId });
+  return error ? { success: false, message: error.message } : { success: true };
+}
+
+/** Signs the account out everywhere except this browser. */
+export async function signOutOtherSessions(): Promise<boolean> {
+  const { error } = await createBrowserClient().auth.signOut({ scope: 'others' });
+  return !error;
+}
+
+/** Sends the email confirmation link again. */
+export async function resendConfirmationEmail(email: string): Promise<{ success: boolean; message?: string }> {
+  const { error } = await createBrowserClient().auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/auth/confirm-email` },
+  });
+  return error ? { success: false, message: error.message } : { success: true };
 }

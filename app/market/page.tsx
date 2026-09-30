@@ -67,7 +67,7 @@ import Loading from '@/components/Loading';
 import { useCart } from '@/context/CartContext';
 import Cart from '@/components/Cart';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { getAuthStatus } from '@/lib/api';
+import { getAuthStatus, getWishlistProductIds, setWishlisted } from '@/lib/api';
 
 // ===== PAYSTACK IMPORTS =====
 import PaystackPaymentModal from '@/components/PaystackPaymentModal';
@@ -2189,17 +2189,29 @@ function MarketPage() {
     } as any);
   }, [isAuthenticated, addToCart, getItemCount]);
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    getWishlistProductIds().then((ids) => setWishlist(new Set(ids)));
+  }, [isAuthenticated]);
+
   const handleWishlistToggle = useCallback((productId: string) => {
-    setWishlist(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(productId)) {
-        newSet.delete(productId);
-      } else {
-        newSet.add(productId);
-      }
-      return newSet;
+    if (!isAuthenticated) {
+      setLoginToastMessage('Please log in to save items to your wishlist.');
+      setShowLoginToast(true);
+      return;
+    }
+    const wishlisted = !wishlist.has(productId);
+    const apply = (on: boolean) =>
+      setWishlist(prev => {
+        const next = new Set(prev);
+        if (on) next.add(productId); else next.delete(productId);
+        return next;
+      });
+    apply(wishlisted);
+    setWishlisted(productId, wishlisted).then((ok) => {
+      if (!ok) apply(!wishlisted);
     });
-  }, []);
+  }, [isAuthenticated, wishlist]);
 
   const handleOrderStatusFilter = useCallback((status: string) => {
     setOrderStatusFilter(status);

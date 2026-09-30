@@ -11,7 +11,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/env";
 import type { Database } from "@/types/database";
 
-const PROTECTED = ["/auth/dashboard", "/auth/orders", "/auth/payments", "/auth/profile", "/auth/settings", "/auth/tours"];
+const PROTECTED = ["/auth/dashboard", "/auth/orders", "/auth/payments", "/auth/profile", "/auth/settings", "/auth/tours", "/auth/study", "/auth/wishlist", "/auth/notifications", "/auth/security"];
 const GUEST_ONLY = ["/auth/login", "/auth/register"];
 
 const matches = (path: string, prefixes: string[]) =>
