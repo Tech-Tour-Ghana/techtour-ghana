@@ -5,10 +5,10 @@
 // metadata editing work everywhere an image can be chosen.
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFolderPlus, faGrip, faList, faMagnifyingGlass, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { faCloudArrowUp, faFolder, faFolderOpen, faGrip, faList, faMagnifyingGlass, faPencil, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Button, EmptyBlock, ListSkeleton, Modal, fieldStyle } from '@/components/admin/ui';
+import { Button, EmptyBlock, IconButton, ListSkeleton, Modal, Surface, fieldStyle } from '@/components/admin/ui';
 import { notify } from '@/components/admin/toast';
 import { createBrowserClient } from '@/lib/supabase/client';
 import {
@@ -21,6 +21,19 @@ import MediaDetails from './MediaDetails';
 import MediaDropzone from './MediaDropzone';
 import MediaUploadQueue from './MediaUploadQueue';
 import { useUploader } from './useUploader';
+import { ACCEPT_ATTR } from '@/lib/media/files';
+
+function useMediaQuery(query: string) {
+  const [match, setMatch] = useState(false);
+  useEffect(() => {
+    const m = window.matchMedia(query);
+    const on = () => setMatch(m.matches);
+    on();
+    m.addEventListener('change', on);
+    return () => m.removeEventListener('change', on);
+  }, [query]);
+  return match;
+}
 
 export type LibraryMode = 'manage' | 'single' | 'multiple';
 
@@ -68,6 +81,10 @@ export default function MediaLibrary({ mode = 'manage', onSelectionChange, onUse
   const [folderModal, setFolderModal] = useState<{ id: string | null; name: string } | null>(null);
   const [folderDelete, setFolderDelete] = useState<MediaFolder | null>(null);
   const [reload, setReload] = useState(0);
+  const wide = useMediaQuery('(min-width: 1280px)');
+  const fileInput = useRef<HTMLInputElement>(null);
+  const dragDepth = useRef(0);
+  const [dragging, setDragging] = useState(false);
 
   useEffect(() => { const t = setTimeout(() => setDebounced(search), 300); return () => clearTimeout(t); }, [search]);
   useEffect(() => { setPage(0); }, [debounced, filter, sort, folderId]);
@@ -146,57 +163,104 @@ export default function MediaLibrary({ mode = 'manage', onSelectionChange, onUse
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const activeFolder = folders.find((f) => f.id === folderId) ?? null;
   const selectedIds = new Set(selected.map((s) => s.id));
-  const filtering = !!debounced || filter !== 'all' || !!folderId;
+  const filtering = !!debounced || filter !== 'all';
+  const emptyLibrary = !loading && total === 0 && !filtering && !folderId;
+
+  const details = active && (
+    <MediaDetails asset={active} onUpdated={patchRow} onDeleted={dropRow} onUse={mode === 'manage' ? undefined : onUse} />
+  );
+
+  const dnd = {
+    onDragEnter: (e: React.DragEvent) => { if (e.dataTransfer.types.includes('Files')) { dragDepth.current += 1; setDragging(true); } },
+    onDragOver: (e: React.DragEvent) => { if (e.dataTransfer.types.includes('Files')) e.preventDefault(); },
+    onDragLeave: () => { dragDepth.current = Math.max(0, dragDepth.current - 1); if (dragDepth.current === 0) setDragging(false); },
+    onDrop: (e: React.DragEvent) => {
+      e.preventDefault();
+      dragDepth.current = 0;
+      setDragging(false);
+      if (e.dataTransfer.files.length) uploader.addFiles(Array.from(e.dataTransfer.files));
+    },
+  };
 
   return (
-    <div className="flex min-h-0 flex-col gap-4 lg:flex-row">
-      <div className="min-w-0 flex-1 space-y-4">
-        <MediaDropzone onFiles={uploader.addFiles} compact={total > 0} />
-        <MediaUploadQueue items={uploader.items} onRetry={uploader.retry} onRemove={uploader.remove} onClearFinished={uploader.clearFinished} />
-
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative min-w-[12rem] flex-1">
-            <FontAwesomeIcon icon={faMagnifyingGlass} className="pointer-events-none absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2" style={{ color: 'var(--adm-muted)' }} />
-            <input aria-label="Search media" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search filename, title or alt text"
-              className="w-full py-2 pl-8 pr-3 text-sm" style={fieldStyle} />
+    <div className="flex min-h-0 gap-5">
+      {/* Folders */}
+      <aside className="hidden w-52 flex-shrink-0 md:block" aria-label="Folders">
+        <Surface className="p-2">
+          <div className="mb-1 flex items-center justify-between px-2 py-1">
+            <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: 'var(--adm-muted)' }}>Folders</span>
+            <IconButton title="New folder" onClick={() => setFolderModal({ id: null, name: '' })}><FontAwesomeIcon icon={faPlus} className="h-3 w-3" /></IconButton>
           </div>
+          <ul className="space-y-0.5">
+            {[{ id: null as string | null, name: 'All media' }, ...folders].map((f) => {
+              const on = folderId === f.id;
+              const real = folders.find((x) => x.id === f.id);
+              return (
+                <li key={f.id ?? 'all'} className="group relative">
+                  <button
+                    type="button"
+                    onClick={() => setFolderId(f.id)}
+                    aria-current={on ? 'true' : undefined}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors"
+                    style={{ background: on ? 'var(--adm-primary-soft)' : 'transparent', color: on ? 'var(--adm-primary)' : 'var(--adm-text-2)', fontWeight: on ? 700 : 500 }}
+                  >
+                    <FontAwesomeIcon icon={on ? faFolderOpen : faFolder} className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span className="truncate">{f.name}</span>
+                  </button>
+                  {mode === 'manage' && real && (
+                    <span className="absolute right-1 top-1/2 flex -translate-y-1/2 gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+                      <button type="button" aria-label={`Rename ${real.name}`} onClick={() => setFolderModal({ id: real.id, name: real.name })} className="rounded p-1.5" style={{ color: 'var(--adm-muted)' }}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></button>
+                      <button type="button" aria-label={`Delete ${real.name}`} onClick={() => setFolderDelete(real)} className="rounded p-1.5" style={{ color: 'var(--adm-error)' }}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></button>
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </Surface>
+      </aside>
+
+      {/* Files */}
+      <div className="relative min-w-0 flex-1" {...dnd}>
+        <input ref={fileInput} type="file" multiple accept={ACCEPT_ATTR} className="sr-only" tabIndex={-1} aria-label="Choose files to upload"
+          onChange={(e) => { if (e.target.files?.length) uploader.addFiles(Array.from(e.target.files)); e.target.value = ''; }} />
+
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <select aria-label="Folder" value={folderId ?? ''} onChange={(e) => setFolderId(e.target.value || null)} className="px-3 py-2 text-sm md:hidden" style={fieldStyle}>
+            <option value="">All media</option>
+            {folders.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+          </select>
+          <div className="relative min-w-[10rem] flex-1">
+            <FontAwesomeIcon icon={faMagnifyingGlass} className="pointer-events-none absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2" style={{ color: 'var(--adm-muted)' }} />
+            <input aria-label="Search media" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search files" className="w-full py-2 pl-8 pr-3 text-sm" style={fieldStyle} />
+          </div>
+          <Button onClick={() => fileInput.current?.click()}>
+            <FontAwesomeIcon icon={faCloudArrowUp} className="mr-2 h-3.5 w-3.5" />Upload
+          </Button>
           <select aria-label="Filter" value={filter} onChange={(e) => setFilter(e.target.value as MediaFilter)} className="px-3 py-2 text-sm" style={fieldStyle}>
             {FILTERS.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
           </select>
           <select aria-label="Sort" value={sort} onChange={(e) => setSort(e.target.value as MediaSort)} className="px-3 py-2 text-sm" style={fieldStyle}>
-            {SORTS.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
-          </select>
-          <select aria-label="Folder" value={folderId ?? ''} onChange={(e) => setFolderId(e.target.value || null)} className="px-3 py-2 text-sm" style={fieldStyle}>
-            <option value="">All folders</option>
-            {folders.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+            {SORTS.map((x) => <option key={x.key} value={x.key}>{x.label}</option>)}
           </select>
           <div className="flex overflow-hidden" style={{ borderRadius: 'var(--adm-radius-control)', border: '1px solid var(--adm-border)' }}>
             {(['grid', 'list'] as const).map((v) => (
               <button key={v} type="button" aria-label={`${v} view`} aria-pressed={view === v} onClick={() => setView(v)} className="px-3 py-2 text-xs"
-                style={{ background: view === v ? 'var(--adm-primary)' : 'var(--adm-card)', color: view === v ? '#fff' : 'var(--adm-text-2)' }}>
+                style={{ background: view === v ? 'var(--adm-primary-soft)' : 'var(--adm-card)', color: view === v ? 'var(--adm-primary)' : 'var(--adm-muted)' }}>
                 <FontAwesomeIcon icon={v === 'grid' ? faGrip : faList} className="h-3.5 w-3.5" />
               </button>
             ))}
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-xs" style={{ color: 'var(--adm-muted)' }}>
-          <span>{total} file{total === 1 ? '' : 's'}{activeFolder ? ` in ${activeFolder.name}` : ''}</span>
-          <span className="flex-1" />
-          <Button variant="secondary" className="!px-3 !py-1.5" onClick={() => setFolderModal({ id: null, name: '' })}>
-            <FontAwesomeIcon icon={faFolderPlus} className="mr-1.5 h-3 w-3" />New folder
-          </Button>
-          {activeFolder && (
-            <>
-              <Button variant="secondary" className="!px-3 !py-1.5" onClick={() => setFolderModal({ id: activeFolder.id, name: activeFolder.name })}>
-                <FontAwesomeIcon icon={faPencil} className="mr-1.5 h-3 w-3" />Rename
-              </Button>
-              <Button variant="danger" className="!px-3 !py-1.5" onClick={() => setFolderDelete(activeFolder)}>
-                <FontAwesomeIcon icon={faTrash} className="mr-1.5 h-3 w-3" />Delete folder
-              </Button>
-            </>
-          )}
-        </div>
+        <MediaUploadQueue items={uploader.items} onRetry={uploader.retry} onRemove={uploader.remove} onClearFinished={uploader.clearFinished} />
+
+        {!emptyLibrary && (
+          <p className="mb-3 mt-1 text-xs" style={{ color: 'var(--adm-muted)' }}>
+            <strong style={{ color: 'var(--adm-text-2)' }}>{activeFolder ? activeFolder.name : 'All media'}</strong> · {total} file{total === 1 ? '' : 's'}
+            {mode !== 'manage' ? '' : ' · drag files here to upload'}
+          </p>
+        )}
 
         {error ? (
           <p role="alert" className="rounded-[var(--adm-radius-control)] p-4 text-sm" style={{ background: 'var(--adm-error-soft)', color: 'var(--adm-error)' }}>
@@ -204,15 +268,14 @@ export default function MediaLibrary({ mode = 'manage', onSelectionChange, onUse
           </p>
         ) : loading && rows.length === 0 ? (
           <ListSkeleton />
+        ) : emptyLibrary ? (
+          <MediaDropzone onFiles={uploader.addFiles} />
         ) : rows.length === 0 ? (
-          <EmptyBlock
-            title={filtering ? 'No files match' : 'No media uploaded yet'}
-            body={filtering ? 'Try a different search or filter.' : 'Drag files into the box above to add your first image.'}
-          />
+          <Surface><EmptyBlock title="No files match" body={folderId && !filtering ? 'This folder is empty. Drag files here to add some.' : 'Try a different search or filter.'} /></Surface>
         ) : (
           <div
-            className={view === 'grid' ? 'grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4' : 'space-y-2'}
-            style={{ opacity: loading ? 0.6 : 1 }}
+            className={view === 'grid' ? 'grid gap-3' : 'space-y-2'}
+            style={{ opacity: loading ? 0.6 : 1, ...(view === 'grid' ? { gridTemplateColumns: 'repeat(auto-fill, minmax(9.5rem, 1fr))' } : {}) }}
           >
             {rows.map((a) => (
               <MediaCard key={a.id} asset={a} view={view} multiple={mode === 'multiple'} selected={mode === 'manage' ? active?.id === a.id : selectedIds.has(a.id)} onClick={() => click(a)} />
@@ -221,23 +284,30 @@ export default function MediaLibrary({ mode = 'manage', onSelectionChange, onUse
         )}
 
         {pages > 1 && (
-          <div className="flex items-center justify-center gap-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>
+          <div className="mt-5 flex items-center justify-center gap-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>
             <Button variant="secondary" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>Previous</Button>
             <span>Page {page + 1} of {pages}</span>
             <Button variant="secondary" disabled={page >= pages - 1} onClick={() => setPage((p) => p + 1)}>Next</Button>
           </div>
         )}
+
+        {dragging && (
+          <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[var(--adm-radius-card)] border-2 border-dashed" style={{ background: 'color-mix(in srgb, var(--adm-primary) 10%, var(--adm-bg))', borderColor: 'var(--adm-primary)', color: 'var(--adm-primary)' }}>
+            <FontAwesomeIcon icon={faCloudArrowUp} className="h-8 w-8 animate-bounce motion-reduce:animate-none" />
+            <p className="text-sm font-bold">Drop files to upload{uploadFolder ? ` to ${uploadFolder.name}` : ''}</p>
+          </div>
+        )}
       </div>
 
-      <div className="w-full flex-shrink-0 lg:w-80">
-        <div className="rounded-[var(--adm-radius-card)] p-4 lg:sticky lg:top-0" style={{ background: 'var(--adm-card)', border: '1px solid var(--adm-border)', boxShadow: 'var(--adm-shadow)' }}>
-          {active ? (
-            <MediaDetails asset={active} onUpdated={patchRow} onDeleted={dropRow} onUse={mode === 'manage' ? undefined : onUse} />
-          ) : (
-            <p className="py-8 text-center text-xs" style={{ color: 'var(--adm-muted)' }}>Select a file to see its details and edit its alt text.</p>
-          )}
-        </div>
-      </div>
+      {/* Details: a side panel on wide screens, a dialog otherwise */}
+      {wide && active && (
+        <aside className="w-80 flex-shrink-0" aria-label="Details">
+          <Surface className="sticky top-0 max-h-[calc(100vh-9rem)] overflow-y-auto p-4">{details}</Surface>
+        </aside>
+      )}
+      {!wide && active && (
+        <Modal title="File details" maxWidth="max-w-md" onClose={() => setActive(null)}>{details}</Modal>
+      )}
 
       {folderModal && (
         <Modal title={folderModal.id ? 'Rename folder' : 'New folder'} maxWidth="max-w-sm" onClose={() => setFolderModal(null)}
