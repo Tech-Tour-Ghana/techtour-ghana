@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faDashboard,
   faBox,
+  faClipboardList,
   faTags,
   faHammer,
   faUsers,
@@ -55,58 +56,66 @@ const BRAND_COLORS = {
   sandyOrange: '#E6A64D',
 };
 
+// Grouped by what the admin is doing, not by table.
 const NAV_GROUPS = [
   {
-    group: null,
-    items: [{ icon: faDashboard, label: 'Dashboard', href: '/admin' }],
+    group: 'Overview',
+    items: [
+      { icon: faDashboard, label: 'Dashboard', href: '/admin' },
+      { icon: faChartLine, label: 'Analytics', href: '/admin/analytics' },
+    ],
   },
   {
-    group: 'Content',
+    group: 'Travel & Study',
     items: [
       { icon: faRoute, label: 'Tours', href: '/admin/tours' },
-      { icon: faBox, label: 'Market Products', href: '/admin/market' },
-      { icon: faHammer, label: 'Artisans', href: '/admin/artisans' },
-      { icon: faUsers, label: 'Team & Careers', href: '/admin/team' },
-      { icon: faMicrochip, label: 'Tech Hub', href: '/admin/tech' },
-      { icon: faGraduationCap, label: 'Study Abroad', href: '/admin/study' },
-      { icon: faLayerGroup, label: 'Homepage', href: '/admin/homepage' },
-      { icon: faQuoteLeft, label: 'Testimonials', href: '/admin/testimonials' },
-      { icon: faNewspaper, label: 'Blog', href: '/admin/blog' },
       { icon: faMapLocationDot, label: 'Destinations', href: '/admin/destinations' },
-      { icon: faBars, label: 'Navigation', href: '/admin/navigation' },
+      { icon: faGraduationCap, label: 'Study Abroad', href: '/admin/study' },
+      { icon: faClipboardList, label: 'Study Applications', href: '/admin/applications' },
     ],
   },
   {
-    group: 'Operations',
+    group: 'Marketplace',
     items: [
+      { icon: faBox, label: 'Market Products', href: '/admin/market' },
       { icon: faCartShopping, label: 'Orders', href: '/admin/orders' },
-      { icon: faUsersCog, label: 'Users', href: '/admin/users' },
-      { icon: faEnvelope, label: 'Contact Messages', href: '/admin/contacts' },
-      { icon: faCommentDots, label: 'Feedback', href: '/admin/feedback' },
-      { icon: faGraduationCap, label: 'Study Applications', href: '/admin/applications' },
-      { icon: faBell, label: 'Send Notifications', href: '/admin/send-notifications' },
-      { icon: faEnvelopeCircleCheck, label: 'Email Log', href: '/admin/emails' },
-      { icon: faPaperPlane, label: 'Newsletter', href: '/admin/newsletter' },
+      { icon: faHammer, label: 'Artisans', href: '/admin/artisans' },
+      { icon: faMicrochip, label: 'Tech Hub', href: '/admin/tech' },
     ],
   },
   {
-    group: 'Assets',
+    group: 'Website Content',
     items: [
+      { icon: faLayerGroup, label: 'Homepage', href: '/admin/homepage' },
+      { icon: faNewspaper, label: 'Blog', href: '/admin/blog' },
+      { icon: faQuoteLeft, label: 'Testimonials', href: '/admin/testimonials' },
+      { icon: faUsers, label: 'Team & Careers', href: '/admin/team' },
       { icon: faImages, label: 'Media Library', href: '/admin/media' },
+      { icon: faBars, label: 'Navigation', href: '/admin/navigation' },
     ],
   },
   {
     group: 'Marketing',
     items: [
       { icon: faMagnifyingGlass, label: 'SEO Manager', href: '/admin/seo' },
+      { icon: faPaperPlane, label: 'Newsletter', href: '/admin/newsletter' },
+      { icon: faBell, label: 'Send Notifications', href: '/admin/send-notifications' },
     ],
   },
   {
-    group: 'System',
+    group: 'Inbox & Support',
     items: [
-      { icon: faChartLine, label: 'Analytics', href: '/admin/analytics' },
-      { icon: faScrewdriverWrench, label: 'Maintenance Mode', href: '/admin/maintenance' },
+      { icon: faEnvelope, label: 'Contact Messages', href: '/admin/contacts' },
+      { icon: faCommentDots, label: 'Feedback', href: '/admin/feedback' },
+      { icon: faEnvelopeCircleCheck, label: 'Email Log', href: '/admin/emails' },
+    ],
+  },
+  {
+    group: 'Administration',
+    items: [
+      { icon: faUsersCog, label: 'Users', href: '/admin/users' },
       { icon: faClockRotateLeft, label: 'Audit Log', href: '/admin/audit' },
+      { icon: faScrewdriverWrench, label: 'Maintenance Mode', href: '/admin/maintenance' },
       { icon: faCog, label: 'Settings', href: '/admin/settings' },
       { icon: faUserCircle, label: 'My Profile', href: '/admin/profile' },
     ],
@@ -258,24 +267,23 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                 </>
               )}
               {items.map((item) => {
-                const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+                const isActive = item.href === '/admin' ? pathname === '/admin' : pathname === item.href || pathname.startsWith(`${item.href}/`);
                 return (
                   <Link
                     key={item.label}
                     href={item.href}
                     title={item.label}
                     aria-label={item.label}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 ${collapsed ? 'lg:justify-center lg:px-0' : ''}`}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors duration-150 ${isActive ? 'font-semibold' : 'font-medium hover:bg-white/5 hover:text-white'} ${collapsed ? 'lg:justify-center lg:px-0' : ''}`}
                     style={{
-                      background: isActive ? `${BRAND_COLORS.tropicalTeal}22` : 'transparent',
-                      color: isActive ? BRAND_COLORS.tropicalTeal : 'rgba(255,255,255,0.55)',
+                      background: isActive ? `${BRAND_COLORS.tropicalTeal}2E` : undefined,
+                      color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.55)',
                     }}
                   >
-                    <FontAwesomeIcon icon={item.icon} className="w-3.5 h-3.5 flex-shrink-0" />
+                    {isActive && <span aria-hidden="true" className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full" style={{ background: BRAND_COLORS.tropicalTeal }} />}
+                    <FontAwesomeIcon icon={item.icon} className="w-3.5 h-3.5 flex-shrink-0" style={isActive ? { color: BRAND_COLORS.tropicalTeal } : undefined} />
                     <span className={hideWhenRail}>{item.label}</span>
-                    {isActive && (
-                      <FontAwesomeIcon icon={faChevronRight} className={`w-2.5 h-2.5 ml-auto ${hideWhenRail}`} style={{ color: BRAND_COLORS.tropicalTeal }} />
-                    )}
                   </Link>
                 );
               })}
