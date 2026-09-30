@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -47,7 +47,7 @@ const THEME_COLORS = {
   }
 };
 
-export default function PaymentVerifyPage() {
+function PaymentVerifyPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { clearCart } = useCart();
@@ -232,5 +232,14 @@ export default function PaymentVerifyPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// useSearchParams needs a Suspense boundary now that the page renders on the server.
+export default function PaymentVerifyPage() {
+  return (
+    <Suspense fallback={null}>
+      <PaymentVerifyPageContent />
+    </Suspense>
   );
 }

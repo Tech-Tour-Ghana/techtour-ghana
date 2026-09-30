@@ -2,6 +2,8 @@
 
 'use client';
 
+import { Suspense } from 'react';
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -2772,10 +2774,19 @@ function MarketPage() {
 }
 
 // ===== EXPORT =====
-export default function MarketPageWrapper() {
+function MarketPageWrapperContent() {
   return (
     <SearchParamsWrapper>
       <MarketPage />
     </SearchParamsWrapper>
+  );
+}
+
+// useSearchParams needs a Suspense boundary now that the page renders on the server.
+export default function MarketPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <MarketPageWrapperContent />
+    </Suspense>
   );
 }

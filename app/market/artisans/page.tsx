@@ -4,7 +4,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -1193,10 +1193,19 @@ function ArtisanDetailModal({ artisan, onClose, colors, isDimMode, API_URL }: an
   );
 }
 
-export default function ArtisansPageWrapper() {
+function ArtisansPageWrapperContent() {
   return (
     <SearchParamsWrapper>
       <ArtisansPage />
     </SearchParamsWrapper>
+  );
+}
+
+// useSearchParams needs a Suspense boundary now that the page renders on the server.
+export default function ArtisansPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <ArtisansPageWrapperContent />
+    </Suspense>
   );
 }
