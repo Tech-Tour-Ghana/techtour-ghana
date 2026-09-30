@@ -2,13 +2,16 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/AppShell";
+import JsonLd from "@/components/seo/JsonLd";
 import { env } from "@/lib/env";
+import { getSiteSeo } from "@/lib/seo/load.server";
+import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/resolve";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
-  title: "TechTour Ghana",
+  title: { default: "TechTour Ghana", template: "%s | TechTour Ghana" },
   // No canonical here. Metadata set in the root layout is inherited by every
   // route, so a canonical of "/" would tell search engines that every page is
   // a duplicate of the homepage. Each page sets its own canonical instead.
@@ -31,14 +34,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+// Hourly ISR for static pages, so edits to site-wide SEO settings reach the
+// Organization/WebSite structured data without a redeploy.
+export const revalidate = 3600;
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const site = await getSiteSeo();
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+        <JsonLd data={[organizationJsonLd(site), websiteJsonLd(site)]} />
         <AppShell>{children}</AppShell>
       </body>
     </html>

@@ -94,3 +94,36 @@ test("plain text bodies become escaped paragraphs and JSON-LD cannot close the s
   assert.equal(sanitizeArticleHtml("One & 2 < 3\n\nTwo"), "<p>One &amp; 2 &lt; 3</p><p>Two</p>");
   assert.ok(!serializeJsonLd({ a: "</script><script>x" }).includes("</script>"));
 });
+
+test("audit finds missing fields, duplicates and noindex on live content only", async () => {
+  const { auditContent, healthOf } = await import("../lib/seo/audit.ts");
+  const base = { kind: "blog_post" as const, slug: "a", path: "/blog/x/a", excerpt: "", contentHtml: "<p>Hello</p>", imageUrl: "", imageAlt: "", live: true, href: "/admin/blog/1" };
+  const report = auditContent(
+    [
+      { ...base, key: "1", name: "Same Title", seo: { ...EMPTY_SEO, seo_title: "Shared", meta_description: "Shared description" } },
+      { ...base, key: "2", name: "Other", slug: "b", path: "/blog/x/b", seo: { ...EMPTY_SEO, seo_title: "Shared", meta_description: "Shared description", robots_index: false, canonical_url: "nope nope" } },
+      { ...base, key: "3", name: "Draft", live: false, seo: EMPTY_SEO },
+    ],
+    site,
+  );
+  assert.equal(report.live.length, 2);
+  assert.equal(report.duplicateTitles.length, 1);
+  assert.equal(report.duplicateDescriptions.length, 1);
+  assert.equal(report.noindex.length, 1);
+  assert.equal(report.badCanonical.length, 1);
+  assert.equal(report.missingTitle.length, 0);
+  assert.equal(report.missingImage.length, 2);
+  assert.equal(healthOf(report.items[2]!), "Missing");
+});
+
+test("redirect validation blocks bad paths, duplicates, self-redirects and loops", async () => {
+  const { validateRedirect } = await import("../lib/seo/redirects.ts");
+  const rules = [{ id: "1", source_path: "/old", destination: "/mid", is_active: true }, { id: "2", source_path: "/mid", destination: "/new", is_active: true }];
+  assert.match(validateRedirect({ source_path: "old", destination: "/x" }, []) ?? "", /starting with \//);
+  assert.match(validateRedirect({ source_path: "/a", destination: "/a/" }, []) ?? "", /same/);
+  assert.match(validateRedirect({ source_path: "/admin/x", destination: "/a" }, []) ?? "", /Admin/);
+  assert.match(validateRedirect({ source_path: "/old", destination: "/z" }, rules) ?? "", /already exists/);
+  assert.match(validateRedirect({ source_path: "/new", destination: "/old" }, rules) ?? "", /loop/);
+  assert.equal(validateRedirect({ source_path: "/fresh", destination: "https://example.com/x" }, rules), null);
+  assert.equal(validateRedirect({ source_path: "/blog/a/b", destination: "/blog/a/c" }, rules), null);
+});

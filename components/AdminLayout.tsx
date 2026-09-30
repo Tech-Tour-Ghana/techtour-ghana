@@ -23,6 +23,7 @@ import {
   faChartLine,
   faCog,
   faImages,
+  faMagnifyingGlass,
   faArrowLeft,
   faSun,
   faMoon,
@@ -90,6 +91,12 @@ const NAV_GROUPS = [
     group: 'Assets',
     items: [
       { icon: faImages, label: 'Media Library', href: '/admin/media' },
+    ],
+  },
+  {
+    group: 'Marketing',
+    items: [
+      { icon: faMagnifyingGlass, label: 'SEO Manager', href: '/admin/seo' },
     ],
   },
   {

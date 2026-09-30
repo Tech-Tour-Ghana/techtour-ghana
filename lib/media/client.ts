@@ -138,3 +138,10 @@ export async function deleteMedia(asset: MediaAsset): Promise<void> {
   const { error } = await supabase.from("media_assets").delete().eq("id", asset.id);
   if (error) throw new Error("The file was removed but its library entry could not be deleted.");
 }
+
+/** Upload straight into the default "General" folder, for editors that have no folder chooser. */
+export async function uploadToGeneral(file: File, onProgress: (pct: number) => void, signal: AbortSignal): Promise<MediaAsset> {
+  const { data } = await createBrowserClient().from("media_folders").select("id, slug").eq("slug", "general").maybeSingle();
+  if (!data) throw new Error("The General media folder is missing. Create it in the Media Library.");
+  return uploadMedia(file, data, onProgress, signal);
+}

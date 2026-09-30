@@ -24,7 +24,7 @@ const OPTIONS: sanitizeHtml.IOptions = {
     "*": ["style", "class"],
   },
   allowedClasses: {
-    "*": ["align-left", "align-right", "align-center", "image", "image-style-align-left", "image-style-align-right"],
+    "*": ["align-left", "align-right", "align-center", "image", "img-md", "img-sm"],
   },
   allowedStyles: {
     "*": {

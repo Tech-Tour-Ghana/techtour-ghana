@@ -5,6 +5,8 @@ import CategoryNav from '@/components/content/CategoryNav';
 import ContentShell from '@/components/content/ContentShell';
 import PostList from '@/components/content/PostList';
 import { BLOG_CATEGORIES, isBlogCategory } from '@/lib/content/blog';
+import { resolveSeo } from '@/lib/seo/resolve';
+import { getSeoFields, getSiteSeo, toMetadata } from '@/lib/seo/load.server';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +17,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { category } = await params;
   if (!isBlogCategory(category)) return {};
   const { label, blurb } = BLOG_CATEGORIES[category];
-  return { title: label, description: blurb, alternates: { canonical: `/blog/${category}` } };
+  const [site, seo] = await Promise.all([getSiteSeo(), getSeoFields('blog_category', category)]);
+  const resolved = resolveSeo({ path: `/blog/${category}`, title: label, excerpt: blurb, imageUrl: '', seo, site });
+  return toMetadata(resolved, { type: 'website', siteName: site.siteName });
 }
 
 export default async function BlogCategoryPage({ params }: Params) {
