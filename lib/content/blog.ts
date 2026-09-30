@@ -11,5 +11,7 @@ export type BlogCategory = keyof typeof BLOG_CATEGORIES;
 
 export const isBlogCategory = (value: string): value is BlogCategory => value in BLOG_CATEGORIES;
 
-export const formatPostDate = (iso: string | null) =>
+export const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w.charAt(0).toUpperCase()).join('') || 'T';
+
+export const formatPostDate =(iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';

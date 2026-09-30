@@ -5,11 +5,12 @@ import { cache } from 'react';
 
 import ArticleFaq from '@/components/content/ArticleFaq';
 import { cardStyle } from '@/components/content/ContentShell';
-import { PostCard, initials, type PostSummary } from '@/components/content/PostList';
+import { PostCard, type PostSummary } from '@/components/content/PostList';
 import ShareLinks from '@/components/content/ShareLinks';
 import JsonLd from '@/components/seo/JsonLd';
+import { CrumbLabel } from '@/components/SiteBreadcrumbs';
 import { ServiceTheme } from '@/components/ServiceTheme';
-import { BLOG_CATEGORIES, formatPostDate, isBlogCategory } from '@/lib/content/blog';
+import { BLOG_CATEGORIES, formatPostDate, initials, isBlogCategory } from '@/lib/content/blog';
 import { readMinutes, withHeadingIds } from '@/lib/content/toc';
 import { cleanFaqs, faqJsonLd } from '@/lib/seo/faq';
 import { articleJsonLd, breadcrumbJsonLd, resolveSeo } from '@/lib/seo/resolve';
@@ -87,10 +88,8 @@ export default async function BlogPostPage({ params }: Params) {
           ]}
         />
 
-        <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-10">
-          <nav aria-label="Breadcrumb" className="mb-6 text-xs" style={muted}>
-            <Link href="/blog" className="hover:underline">Blog</Link> / <Link href={`/blog/${category}`} className="hover:underline">{label}</Link>
-          </nav>
+        <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-8">
+          <CrumbLabel label={post.title} />
 
           <header className="mx-auto max-w-3xl text-center">
             <Link href={`/blog/${category}`} className="inline-block rounded-full px-3 py-1 text-xs font-semibold"

@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { CartProvider } from "@/context/CartContext";
 import dynamic from 'next/dynamic';
 import AnalyticsTracker from "@/components/AnalyticsTracker";
+import SiteBreadcrumbs, { CrumbProvider } from "@/components/SiteBreadcrumbs";
 import { Suspense, useState, useEffect } from "react";
 import { usePathname } from 'next/navigation';
 
@@ -57,13 +58,16 @@ export default function AppShell({
         <AnalyticsTracker />
       </Suspense>
       <CartProvider>
+       <CrumbProvider>
         {!isFullPageOnly && <Navbar />}
         {/* Add auth-page class to main for auth pages */}
         <main className={isFullPageOnly ? "min-h-screen" : isAuthPage ? "auth-page page-main" : "page-main"}>
+          {!isFullPageOnly && <SiteBreadcrumbs />}
           {children}
         </main>
         {!isFullPageOnly && <CartWrapper />}
         {!isFullPageOnly && <Footer />}
+       </CrumbProvider>
       </CartProvider>
     </ThemeProvider>
   );

@@ -69,7 +69,8 @@ import Loading from '@/components/Loading';
 import { useCart } from '@/context/CartContext';
 import Cart from '@/components/Cart';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { CURRENCIES, MARKET_COLORS as COLORS, PRODUCT_SELECT, toMarketProduct, type Currency } from '@/components/market/shared';
+import { MARKET_COLORS as COLORS, PRODUCT_SELECT, toMarketProduct } from '@/components/market/shared';
+import { CURRENCIES, useCurrencies, type Currency } from '@/lib/currency';
 import { getAuthStatus, getWishlistProductIds, setWishlisted } from '@/lib/api';
 
 // ===== PAYSTACK IMPORTS =====
@@ -677,7 +678,9 @@ function MarketPage() {
   const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high' | 'popular'>('newest');
   const [stats, setStats] = useState<MarketStats | null>(null);
 
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>(CURRENCIES[0]!);
+  const [pickedCurrency, setSelectedCurrency] = useState<Currency>(CURRENCIES[0]!);
+  const { currencies: liveCurrencies, info: rateInfo } = useCurrencies();
+  const selectedCurrency = liveCurrencies.find((c) => c.code === pickedCurrency.code) ?? pickedCurrency;
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
 
   const [orders, setOrders] = useState<MarketOrder[]>([]);
@@ -1257,7 +1260,7 @@ function MarketPage() {
                     border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
                   }}
                 >
-                  {CURRENCIES.map((currency) => (
+                  {liveCurrencies.map((currency) => (
                     <button
                       key={currency.code}
                       onClick={() => {
@@ -1285,6 +1288,15 @@ function MarketPage() {
                       </span>
                     </button>
                   ))}
+                  <a
+                    href="https://www.exchangerate-api.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block px-4 py-2 text-[10px]"
+                    style={{ color: '#9CA3AF', borderTop: '1px solid rgba(128,128,128,0.2)' }}
+                  >
+                    {rateInfo.live ? 'Live rates' : 'Approximate rates'} · Rates By Exchange Rate API
+                  </a>
                 </div>
               )}
             </div>

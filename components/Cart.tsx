@@ -15,21 +15,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from '@/context/ThemeContext';
 import { getAuthStatus } from '@/lib/api';
-
-interface Currency {
-  code: string;
-  symbol: string;
-  name: string;
-  rate: number;
-}
-
-const CURRENCIES: Currency[] = [
-  { code: 'GHS', symbol: '₵', name: 'Ghana Cedi', rate: 1 },
-  { code: 'USD', symbol: '$', name: 'US Dollar', rate: 0.085 },
-  { code: 'EUR', symbol: '€', name: 'Euro', rate: 0.078 },
-  { code: 'GBP', symbol: '£', name: 'British Pound', rate: 0.067 },
-  { code: 'NGN', symbol: '₦', name: 'Nigerian Naira', rate: 130 },
-];
+import { CURRENCIES, useCurrencies, type Currency } from '@/lib/currency';
 
 export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () => void }) {
   const { 
@@ -50,7 +36,9 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
   const [showNotification, setShowNotification] = useState(false);
   const [lastAddedItem, setLastAddedItem] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>(CURRENCIES[0]!);
+  const [pickedCurrency, setSelectedCurrency] = useState<Currency>(CURRENCIES[0]!);
+  const { currencies: liveCurrencies, info: rateInfo } = useCurrencies();
+  const selectedCurrency = liveCurrencies.find((c) => c.code === pickedCurrency.code) ?? pickedCurrency;
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   
@@ -341,7 +329,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                   minWidth: '120px',
                   overflow: 'hidden',
                 }}>
-                  {CURRENCIES.map((currency) => (
+                  {liveCurrencies.map((currency) => (
                     <button
                       key={currency.code}
                       onClick={() => handleCurrencyChange(currency)}
@@ -363,6 +351,15 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                       {currency.symbol} {currency.code} - {currency.name}
                     </button>
                   ))}
+
+                  <a
+                    href="https://www.exchangerate-api.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: 'block', padding: '6px 12px', fontSize: '10px', color: '#9CA3AF', borderTop: '1px solid rgba(128,128,128,0.2)' }}
+                  >
+                    {rateInfo.live ? 'Live rates' : 'Approximate rates'} · Rates By Exchange Rate API
+                  </a>
                 </div>
               )}
             </div>

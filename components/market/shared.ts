@@ -45,21 +45,6 @@ export const MARKET_COLORS = {
   },
 } as const;
 
-export interface Currency {
-  code: string;
-  symbol: string;
-  name: string;
-  rate: number;
-}
-
-export const CURRENCIES: Currency[] = [
-  { code: 'GHS', symbol: '₵', name: 'Ghana Cedi', rate: 1 },
-  { code: 'USD', symbol: '$', name: 'US Dollar', rate: 0.085 },
-  { code: 'EUR', symbol: '€', name: 'Euro', rate: 0.078 },
-  { code: 'GBP', symbol: '£', name: 'British Pound', rate: 0.067 },
-  { code: 'NGN', symbol: '₦', name: 'Nigerian Naira', rate: 130 },
-];
-
 export function getColorSwatch(color: string): string {
   const c = color.toLowerCase();
   if (c.includes('black')) return '#1a1a1a';

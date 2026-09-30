@@ -1,7 +1,8 @@
 import Link from 'next/link';
 
-import { BLOG_CATEGORIES, formatPostDate, type BlogCategory } from '@/lib/content/blog';
+import { BLOG_CATEGORIES, formatPostDate, initials, type BlogCategory } from '@/lib/content/blog';
 import { cardStyle } from './ContentShell';
+import PostCarousel from './PostCarousel';
 import ShareButton from './ShareButton';
 
 export interface PostSummary {
@@ -13,8 +14,6 @@ export interface PostSummary {
   author: string;
   published_at: string | null;
 }
-
-export const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w.charAt(0).toUpperCase()).join('') || 'T';
 
 export function PostCard({ post }: { post: PostSummary }) {
   const href = `/blog/${post.category}/${post.slug}`;
@@ -80,5 +79,16 @@ export default function PostList({ posts }: { posts: PostSummary[] }) {
       </div>
     );
   }
-  return <div className="flex flex-col gap-5">{posts.map((post) => <PostCard key={post.slug} post={post} />)}</div>;
+  // Desktop: every post as a wide card. Tablet and phone: the first post as the
+  // wide featured card, the rest as a sliding row of portrait cards.
+  const [featured, ...rest] = posts;
+  return (
+    <>
+      <div className="hidden flex-col gap-5 lg:flex">{posts.map((post) => <PostCard key={post.slug} post={post} />)}</div>
+      <div className="lg:hidden">
+        <PostCard post={featured!} />
+        <PostCarousel posts={rest} label="More stories" />
+      </div>
+    </>
+  );
 }

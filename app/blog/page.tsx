@@ -23,9 +23,9 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
       titleAccent="Updates"
       description="Stories, destination guides, student experiences and travel tips from across Ghana."
     >
-      <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
         <CategoryNav counts={counts} />
-        <div>
+        <div className="min-w-0">
           <PostList posts={posts} />
           <Pagination page={page} pages={pages} basePath="/blog" />
         </div>
