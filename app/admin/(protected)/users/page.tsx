@@ -15,8 +15,8 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
+import { ListSkeleton, EmptyBlock } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -32,7 +32,6 @@ interface Profile {
 }
 
 export default function AdminUsersPage() {
-  const { isDimMode } = useTheme();
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -40,13 +39,13 @@ export default function AdminUsersPage() {
   const [viewUser, setViewUser] = useState<Profile | null>(null);
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+    cardBg: 'var(--adm-card)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    inputBg: 'var(--adm-bg)',
+    inputBorder: 'var(--adm-border)',
   };
 
   const fetchUsers = useCallback(async () => {
@@ -122,15 +121,11 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Table */}
-        <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+        <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
           {loading ? (
-            <div className="flex items-center justify-center h-40">
-              <FontAwesomeIcon icon={faSpinner} className="w-6 h-6 animate-spin" style={{ color: BRAND_COLORS.tropicalTeal }} />
-            </div>
+            <ListSkeleton />
           ) : filtered.length === 0 ? (
-            <p className="p-6 text-sm text-center" style={{ color: themeStyles.textMuted }}>
-              {search ? 'No users match your search.' : 'No users found.'}
-            </p>
+            <EmptyBlock title={search ? 'No users match your search' : 'No users yet'} body={search ? 'Try a different name or email.' : undefined} />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -160,7 +155,7 @@ export default function AdminUsersPage() {
                             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
                             style={u.is_admin
                               ? { background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }
-                              : { background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textMuted }
+                              : { background: 'var(--adm-track)', color: themeStyles.textMuted }
                             }
                           >
                             <FontAwesomeIcon icon={u.is_admin ? faShieldHalved : faShield} className="w-2.5 h-2.5" />
@@ -242,7 +237,7 @@ export default function AdminUsersPage() {
         >
           <div
             className="w-full max-w-md rounded-2xl shadow-2xl"
-            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}
+            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}
           >
             <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: themeStyles.border }}>
               <h2 className="text-base font-bold" style={{ color: themeStyles.textPrimary }}>User Profile</h2>

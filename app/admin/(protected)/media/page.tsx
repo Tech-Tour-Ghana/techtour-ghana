@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
+import { ListSkeleton } from '@/components/admin/ui';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faFolder, faFolderPlus, faUpload, faTrash, faCopy,
@@ -37,7 +37,6 @@ function fmtSize(bytes: number | null) {
 }
 
 export default function MediaLibraryPage() {
-  const { isDimMode } = useTheme();
   const supabase = createBrowserClient();
 
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -56,14 +55,14 @@ export default function MediaLibraryPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const ts = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    sidebarBg: isDimMode ? '#111111' : '#F9FAFB',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.06)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+    cardBg: 'var(--adm-card)',
+    sidebarBg: 'var(--adm-bg)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    inputBg: 'var(--adm-bg)',
+    inputBorder: 'var(--adm-border)',
   };
 
   const inputStyle: React.CSSProperties = {
@@ -266,9 +265,7 @@ export default function MediaLibraryPage() {
           {/* Asset grid */}
           <div className="flex-1 overflow-y-auto p-4">
             {loading ? (
-              <div className="flex items-center justify-center h-40">
-                <FontAwesomeIcon icon={faSpinner} className="w-6 h-6 animate-spin" style={{ color: BRAND }} />
-              </div>
+              <ListSkeleton />
             ) : assets.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-40 gap-3">
                 <FontAwesomeIcon icon={faImages} className="w-10 h-10" style={{ color: ts.border }} />
@@ -293,10 +290,10 @@ export default function MediaLibraryPage() {
                   const isCopied = copied === a.public_url;
                   return (
                     <div key={a.id} className="group rounded-xl overflow-hidden flex flex-col"
-                      style={{ border: `1px solid ${ts.border}`, background: isDimMode ? '#111' : '#F9FAFB' }}>
+                      style={{ border: `1px solid ${ts.border}`, background: 'var(--adm-bg)' }}>
                       {/* Thumbnail */}
                       <div className="relative aspect-square overflow-hidden"
-                        style={{ background: isDimMode ? '#0A0A0A' : '#E5E7EB' }}>
+                        style={{ background: 'var(--adm-border)' }}>
                         {isImg ? (
                           <img src={a.public_url} alt={a.name} className="w-full h-full object-cover" />
                         ) : (

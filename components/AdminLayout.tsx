@@ -3,6 +3,7 @@
 import { ReactNode, useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faDashboard,
@@ -110,6 +111,7 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const reduceMotion = useReducedMotion();
   const { isDimMode, toggleTheme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -288,7 +290,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
           <button
             onClick={() => setNavOpen(true)}
             className="lg:hidden w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textSecondary }}
+            style={{ background: 'var(--adm-track)', color: themeStyles.textSecondary }}
             aria-label="Open menu"
           >
             <FontAwesomeIcon icon={faBars} className="w-3.5 h-3.5" />
@@ -296,7 +298,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
           <button
             onClick={toggleCollapsed}
             className="hidden lg:flex w-8 h-8 rounded-lg items-center justify-center flex-shrink-0 transition hover:scale-105"
-            style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textSecondary }}
+            style={{ background: 'var(--adm-track)', color: themeStyles.textSecondary }}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             aria-expanded={!collapsed}
@@ -312,7 +314,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
             <button
               onClick={toggleTheme}
               className="w-8 h-8 rounded-lg flex items-center justify-center transition hover:scale-105"
-              style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textSecondary }}
+              style={{ background: 'var(--adm-track)', color: themeStyles.textSecondary }}
             >
               <FontAwesomeIcon icon={isDimMode ? faSun : faMoon} className="w-3.5 h-3.5" />
             </button>
@@ -321,7 +323,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition"
-                style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6' }}
+                style={{ background: 'var(--adm-track)' }}
               >
                 <div
                   className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
@@ -360,7 +362,15 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-          {children}
+          {/* Same entrance for every admin page, none for reduced motion. */}
+          <motion.div
+            key={pathname}
+            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {children}
+          </motion.div>
         </div>
       </div>
     </div>

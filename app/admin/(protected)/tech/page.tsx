@@ -14,8 +14,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
-import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
+import { Tabs, EmptyBlock } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -120,7 +120,6 @@ const STATUS_COLORS: Record<string, string> = {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function AdminTechPage() {
-  const { isDimMode } = useTheme();
   const [tab, setTab] = useState<Tab>('innovations');
 
   const [innovations, setInnovations] = useState<TechInnovation[]>([]);
@@ -136,14 +135,14 @@ export default function AdminTechPage() {
   const supabase = createBrowserClient();
 
   const ts = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
-    rowHover: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9FAFB',
+    cardBg: 'var(--adm-card)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    inputBg: 'var(--adm-bg)',
+    inputBorder: 'var(--adm-border)',
+    rowHover: 'var(--adm-track)',
   };
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
@@ -273,36 +272,11 @@ export default function AdminTechPage() {
       <div className="space-y-5">
 
         {/* Tab bar */}
-        <div className="flex gap-2 flex-wrap">
-          {tabs.map((t) => {
-            const active = tab === t.key;
-            return (
-              <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition"
-                style={{
-                  background: active ? BRAND_COLORS.tropicalTeal : ts.cardBg,
-                  color: active ? '#FFFFFF' : ts.textSecondary,
-                  border: `1px solid ${active ? BRAND_COLORS.tropicalTeal : ts.border}`,
-                }}
-              >
-                <FontAwesomeIcon icon={t.icon} className="w-3.5 h-3.5" />
-                {t.label}
-                <span
-                  className="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
-                  style={{ background: active ? 'rgba(255,255,255,0.25)' : `${BRAND_COLORS.tropicalTeal}22`, color: active ? '#fff' : BRAND_COLORS.tropicalTeal }}
-                >
-                  {t.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <Tabs value={tab} onChange={setTab} tabs={tabs.map((t) => ({ key: t.key, label: t.label, count: t.count }))} />
 
         {/* ── Innovations ── */}
         {tab === 'innovations' && (
-          <div className="rounded-xl overflow-hidden" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
+          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
             <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: ts.border }}>
               <h2 className="text-sm font-semibold" style={{ color: ts.textPrimary }}>Tech Innovations</h2>
               <button
@@ -325,7 +299,7 @@ export default function AdminTechPage() {
                 </thead>
                 <tbody>
                   {innovations.length === 0 ? (
-                    <tr><td colSpan={5} className="px-5 py-8 text-center" style={{ color: ts.textMuted }}>No innovations yet.</td></tr>
+                    <tr><td colSpan={5}><EmptyBlock title="No innovations yet." /></td></tr>
                   ) : innovations.map((n) => (
                     <tr key={n.id} style={{ borderBottom: `1px solid ${ts.border}` }} className="transition" onMouseEnter={e => (e.currentTarget.style.background = ts.rowHover)} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                       <td className="px-5 py-2.5 font-medium" style={{ color: ts.textPrimary }}>{n.title}</td>
@@ -360,7 +334,7 @@ export default function AdminTechPage() {
 
         {/* ── Events ── */}
         {tab === 'events' && (
-          <div className="rounded-xl overflow-hidden" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
+          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
             <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: ts.border }}>
               <h2 className="text-sm font-semibold" style={{ color: ts.textPrimary }}>Tech Events</h2>
               <button
@@ -383,7 +357,7 @@ export default function AdminTechPage() {
                 </thead>
                 <tbody>
                   {events.length === 0 ? (
-                    <tr><td colSpan={5} className="px-5 py-8 text-center" style={{ color: ts.textMuted }}>No events yet.</td></tr>
+                    <tr><td colSpan={5}><EmptyBlock title="No events yet." /></td></tr>
                   ) : events.map((ev) => (
                     <tr key={ev.id} style={{ borderBottom: `1px solid ${ts.border}` }} className="transition" onMouseEnter={e => (e.currentTarget.style.background = ts.rowHover)} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                       <td className="px-5 py-2.5 font-medium" style={{ color: ts.textPrimary }}>{ev.title}</td>
@@ -418,7 +392,7 @@ export default function AdminTechPage() {
 
         {/* ── Resources ── */}
         {tab === 'resources' && (
-          <div className="rounded-xl overflow-hidden" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
+          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
             <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: ts.border }}>
               <h2 className="text-sm font-semibold" style={{ color: ts.textPrimary }}>Tech Resources</h2>
               <button
@@ -441,7 +415,7 @@ export default function AdminTechPage() {
                 </thead>
                 <tbody>
                   {resources.length === 0 ? (
-                    <tr><td colSpan={4} className="px-5 py-8 text-center" style={{ color: ts.textMuted }}>No resources yet.</td></tr>
+                    <tr><td colSpan={4}><EmptyBlock title="No resources yet." /></td></tr>
                   ) : resources.map((r) => (
                     <tr key={r.id} style={{ borderBottom: `1px solid ${ts.border}` }} className="transition" onMouseEnter={e => (e.currentTarget.style.background = ts.rowHover)} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                       <td className="px-5 py-2.5 font-medium" style={{ color: ts.textPrimary }}>{r.title}</td>

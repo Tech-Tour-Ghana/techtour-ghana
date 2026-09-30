@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faPen, faTrash, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
+import { Tabs } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -22,7 +22,6 @@ interface VideoSection {
 }
 
 export default function HomepagePage() {
-  const { isDimMode } = useTheme();
   const [tab, setTab] = useState<Tab>('feature_cards');
   const [featureCards, setFeatureCards] = useState<MainFeatureCard[]>([]);
   const [videoSections, setVideoSections] = useState<VideoSection[]>([]);
@@ -44,13 +43,13 @@ export default function HomepagePage() {
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+    cardBg: 'var(--adm-card)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    inputBg: 'var(--adm-bg)',
+    inputBorder: 'var(--adm-border)',
   };
 
   const inputClass = 'w-full px-3 py-2 rounded-lg border text-sm focus:outline-none';
@@ -104,15 +103,7 @@ export default function HomepagePage() {
 
   return (
     <AdminLayout title="Homepage" subtitle="Manage homepage feature cards and video sections">
-      <div className="flex gap-1 mb-6 rounded-xl p-1" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
-        {[{ key: 'feature_cards' as Tab, label: 'Feature Cards' }, { key: 'video_sections' as Tab, label: 'Video Sections' }].map((t) => (
-          <button key={t.key} onClick={() => setTab(t.key)}
-            className="px-4 py-2 rounded-lg text-xs font-medium transition flex-1"
-            style={{ background: tab === t.key ? BRAND_COLORS.tropicalTeal : 'transparent', color: tab === t.key ? '#fff' : themeStyles.textSecondary }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <div className="mb-6"><Tabs value={tab} onChange={setTab} tabs={[{ key: 'feature_cards' as Tab, label: 'Feature Cards' }, { key: 'video_sections' as Tab, label: 'Video Sections' }]} /></div>
 
       {/* Feature Cards */}
       {tab === 'feature_cards' && (
@@ -125,7 +116,7 @@ export default function HomepagePage() {
               <FontAwesomeIcon icon={faPlus} className="w-3 h-3" /> Add Card
             </button>
           </div>
-          <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
             <table className="w-full text-xs">
               <thead><tr style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
                 {['Title', 'Subtitle', 'Button', 'Order', 'Status', ''].map((h) => <th key={h} className="px-4 py-2 text-left font-medium" style={{ color: themeStyles.textMuted }}>{h}</th>)}
@@ -163,7 +154,7 @@ export default function HomepagePage() {
               <FontAwesomeIcon icon={faPlus} className="w-3 h-3" /> Add Section
             </button>
           </div>
-          <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
             <table className="w-full text-xs">
               <thead><tr style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
                 {['Title', 'Card Type', 'Media Type', 'Order', 'Status', ''].map((h) => <th key={h} className="px-4 py-2 text-left font-medium" style={{ color: themeStyles.textMuted }}>{h}</th>)}

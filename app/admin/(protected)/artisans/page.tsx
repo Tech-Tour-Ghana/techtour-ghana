@@ -13,8 +13,8 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
+import { ListSkeleton, EmptyBlock } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -68,7 +68,6 @@ function toSlug(name: string) {
 }
 
 export default function AdminArtisansPage() {
-  const { isDimMode } = useTheme();
   const [artisans, setArtisans] = useState<Artisan[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -77,13 +76,13 @@ export default function AdminArtisansPage() {
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#111827',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4B5563',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+    cardBg: 'var(--adm-card)',
+    textPrimary: 'var(--adm-text)',
+    textSecondary: 'var(--adm-text-2)',
+    textMuted: 'var(--adm-muted)',
+    border: 'var(--adm-border)',
+    inputBg: 'var(--adm-bg)',
+    inputBorder: 'var(--adm-border)',
   };
 
   const fetch = useCallback(async () => {
@@ -200,13 +199,11 @@ export default function AdminArtisansPage() {
         </div>
 
         {/* Table */}
-        <div className="rounded-xl overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+        <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
           {loading ? (
-            <div className="flex items-center justify-center h-40">
-              <FontAwesomeIcon icon={faSpinner} className="w-6 h-6 animate-spin" style={{ color: BRAND_COLORS.tropicalTeal }} />
-            </div>
+            <ListSkeleton />
           ) : artisans.length === 0 ? (
-            <p className="p-6 text-sm text-center" style={{ color: themeStyles.textMuted }}>No artisans yet. Add one to get started.</p>
+            <EmptyBlock title="No artisans yet. Add one to get started." />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -237,7 +234,7 @@ export default function AdminArtisansPage() {
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
                           style={a.is_active
                             ? { background: '#10B98122', color: '#10B981' }
-                            : { background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textMuted }
+                            : { background: 'var(--adm-track)', color: themeStyles.textMuted }
                           }
                         >
                           <FontAwesomeIcon icon={a.is_active ? faCheck : faTimes} className="w-2.5 h-2.5" />
@@ -290,7 +287,7 @@ export default function AdminArtisansPage() {
         >
           <div
             className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
-            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}
+            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}
           >
             {/* Modal header */}
             <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 z-10" style={{ borderColor: themeStyles.border, background: themeStyles.cardBg }}>
