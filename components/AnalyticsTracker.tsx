@@ -14,12 +14,13 @@ import { useEffect, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase/client';
 
+const SESSION_KEY = 'analytics_session_id';
+
 function getSessionId(): string {
-  const key = 'analytics_session_id';
-  let sessionId = localStorage.getItem(key);
+  let sessionId = localStorage.getItem(SESSION_KEY);
   if (!sessionId) {
     sessionId = `session_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
-    localStorage.setItem(key, sessionId);
+    localStorage.setItem(SESSION_KEY, sessionId);
   }
   return sessionId;
 }
@@ -32,8 +33,14 @@ export default function AnalyticsTracker() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const supabase = createBrowserClient();
+    // The row is only written when this browser has no session id yet. Every
+    // later visit would insert a duplicate, and the 409 it gets back shows up
+    // as a red console error on each page load even though it is harmless.
+    const isNewSession = localStorage.getItem(SESSION_KEY) === null;
     const sessionId = getSessionId();
+    if (!isNewSession) return;
+
+    const supabase = createBrowserClient();
 
     supabase.auth.getUser().then(({ data }) => {
       supabase

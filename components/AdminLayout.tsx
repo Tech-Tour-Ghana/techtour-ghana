@@ -34,6 +34,8 @@ import {
   faCartShopping,
   faQuoteLeft,
   faCommentDots,
+  faNewspaper,
+  faMapLocationDot,
 } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from '@/context/ThemeContext';
 import { getAuthStatus, logoutUser, type User } from '@/lib/api';
@@ -59,6 +61,8 @@ const NAV_GROUPS = [
       { icon: faGraduationCap, label: 'Study Abroad', href: '/admin/study' },
       { icon: faLayerGroup, label: 'Homepage', href: '/admin/homepage' },
       { icon: faQuoteLeft, label: 'Testimonials', href: '/admin/testimonials' },
+      { icon: faNewspaper, label: 'Blog', href: '/admin/blog' },
+      { icon: faMapLocationDot, label: 'Destinations', href: '/admin/destinations' },
       { icon: faBars, label: 'Navigation', href: '/admin/navigation' },
     ],
   },
