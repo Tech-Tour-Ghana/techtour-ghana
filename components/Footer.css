@@ -948,3 +948,14 @@
   .footer-links-wide { gap: 1.25rem 1rem; }
   .footer-links-list-wide li { margin-bottom: 0.35rem; }
 }
+
+/* Phone: social icons in a tidy 4-column grid (two rows for seven icons). */
+@media (max-width: 767px) {
+  .social-icons-circle {
+    display: grid;
+    grid-template-columns: repeat(4, 42px);
+    justify-content: space-between;
+    gap: 12px;
+    max-width: 320px;
+  }
+}
