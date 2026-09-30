@@ -44,6 +44,7 @@ import {
   faMapLocationDot,
   faAnglesLeft,
   faClockRotateLeft,
+  faTrashCan,
   faBell,
   faEnvelopeCircleCheck,
   faAnglesRight,
@@ -115,6 +116,7 @@ const NAV_GROUPS = [
     items: [
       { icon: faUsersCog, label: 'Users', href: '/admin/users' },
       { icon: faClockRotateLeft, label: 'Audit Log', href: '/admin/audit' },
+      { icon: faTrashCan, label: 'Trash', href: '/admin/trash' },
       { icon: faScrewdriverWrench, label: 'Maintenance Mode', href: '/admin/maintenance' },
       { icon: faCog, label: 'Settings', href: '/admin/settings' },
       { icon: faUserCircle, label: 'My Profile', href: '/admin/profile' },

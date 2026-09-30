@@ -38,7 +38,7 @@ export default function AdminToursPage() {
       supabase.from('tour_categories').select('*').order('sort_order'),
       supabase.from('tour_schedules').select('*').order('start_date', { ascending: false }),
       supabase.from('bookings').select('*, tours(title), tour_schedules(start_date, end_date)').order('created_at', { ascending: false }),
-      supabase.from('tour_reviews').select('*, tours(title)').order('created_at', { ascending: false }),
+      supabase.rpc('admin_tour_reviews'),
       supabase.from('destinations').select('id, name').order('sort_order'),
     ]);
     if (a.error || b.error || c.error || d.error || e.error || f.error) setError('Some tour data could not be loaded. Please refresh.');
@@ -47,7 +47,7 @@ export default function AdminToursPage() {
     setCategories(b.data ?? []);
     setSchedules(c.data ?? []);
     setBookings((d.data as Booking[] | null) ?? []);
-    setReviews((e.data as Review[] | null) ?? []);
+    setReviews((e.data as unknown as Review[] | null) ?? []);
     setDestinations(f.data ?? []);
     setLoading(false);
   }, [supabase]);

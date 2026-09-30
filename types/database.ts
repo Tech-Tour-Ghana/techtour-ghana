@@ -3273,6 +3273,12 @@ export type Database = {
           },
         ]
       }
+      trash_items: {
+        Row: { batch: number; data: Json; deleted_at: string; deleted_by: string | null; id: number; label: string; record_id: string; table_name: string }
+        Insert: { batch: number; data: Json; deleted_at?: string; deleted_by?: string | null; id?: number; label?: string; record_id: string; table_name: string }
+        Update: { batch?: number; data?: Json; deleted_at?: string; deleted_by?: string | null; id?: number; label?: string; record_id?: string; table_name?: string }
+        Relationships: []
+      }
       tours: {
         Row: {
           category_id: string | null
@@ -3804,6 +3810,9 @@ export type Database = {
         Args: { p_participants: number; p_phone?: string; p_schedule_id: string; p_special_requests?: string }
         Returns: string
       }
+      restore_trash: { Args: { p_id: number }; Returns: number }
+      purge_trash: { Args: { p_id?: number }; Returns: number }
+      admin_tour_reviews: { Args: never; Returns: Json }
       analytics_growth: { Args: { cur: number; prev: number }; Returns: Json }
       analytics_kpis: { Args: { p_from: string; p_to: string }; Returns: Json }
       analytics_require_admin: { Args: never; Returns: undefined }
