@@ -24,6 +24,7 @@ import {
   faCog,
   faImages,
   faMagnifyingGlass,
+  faScrewdriverWrench,
   faArrowLeft,
   faSun,
   faMoon,
@@ -103,6 +104,7 @@ const NAV_GROUPS = [
     group: 'System',
     items: [
       { icon: faChartLine, label: 'Analytics', href: '/admin/analytics' },
+      { icon: faScrewdriverWrench, label: 'Maintenance Mode', href: '/admin/maintenance' },
       { icon: faClockRotateLeft, label: 'Audit Log', href: '/admin/audit' },
       { icon: faCog, label: 'Settings', href: '/admin/settings' },
       { icon: faUserCircle, label: 'My Profile', href: '/admin/profile' },

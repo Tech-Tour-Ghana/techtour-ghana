@@ -140,3 +140,13 @@ test("FAQs: only complete pairs survive, capped, and schema mirrors the visible 
   assert.equal(cleanFaqs(Array.from({ length: 30 }, (_, i) => ({ question: `q${i}`, answer: "a" }))).length, MAX_FAQS);
   assert.deepEqual(cleanFaqs("nope"), []);
 });
+
+test("maintenance: which paths stay reachable, defaults, email and ETA formatting", async () => {
+  const { isMaintenanceExempt, maintenanceFrom, isValidEmail, formatEta, DEFAULT_MAINTENANCE } = await import("../lib/maintenance.ts");
+  for (const ok of ["/admin", "/admin/login", "/admin/maintenance", "/maintenance", "/api/paystack/webhook", "/auth/callback", "/robots.txt", "/sitemap.xml"]) assert.ok(isMaintenanceExempt(ok), ok);
+  for (const blocked of ["/", "/blog", "/market/checkout", "/api/contact", "/auth/login", "/administrator", "/api/paystackx"]) assert.ok(!isMaintenanceExempt(blocked), blocked);
+  assert.deepEqual(maintenanceFrom(null), DEFAULT_MAINTENANCE);
+  assert.equal(maintenanceFrom({ maintenance_enabled: true, maintenance_title: "  ", maintenance_message: "Back soon" }).title, DEFAULT_MAINTENANCE.title);
+  assert.ok(isValidEmail("") && isValidEmail("a@b.co") && !isValidEmail("nope"));
+  assert.match(formatEta("2026-10-04T14:00:00Z"), /Sunday 4 October.*14:00 GMT/);
+});
