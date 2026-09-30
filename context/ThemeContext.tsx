@@ -62,7 +62,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // the same no-flash behaviour as before, without an empty HTML document.
   return (
     <ThemeContext.Provider value={{ isDimMode, toggleTheme }}>
-      {!isMounted && <style>{'body{visibility:hidden}'}</style>}
+      {/* Hidden only until the saved theme is known. The animation reveals the page after
+          2s regardless, so a slow or failed script can never leave a blank page. */}
+      {!isMounted && <style>{'body{visibility:hidden;animation:tt-reveal 0s 2s forwards}@keyframes tt-reveal{to{visibility:visible}}'}</style>}
       {children}
     </ThemeContext.Provider>
   );
