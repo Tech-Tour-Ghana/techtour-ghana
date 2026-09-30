@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faPlus, faPencil, faTrash, faSpinner, faCheck, faTimes, } from '@fortawesome/free-solid-svg-icons';
+  faPlus, faPencil, faTrash, faSpinner, faCheck, } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { useTheme } from '@/context/ThemeContext';

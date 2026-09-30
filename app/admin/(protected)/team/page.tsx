@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
@@ -98,7 +98,7 @@ export default function AdminTeamPage() {
   const [categoryModal, setCategoryModal] = useState<{ open: boolean; data: Omit<JobCategory, 'id'>; id: string | null }>({ open: false, data: blankCategory(), id: null });
   const [openingModal, setOpeningModal] = useState<{ open: boolean; data: Omit<JobOpening, 'id'>; id: string | null }>({ open: false, data: blankOpening(), id: null });
 
-  const supabase = createBrowserClient();
+  const supabase = useMemo(() => createBrowserClient(), []);
 
   const ts = {
     cardBg: 'var(--adm-card)',
@@ -124,7 +124,7 @@ export default function AdminTeamPage() {
     setCategories((c.data ?? []) as JobCategory[]);
     setOpenings((o.data ?? []) as JobOpening[]);
     setLoading(false);
-  }, []); // ponytail: supabase is stable ref, no dep needed
+  }, [supabase]); // ponytail: supabase is stable ref, no dep needed
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 

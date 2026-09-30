@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
@@ -89,7 +89,7 @@ export default function AdminMarketPage() {
     inputBorder: 'var(--adm-border)',
   };
 
-  const supabase = createBrowserClient();
+  const supabase = useMemo(() => createBrowserClient(), []);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -100,7 +100,7 @@ export default function AdminMarketPage() {
     setProducts((prodRes.data ?? []) as Product[]);
     setCategories((catRes.data ?? []) as Category[]);
     setLoading(false);
-  }, []);
+  }, [supabase]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 

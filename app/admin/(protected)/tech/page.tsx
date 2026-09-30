@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
@@ -124,7 +124,7 @@ export default function AdminTechPage() {
   const [eventModal, setEventModal] = useState<{ open: boolean; data: Omit<TechEvent, 'id'>; id: string | null }>({ open: false, data: blankEvent(), id: null });
   const [resourceModal, setResourceModal] = useState<{ open: boolean; data: Omit<TechResource, 'id'>; id: string | null }>({ open: false, data: blankResource(), id: null });
 
-  const supabase = createBrowserClient();
+  const supabase = useMemo(() => createBrowserClient(), []);
 
   const ts = {
     cardBg: 'var(--adm-card)',
@@ -150,7 +150,7 @@ export default function AdminTechPage() {
     setEvents((ev.data ?? []) as unknown as TechEvent[]);
     setResources((res.data ?? []) as unknown as TechResource[]);
     setLoading(false);
-  }, []); // ponytail: supabase ref is stable
+  }, [supabase]); // ponytail: supabase ref is stable
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
