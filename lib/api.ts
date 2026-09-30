@@ -123,6 +123,10 @@ export async function requestPasswordReset(
 export interface DashboardStats {
   tours_booked: number;
   orders_placed: number;
+  study_applications: number;
+  wishlist_count: number;
+  profile_complete: number;
+  recent_orders: Order[];
   member_since?: string;
 }
 
@@ -241,14 +245,23 @@ export async function getUserTours(): Promise<TourBooking[]> {
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const supabase = createBrowserClient();
-  const [{ count: toursBooked }, { count: ordersPlaced }] = await Promise.all([
-    supabase.from('bookings').select('id', { count: 'exact', head: true }),
-    supabase.from('orders').select('id', { count: 'exact', head: true }),
-  ]);
+  const count = (table: 'bookings' | 'orders' | 'study_applications' | 'wishlist_items') =>
+    supabase.from(table).select('id', { count: 'exact', head: true });
+
+  const [{ count: toursBooked }, { count: ordersPlaced }, { count: studyApps }, { count: wishlisted }, profile, orders] =
+    await Promise.all([count('bookings'), count('orders'), count('study_applications'), count('wishlist_items'), getProfile(), getUserOrders()]);
+
+  // Share of the profile fields a user can fill in that are filled.
+  const fields = profile ? [profile.first_name, profile.last_name, profile.phone_number, profile.bio, profile.avatar_url] : [];
+  const profileComplete = fields.length ? Math.round((fields.filter(Boolean).length / fields.length) * 100) : 0;
 
   return {
     tours_booked: toursBooked ?? 0,
     orders_placed: ordersPlaced ?? 0,
+    study_applications: studyApps ?? 0,
+    wishlist_count: wishlisted ?? 0,
+    profile_complete: profileComplete,
+    recent_orders: orders.slice(0, 3),
   };
 }
 
@@ -328,4 +341,79 @@ export async function logoutUser(): Promise<{ success: boolean }> {
   }
 
   return { success: !error };
+}
+
+export interface WishlistItem {
+  id: string;
+  product_id: string;
+  title: string;
+  price: number;
+  image_url: string;
+  added_at: string;
+}
+
+export interface StudyApplication {
+  id: string;
+  program_name: string;
+  university: string;
+  location: string;
+  start_date: string;
+  status: string;
+  duration: string;
+  created_at: string;
+}
+
+// RLS (0016) scopes both tables to the signed in user, so no user filter here.
+export async function getUserWishlist(): Promise<WishlistItem[]> {
+  const supabase = createBrowserClient();
+  const { data, error } = await supabase
+    .from('wishlist_items')
+    .select('id, product_id, created_at, market_products(title, price, discount_price, image_url)')
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    product_id: row.product_id,
+    title: row.market_products?.title ?? 'Unknown product',
+    price: row.market_products?.discount_price ?? row.market_products?.price ?? 0,
+    image_url: row.market_products?.image_url ?? '',
+    added_at: row.created_at,
+  }));
+}
+
+export async function getWishlistProductIds(): Promise<string[]> {
+  const { data } = await createBrowserClient().from('wishlist_items').select('product_id');
+  return (data ?? []).map((row) => row.product_id);
+}
+
+/** Adds or removes a product. Returns false if signed out or the write failed. */
+export async function setWishlisted(productId: string, wishlisted: boolean): Promise<boolean> {
+  const supabase = createBrowserClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return false;
+
+  const { error } = wishlisted
+    ? await supabase.from('wishlist_items').upsert(
+        { user_id: auth.user.id, product_id: productId },
+        { onConflict: 'user_id,product_id', ignoreDuplicates: true },
+      )
+    : await supabase.from('wishlist_items').delete().eq('product_id', productId);
+  return !error;
+}
+
+export async function removeWishlistItem(id: string): Promise<boolean> {
+  const { error } = await createBrowserClient().from('wishlist_items').delete().eq('id', id);
+  return !error;
+}
+
+export async function getUserStudy(): Promise<StudyApplication[]> {
+  const { data, error } = await createBrowserClient()
+    .from('study_applications')
+    .select('id, program_name, university, location, start_date, status, duration, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+  return data.map((row) => ({ ...row, start_date: row.start_date ?? '' }));
 }

@@ -2292,6 +2292,53 @@ export type Database = {
         }
         Relationships: []
       }
+      study_applications: {
+        Row: {
+          created_at: string
+          duration: string
+          id: string
+          location: string
+          program_name: string
+          start_date: string | null
+          status: string
+          university: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration?: string
+          id?: string
+          location?: string
+          program_name: string
+          start_date?: string | null
+          status?: string
+          university?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration?: string
+          id?: string
+          location?: string
+          program_name?: string
+          start_date?: string | null
+          status?: string
+          university?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_applications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       study_destinations: {
         Row: {
           average_tuition: string
@@ -3280,6 +3327,42 @@ export type Database = {
           video_url?: string
         }
         Relationships: []
+      }
+      wishlist_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "market_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_items_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

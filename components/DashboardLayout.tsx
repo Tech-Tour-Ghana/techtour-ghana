@@ -3,12 +3,9 @@
 //
 // 1. User identity comes from getAuthStatus() (Supabase, lib/api.ts) instead
 //    of a localStorage 'user' blob left over from the JWT-era client.
-// 2. The sidebar drops Study and Wishlist. Both called real-sounding
-//    endpoints on the old Django backend, but user_wishlist and user_study
-//    (admin_dashboard/views.py) imported pages.models.Wishlist and
-//    pages.models.StudyApplication, neither of which exists anywhere in
-//    pages/models.py. Both endpoints would 500 in production. There is
-//    nothing there to port.
+// 2. Study and Wishlist are back in the sidebar. The old endpoints behind them
+//    never worked, so 0016 adds wishlist_items and study_applications and the
+//    pages read those through Supabase.
 
 'use client';
 
@@ -21,6 +18,8 @@ import {
   faDashboard,
   faShoppingBag,
   faCalendarCheck,
+  faGraduationCap,
+  faHeart,
   faCreditCard,
   faBell,
   faCog,
@@ -46,7 +45,9 @@ export const SIDEBAR_ITEMS = [
   { icon: faDashboard, label: 'Dashboard', href: '/auth/dashboard' },
   { icon: faShoppingBag, label: 'Orders', href: '/auth/orders' },
   { icon: faCreditCard, label: 'Payments', href: '/auth/payments' },
+  { icon: faGraduationCap, label: 'Study', href: '/auth/study' },
   { icon: faCalendarCheck, label: 'Tours', href: '/auth/tours' },
+  { icon: faHeart, label: 'Wishlist', href: '/auth/wishlist' },
 ];
 
 export const TOP_BAR_ITEMS = [
