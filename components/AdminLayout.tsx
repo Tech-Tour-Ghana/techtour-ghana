@@ -37,6 +37,9 @@ import {
   faNewspaper,
   faMapLocationDot,
   faAnglesLeft,
+  faClockRotateLeft,
+  faBell,
+  faEnvelopeCircleCheck,
   faAnglesRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from '@/context/ThemeContext';
@@ -75,6 +78,9 @@ const NAV_GROUPS = [
       { icon: faUsersCog, label: 'Users', href: '/admin/users' },
       { icon: faEnvelope, label: 'Contact Messages', href: '/admin/contacts' },
       { icon: faCommentDots, label: 'Feedback', href: '/admin/feedback' },
+      { icon: faGraduationCap, label: 'Study Applications', href: '/admin/applications' },
+      { icon: faBell, label: 'Send Notifications', href: '/admin/send-notifications' },
+      { icon: faEnvelopeCircleCheck, label: 'Email Log', href: '/admin/emails' },
       { icon: faPaperPlane, label: 'Newsletter', href: '/admin/newsletter' },
     ],
   },
@@ -88,6 +94,7 @@ const NAV_GROUPS = [
     group: 'System',
     items: [
       { icon: faChartLine, label: 'Analytics', href: '/admin/analytics' },
+      { icon: faClockRotateLeft, label: 'Audit Log', href: '/admin/audit' },
       { icon: faCog, label: 'Settings', href: '/admin/settings' },
       { icon: faUserCircle, label: 'My Profile', href: '/admin/profile' },
     ],

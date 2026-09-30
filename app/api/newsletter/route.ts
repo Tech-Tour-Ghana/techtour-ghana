@@ -26,6 +26,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Subscription failed." }, { status: 500 });
   }
 
-  await sendEmail({ to: email, ...newsletterWelcome() });
+  await sendEmail({ to: email, template: 'newsletter_welcome', ...newsletterWelcome() });
   return NextResponse.json({ ok: true });
 }

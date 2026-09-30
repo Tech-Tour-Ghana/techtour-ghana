@@ -90,6 +90,7 @@ export async function settleSuccessfulTransaction(
   // any repeat call, so a duplicate webhook or a verify poll cannot resend.
   await sendEmail({
     to: transaction.email,
+    template: "order_confirmation",
     ...orderConfirmation({
       name: transaction.name,
       reference: transaction.reference,
