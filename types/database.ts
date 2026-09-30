@@ -616,11 +616,13 @@ export type Database = {
           content: string
           created_at: string
           excerpt: string
+          faqs: Json
           id: string
           image_alt: string
           image_url: string
           is_published: boolean
           published_at: string | null
+          scheduled_at: string | null
           slug: string
           title: string
           updated_at: string
@@ -631,11 +633,13 @@ export type Database = {
           content?: string
           created_at?: string
           excerpt?: string
+          faqs?: Json
           id?: string
           image_alt?: string
           image_url?: string
           is_published?: boolean
           published_at?: string | null
+          scheduled_at?: string | null
           slug: string
           title: string
           updated_at?: string
@@ -646,11 +650,13 @@ export type Database = {
           content?: string
           created_at?: string
           excerpt?: string
+          faqs?: Json
           id?: string
           image_alt?: string
           image_url?: string
           is_published?: boolean
           published_at?: string | null
+          scheduled_at?: string | null
           slug?: string
           title?: string
           updated_at?: string
@@ -3780,6 +3786,7 @@ export type Database = {
         Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
+      publish_due_blog_posts: { Args: never; Returns: number }
     }
     Enums: {
       activity_action:

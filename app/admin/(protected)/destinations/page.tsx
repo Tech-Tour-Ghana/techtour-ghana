@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
+import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { BRAND, IconButton, TableCard, Toggle, rowClass, useAdminTheme } from '@/components/admin/ui';
 import type { Database } from '@/types/database';
 
@@ -71,7 +72,7 @@ export default function AdminDestinationsPage() {
         <form onSubmit={save} className="rounded-xl p-4 grid gap-3 md:grid-cols-3" style={{ background: t.cardBg, border: `1px solid ${t.border}` }}>
           <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Name" className={cls} style={input} />
           <input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="Slug (auto from name)" className={cls} style={input} />
-          <input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="Image URL" className={cls} style={input} />
+          <div className="md:col-span-3"><UrlWithPicker inputStyle={input} placeholder="Image URL or choose from the Media Library" value={form.image_url} onChange={(v) => setForm({ ...form, image_url: v })} /></div>
           <input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} placeholder="Tagline" className={`${cls} md:col-span-3`} style={input} />
           <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description" rows={4} className={`${cls} md:col-span-3`} style={input} />
           <textarea value={form.highlights} onChange={(e) => setForm({ ...form, highlights: e.target.value })} placeholder="Highlights, one per line" rows={4} className={`${cls} md:col-span-3`} style={input} />

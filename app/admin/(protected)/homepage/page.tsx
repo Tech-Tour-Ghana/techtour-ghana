@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faPen, faTrash, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
+import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { Tabs, ListSkeleton, reportError, Modal, Button } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
@@ -218,7 +219,7 @@ Cancel
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Video URL</label>
                 <input className={inputClass} style={inputStyle} value={modal.data.video_url ?? ''} onChange={(e) => setField('video_url', e.target.value)} /></div>
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Image URL</label>
-                <input className={inputClass} style={inputStyle} value={modal.data.image_url ?? ''} onChange={(e) => setField('image_url', e.target.value)} /></div>
+                <UrlWithPicker inputStyle={inputStyle} value={modal.data.image_url ?? ''} onChange={(v) => setField('image_url', v)} /></div>
             </>}
 
             {modal.type === 'feature_cards' && (

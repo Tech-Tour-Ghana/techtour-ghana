@@ -38,7 +38,7 @@ export default function AdminBlogPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<'all' | 'published' | 'draft'>('all');
+  const [status, setStatus] = useState<'all' | 'published' | 'scheduled' | 'draft'>('all');
   const [category, setCategory] = useState<'all' | BlogCategory>('all');
   const [seoFilter, setSeoFilter] = useState<SeoFilter>('all');
   const [toDelete, setToDelete] = useState<Post | null>(null);
@@ -67,7 +67,8 @@ export default function AdminBlogPage() {
   useEffect(() => { load(); }, [load]);
 
   const visible = rows.filter(({ post, score, missing }) => {
-    if (status !== 'all' && post.is_published !== (status === 'published')) return false;
+    const state = post.is_published ? 'published' : post.scheduled_at ? 'scheduled' : 'draft';
+    if (status !== 'all' && state !== status) return false;
     if (category !== 'all' && post.category !== category) return false;
     if (search.trim() && !post.title.toLowerCase().includes(search.trim().toLowerCase())) return false;
     if (seoFilter === 'good' && score < 70) return false;
@@ -79,7 +80,7 @@ export default function AdminBlogPage() {
   async function togglePublished(post: Post) {
     const publishing = !post.is_published;
     if (publishing && !post.content.replace(/<[^>]*>/g, '').trim()) return notify('Add content in the editor before publishing.');
-    const patch = { is_published: publishing, published_at: publishing ? post.published_at ?? new Date().toISOString() : post.published_at };
+    const patch = { is_published: publishing, published_at: publishing ? post.published_at ?? new Date().toISOString() : post.published_at, scheduled_at: null };
     const { error: err } = await supabase.from('blog_posts').update(patch).eq('id', post.id);
     if (err) return notify('Could not update the article.');
     setRows((prev) => prev.map((r) => (r.post.id === post.id ? { ...r, post: { ...r.post, ...patch } } : r)));
@@ -103,7 +104,7 @@ export default function AdminBlogPage() {
         <div className="flex flex-wrap items-center gap-2">
           <input aria-label="Search articles" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by title" className={`${selectClass} min-w-[12rem] flex-1`} style={fieldStyle} />
           <select aria-label="Status" value={status} onChange={(e) => setStatus(e.target.value as typeof status)} className={selectClass} style={fieldStyle}>
-            <option value="all">All statuses</option><option value="published">Published</option><option value="draft">Draft</option>
+            <option value="all">All statuses</option><option value="published">Published</option><option value="scheduled">Scheduled</option><option value="draft">Draft</option>
           </select>
           <select aria-label="Category" value={category} onChange={(e) => setCategory(e.target.value as typeof category)} className={selectClass} style={fieldStyle}>
             <option value="all">All categories</option>
@@ -136,7 +137,7 @@ export default function AdminBlogPage() {
                   </td>
                   <td className="px-4 py-3" style={{ color: t.textSecondary }}>{BLOG_CATEGORIES[post.category as BlogCategory]?.label ?? post.category}</td>
                   <td className="px-4 py-3" style={{ color: t.textSecondary }}>{post.author}</td>
-                  <td className="px-4 py-3"><Toggle on={post.is_published} label={post.is_published ? 'Published' : 'Draft'} onClick={() => togglePublished(post)} /></td>
+                  <td className="px-4 py-3"><Toggle on={post.is_published} label={post.is_published ? 'Published' : post.scheduled_at ? 'Scheduled' : 'Draft'} onClick={() => togglePublished(post)} />{!post.is_published && post.scheduled_at && <div className="mt-1 text-[11px]" style={{ color: t.textMuted }}>{new Date(post.scheduled_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>}</td>
                   <td className="px-4 py-3">
                     <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold" style={{ background: b.bg, color: b.color }} title={missing ? 'SEO title or description not set' : undefined}>
                       {score} · {missing && score < 70 ? 'Missing SEO' : label}

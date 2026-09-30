@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
+import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { BRAND, IconButton, StatusSelect, TableCard, Tabs, Toggle, fmtDate, rowClass, useAdminTheme } from '@/components/admin/ui';
 import type { Database } from '@/types/database';
 
@@ -182,7 +183,7 @@ export default function AdminToursPage() {
               <input value={tourForm.region} onChange={(e) => setTourForm({ ...tourForm, region: e.target.value })} placeholder="Region" className={inputCls} style={input} />
               <input required type="number" min="0" step="0.01" value={tourForm.price} onChange={(e) => setTourForm({ ...tourForm, price: e.target.value })} placeholder="Price (GHS)" className={inputCls} style={input} />
               <input required type="number" min="1" value={tourForm.duration_days} onChange={(e) => setTourForm({ ...tourForm, duration_days: e.target.value })} placeholder="Days" className={inputCls} style={input} />
-              <input value={tourForm.featured_image_url} onChange={(e) => setTourForm({ ...tourForm, featured_image_url: e.target.value })} placeholder="Image URL" className={inputCls} style={input} />
+              <UrlWithPicker inputStyle={input} placeholder="Image URL or choose from the Media Library" value={tourForm.featured_image_url} onChange={(v) => setTourForm({ ...tourForm, featured_image_url: v })} />
               {submit('Add tour')}
               <textarea value={tourForm.short_description} onChange={(e) => setTourForm({ ...tourForm, short_description: e.target.value })} placeholder="Short description" rows={2} className={`md:col-span-4 ${inputCls}`} style={input} />
             </form>
