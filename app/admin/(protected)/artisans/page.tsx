@@ -13,6 +13,7 @@ import {
   } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
+import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { ListSkeleton, EmptyBlock, reportError, Modal, Button } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
@@ -398,7 +399,7 @@ Cancel
               {/* Profile image */}
               <div className="space-y-1">
                 <label style={labelStyle}>Profile Image URL</label>
-                <input className={inputClass} style={inputStyle} value={form.profile_image_url ?? ''} onChange={(e) => setForm((f) => ({ ...f, profile_image_url: e.target.value }))} placeholder="https://..." />
+                <UrlWithPicker inputStyle={inputStyle} value={form.profile_image_url ?? ''} onChange={(v) => setForm((f) => ({ ...f, profile_image_url: v }))} />
               </div>
 
               {/* Sort order */}

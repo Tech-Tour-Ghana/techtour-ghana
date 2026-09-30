@@ -127,3 +127,16 @@ test("redirect validation blocks bad paths, duplicates, self-redirects and loops
   assert.equal(validateRedirect({ source_path: "/fresh", destination: "https://example.com/x" }, rules), null);
   assert.equal(validateRedirect({ source_path: "/blog/a/b", destination: "/blog/a/c" }, rules), null);
 });
+
+test("FAQs: only complete pairs survive, capped, and schema mirrors the visible list", async () => {
+  const { cleanFaqs, faqJsonLd, MAX_FAQS } = await import("../lib/seo/faq.ts");
+  const items = cleanFaqs([{ question: " Q1 ", answer: " A1 " }, { question: "Only q", answer: "" }, { question: 1, answer: "x" }, null, "str"]);
+  assert.deepEqual(items, [{ question: "Q1", answer: "A1" }]);
+  assert.equal(faqJsonLd([]), null);
+  const ld = faqJsonLd(items) as { "@type": string; mainEntity: { name: string; acceptedAnswer: { text: string } }[] };
+  assert.equal(ld["@type"], "FAQPage");
+  assert.equal(ld.mainEntity[0]!.name, "Q1");
+  assert.equal(ld.mainEntity[0]!.acceptedAnswer.text, "A1");
+  assert.equal(cleanFaqs(Array.from({ length: 30 }, (_, i) => ({ question: `q${i}`, answer: "a" }))).length, MAX_FAQS);
+  assert.deepEqual(cleanFaqs("nope"), []);
+});

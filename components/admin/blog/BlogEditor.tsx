@@ -19,14 +19,17 @@ import { env } from '@/lib/env';
 import { BLOG_CATEGORIES, type BlogCategory } from '@/lib/content/blog';
 import { SITE_LINK_GROUPS } from '@/lib/content/site-links';
 import type { MediaAsset } from '@/lib/media/client';
+import { cleanFaqs, type FaqItem } from '@/lib/seo/faq';
 import { EMPTY_SEO, isValidCanonical, resolveSeo, type SeoFields } from '@/lib/seo/resolve';
 import { analyzeSeo } from '@/lib/seo/score';
 import { SEO_COLUMNS, seoFieldsFrom, siteSeoFrom } from '@/lib/seo/site';
 import { isValidSlug, slugify } from '@/lib/seo/slug';
 import { createBrowserClient } from '@/lib/supabase/client';
+import type { Json } from '@/types/database';
 import ArticleQuality from './ArticleQuality';
 import FeaturedImagePicker from './FeaturedImagePicker';
 import PublishingPanel, { type SaveState } from './PublishingPanel';
+import FaqEditor from './FaqEditor';
 import type { ImagePick, LinkItem } from './RichTextEditor';
 
 const RichTextEditor = dynamic(() => import('./RichTextEditor'), { ssr: false, loading: () => <ListSkeleton /> });
@@ -40,19 +43,21 @@ interface Draft {
   content: string;
   image_url: string;
   image_alt: string;
+  faqs: FaqItem[];
 }
 
-const NEW_DRAFT: Draft = { title: '', slug: '', category: 'culture', author: 'TechTour Ghana', excerpt: '', content: '', image_url: '', image_alt: '' };
+const NEW_DRAFT: Draft = { title: '', slug: '', category: 'culture', author: 'TechTour Ghana', excerpt: '', content: '', image_url: '', image_alt: '', faqs: [] };
 
 interface Persisted {
   slug: string;
   category: string;
   published: boolean;
   publishedAt: string | null;
+  scheduledAt: string | null;
   updatedAt: string | null;
 }
 
-type SaveKind = 'draft' | 'auto' | 'publish' | 'unpublish';
+type SaveKind = 'draft' | 'auto' | 'publish' | 'unpublish' | 'schedule' | 'unschedule';
 
 const AUTOSAVE_MS = 4000;
 
@@ -121,12 +126,12 @@ export default function BlogEditor({ postId }: { postId: string | null }) {
       const p = post.data;
       const loaded: Draft = {
         title: p.title, slug: p.slug, category: p.category as BlogCategory, author: p.author, excerpt: p.excerpt,
-        content: p.content, image_url: p.image_url, image_alt: p.image_alt,
+        content: p.content, image_url: p.image_url, image_alt: p.image_alt, faqs: cleanFaqs(p.faqs),
       };
       const loadedSeo = seoFieldsFrom(seoRow.data);
       setDraft(loaded);
       setSeo(loadedSeo);
-      setPersisted({ slug: p.slug, category: p.category, published: p.is_published, publishedAt: p.published_at, updatedAt: p.updated_at });
+      setPersisted({ slug: p.slug, category: p.category, published: p.is_published, publishedAt: p.published_at, scheduledAt: p.scheduled_at, updatedAt: p.updated_at });
       setSnapshot(JSON.stringify({ d: loaded, s: loadedSeo }));
       setLoading(false);
     })().catch(() => { if (!cancelled) { setLoadError('Could not load the article.'); setLoading(false); } });
@@ -171,9 +176,13 @@ export default function BlogEditor({ postId }: { postId: string | null }) {
   // ---- Save ------------------------------------------------------------------------------
   const saveRef = useRef<(kind: SaveKind, redirect?: boolean) => Promise<boolean>>(async () => false);
 
-  const save = useCallback(async (kind: SaveKind, redirect = false): Promise<boolean> => {
+  const save = useCallback(async (kind: SaveKind, redirect = false, scheduleIso?: string): Promise<boolean> => {
     const auto = kind === 'auto';
-    const problems = validate(kind === 'publish');
+    if (kind === 'schedule' && (!scheduleIso || new Date(scheduleIso).getTime() < Date.now() + 60_000)) {
+      setErrors(['Choose a publish time at least a minute in the future.']);
+      return false;
+    }
+    const problems = validate(kind === 'publish' || kind === 'schedule');
     if (problems.length) {
       if (!auto) setErrors(problems);
       return false;
@@ -191,12 +200,30 @@ export default function BlogEditor({ postId }: { postId: string | null }) {
       }
       setSlugError('');
 
-      const nowPublished = kind === 'publish' ? true : kind === 'unpublish' ? false : published;
-      const publishedAt = nowPublished ? persisted?.publishedAt ?? new Date().toISOString() : persisted?.publishedAt ?? null;
+      // A scheduled post can go live while this editor is open, so the database, not this
+      // screen, decides whether the post is published. Saving must never quietly unpublish it.
+      const current = await supabase.from('blog_posts').select('is_published, published_at, scheduled_at').eq('id', id).maybeSingle();
+      const livePublished = current.data?.is_published ?? false;
+      if (kind === 'schedule' && livePublished) throw new Error('This article is already published.');
+      if (auto && livePublished) {
+        // It went live on schedule while the editor was open. Autosave must not touch a live article.
+        setPersisted((p) => (p ? { ...p, published: true, publishedAt: current.data?.published_at ?? p.publishedAt, scheduledAt: null } : p));
+        setSaveState('idle');
+        notify('This article was published on schedule. Autosave is off. Use Save changes to update it.', 'success');
+        return false;
+      }
+
+      const nowPublished = kind === 'publish' ? true : kind === 'unpublish' ? false : livePublished;
+      const publishedAt = nowPublished ? current.data?.published_at ?? new Date().toISOString() : current.data?.published_at ?? null;
+      const scheduledAt =
+        nowPublished || kind === 'publish' || kind === 'unpublish' || kind === 'unschedule' ? null
+        : kind === 'schedule' ? scheduleIso ?? null
+        : current.data?.scheduled_at ?? null;
+      const { faqs, ...fields } = draft;
       const { data: row, error } = await supabase
         .from('blog_posts')
-        .upsert({ id, ...draft, title: draft.title.trim(), is_published: nowPublished, published_at: publishedAt })
-        .select('slug, category, is_published, published_at, updated_at')
+        .upsert({ id, ...fields, faqs: cleanFaqs(faqs) as unknown as Json, title: draft.title.trim(), is_published: nowPublished, published_at: publishedAt, scheduled_at: scheduledAt })
+        .select('slug, category, is_published, published_at, scheduled_at, updated_at')
         .single();
       if (error || !row) {
         throw new Error(error?.code === '23505' ? 'That slug is already used by another article.' : 'Could not save the article.');
@@ -213,14 +240,16 @@ export default function BlogEditor({ postId }: { postId: string | null }) {
         else notify(`Redirect created: ${from} → ${to}`, 'success');
       }
 
-      setPersisted({ slug: row.slug, category: row.category, published: row.is_published, publishedAt: row.published_at, updatedAt: row.updated_at });
+      setPersisted({ slug: row.slug, category: row.category, published: row.is_published, publishedAt: row.published_at, scheduledAt: row.scheduled_at, updatedAt: row.updated_at });
       setSnapshot(JSON.stringify({ d: draft, s: seo }));
       setSavedAt(new Date());
       setSaveState('saved');
       if (!postId && typeof window !== 'undefined') window.history.replaceState(null, '', `/admin/blog/${id}`);
       if (kind === 'publish') notify('Article published.', 'success');
       if (kind === 'unpublish') notify('Article unpublished. It is now a draft.', 'success');
-      if (kind === 'draft') notify('Saved.', 'success');
+      if (kind === 'schedule') notify('Article scheduled.', 'success');
+      if (kind === 'unschedule') notify('Schedule removed. The article is a draft.', 'success');
+      if (kind === 'draft') notify(row.is_published && !published ? 'Saved. The article had already gone live.' : 'Saved.', 'success');
       return true;
     } catch (e) {
       setSaveState('error');
@@ -235,10 +264,10 @@ export default function BlogEditor({ postId }: { postId: string | null }) {
   saveRef.current = save;
 
   /** Saves, asking first when a live article's URL is about to change. */
-  const requestSave = (kind: SaveKind) => {
+  const requestSave = (kind: SaveKind, scheduleIso?: string) => {
     const urlChanged = persisted?.published && (persisted.slug !== draft.slug || persisted.category !== draft.category) && kind !== 'unpublish';
     if (urlChanged) { setSlugPrompt({ kind }); return; }
-    void save(kind);
+    void save(kind, false, scheduleIso);
   };
 
   // Autosave drafts only.
@@ -363,6 +392,10 @@ export default function BlogEditor({ postId }: { postId: string | null }) {
             </p>
             <RichTextEditor value={draft.content} onChange={(html) => patch({ content: html })} onPickImage={onPickImage} linkItems={linkItems} />
           </div>
+
+          <Section title="FAQ (optional)">
+            <FaqEditor items={draft.faqs} onChange={(faqs) => patch({ faqs })} />
+          </Section>
         </div>
 
         {/* ---------------- Sidebar ---------------- */}
@@ -376,12 +409,15 @@ export default function BlogEditor({ postId }: { postId: string | null }) {
               savedAt={savedAt}
               updatedAt={persisted?.updatedAt ?? null}
               publishedAt={persisted?.publishedAt ?? null}
+              scheduledAt={persisted?.scheduledAt ?? null}
               autosaveNote={!published}
               errors={errors}
               busy={busy}
               onSaveDraft={() => requestSave('draft')}
               onPublish={() => requestSave('publish')}
               onUnpublish={() => requestSave('unpublish')}
+              onSchedule={(iso) => requestSave('schedule', iso)}
+              onUnschedule={() => requestSave('unschedule')}
               onPreview={openPreview}
             />
           </Section>

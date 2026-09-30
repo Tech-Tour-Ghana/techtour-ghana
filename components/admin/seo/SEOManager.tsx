@@ -98,7 +98,7 @@ export default function SEOManager() {
   const inSitemap = report.live.filter((i) => i.seo.robots_index).length + SITE_LINK_GROUPS.flatMap((g) => g.links).length;
   const excluded = [
     ...report.noindex.map((i) => ({ label: i.name, reason: 'Set to noindex' })),
-    ...data.posts.filter((p) => !p.is_published).map((p) => ({ label: p.title || 'Untitled', reason: 'Draft' })),
+    ...data.posts.filter((p) => !p.is_published).map((p) => ({ label: p.title || 'Untitled', reason: p.scheduled_at ? 'Scheduled, not live yet' : 'Draft' })),
     ...data.destinations.filter((d) => !d.is_active).map((d) => ({ label: d.name, reason: 'Inactive destination' })),
   ];
 
