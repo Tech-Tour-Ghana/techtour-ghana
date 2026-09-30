@@ -1,0 +1,35 @@
+import type { ReactNode } from 'react';
+
+import ServiceHero from '@/components/ServiceHero';
+import { ServiceTheme } from '@/components/ServiceTheme';
+
+// Page frame for the content pages (blog, destinations, policies). Reuses the
+// service-page hero and theme so these pages match the rest of the site.
+export default function ContentShell({
+  title,
+  titleAccent,
+  description,
+  accent = 'teal',
+  children,
+}: {
+  title: string;
+  titleAccent: string;
+  description: string;
+  accent?: 'teal' | 'orange';
+  children: ReactNode;
+}) {
+  return (
+    <ServiceTheme>
+      <main style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
+        <ServiceHero title={title} titleAccent={titleAccent} description={description} accentColor={accent} />
+        <div className="mx-auto w-full max-w-5xl px-4 py-12">{children}</div>
+      </main>
+    </ServiceTheme>
+  );
+}
+
+export const cardStyle = {
+  background: 'var(--sp-bg-card)',
+  border: '1px solid var(--sp-border)',
+  boxShadow: 'var(--sp-shadow-sm)',
+} as const;
