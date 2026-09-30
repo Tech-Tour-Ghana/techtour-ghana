@@ -38,6 +38,15 @@ if (issues.length > 0) {
   throw new Error([FAILURE_HEADER, ...issues].join("\n"));
 }
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  // Old Django-era verification and reset URLs, now handled by the Supabase flow.
+  async redirects() {
+    return [
+      { source: "/auth/verify-email/:path*", destination: "/auth/confirm-email", permanent: true },
+      { source: "/auth/verification-complete", destination: "/auth/confirm-email", permanent: true },
+      { source: "/auth/password-reset/confirm/:path*", destination: "/auth/password-reset", permanent: true },
+    ];
+  },
+};
 
 export default nextConfig;

@@ -97,7 +97,7 @@ export async function registerUser(params: {
     options: {
       data: { first_name: params.first_name, last_name: params.last_name },
       emailRedirectTo:
-        typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : undefined,
+        typeof window !== "undefined" ? `${window.location.origin}/auth/callback?next=/auth/confirm-email` : undefined,
     },
   });
 
@@ -416,4 +416,102 @@ export async function getUserStudy(): Promise<StudyApplication[]> {
 
   if (error || !data) return [];
   return data.map((row) => ({ ...row, start_date: row.start_date ?? '' }));
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  date: string;
+  read: boolean;
+  type: 'order' | 'tour' | 'promotion' | 'wishlist' | 'general';
+}
+
+// RLS (0017) scopes notifications to the signed in user.
+export async function getNotifications(): Promise<Notification[]> {
+  const { data, error } = await createBrowserClient()
+    .from('notifications')
+    .select('id, title, message, created_at, is_read, type')
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+  return data.map((row) => ({
+    id: row.id,
+    title: row.title,
+    message: row.message,
+    date: row.created_at,
+    read: row.is_read,
+    type: row.type as Notification['type'],
+  }));
+}
+
+/** Marks one notification read, or every unread one when no id is given. */
+export async function markNotificationsRead(id?: string): Promise<boolean> {
+  let query = createBrowserClient().from('notifications').update({ is_read: true });
+  query = id ? query.eq('id', id) : query.eq('is_read', false);
+  const { error } = await query;
+  return !error;
+}
+
+/** Re-checks the current password before changing it, Supabase does not. */
+export async function changePasswordWithCurrent(
+  currentPassword: string,
+  newPassword: string,
+): Promise<{ success: boolean; message?: string }> {
+  const supabase = createBrowserClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user?.email) return { success: false, message: 'Not authenticated' };
+
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: auth.user.email,
+    password: currentPassword,
+  });
+  if (verifyError) return { success: false, message: 'Current password is incorrect' };
+  return changePassword(newPassword);
+}
+
+/** The user's verified authenticator app factor, if they have set one up. */
+export async function getTotpFactorId(): Promise<string | null> {
+  const { data } = await createBrowserClient().auth.mfa.listFactors();
+  return data?.totp[0]?.id ?? null;
+}
+
+export async function enrollTotp(): Promise<{ id: string; qrCode: string; secret: string } | { error: string }> {
+  const supabase = createBrowserClient();
+  // A half finished earlier enrolment blocks a new one, clear it first.
+  const { data: factors } = await supabase.auth.mfa.listFactors();
+  for (const factor of factors?.all ?? []) {
+    if (factor.factor_type === 'totp' && factor.status === 'unverified') {
+      await supabase.auth.mfa.unenroll({ factorId: factor.id });
+    }
+  }
+  const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Authenticator app' });
+  if (error || !data) return { error: error?.message ?? 'Could not start two-factor setup' };
+  return { id: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret };
+}
+
+export async function verifyTotp(factorId: string, code: string): Promise<{ success: boolean; message?: string }> {
+  const { error } = await createBrowserClient().auth.mfa.challengeAndVerify({ factorId, code });
+  return error ? { success: false, message: error.message } : { success: true };
+}
+
+export async function disableTotp(factorId: string): Promise<{ success: boolean; message?: string }> {
+  const { error } = await createBrowserClient().auth.mfa.unenroll({ factorId });
+  return error ? { success: false, message: error.message } : { success: true };
+}
+
+/** Signs the account out everywhere except this browser. */
+export async function signOutOtherSessions(): Promise<boolean> {
+  const { error } = await createBrowserClient().auth.signOut({ scope: 'others' });
+  return !error;
+}
+
+/** Sends the email confirmation link again. */
+export async function resendConfirmationEmail(email: string): Promise<{ success: boolean; message?: string }> {
+  const { error } = await createBrowserClient().auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/auth/confirm-email` },
+  });
+  return error ? { success: false, message: error.message } : { success: true };
 }

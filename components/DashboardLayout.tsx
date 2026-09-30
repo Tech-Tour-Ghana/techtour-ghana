@@ -22,6 +22,7 @@ import {
   faHeart,
   faCreditCard,
   faBell,
+  faShieldAlt,
   faCog,
   faSignOutAlt,
   faChevronRight,
@@ -34,7 +35,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from '@/context/ThemeContext';
 import { useCart } from '@/context/CartContext';
-import { getAuthStatus, logoutUser, type User } from '@/lib/api';
+import { getAuthStatus, getNotifications, logoutUser, type Notification, type User } from '@/lib/api';
 
 const BRAND_COLORS = {
   tropicalTeal: '#139EA2',
@@ -53,6 +54,7 @@ export const SIDEBAR_ITEMS = [
 export const TOP_BAR_ITEMS = [
   { icon: faUser, label: 'Profile', href: '/auth/profile' },
   { icon: faCog, label: 'Settings', href: '/auth/settings' },
+  { icon: faShieldAlt, label: 'Security', href: '/auth/security' },
 ];
 
 interface DashboardLayoutProps {
@@ -69,6 +71,11 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
   const [user, setUser] = useState<User | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  useEffect(() => {
+    getNotifications().then(setNotifications);
+  }, []);
+  const unreadNotifications = notifications.filter((n) => !n.read).length;
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
 
@@ -224,6 +231,11 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
                 style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textSecondary }}
               >
                 <FontAwesomeIcon icon={faBell} className="w-4 h-4" />
+                {unreadNotifications > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] leading-4 text-center">
+                    {unreadNotifications}
+                  </span>
+                )}
               </button>
               {isNotificationsOpen && (
                 <div
@@ -233,9 +245,23 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
                   <div className="p-3 border-b" style={{ borderColor: themeStyles.border }}>
                     <p className="font-semibold text-sm" style={{ color: themeStyles.textPrimary }}>Notifications</p>
                   </div>
-                  <div className="p-3 text-center">
-                    <p className="text-sm" style={{ color: themeStyles.textMuted }}>No new notifications</p>
-                  </div>
+                  {notifications.length === 0 ? (
+                    <div className="p-3 text-center">
+                      <p className="text-sm" style={{ color: themeStyles.textMuted }}>No new notifications</p>
+                    </div>
+                  ) : (
+                    <>
+                      {notifications.slice(0, 4).map((n) => (
+                        <div key={n.id} className="p-3 border-b" style={{ borderColor: themeStyles.border }}>
+                          <p className="text-sm font-medium" style={{ color: themeStyles.textPrimary }}>{n.title}</p>
+                          <p className="text-xs" style={{ color: themeStyles.textMuted }}>{n.message}</p>
+                        </div>
+                      ))}
+                      <Link href="/auth/notifications" onClick={() => setIsNotificationsOpen(false)} className="block p-3 text-center text-sm font-medium" style={{ color: BRAND_COLORS.tropicalTeal }}>
+                        View all
+                      </Link>
+                    </>
+                  )}
                 </div>
               )}
             </div>
