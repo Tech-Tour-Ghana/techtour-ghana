@@ -13,9 +13,9 @@ import { BLOG_CATEGORIES } from '@/lib/content/blog';
 const LABELS: Record<string, string> = {
   about: 'About', 'our-story': 'Our Story', 'our-team': 'Meet the Team', partnership: 'Partnerships', careers: 'Careers', 'contact-us': 'Contact Us',
   services: 'Services', 'onsite-tourism': 'Onsite Tourism', 'dream-vacations': 'Dream Vacations', 'study-abroad': 'Study Abroad',
-  destinations: 'Destinations', blog: 'Blog Updates', market: 'TechTour Market', artisans: 'Artisan Spotlight', 'tech-innovation': 'Tech & Innovation',
+  destinations: 'Destinations', tours: 'Tours Listings', blog: 'Blog Updates', market: 'TechTour Market', artisans: 'Artisan Spotlight', 'tech-innovation': 'Tech & Innovation',
   faq: 'FAQ', privacy: 'Privacy Policy', terms: 'Terms of Service', cookies: 'Cookie Policy', refund: 'Refund Policy', sitemap: 'Sitemap',
-  study: 'Study', tours: 'Tours', positions: 'Open Positions', all: 'All',
+  study: 'Study', positions: 'Open Positions', all: 'All',
 };
 
 // Levels that have no page of their own, so they are shown as plain text.
