@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faPen, faTrash, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs, ListSkeleton, reportError, Modal } from '@/components/admin/ui';
+import { Tabs, ListSkeleton, reportError, Modal, Button } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -184,14 +184,12 @@ export default function HomepagePage() {
         <Modal title={`${modal.data.id ? 'Edit' : 'Add'} ${modal.type === 'feature_cards' ? 'Feature Card' : 'Video Section'}`} maxWidth="max-w-md" onClose={() => setModal(null)}
           footer={
             <>
-              <button onClick={save} disabled={saving}
-                className="flex-1 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
-                style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
-                {saving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : 'Save'}
-              </button>
-              <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-lg text-xs font-medium" style={{ background: themeStyles.border, color: themeStyles.textSecondary }}>
-                Cancel
-              </button>
+              <Button className="flex-1" onClick={save} disabled={saving}>
+{saving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : 'Save'}
+</Button>
+              <Button variant="secondary" className="flex-1" onClick={() => setModal(null)}>
+Cancel
+</Button>
             
             </>
           }

@@ -16,7 +16,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock, reportError, Modal } from '@/components/admin/ui';
+import { ListSkeleton, EmptyBlock, reportError, Modal, Button } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -233,32 +233,15 @@ export default function AdminUsersPage() {
         <Modal title="User Profile" maxWidth="max-w-md" onClose={() => setViewUser(null)}
           footer={
             <>
-              <button
-                onClick={() => toggleAdmin(viewUser)}
-                disabled={togglingId === viewUser.id}
-                className="px-3 py-2 rounded-lg text-xs font-medium transition hover:opacity-80"
-                style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}
-              >
-                {viewUser.is_admin ? 'Remove Admin' : 'Make Admin'}
-              </button>
-              <button
-                onClick={() => toggleActive(viewUser)}
-                disabled={togglingId === viewUser.id}
-                className="px-3 py-2 rounded-lg text-xs font-medium transition hover:opacity-80"
-                style={viewUser.is_active
-                  ? { background: '#EF444422', color: '#EF4444' }
-                  : { background: '#10B98122', color: '#10B981' }
-                }
-              >
-                {viewUser.is_active ? 'Suspend User' : 'Activate User'}
-              </button>
-              <button
-                onClick={() => setViewUser(null)}
-                className="px-3 py-2 rounded-lg text-xs font-medium transition hover:opacity-70"
-                style={{ background: themeStyles.inputBg, color: themeStyles.textSecondary }}
-              >
-                Close
-              </button>
+              <Button variant="secondary" onClick={() => toggleAdmin(viewUser)} disabled={togglingId === viewUser.id}>
+{viewUser.is_admin ? 'Remove Admin' : 'Make Admin'}
+</Button>
+              <Button variant={viewUser.is_active ? 'danger' : 'secondary'} onClick={() => toggleActive(viewUser)} disabled={togglingId === viewUser.id}>
+{viewUser.is_active ? 'Suspend User' : 'Activate User'}
+</Button>
+              <Button variant="secondary" onClick={() => setViewUser(null)}>
+Close
+</Button>
             
             </>
           }

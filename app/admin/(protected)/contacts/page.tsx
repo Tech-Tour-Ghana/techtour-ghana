@@ -12,7 +12,7 @@ import {
   } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock, Tabs, reportError, Modal } from '@/components/admin/ui';
+import { ListSkeleton, EmptyBlock, Tabs, reportError, Modal, Button } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -208,29 +208,15 @@ export default function AdminContactsPage() {
         <Modal title="Message Details" maxWidth="max-w-lg" onClose={() => setViewMsg(null)}
           footer={
             <>
-              <button
-                onClick={() => toggleRead(viewMsg)}
-                disabled={busyId === viewMsg.id}
-                className="px-3 py-2 rounded-lg text-xs font-medium transition hover:opacity-80"
-                style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}
-              >
-                {viewMsg.is_read ? 'Mark Unread' : 'Mark Read'}
-              </button>
-              <button
-                onClick={() => deleteMsg(viewMsg)}
-                disabled={busyId === viewMsg.id}
-                className="px-3 py-2 rounded-lg text-xs font-medium transition hover:opacity-80"
-                style={{ background: '#EF444422', color: '#EF4444' }}
-              >
-                Delete
-              </button>
-              <button
-                onClick={() => setViewMsg(null)}
-                className="px-3 py-2 rounded-lg text-xs font-medium transition hover:opacity-70"
-                style={{ background: themeStyles.inputBg, color: themeStyles.textSecondary }}
-              >
-                Close
-              </button>
+              <Button variant="secondary" onClick={() => toggleRead(viewMsg)} disabled={busyId === viewMsg.id}>
+{viewMsg.is_read ? 'Mark Unread' : 'Mark Read'}
+</Button>
+              <Button variant="danger" onClick={() => deleteMsg(viewMsg)} disabled={busyId === viewMsg.id}>
+Delete
+</Button>
+              <Button variant="secondary" onClick={() => setViewMsg(null)}>
+Close
+</Button>
             
             </>
           }

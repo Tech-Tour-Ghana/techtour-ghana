@@ -13,7 +13,7 @@ import {
   } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock, reportError, Modal } from '@/components/admin/ui';
+import { ListSkeleton, EmptyBlock, reportError, Modal, Button } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -214,7 +214,7 @@ export default function AdminArtisansPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {artisans.map((a, i) => (
+                  {artisans.map((a) => (
                     <tr
                       key={a.id}
                       className="border-b last:border-b-0 transition hover:bg-black/5"
@@ -282,18 +282,13 @@ export default function AdminArtisansPage() {
         <Modal title={editingId ? 'Edit Artisan' : 'Add New Artisan'} maxWidth="max-w-2xl" onClose={() => closeModal()}
           footer={
             <>
-              <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textSecondary }}>
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving || !form.name.trim()}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-                style={{ background: BRAND_COLORS.tropicalTeal }}
-              >
-                {saving && <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />}
+              <Button variant="secondary" onClick={closeModal}>
+Cancel
+</Button>
+              <Button onClick={handleSave} disabled={saving || !form.name.trim()}>
+{saving && <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />}
                 {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Artisan'}
-              </button>
+</Button>
             
             </>
           }

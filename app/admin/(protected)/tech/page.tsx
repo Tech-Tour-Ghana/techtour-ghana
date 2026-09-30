@@ -14,7 +14,7 @@ import {
 import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs, EmptyBlock, ListSkeleton, reportError, Modal } from '@/components/admin/ui';
+import { Tabs, EmptyBlock, ListSkeleton, reportError, Modal, Button } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -452,13 +452,13 @@ export default function AdminTechPage() {
         <Modal title={innovationModal.id ? 'Edit Innovation' : 'Add Innovation'} maxWidth="max-w-lg" onClose={() => setInnovationModal({ open: false, data: blankInnovation(), id: null })}
           footer={
             <>
-                <button onClick={() => setInnovationModal({ open: false, data: blankInnovation(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                  Cancel
-                </button>
-                <button onClick={saveInnovation} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
-                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
+                <Button variant="secondary" onClick={() => setInnovationModal({ open: false, data: blankInnovation(), id: null })}>
+Cancel
+</Button>
+                <Button onClick={saveInnovation} disabled={saving}>
+{saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
                   {innovationModal.id ? 'Save Changes' : 'Add Innovation'}
-                </button>
+</Button>
               
             </>
           }
@@ -514,13 +514,13 @@ export default function AdminTechPage() {
         <Modal title={eventModal.id ? 'Edit Event' : 'Add Event'} maxWidth="max-w-lg" onClose={() => setEventModal({ open: false, data: blankEvent(), id: null })}
           footer={
             <>
-                <button onClick={() => setEventModal({ open: false, data: blankEvent(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                  Cancel
-                </button>
-                <button onClick={saveEvent} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
-                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
+                <Button variant="secondary" onClick={() => setEventModal({ open: false, data: blankEvent(), id: null })}>
+Cancel
+</Button>
+                <Button onClick={saveEvent} disabled={saving}>
+{saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
                   {eventModal.id ? 'Save Changes' : 'Add Event'}
-                </button>
+</Button>
               
             </>
           }
@@ -574,13 +574,13 @@ export default function AdminTechPage() {
         <Modal title={resourceModal.id ? 'Edit Resource' : 'Add Resource'} maxWidth="max-w-lg" onClose={() => setResourceModal({ open: false, data: blankResource(), id: null })}
           footer={
             <>
-                <button onClick={() => setResourceModal({ open: false, data: blankResource(), id: null })} className="px-4 py-2 rounded-lg text-xs font-medium transition" style={{ background: ts.inputBg, color: ts.textSecondary, border: `1px solid ${ts.inputBorder}` }}>
-                  Cancel
-                </button>
-                <button onClick={saveResource} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-60" style={{ background: BRAND_COLORS.tropicalTeal }}>
-                  {saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
+                <Button variant="secondary" onClick={() => setResourceModal({ open: false, data: blankResource(), id: null })}>
+Cancel
+</Button>
+                <Button onClick={saveResource} disabled={saving}>
+{saving && <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />}
                   {resourceModal.id ? 'Save Changes' : 'Add Resource'}
-                </button>
+</Button>
               
             </>
           }

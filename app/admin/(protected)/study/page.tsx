@@ -8,7 +8,7 @@ import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock, Tabs, reportError, Modal } from '@/components/admin/ui';
+import { ListSkeleton, EmptyBlock, Tabs, reportError, Modal, Button } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -109,7 +109,7 @@ interface TabProps {
   labelStyle: React.CSSProperties;
 }
 
-function DestinationsTab({ themeStyles, isDimMode, inputClass, inputStyle, labelStyle }: TabProps) {
+function DestinationsTab({ themeStyles, inputClass, inputStyle, labelStyle }: TabProps) {
   const [rows, setRows] = useState<Destination[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -241,16 +241,13 @@ function DestinationsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
         <Modal title={editingId ? 'Edit Destination' : 'Add Destination'} maxWidth="max-w-lg" onClose={() => closeModal()}
           footer={
             <>
-              <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textSecondary }}>Cancel</button>
-              <button
-                onClick={handleSave}
-                disabled={saving || !form.country_name.trim()}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-                style={{ background: BRAND_COLORS.tropicalTeal }}
-              >
-                {saving && <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />}
+              <Button variant="secondary" onClick={closeModal}>
+Cancel
+</Button>
+              <Button onClick={handleSave} disabled={saving || !form.country_name.trim()}>
+{saving && <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />}
                 {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Destination'}
-              </button>
+</Button>
             
             </>
           }
@@ -304,7 +301,7 @@ function DestinationsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
   );
 }
 
-function ScholarshipsTab({ themeStyles, isDimMode, inputClass, inputStyle, labelStyle }: TabProps) {
+function ScholarshipsTab({ themeStyles, inputClass, inputStyle, labelStyle }: TabProps) {
   const [rows, setRows] = useState<Scholarship[]>([]);
   const [destinations, setDestinations] = useState<Pick<Destination, 'id' | 'country_name'>[]>([]);
   const [loading, setLoading] = useState(true);
@@ -459,16 +456,13 @@ function ScholarshipsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
         <Modal title={editingId ? 'Edit Scholarship' : 'Add Scholarship'} maxWidth="max-w-2xl" onClose={() => closeModal()}
           footer={
             <>
-              <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium transition hover:opacity-70" style={{ background: themeStyles.inputBg, color: themeStyles.textSecondary }}>Cancel</button>
-              <button
-                onClick={handleSave}
-                disabled={saving || !form.title.trim() || !form.destination_id}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-                style={{ background: BRAND_COLORS.tropicalTeal }}
-              >
-                {saving && <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />}
+              <Button variant="secondary" onClick={closeModal}>
+Cancel
+</Button>
+              <Button onClick={handleSave} disabled={saving || !form.title.trim() || !form.destination_id}>
+{saving && <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />}
                 {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Scholarship'}
-              </button>
+</Button>
             
             </>
           }
