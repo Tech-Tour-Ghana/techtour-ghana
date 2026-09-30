@@ -4,6 +4,9 @@ import { notFound } from 'next/navigation';
 import { cache } from 'react';
 
 import ContentShell, { cardStyle } from '@/components/content/ContentShell';
+import JsonLd from '@/components/seo/JsonLd';
+import { breadcrumbJsonLd, destinationJsonLd, resolveSeo } from '@/lib/seo/resolve';
+import { getSeoFields, getSiteSeo, toMetadata } from '@/lib/seo/load.server';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -14,34 +17,44 @@ const getDestination = cache(async (slug: string) => {
   const supabase = await createClient();
   const { data } = await supabase
     .from('destinations')
-    .select('slug, name, tagline, description, highlights, image_url')
+    .select('id, slug, name, tagline, description, highlights, image_url')
     .eq('slug', slug)
     .eq('is_active', true)
     .maybeSingle();
   return data;
 });
 
+const getResolved = cache(async (slug: string) => {
+  const destination = await getDestination(slug);
+  if (!destination) return null;
+  const [site, seo] = await Promise.all([getSiteSeo(), getSeoFields('destination', destination.id)]);
+  const resolved = resolveSeo({ path: `/destinations/${slug}`, title: destination.name, excerpt: destination.tagline, imageUrl: destination.image_url, seo, site });
+  return { destination, site, resolved };
+});
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const destination = await getDestination(slug);
-  if (!destination) return {};
-  return {
-    title: destination.name,
-    description: destination.tagline,
-    alternates: { canonical: `/destinations/${slug}` },
-    openGraph: { title: destination.name, description: destination.tagline, images: destination.image_url ? [destination.image_url] : undefined },
-  };
+  const found = await getResolved(slug);
+  if (!found) return {};
+  return toMetadata(found.resolved, { type: 'website', siteName: found.site.siteName });
 }
 
 export default async function DestinationPage({ params }: Params) {
   const { slug } = await params;
-  const destination = await getDestination(slug);
-  if (!destination) notFound();
+  const found = await getResolved(slug);
+  if (!found) notFound();
+  const { destination, site, resolved } = found;
 
   const highlights = destination.highlights.split('\n').map((h) => h.trim()).filter(Boolean);
 
   return (
     <ContentShell title={destination.name} titleAccent="" description={destination.tagline}>
+      <JsonLd
+        data={[
+          destinationJsonLd({ resolved, name: destination.name }),
+          breadcrumbJsonLd([{ name: 'Destinations', path: '/destinations' }, { name: destination.name, path: `/destinations/${slug}` }], site),
+        ]}
+      />
       <div className="grid gap-6 lg:grid-cols-3">
         <section className="lg:col-span-2 rounded-2xl p-6 md:p-8" style={cardStyle}>
           {destination.image_url && (

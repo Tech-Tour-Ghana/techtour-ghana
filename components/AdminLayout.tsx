@@ -3,6 +3,7 @@
 import { ReactNode, useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Toaster } from '@/components/admin/toast';
 import { motion, useReducedMotion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -22,6 +23,7 @@ import {
   faChartLine,
   faCog,
   faImages,
+  faMagnifyingGlass,
   faArrowLeft,
   faSun,
   faMoon,
@@ -89,6 +91,12 @@ const NAV_GROUPS = [
     group: 'Assets',
     items: [
       { icon: faImages, label: 'Media Library', href: '/admin/media' },
+    ],
+  },
+  {
+    group: 'Marketing',
+    items: [
+      { icon: faMagnifyingGlass, label: 'SEO Manager', href: '/admin/seo' },
     ],
   },
   {
@@ -373,6 +381,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
           </motion.div>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 }

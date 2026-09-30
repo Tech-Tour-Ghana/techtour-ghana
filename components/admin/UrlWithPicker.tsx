@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faImages } from '@fortawesome/free-solid-svg-icons';
-import MediaPickerModal from './MediaPickerModal';
+import MediaPicker from './media/MediaPicker';
 
 const BRAND = '#139EA2';
 
@@ -35,10 +35,10 @@ export default function UrlWithPicker({ value, onChange, inputStyle, placeholder
           <FontAwesomeIcon icon={faImages} className="w-3.5 h-3.5" />
         </button>
       </div>
-      <MediaPickerModal
+      <MediaPicker
         open={open}
         onClose={() => setOpen(false)}
-        onSelect={url => { onChange(url); setOpen(false); }}
+        onSelect={([asset]) => { if (asset) onChange(asset.public_url); setOpen(false); }}
       />
     </>
   );

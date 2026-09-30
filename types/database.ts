@@ -617,6 +617,7 @@ export type Database = {
           created_at: string
           excerpt: string
           id: string
+          image_alt: string
           image_url: string
           is_published: boolean
           published_at: string | null
@@ -631,6 +632,7 @@ export type Database = {
           created_at?: string
           excerpt?: string
           id?: string
+          image_alt?: string
           image_url?: string
           is_published?: boolean
           published_at?: string | null
@@ -645,6 +647,7 @@ export type Database = {
           created_at?: string
           excerpt?: string
           id?: string
+          image_alt?: string
           image_url?: string
           is_published?: boolean
           published_at?: string | null
@@ -1593,34 +1596,58 @@ export type Database = {
       }
       media_assets: {
         Row: {
+          alt_text: string
+          caption: string
           created_at: string | null
+          description: string
           folder_id: string
+          height: number | null
           id: string
+          is_decorative: boolean
           mime_type: string | null
           name: string
           public_url: string
           size_bytes: number | null
           storage_path: string
+          title: string
+          uploaded_by: string | null
+          width: number | null
         }
         Insert: {
+          alt_text?: string
+          caption?: string
           created_at?: string | null
+          description?: string
           folder_id: string
+          height?: number | null
           id?: string
+          is_decorative?: boolean
           mime_type?: string | null
           name: string
           public_url: string
           size_bytes?: number | null
           storage_path: string
+          title?: string
+          uploaded_by?: string | null
+          width?: number | null
         }
         Update: {
+          alt_text?: string
+          caption?: string
           created_at?: string | null
+          description?: string
           folder_id?: string
+          height?: number | null
           id?: string
+          is_decorative?: boolean
           mime_type?: string | null
           name?: string
           public_url?: string
           size_bytes?: number | null
           storage_path?: string
+          title?: string
+          uploaded_by?: string | null
+          width?: number | null
         }
         Relationships: [
           {
@@ -2197,6 +2224,36 @@ export type Database = {
         }
         Relationships: []
       }
+      redirects: {
+        Row: {
+          created_at: string
+          destination: string
+          id: string
+          is_active: boolean
+          source_path: string
+          status_code: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          destination: string
+          id?: string
+          is_active?: boolean
+          source_path: string
+          status_code?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          destination?: string
+          id?: string
+          is_active?: boolean
+          source_path?: string
+          status_code?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       scholarships: {
         Row: {
           amount: string
@@ -2252,6 +2309,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      seo_metadata: {
+        Row: {
+          canonical_url: string
+          created_at: string
+          entity_key: string
+          entity_type: string
+          focus_keyword: string
+          id: string
+          meta_description: string
+          og_description: string
+          og_image_url: string
+          og_title: string
+          robots_follow: boolean
+          robots_index: boolean
+          seo_title: string
+          twitter_description: string
+          twitter_image_url: string
+          twitter_title: string
+          updated_at: string
+        }
+        Insert: {
+          canonical_url?: string
+          created_at?: string
+          entity_key: string
+          entity_type: string
+          focus_keyword?: string
+          id?: string
+          meta_description?: string
+          og_description?: string
+          og_image_url?: string
+          og_title?: string
+          robots_follow?: boolean
+          robots_index?: boolean
+          seo_title?: string
+          twitter_description?: string
+          twitter_image_url?: string
+          twitter_title?: string
+          updated_at?: string
+        }
+        Update: {
+          canonical_url?: string
+          created_at?: string
+          entity_key?: string
+          entity_type?: string
+          focus_keyword?: string
+          id?: string
+          meta_description?: string
+          og_description?: string
+          og_image_url?: string
+          og_title?: string
+          robots_follow?: boolean
+          robots_index?: boolean
+          seo_title?: string
+          twitter_description?: string
+          twitter_image_url?: string
+          twitter_title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       shipping_settings: {
         Row: {
@@ -2316,6 +2433,13 @@ export type Database = {
           register_description: string
           register_features: string
           register_headline: string
+          seo_default_description: string
+          seo_default_image_url: string
+          seo_org_logo_url: string
+          seo_org_name: string
+          seo_site_name: string
+          seo_social_profiles: string[]
+          seo_title_pattern: string
           updated_at: string
         }
         Insert: {
@@ -2332,6 +2456,13 @@ export type Database = {
           register_description?: string
           register_features?: string
           register_headline?: string
+          seo_default_description?: string
+          seo_default_image_url?: string
+          seo_org_logo_url?: string
+          seo_org_name?: string
+          seo_site_name?: string
+          seo_social_profiles?: string[]
+          seo_title_pattern?: string
           updated_at?: string
         }
         Update: {
@@ -2348,6 +2479,13 @@ export type Database = {
           register_description?: string
           register_features?: string
           register_headline?: string
+          seo_default_description?: string
+          seo_default_image_url?: string
+          seo_org_logo_url?: string
+          seo_org_name?: string
+          seo_site_name?: string
+          seo_social_profiles?: string[]
+          seo_title_pattern?: string
           updated_at?: string
         }
         Relationships: []

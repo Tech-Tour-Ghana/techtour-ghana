@@ -1,5 +1,7 @@
 "use client";
 
+import { Suspense } from 'react';
+
 import React, {
   useState,
   useEffect,
@@ -1062,7 +1064,7 @@ function JobDetails({ job }: { job: Job }) {
    PAGE
    ============================================================ */
 
-export default function PositionsPage() {
+function PositionsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -2387,5 +2389,14 @@ export default function PositionsPage() {
         `}</style>
       </main>
     </ServiceTheme>
+  );
+}
+
+// useSearchParams needs a Suspense boundary now that the page renders on the server.
+export default function PositionsPage() {
+  return (
+    <Suspense fallback={null}>
+      <PositionsPageContent />
+    </Suspense>
   );
 }
