@@ -146,17 +146,13 @@ export default function ContactUsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createBrowserClient();
-    const { error } = await supabase.from('contact_messages').insert({
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      subject: formData.subject,
-      message: formData.message,
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
     });
-    // ponytail: no select() after insert, there is no select policy for anon
-    if (error) {
-      console.error('Failed to send contact message:', error);
+    if (!res.ok) {
+      console.error('Failed to send contact message:', res.status);
       return;
     }
     setSubmitted(true);
