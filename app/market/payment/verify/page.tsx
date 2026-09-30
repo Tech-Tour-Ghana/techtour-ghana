@@ -19,6 +19,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { paystackService } from '@/services/paystackService';
 import { BRAND_COLORS } from '@/config/paystack';
+import { useCart } from '@/context/CartContext';
 
 // ===== THEME COLORS =====
 const THEME_COLORS = {
@@ -49,6 +50,7 @@ const THEME_COLORS = {
 export default function PaymentVerifyPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { clearCart } = useCart();
   const [status, setStatus] = useState<'loading' | 'success' | 'failed'>('loading');
   const [message, setMessage] = useState('');
   const [reference, setReference] = useState('');
@@ -97,6 +99,7 @@ export default function PaymentVerifyPage() {
 
           if (transaction.status === 'success') {
             setStatus('success');
+            clearCart();
             setMessage('Payment verified successfully! Your order has been confirmed.');
             localStorage.removeItem('pending_payment_reference');
             localStorage.removeItem('pending_payment_order');
@@ -115,7 +118,7 @@ export default function PaymentVerifyPage() {
     };
 
     verifyPayment();
-  }, [searchParams]);
+  }, [searchParams, clearCart]);
 
   const theme = isDimMode ? THEME_COLORS.dark : THEME_COLORS.light;
   const primaryColor = isDimMode ? brandColors.sandyOrange : brandColors.tropicalTeal;
