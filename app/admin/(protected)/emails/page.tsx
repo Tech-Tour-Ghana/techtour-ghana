@@ -5,10 +5,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { BRAND, IconButton, TableCard, Tabs, rowClass, useAdminTheme } from '@/components/admin/ui';
+import { BRAND, IconButton, TableCard, Tabs, rowClass, useAdminTheme, Modal } from '@/components/admin/ui';
 
 interface EmailRow {
   id: string;
@@ -111,25 +111,22 @@ export default function AdminEmailsPage() {
       </div>
 
       {view && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={(e) => e.target === e.currentTarget && setView(null)}>
-          <div className="w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]" style={{ background: t.cardBg, border: `1px solid ${t.border}` }}>
-            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: t.border }}>
-              <div className="min-w-0">
-                <h2 className="text-base font-bold truncate" style={{ color: t.textPrimary }}>{view.subject}</h2>
-                <p className="text-xs" style={{ color: t.textMuted }}>To {view.recipient}</p>
-              </div>
-              <button onClick={() => setView(null)} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: t.inputBg, color: t.textMuted }} aria-label="Close">
-                <FontAwesomeIcon icon={faXmark} className="w-4 h-4" />
-              </button>
-            </div>
-            {view.error_message && <p className="px-6 pt-3 text-xs" style={{ color: '#EF4444' }}>{view.error_message}</p>}
-            {/* sandbox="" so nothing inside a stored email can run scripts or navigate. */}
-            <iframe title="Email content" sandbox="" srcDoc={view.content} className="flex-1 min-h-[320px] m-4 rounded-lg bg-white" />
-            <div className="px-6 pb-4 flex justify-end">
+        <Modal title={view.subject} subtitle={`To ${view.recipient}`} maxWidth="max-w-2xl" onClose={() => setView(null)}
+          footer={
+            <>
               <button onClick={() => setView(null)} className="px-4 py-2 rounded-lg text-sm font-medium text-white" style={{ background: BRAND.teal }}>Close</button>
-            </div>
-          </div>
-        </div>
+            
+            </>
+          }
+        >
+<div className="space-y-4">
+            {view.error_message && <p className="text-xs" style={{ color: 'var(--adm-error)' }}>{view.error_message}</p>}
+            {/* sandbox="" so nothing inside a stored email can run scripts or navigate. */}
+            <iframe title="Email content" sandbox="" srcDoc={view.content} className="min-h-[320px] w-full rounded-lg bg-white" />
+            
+          
+</div>
+        </Modal>
       )}
     </AdminLayout>
   );

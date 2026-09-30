@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faPen, faTrash, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs, ListSkeleton, reportError } from '@/components/admin/ui';
+import { Tabs, ListSkeleton, reportError, Modal } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -181,12 +181,22 @@ export default function HomepagePage() {
 
       {/* Modal */}
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setModal(null)}>
-          <div className="w-full max-w-md rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto" style={{ background: themeStyles.cardBg }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-bold" style={{ color: themeStyles.textPrimary }}>
-              {modal.data.id ? 'Edit' : 'Add'} {modal.type === 'feature_cards' ? 'Feature Card' : 'Video Section'}
-            </h3>
-
+        <Modal title={`${modal.data.id ? 'Edit' : 'Add'} ${modal.type === 'feature_cards' ? 'Feature Card' : 'Video Section'}`} maxWidth="max-w-md" onClose={() => setModal(null)}
+          footer={
+            <>
+              <button onClick={save} disabled={saving}
+                className="flex-1 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
+                style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
+                {saving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : 'Save'}
+              </button>
+              <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-lg text-xs font-medium" style={{ background: themeStyles.border, color: themeStyles.textSecondary }}>
+                Cancel
+              </button>
+            
+            </>
+          }
+        >
+<div className="space-y-4">
             <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Title</label>
               <input className={inputClass} style={inputStyle} value={modal.data.title ?? ''} onChange={(e) => setField('title', e.target.value)} /></div>
             <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Subtitle</label>
@@ -227,18 +237,10 @@ export default function HomepagePage() {
               <input type="checkbox" checked={modal.data.is_active ?? true} onChange={(e) => setField('is_active', e.target.checked)} />Active
             </label>
 
-            <div className="flex gap-2 pt-2">
-              <button onClick={save} disabled={saving}
-                className="flex-1 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
-                style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
-                {saving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : 'Save'}
-              </button>
-              <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-lg text-xs font-medium" style={{ background: themeStyles.border, color: themeStyles.textSecondary }}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+            
+          
+</div>
+        </Modal>
       )}
     </AdminLayout>
   );

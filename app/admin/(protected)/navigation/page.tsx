@@ -7,7 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs, ListSkeleton, reportError } from '@/components/admin/ui';
+import { Tabs, ListSkeleton, reportError, Modal } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -385,15 +385,22 @@ export default function NavigationPage() {
 
       {/* Modal */}
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setModal(null)}>
-          <div className="w-full max-w-md rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto" style={{ background: themeStyles.cardBg }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-bold" style={{ color: themeStyles.textPrimary }}>
-              {modal.type.includes('add') ? 'Add' : 'Edit'}{' '}
-              {modal.type.includes('menu') ? 'Menu' : modal.type.includes('dropdown') ? 'Dropdown Item' :
-               modal.type.includes('footer_link') ? 'Footer Link' : modal.type.includes('social') ? 'Social Link' :
-               modal.type.includes('legal') ? 'Legal Link' : modal.type.includes('footer_settings') ? 'Footer Settings' : 'Footer Contact'}
-            </h3>
-
+        <Modal title={`${modal.type.includes('add') ? 'Add' : 'Edit'}${' '} ${modal.type.includes('menu') ? 'Menu' : modal.type.includes('dropdown') ? 'Dropdown Item' : modal.type.includes('footer_link') ? 'Footer Link' : modal.type.includes('social') ? 'Social Link' : modal.type.includes('legal') ? 'Legal Link' : modal.type.includes('footer_settings') ? 'Footer Settings' : 'Footer Contact'}`} maxWidth="max-w-md" onClose={() => setModal(null)}
+          footer={
+            <>
+              <button onClick={saveModal} disabled={saving}
+                className="flex-1 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
+                style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
+                {saving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : 'Save'}
+              </button>
+              <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-lg text-xs font-medium" style={{ background: themeStyles.border, color: themeStyles.textSecondary }}>
+                Cancel
+              </button>
+            
+            </>
+          }
+        >
+<div className="space-y-4">
             {/* Menu fields */}
             {(modal.type === 'menu_add' || modal.type === 'menu_edit') && <>
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Label</label>
@@ -488,18 +495,10 @@ export default function NavigationPage() {
               </label>
             </>}
 
-            <div className="flex gap-2 pt-2">
-              <button onClick={saveModal} disabled={saving}
-                className="flex-1 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
-                style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
-                {saving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : 'Save'}
-              </button>
-              <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-lg text-xs font-medium" style={{ background: themeStyles.border, color: themeStyles.textSecondary }}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+            
+          
+</div>
+        </Modal>
       )}
     </AdminLayout>
   );
