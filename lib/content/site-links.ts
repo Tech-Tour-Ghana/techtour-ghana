@@ -5,6 +5,7 @@ export const SITE_LINK_GROUPS: { title: string; links: { label: string; href: st
     title: 'Main',
     links: [
       { label: 'Home', href: '/' },
+      { label: 'Tours Listings', href: '/tours' },
       { label: 'Destinations', href: '/destinations' },
       { label: 'Blog Updates', href: '/blog' },
     ],

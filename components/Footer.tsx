@@ -330,7 +330,7 @@ const Footer = () => {
 
   const quickLinkSections = [
     { key: 'services' as const, title: 'Services' },
-    { key: 'destinations' as const, title: 'Destinations' },
+    { key: 'destinations' as const, title: 'Tours Listings' },
     { key: 'company' as const, title: 'Company' },
     { key: 'support' as const, title: 'Support' },
   ];

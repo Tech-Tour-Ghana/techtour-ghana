@@ -14,7 +14,7 @@ import { CURRENCY_CODES, Field, Section, inputCls, money, slugify, type Category
 type TourInsert = Database['public']['Tables']['tours']['Insert'];
 
 interface Form {
-  title: string; slug: string; category_id: string; short_description: string; description: string;
+  title: string; slug: string; category_id: string; destination_id: string; short_description: string; description: string;
   location: string; region: string; price: string; discount_price: string; currency: CurrencyCode;
   duration_days: string; min_group_size: string; max_group_size: string; meeting_point: string;
   featured_image_url: string; gallery: string; video_url: string; video_preview_seconds: string;
@@ -23,13 +23,13 @@ interface Form {
 }
 
 const EMPTY: Form = {
-  title: '', slug: '', category_id: '', short_description: '', description: '', location: '', region: '', price: '', discount_price: '',
+  title: '', slug: '', category_id: '', destination_id: '', short_description: '', description: '', location: '', region: '', price: '', discount_price: '',
   currency: 'GHS', duration_days: '1', min_group_size: '1', max_group_size: '20', meeting_point: '', featured_image_url: '', gallery: '',
   video_url: '', video_preview_seconds: '0', highlights: '', itinerary: '', includes: '', excludes: '', is_active: true, is_featured: false,
 };
 
 const toForm = (t: Tour): Form => ({
-  title: t.title, slug: t.slug, category_id: t.category_id ?? '', short_description: t.short_description, description: t.description,
+  title: t.title, slug: t.slug, category_id: t.category_id ?? '', destination_id: t.destination_id ?? '', short_description: t.short_description, description: t.description,
   location: t.location, region: t.region, price: String(t.price), discount_price: t.discount_price === null ? '' : String(t.discount_price),
   currency: t.currency, duration_days: String(t.duration_days), min_group_size: String(t.min_group_size), max_group_size: String(t.max_group_size),
   meeting_point: t.meeting_point, featured_image_url: t.featured_image_url, gallery: t.gallery, video_url: t.video_url,
@@ -51,7 +51,7 @@ function build(f: Form): { error: string } | { row: TourInsert } {
   if (!Number.isInteger(min) || !Number.isInteger(max) || min < 1 || max < min) return { error: 'Group size: the maximum must be at least the minimum.' };
   return {
     row: {
-      title: f.title.trim(), slug: f.slug.trim() || slugify(f.title), category_id: f.category_id || null,
+      title: f.title.trim(), slug: f.slug.trim() || slugify(f.title), category_id: f.category_id || null, destination_id: f.destination_id || null,
       short_description: f.short_description.trim(), description: f.description.trim(), location: f.location.trim(), region: f.region.trim(),
       price, discount_price: discount, currency: f.currency, duration_days: Number(f.duration_days), min_group_size: min, max_group_size: max,
       meeting_point: f.meeting_point.trim(), featured_image_url: f.featured_image_url.trim(), gallery: f.gallery.trim(), video_url: f.video_url.trim(),
@@ -61,7 +61,7 @@ function build(f: Form): { error: string } | { row: TourInsert } {
   };
 }
 
-export default function ToursPanel({ tours, categories, loading, reload }: { tours: Tour[]; categories: Category[]; loading: boolean; reload: () => Promise<void> }) {
+export default function ToursPanel({ tours, categories, destinations, loading, reload }: { tours: Tour[]; categories: Category[]; destinations: { id: string; name: string }[]; loading: boolean; reload: () => Promise<void> }) {
   const supabase = useMemo(() => createBrowserClient(), []);
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
@@ -229,6 +229,12 @@ export default function ToursPanel({ tours, categories, loading, reload }: { tou
               <select className={inputCls} style={fieldStyle} value={form.category_id} onChange={(e) => set('category_id', e.target.value)}>
                 <option value="">No category</option>
                 {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </Field>
+            <Field label="Destination" hint="Where it appears on the Tours Listings page.">
+              <select className={inputCls} style={fieldStyle} value={form.destination_id} onChange={(e) => set('destination_id', e.target.value)}>
+                <option value="">No destination</option>
+                {destinations.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
               </select>
             </Field>
             <Field label="Short description" hint="One or two lines for tour cards." className="sm:col-span-2"><textarea rows={2} className={inputCls} style={fieldStyle} value={form.short_description} onChange={(e) => set('short_description', e.target.value)} /></Field>

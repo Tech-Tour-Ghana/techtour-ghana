@@ -3279,6 +3279,7 @@ export type Database = {
           created_at: string
           currency: Database["public"]["Enums"]["currency_code"]
           description: string
+          destination_id: string | null
           discount_price: number | null
           duration_days: number
           excludes: string
@@ -3313,6 +3314,7 @@ export type Database = {
           created_at?: string
           currency?: Database["public"]["Enums"]["currency_code"]
           description: string
+          destination_id?: string | null
           discount_price?: number | null
           duration_days?: number
           excludes?: string
@@ -3347,6 +3349,7 @@ export type Database = {
           created_at?: string
           currency?: Database["public"]["Enums"]["currency_code"]
           description?: string
+          destination_id?: string | null
           discount_price?: number | null
           duration_days?: number
           excludes?: string
@@ -3377,6 +3380,13 @@ export type Database = {
           video_url?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tours_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tours_category_id_fkey"
             columns: ["category_id"]
@@ -3790,6 +3800,10 @@ export type Database = {
       }
     }
     Functions: {
+      create_tour_booking: {
+        Args: { p_participants: number; p_phone?: string; p_schedule_id: string; p_special_requests?: string }
+        Returns: string
+      }
       analytics_growth: { Args: { cur: number; prev: number }; Returns: Json }
       analytics_kpis: { Args: { p_from: string; p_to: string }; Returns: Json }
       analytics_require_admin: { Args: never; Returns: undefined }

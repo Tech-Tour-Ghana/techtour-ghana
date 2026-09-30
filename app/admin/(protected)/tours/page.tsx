@@ -30,22 +30,25 @@ export default function AdminToursPage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [destinations, setDestinations] = useState<{ id: string; name: string }[]>([]);
 
   const load = useCallback(async () => {
-    const [a, b, c, d, e] = await Promise.all([
+    const [a, b, c, d, e, f] = await Promise.all([
       supabase.from('tours').select('*').order('created_at', { ascending: false }),
       supabase.from('tour_categories').select('*').order('sort_order'),
       supabase.from('tour_schedules').select('*').order('start_date', { ascending: false }),
       supabase.from('bookings').select('*, tours(title), tour_schedules(start_date, end_date)').order('created_at', { ascending: false }),
       supabase.from('tour_reviews').select('*, tours(title)').order('created_at', { ascending: false }),
+      supabase.from('destinations').select('id, name').order('sort_order'),
     ]);
-    if (a.error || b.error || c.error || d.error || e.error) setError('Some tour data could not be loaded. Please refresh.');
+    if (a.error || b.error || c.error || d.error || e.error || f.error) setError('Some tour data could not be loaded. Please refresh.');
     else setError('');
     setTours(a.data ?? []);
     setCategories(b.data ?? []);
     setSchedules(c.data ?? []);
     setBookings((d.data as Booking[] | null) ?? []);
     setReviews((e.data as Review[] | null) ?? []);
+    setDestinations(f.data ?? []);
     setLoading(false);
   }, [supabase]);
 
@@ -81,7 +84,7 @@ export default function AdminToursPage() {
 
       {error && <p role="alert" className="mb-4 rounded-[var(--adm-radius-control)] p-4 text-sm" style={{ background: 'var(--adm-error-soft)', color: 'var(--adm-error)' }}>{error}</p>}
 
-      {tab === 'tours' && <ToursPanel tours={tours} categories={categories} loading={loading} reload={load} />}
+      {tab === 'tours' && <ToursPanel tours={tours} categories={categories} destinations={destinations} loading={loading} reload={load} />}
       {tab === 'categories' && <CategoriesPanel categories={categories} tours={tours} loading={loading} reload={load} />}
       {tab === 'schedules' && <SchedulesPanel schedules={schedules} tours={tours} loading={loading} reload={load} />}
       {tab === 'bookings' && <BookingsPanel bookings={bookings} loading={loading} reload={load} />}
