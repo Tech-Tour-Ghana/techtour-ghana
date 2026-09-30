@@ -484,6 +484,47 @@ export type Database = {
           },
         ]
       }
+      artisan_private_contacts: {
+        Row: {
+          artisan_id: string
+          email: string
+          facebook: string
+          instagram: string
+          phone: string
+          twitter: string
+          updated_at: string
+          website: string
+        }
+        Insert: {
+          artisan_id: string
+          email?: string
+          facebook?: string
+          instagram?: string
+          phone?: string
+          twitter?: string
+          updated_at?: string
+          website?: string
+        }
+        Update: {
+          artisan_id?: string
+          email?: string
+          facebook?: string
+          instagram?: string
+          phone?: string
+          twitter?: string
+          updated_at?: string
+          website?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artisan_private_contacts_artisan_id_fkey"
+            columns: ["artisan_id"]
+            isOneToOne: true
+            referencedRelation: "artisans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artisans: {
         Row: {
           bio: string
@@ -491,25 +532,19 @@ export type Database = {
           cover_image_url: string
           craft_type: string
           created_at: string
-          email: string
-          facebook: string
           id: string
-          instagram: string
           is_active: boolean
           is_featured: boolean
           legacy_id: number | null
           location: string
           name: string
-          phone: string
           profile_image_path: string | null
           profile_image_url: string
           slug: string
           sort_order: number
           specialties: string
           title: string
-          twitter: string
           updated_at: string
-          website: string
           years_of_experience: number
         }
         Insert: {
@@ -518,25 +553,19 @@ export type Database = {
           cover_image_url?: string
           craft_type?: string
           created_at?: string
-          email?: string
-          facebook?: string
           id?: string
-          instagram?: string
           is_active?: boolean
           is_featured?: boolean
           legacy_id?: number | null
           location?: string
           name: string
-          phone?: string
           profile_image_path?: string | null
           profile_image_url?: string
           slug: string
           sort_order?: number
           specialties?: string
           title?: string
-          twitter?: string
           updated_at?: string
-          website?: string
           years_of_experience?: number
         }
         Update: {
@@ -545,25 +574,19 @@ export type Database = {
           cover_image_url?: string
           craft_type?: string
           created_at?: string
-          email?: string
-          facebook?: string
           id?: string
-          instagram?: string
           is_active?: boolean
           is_featured?: boolean
           legacy_id?: number | null
           location?: string
           name?: string
-          phone?: string
           profile_image_path?: string | null
           profile_image_url?: string
           slug?: string
           sort_order?: number
           specialties?: string
           title?: string
-          twitter?: string
           updated_at?: string
-          website?: string
           years_of_experience?: number
         }
         Relationships: []
