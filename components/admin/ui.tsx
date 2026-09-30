@@ -137,8 +137,8 @@ export function TableCard({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b" style={{ borderColor: 'var(--adm-border)' }}>
-                {headers.map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--adm-muted)' }}>
+                {headers.map((h, i) => (
+                  <th key={`${i}-${h}`} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--adm-muted)' }}>
                     {h}
                   </th>
                 ))}
