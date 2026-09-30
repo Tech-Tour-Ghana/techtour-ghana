@@ -10,6 +10,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import AdminLayout from '@/components/AdminLayout';
 import { Button, IconButton, Modal, SearchInput, StatusPill, TableCard, Tabs, Toolbar, confirmAction, reportError, rowClass } from '@/components/admin/ui';
+import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { createBrowserClient } from '@/lib/supabase/client';
 
 function toSlug(value: string) {
@@ -31,6 +32,8 @@ interface Product {
   slug: string;
   description: string | null;
   price: number;
+  discount_price: number | null;
+  image_url: string;
   currency: string;
   stock_quantity: number;
   category_id: string | null;
@@ -47,6 +50,8 @@ const EMPTY_PRODUCT: Omit<Product, 'id'> = {
   slug: '',
   description: '',
   price: 0,
+  discount_price: null,
+  image_url: '',
   currency: 'GHS',
   stock_quantity: 0,
   category_id: null,
@@ -117,6 +122,8 @@ export default function AdminMarketPage() {
       slug: p.slug,
       description: p.description ?? '',
       price: p.price,
+      discount_price: p.discount_price,
+      image_url: p.image_url ?? '',
       currency: p.currency,
       stock_quantity: p.stock_quantity,
       category_id: p.category_id,
@@ -233,7 +240,15 @@ export default function AdminMarketPage() {
         >
           {visibleProducts.map((p) => (
             <tr key={p.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
-              <td className="px-4 py-3 font-medium" style={{ color: 'var(--adm-text)' }}>{p.title}</td>
+              <td className="px-4 py-3 font-medium" style={{ color: 'var(--adm-text)' }}>
+                <div className="flex items-center gap-3">
+                  {p.image_url
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={p.image_url} alt="" className="h-10 w-10 flex-shrink-0 rounded-md object-cover" />
+                    : <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md text-[10px]" style={{ background: 'var(--adm-track)', color: 'var(--adm-muted)' }}>No image</span>}
+                  <span className="min-w-0 truncate">{p.title}</span>
+                </div>
+              </td>
               <td className="px-4 py-3 text-xs font-semibold" style={{ color: 'var(--adm-text-2)' }}>{p.currency} {Number(p.price).toFixed(2)}</td>
               <td className="px-4 py-3">
                 {p.stock_quantity <= 0 ? <StatusPill tone="danger">Out of stock</StatusPill>
@@ -319,6 +334,14 @@ Cancel
                       />
                     </div>
                     <div className="col-span-2">
+                      <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Product image</label>
+                      <UrlWithPicker inputStyle={inputStyle} value={productForm.image_url} onChange={(v) => setProductForm((f) => ({ ...f, image_url: v }))} />
+                      {productForm.image_url && (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={productForm.image_url} alt="" className="mt-2 h-28 w-28 rounded-lg object-cover" />
+                      )}
+                    </div>
+                    <div className="col-span-2">
                       <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Description</label>
                       <textarea
                         value={productForm.description ?? ''}
@@ -336,6 +359,18 @@ Cancel
                         step="0.01"
                         value={productForm.price}
                         onChange={(e) => setProductForm((f) => ({ ...f, price: parseFloat(e.target.value) || 0 }))}
+                        className={inputClass}
+                        style={inputStyle}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Sale price (optional)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={productForm.discount_price ?? ''}
+                        onChange={(e) => setProductForm((f) => ({ ...f, discount_price: e.target.value === '' ? null : parseFloat(e.target.value) || 0 }))}
                         className={inputClass}
                         style={inputStyle}
                       />
