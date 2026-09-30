@@ -29,6 +29,7 @@ import {
   faShieldHalved,
   faChevronRight,
   faGlobeAfrica,
+  faUserCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from '@/context/ThemeContext';
 import { getAuthStatus, logoutUser, type User } from '@/lib/api';
@@ -74,6 +75,7 @@ const NAV_GROUPS = [
     items: [
       { icon: faChartLine, label: 'Analytics', href: '/admin/analytics' },
       { icon: faCog, label: 'Settings', href: '/admin/settings' },
+      { icon: faUserCircle, label: 'My Profile', href: '/admin/profile' },
     ],
   },
 ];
@@ -130,7 +132,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
   };
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: themeStyles.background }}>
+    <div className="fixed inset-0 flex" style={{ background: themeStyles.background }}>
       {/* Sidebar */}
       <div
         className="w-64 flex-shrink-0 h-full overflow-y-auto flex flex-col"
