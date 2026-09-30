@@ -26,12 +26,12 @@ interface Artisan {
   craft_type: string | null;
   specialties: string | null;
   years_of_experience: number | null;
-  email: string | null;
-  phone: string | null;
-  website: string | null;
-  instagram: string | null;
-  facebook: string | null;
-  twitter: string | null;
+  email: string;
+  phone: string;
+  website: string;
+  instagram: string;
+  facebook: string;
+  twitter: string;
   profile_image_url: string | null;
   is_featured: boolean;
   is_active: boolean;
@@ -39,6 +39,13 @@ interface Artisan {
 }
 
 type FormData = Omit<Artisan, 'id'>;
+
+// Contact details are private: they live in their own admin-only table so the
+// public artisans page can never expose them.
+const CONTACT_KEYS = ['email', 'phone', 'website', 'instagram', 'facebook', 'twitter'] as const;
+type ContactKey = (typeof CONTACT_KEYS)[number];
+const contactFields = (row?: Partial<Record<ContactKey, string>>): Record<ContactKey, string> =>
+  Object.fromEntries(CONTACT_KEYS.map((k) => [k, row?.[k] ?? ''])) as Record<ContactKey, string>;
 
 const EMPTY_FORM: FormData = {
   name: '',
@@ -91,7 +98,9 @@ export default function AdminArtisansPage() {
       .select('*')
       .order('sort_order', { ascending: true, nullsFirst: false })
       .order('name', { ascending: true });
-    setArtisans((data as Artisan[]) ?? []);
+    const { data: contacts } = await createBrowserClient().from('artisan_private_contacts').select('*');
+    const byId = new Map((contacts ?? []).map((c) => [c.artisan_id, c]));
+    setArtisans(((data ?? []) as Omit<Artisan, ContactKey>[]).map((a) => ({ ...a, ...contactFields(byId.get(a.id)) })));
     setLoading(false);
   }, []);
 
@@ -142,20 +151,19 @@ export default function AdminArtisansPage() {
       location: n(form.location),
       craft_type: n(form.craft_type),
       specialties: n(form.specialties),
-      email: n(form.email),
-      phone: n(form.phone),
-      website: n(form.website),
-      instagram: n(form.instagram),
-      facebook: n(form.facebook),
-      twitter: n(form.twitter),
       profile_image_url: n(form.profile_image_url),
     };
 
+    let artisanId = editingId;
     if (editingId) {
       if (reportError((await supabase.from('artisans').update(payload).eq('id', editingId)).error)) { setSaving(false); return; }
     } else {
-      if (reportError((await supabase.from('artisans').insert(payload)).error)) { setSaving(false); return; }
+      const { data, error } = await supabase.from('artisans').insert(payload).select('id').single();
+      if (reportError(error) || !data) { setSaving(false); return; }
+      artisanId = data.id;
     }
+    const contacts = Object.fromEntries(CONTACT_KEYS.map((k) => [k, (form[k] ?? '').trim()])) as Record<ContactKey, string>;
+    if (reportError((await supabase.from('artisan_private_contacts').upsert({ artisan_id: artisanId!, ...contacts })).error)) { setSaving(false); return; }
 
     setSaving(false);
     closeModal();
@@ -321,7 +329,8 @@ Cancel
                 </div>
               </div>
 
-              {/* Contact */}
+              {/* Contact (private: never shown on the public site) */}
+              <p className="text-xs" style={{ color: themeStyles.textMuted }}>Contact details are private. Only admins can see them, they are never shown on the public site.</p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label style={labelStyle}>Email</label>

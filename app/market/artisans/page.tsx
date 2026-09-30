@@ -106,12 +106,6 @@ interface Artisan {
   craft_type: string;
   specialties: string;
   years_of_experience: number;
-  email: string;
-  phone: string;
-  website: string;
-  instagram: string;
-  facebook: string;
-  twitter: string;
   is_featured: boolean;
   is_active: boolean;
   order: number;
@@ -198,12 +192,6 @@ function ArtisansPage() {
             craft_type: a.craft_type,
             specialties: a.specialties,
             years_of_experience: a.years_of_experience,
-            email: a.email,
-            phone: a.phone,
-            website: a.website,
-            instagram: a.instagram,
-            facebook: a.facebook,
-            twitter: a.twitter,
             is_featured: a.is_featured,
             is_active: a.is_active,
             order: a.sort_order,
@@ -946,77 +934,6 @@ function ArtisanDetailModal({ artisan, onClose, colors, isDimMode, API_URL }: an
                 </div>
               </div>
 
-              {/* Contact Info */}
-              {(artisan.email || artisan.phone || artisan.website) && (
-                <div className="p-4 rounded-xl" style={{
-                  background: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
-                  border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
-                }}>
-                  <h4 className="text-xs font-medium mb-2" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
-                    <FontAwesomeIcon icon={faEnvelope} className="mr-1.5" />
-                    Contact
-                  </h4>
-                  <div className="flex flex-wrap gap-3 text-sm">
-                    {artisan.email && (
-                      <a href={`mailto:${artisan.email}`} className="flex items-center gap-2 hover:underline" style={{ color: isDimMode ? colors.primary : '#139EA2' }}>
-                        <FontAwesomeIcon icon={faEnvelope} className="text-xs" />
-                        {artisan.email}
-                      </a>
-                    )}
-                    {artisan.phone && (
-                      <a href={`tel:${artisan.phone}`} className="flex items-center gap-2 hover:underline" style={{ color: isDimMode ? colors.primary : '#139EA2' }}>
-                        <FontAwesomeIcon icon={faPhone} className="text-xs" />
-                        {artisan.phone}
-                      </a>
-                    )}
-                    {artisan.website && (
-                      <a href={artisan.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline" style={{ color: isDimMode ? colors.primary : '#139EA2' }}>
-                        <FontAwesomeIcon icon={faGlobe} className="text-xs" />
-                        Website
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Social Media */}
-              {(artisan.instagram || artisan.facebook || artisan.twitter) && (
-                <div className="p-4 rounded-xl" style={{
-                  background: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
-                  border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
-                }}>
-                  <h4 className="text-xs font-medium mb-2" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
-                    <FontAwesomeIcon icon={faShare} className="mr-1.5" />
-                    Social Media
-                  </h4>
-                  <div className="flex gap-3">
-                    {artisan.instagram && (
-                      <a href={artisan.instagram} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg" style={{
-                        background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
-                        color: '#E4405F',
-                      }} title="Instagram">
-                        <FontAwesomeIcon icon={faInstagram} className="text-lg" />
-                      </a>
-                    )}
-                    {artisan.facebook && (
-                      <a href={artisan.facebook} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg" style={{
-                        background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
-                        color: '#1877F2',
-                      }} title="Facebook">
-                        <FontAwesomeIcon icon={faFacebook} className="text-lg" />
-                      </a>
-                    )}
-                    {artisan.twitter && (
-                      <a href={artisan.twitter} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg" style={{
-                        background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
-                        color: '#1DA1F2',
-                      }} title="Twitter">
-                        <FontAwesomeIcon icon={faTwitter} className="text-lg" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
