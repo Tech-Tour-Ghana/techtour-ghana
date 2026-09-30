@@ -690,7 +690,7 @@ function MarketPage() {
   const [loginToastMessage, setLoginToastMessage] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(6);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
   const [isMobile, setIsMobile] = useState(false);
 
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
@@ -739,7 +739,7 @@ function MarketPage() {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      setItemsPerPage(mobile ? 4 : 6);
+      setItemsPerPage(mobile ? 8 : 12);
       setCurrentPage(1);
     };
 
@@ -1325,7 +1325,7 @@ function MarketPage() {
 
           {paginatedProducts.length > 0 ? (
             <div className={viewMode === 'grid'
-              ? 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 md:gap-4'
+              ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4'
               : 'grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4'
             }>
               {paginatedProducts.map((product) => {
