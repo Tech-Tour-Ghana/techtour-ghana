@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "postinstall": "node scripts/copy-tinymce.mjs",
     "predev": "node scripts/copy-tinymce.mjs",
     "dev": "next dev --turbopack",
     "prebuild": "node scripts/copy-tinymce.mjs",
