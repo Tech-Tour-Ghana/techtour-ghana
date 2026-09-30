@@ -1096,7 +1096,7 @@ function ArtisanDetailModal({ artisan, onClose, colors, isDimMode, API_URL }: an
                   {products.map((product: MarketProduct) => (
                     <Link
                       key={product.id}
-                      href={`/market?product=${product.id}`}
+                      href={`/market/${product.slug}`}
                       className="group rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                       style={{
                         background: isDimMode ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
