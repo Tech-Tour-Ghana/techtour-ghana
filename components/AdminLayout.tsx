@@ -3,6 +3,7 @@
 import { ReactNode, useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Toaster } from '@/components/admin/toast';
 import { motion, useReducedMotion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -373,6 +374,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
           </motion.div>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 }

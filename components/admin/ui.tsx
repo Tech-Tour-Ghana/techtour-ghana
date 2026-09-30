@@ -6,8 +6,9 @@
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInbox, faXmark } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useRef, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
 
+import { notify } from '@/components/admin/toast';
 import { Skeleton } from '@/components/admin/analytics/AnalyticsSkeleton';
 import { useTheme } from '@/context/ThemeContext';
 
@@ -241,6 +242,8 @@ export function Button({
 export const fieldStyle = controlStyle;
 
 /** Modal on the design tokens. Closes on Escape and on backdrop click. */
+const modalStack: object[] = [];
+
 export function Modal({
   title,
   subtitle,
@@ -248,7 +251,6 @@ export function Modal({
   children,
   footer,
   maxWidth = 'max-w-lg',
-  flush = false,
 }: {
   title: string;
   subtitle?: string;
@@ -256,14 +258,41 @@ export function Modal({
   children: ReactNode;
   footer?: ReactNode;
   maxWidth?: string;
-  /** Fill the dialog with the content (fixed height, no body padding), for panes like the media picker. */
-  flush?: boolean;
 }) {
+  const dialog = useRef<HTMLDivElement>(null);
+  const closeRef = useRef(onClose);
+  useEffect(() => { closeRef.current = onClose; });
+
+  // Escape and Tab only act on the topmost dialog, so a picker opened from
+  // another dialog closes on its own. Focus moves in and returns on close.
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const token = {};
+    modalStack.push(token);
+    const opener = document.activeElement as HTMLElement | null;
+    const focusables = () => Array.from(dialog.current?.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ) ?? []).filter((el) => !el.closest('[aria-hidden="true"]') && el.offsetParent !== null);
+    const list = focusables();
+    (list.find((el) => el.hasAttribute('autofocus')) ?? list[1] ?? list[0] ?? dialog.current)?.focus();
+
+    const onKey = (e: KeyboardEvent) => {
+      if (modalStack[modalStack.length - 1] !== token) return;
+      if (e.key === 'Escape') { closeRef.current(); return; }
+      if (e.key !== 'Tab') return;
+      const items = focusables();
+      if (!items.length) return;
+      const first = items[0]!;
+      const last = items[items.length - 1]!;
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      modalStack.splice(modalStack.indexOf(token), 1);
+      opener?.focus?.();
+    };
+  }, []);
 
   return (
     <div
@@ -272,10 +301,12 @@ export function Modal({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
+        ref={dialog}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`flex w-full flex-col ${flush ? 'h-[80vh] max-h-[90vh]' : 'max-h-[90vh]'} ${maxWidth}`}
+        className={`flex max-h-[90vh] w-full flex-col ${maxWidth}`}
         style={{ background: 'var(--adm-card)', border: '1px solid var(--adm-border)', borderRadius: 'var(--adm-radius-card)', boxShadow: 'var(--adm-shadow)', color: 'var(--adm-text)' }}
       >
         <div className="flex items-center justify-between border-b px-6 py-4" style={{ borderColor: 'var(--adm-border)' }}>
@@ -287,7 +318,7 @@ export function Modal({
             <FontAwesomeIcon icon={faXmark} className="h-3.5 w-3.5" />
           </button>
         </div>
-        <div className={flush ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'flex-1 overflow-y-auto px-6 py-5'}>{children}</div>
+        <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
         {footer && <div className="flex justify-end gap-2 border-t px-6 py-4" style={{ borderColor: 'var(--adm-border)' }}>{footer}</div>}
       </div>
     </div>
@@ -296,5 +327,5 @@ export function Modal({
 
 /** Tell the admin when a write failed instead of letting the form close as if it worked. */
 export function reportError(error: { message: string } | null | undefined) {
-  if (error) window.alert(`That didn't save: ${error.message}`);
+  if (error) notify(`That didn't save: ${error.message}`);
 }
