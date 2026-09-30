@@ -69,53 +69,11 @@ import Loading from '@/components/Loading';
 import { useCart } from '@/context/CartContext';
 import Cart from '@/components/Cart';
 import { createBrowserClient } from '@/lib/supabase/client';
+import { CURRENCIES, MARKET_COLORS as COLORS, PRODUCT_SELECT, toMarketProduct, type Currency } from '@/components/market/shared';
 import { getAuthStatus, getWishlistProductIds, setWishlisted } from '@/lib/api';
 
 // ===== PAYSTACK IMPORTS =====
 import PaystackPaymentModal from '@/components/PaystackPaymentModal';
-
-// ===== BRAND COLORS =====
-const COLORS = {
-  light: {
-    primary: '#139EA2',
-    primaryHover: '#0D7A7D',
-    primaryLight: '#E6F4F5',
-    secondary: '#E6A64D',
-    secondaryHover: '#D4953A',
-    secondaryLight: '#FDF3E6',
-    textPrimary: '#000000',
-    textSecondary: '#4A4A4A',
-    textMuted: '#9CA3AF',
-    background: '#FFFFFF',
-    backgroundAlt: '#F9F9F9',
-    backgroundCard: '#FFFFFF',
-    border: '#E5E7EB',
-    borderLight: '#F3F4F6',
-    success: '#10B981',
-    warning: '#F59E0B',
-    error: '#EF4444',
-    shadow: 'rgba(0,0,0,0.08)',
-    shadowHover: 'rgba(0,0,0,0.15)',
-  },
-  dark: {
-    primary: '#E6A64D',
-    primaryHover: '#D4953A',
-    primaryLight: '#2A2218',
-    secondary: '#139EA2',
-    secondaryHover: '#0D7A7D',
-    secondaryLight: '#1A2A2B',
-    textPrimary: '#FFFFFF',
-    textSecondary: '#B0B0B0',
-    textMuted: '#6B7280',
-    background: '#0A0A0A',
-    backgroundAlt: '#1A1A1A',
-    backgroundCard: '#1A1A1A',
-    border: '#2A2A2A',
-    borderLight: '#222222',
-    shadow: 'rgba(0,0,0,0.3)',
-    shadowHover: 'rgba(0,0,0,0.5)',
-  }
-};
 
 // ===== INTERFACES =====
 interface MarketProduct {
@@ -206,21 +164,6 @@ interface User {
   display_name: string;
   phone?: string;
 }
-
-interface Currency {
-  code: string;
-  symbol: string;
-  name: string;
-  rate: number;
-}
-
-const CURRENCIES: Currency[] = [
-  { code: 'GHS', symbol: '₵', name: 'Ghana Cedi', rate: 1 },
-  { code: 'USD', symbol: '$', name: 'US Dollar', rate: 0.085 },
-  { code: 'EUR', symbol: '€', name: 'Euro', rate: 0.078 },
-  { code: 'GBP', symbol: '£', name: 'British Pound', rate: 0.067 },
-  { code: 'NGN', symbol: '₦', name: 'Nigerian Naira', rate: 130 },
-];
 
 // ===== LOGIN TOAST COMPONENT =====
 const LoginToast = ({ message, onClose, isDimMode, colors }: any) => {
@@ -328,7 +271,6 @@ const ProductCard = React.memo(({
   product,
   colors,
   isDimMode,
-  onQuickView,
   onAddToCart,
   isWishlisted = false,
   onWishlistToggle,
@@ -432,26 +374,21 @@ const ProductCard = React.memo(({
 
   // ===== GRID MODE =====
   if (!isListView) {
+    const href = `/market/${product.slug}`;
     return (
       <div
-        className="group relative rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl"
+        className="group relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300"
         style={{
           background: isDimMode ? colors.backgroundCard : '#FFFFFF',
-          border: `1px solid ${isDimMode ? 'rgba(230,166,77,0.1)' : 'rgba(19,158,162,0.1)'}`,
+          border: `1px solid ${isDimMode ? colors.border : '#E5E7EB'}`,
           boxShadow: isHovered
-            ? (isDimMode ? '0 20px 60px rgba(0,0,0,0.5)' : '0 20px 60px rgba(19,158,162,0.12)')
-            : '0 4px 12px rgba(0,0,0,0.04)',
-          transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+            ? (isDimMode ? '0 16px 40px rgba(0,0,0,0.5)' : '0 16px 40px rgba(0,0,0,0.10)')
+            : '0 1px 3px rgba(0,0,0,0.04)',
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="relative aspect-[3/2] overflow-hidden bg-gray-100">
-          {!imageLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center" style={{ background: isDimMode ? '#1A1A1A' : '#F9F9F9' }}>
-              <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: isDimMode ? colors.primary : '#139EA2' }}></div>
-            </div>
-          )}
+        <Link href={href} aria-label={product.title} className="relative block aspect-[4/3] overflow-hidden" style={{ background: isDimMode ? '#1A1A1A' : '#F5F5F5' }}>
           <img
             src={imageUrl}
             alt={product.title}
@@ -459,172 +396,92 @@ const ProductCard = React.memo(({
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageLoaded(true)}
           />
-
           {hasDiscount && (
-            <div className="absolute top-2 left-2 z-10">
-              <span className="px-1.5 py-0.5 text-[9px] font-bold text-white rounded-full" style={{ background: colors.secondary }}>
-                -{discountPercent}%
-              </span>
-            </div>
+            <span className="absolute top-3 left-3 px-2 py-0.5 text-[11px] font-bold text-white rounded-full" style={{ background: colors.secondary }}>
+              -{discountPercent}%
+            </span>
           )}
-
           {!product.is_in_stock && (
-            <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
-              <span className="px-2 py-0.5 text-[10px] font-semibold text-white bg-red-500/90 rounded-lg">
-                Out of Stock
-              </span>
-            </div>
+            <span className="absolute bottom-3 left-3 px-2 py-0.5 text-[11px] font-semibold text-white rounded-full bg-black/70">
+              Out of stock
+            </span>
           )}
+        </Link>
 
-          {isInCart && isAuthenticated && (
-            <div className="absolute bottom-1 right-1 z-10">
-              <span className="px-1.5 py-0.5 text-[8px] font-semibold text-white bg-green-500/90 rounded-full">
-                In Cart
-              </span>
-            </div>
-          )}
-
-          <button
-            onClick={() => onWishlistToggle && onWishlistToggle(product.id)}
-            className="absolute top-1 right-1 z-10 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
-            style={{
-              background: isDimMode ? 'rgba(26,26,26,0.8)' : 'rgba(255,255,255,0.9)',
-              color: isWishlisted ? '#EF4444' : (isDimMode ? '#B0B0B0' : '#4A4A4A'),
-              backdropFilter: 'blur(8px)',
-              border: 'none',
-            }}
-          >
-            <FontAwesomeIcon icon={faHeart} className={`text-[10px] ${isWishlisted ? 'text-red-500' : ''}`} />
-          </button>
-
-          <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-            <button
-              onClick={() => onQuickView && onQuickView(product)}
-              className="px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-1.5"
-              style={{
-                background: isDimMode ? colors.primary : '#139EA2',
-                color: isDimMode ? '#0A0A0A' : 'white',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                border: 'none',
-              }}
-            >
-              <FontAwesomeIcon icon={faEye} className="text-[10px]" />
-              Quick View
-            </button>
-          </div>
-
+        <div className="flex flex-1 flex-col p-4">
           {product.category_name && (
-            <div className="absolute bottom-1 left-1 z-10">
-              <span className="px-1.5 py-0.5 text-[8px] font-medium text-white rounded-full bg-black/50 backdrop-blur-sm">
-                {product.category_name}
+            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+              {product.category_name}
+            </p>
+          )}
+          <h3 className="font-semibold text-base leading-snug line-clamp-1" style={{ color: colors.textPrimary }}>
+            <Link href={href}>{product.title}</Link>
+          </h3>
+          {product.description && (
+            <p className="mt-1 text-sm line-clamp-2" style={{ color: isDimMode ? colors.textSecondary : '#6B7280' }}>
+              {product.description}
+            </p>
+          )}
+
+          {product.rating > 0 && (
+            <div className="mt-2 flex items-center gap-1">
+              <FontAwesomeIcon icon={faStar} className="w-3 h-3" style={{ color: '#F59E0B' }} />
+              <span className="text-xs font-medium" style={{ color: colors.textSecondary }}>
+                {Number(product.rating).toFixed(1)} <span style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>({product.review_count || 0})</span>
               </span>
             </div>
           )}
-        </div>
 
-        <div className="p-3 md:p-4">
-          <div className="flex flex-row items-start justify-between gap-2 mb-1.5">
-            <h3 className="font-bold text-base md:text-lg line-clamp-1 flex-1" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
-              {product.title}
-            </h3>
-            <div className="flex flex-col items-end flex-shrink-0">
-              {hasDiscount ? (
-                <>
-                  <span className="font-bold text-sm md:text-base" style={{ color: colors.secondary }}>
-                    {currency.symbol}{displayDiscountPrice.toFixed(2)}
-                  </span>
-                  <span className="text-[9px] line-through" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
-                    {currency.symbol}{displayPrice.toFixed(2)}
-                  </span>
-                </>
-              ) : (
-                <span className="font-bold text-sm md:text-base" style={{ color: isDimMode ? colors.primary : '#139EA2' }}>
+          <div className="mt-auto flex items-end justify-between gap-3 pt-3">
+            <div className="flex flex-col">
+              <span className="text-xl font-bold leading-none" style={{ color: hasDiscount ? colors.secondary : (isDimMode ? colors.primary : '#139EA2') }}>
+                {currency.symbol}{(hasDiscount ? displayDiscountPrice : displayPrice).toFixed(2)}
+              </span>
+              {hasDiscount && (
+                <span className="mt-1 text-xs line-through" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
                   {currency.symbol}{displayPrice.toFixed(2)}
                 </span>
               )}
             </div>
-          </div>
-
-          <p className="text-[8px] md:text-[10px] mb-1.5" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
-            SKU: {product.sku || 'N/A'}
-          </p>
-
-          {product.rating && (
-            <div className="flex items-center gap-0.5 mb-1.5">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <FontAwesomeIcon
-                    key={i}
-                    icon={i < Math.floor(product.rating) ? faStar : (i < product.rating ? faStarHalfAlt : faStar)}
-                    className="w-2.5 h-2.5 md:w-3 md:h-3"
-                    style={{ color: '#F59E0B' }}
-                  />
-                ))}
-              </div>
-              <span className="text-[8px] md:text-[10px] font-medium" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
-                ({product.review_count || 0})
-              </span>
-            </div>
-          )}
-
-          {product.colors && product.colors.length > 0 && (
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <span className="text-[9px] md:text-[11px] font-medium" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
-                Colors:
-              </span>
-              <div className="flex gap-0.5">
+            {product.colors && product.colors.length > 0 && (
+              <div className="flex items-center gap-1.5 pb-0.5">
                 {product.colors.slice(0, 4).map((color: string) => (
                   <span
                     key={color}
-                    className="w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border border-gray-300 flex-shrink-0"
-                    style={{
-                      background: getColorSwatch(color),
-                      border: color.toLowerCase() === 'white' ? '1px solid #d1d5db' : 'none'
-                    }}
+                    className="w-4 h-4 rounded-full flex-shrink-0"
+                    style={{ background: getColorSwatch(color), border: `1px solid ${isDimMode ? '#3A3A3A' : '#D1D5DB'}` }}
                     title={color}
                   />
                 ))}
                 {product.colors.length > 4 && (
-                  <span className="text-[8px] md:text-[10px] font-medium flex items-center" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
-                    +{product.colors.length - 4}
-                  </span>
+                  <span className="text-[11px]" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>+{product.colors.length - 4}</span>
                 )}
               </div>
-            </div>
-          )}
-
-          <div className="flex items-center gap-1.5 mb-2.5">
-            {product.is_in_stock ? (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                <span className="text-[9px] md:text-[11px] font-medium" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
-                  In Stock
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                <span className="text-[9px] md:text-[11px] font-medium" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
-                  Out of Stock
-                </span>
-              </>
-            )}
-            {product.is_in_stock && product.stock_quantity > 0 && (
-              <span className="text-[8px] md:text-[10px]" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
-                ({product.stock_quantity} available)
-              </span>
             )}
           </div>
 
-          <button
-            onClick={handleAddToCartClick}
-            disabled={isDisabled}
-            className={`w-full py-2 md:py-2.5 rounded-lg text-[11px] md:text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${!isDisabled ? 'hover:scale-[1.02]' : 'opacity-60 cursor-not-allowed'}`}
-            style={getButtonStyles()}
-          >
-            <FontAwesomeIcon icon={faShoppingCart} className="text-[11px] md:text-sm" />
-            {buttonText}
-          </button>
+          <div className="mt-4 grid grid-cols-[auto_1fr] gap-2">
+            <button
+              type="button"
+              onClick={() => onWishlistToggle && onWishlistToggle(product.id)}
+              aria-pressed={isWishlisted}
+              className="flex items-center justify-center gap-2 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-colors hover:bg-black/[0.03]"
+              style={{ border: `1px solid ${isDimMode ? colors.border : '#E5E7EB'}`, color: isWishlisted ? '#EF4444' : colors.textSecondary, background: 'transparent' }}
+            >
+              <FontAwesomeIcon icon={faHeart} className="text-sm" />
+              <span className="hidden sm:inline">{isWishlisted ? 'Saved' : 'Wishlist'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleAddToCartClick}
+              disabled={isDisabled}
+              className={`flex items-center justify-center gap-2 rounded-lg px-3.5 py-2.5 text-sm font-semibold transition-opacity ${isDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-90'}`}
+              style={getButtonStyles()}
+            >
+              <FontAwesomeIcon icon={faShoppingCart} className="text-sm" />
+              {buttonText}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -765,18 +622,17 @@ const ProductCard = React.memo(({
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              onClick={() => onQuickView && onQuickView(product)}
+            <Link
+              href={`/market/${product.slug}`}
               className="px-2.5 py-1.5 md:px-3.5 md:py-2 text-[10px] md:text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105 flex items-center gap-1.5"
               style={{
                 background: isDimMode ? 'rgba(230,166,77,0.15)' : 'rgba(19,158,162,0.1)',
                 color: isDimMode ? colors.primary : '#139EA2',
-                border: 'none',
               }}
             >
               <FontAwesomeIcon icon={faEye} className="text-[10px] md:text-xs" />
-              Quick View
-            </button>
+              View details
+            </Link>
             <button
               onClick={handleAddToCartClick}
               disabled={isDisabled}
@@ -794,933 +650,6 @@ const ProductCard = React.memo(({
 });
 
 ProductCard.displayName = 'ProductCard';
-
-// ===== PRODUCT DETAILS MODAL =====
-const ProductDetailsModal = ({
-  product,
-  onClose,
-  onAddToCart,
-  colors,
-  isDimMode,
-  currency,
-  convertPrice,
-  isAuthenticated,
-  isInCart = false,
-}: any) => {
-  const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'details' | 'shipping' | 'artisan'>('details');
-  const [galleryImages, setGalleryImages] = useState<any[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [loadingGallery, setLoadingGallery] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [touchStartX, setTouchStartX] = useState(0);
-  const [touchEndX, setTouchEndX] = useState(0);
-  const [selectedVariants, setSelectedVariants] = useState<Array<{
-    color: string | null;
-    size: string | null;
-    quantity: number;
-  }>>([]);
-  const [currentPage, setCurrentPage] = useState<1 | 2>(1);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  if (!product) return null;
-
-  const getProductImages = () => {
-    let images: any[] = [];
-
-    if (product.gallery_images && Array.isArray(product.gallery_images)) {
-      images = product.gallery_images
-        .filter((img: any) => img.image_url)
-        .map((img: any) => ({
-          url: img.image_url || img.url,
-          alt_text: img.alt_text || product.title || 'Product image',
-          is_primary: img.is_primary || false,
-          order: img.order || 0,
-          id: img.id || Math.random(),
-        }));
-
-      if (images.length > 0) {
-        images.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
-        return images;
-      }
-    }
-
-    if (product.image_url) {
-      images = [{
-        url: product.image_url,
-        alt_text: product.title || 'Product image',
-        is_primary: true,
-        order: 0,
-        id: 0,
-      }];
-      return images;
-    }
-
-    images = [{
-      url: '/placeholder-product.jpg',
-      alt_text: product.title || 'Product',
-      is_primary: true,
-      order: 0,
-      id: 0,
-    }];
-    return images;
-  };
-
-  const images = getProductImages();
-  const finalImages = images.length > 0 ? images : [{
-    url: product.image_url || product.image || '/placeholder-product.jpg',
-    alt_text: product.title || 'Product',
-    is_primary: true,
-    order: 0,
-    id: 0,
-  }];
-
-  const currentImage = finalImages.length > 0 ? finalImages[currentIndex % finalImages.length] : null;
-  const imageUrl = currentImage?.url || product.image_url || product.image || '/placeholder-product.jpg';
-
-  const price = parseFloat(product.price) || 0;
-  const discountPrice = product.discount_price ? parseFloat(product.discount_price) : null;
-  const hasDiscount = discountPrice !== null && discountPrice < price;
-  const displayPrice = convertPrice(price);
-  const displayDiscountPrice = hasDiscount ? convertPrice(discountPrice) : null;
-
-  const nextImage = () => {
-    if (finalImages.length > 0) {
-      setCurrentIndex((prev) => (prev + 1) % finalImages.length);
-    }
-  };
-
-  const prevImage = () => {
-    if (finalImages.length > 0) {
-      setCurrentIndex((prev) => (prev - 1 + finalImages.length) % finalImages.length);
-    }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0]!.clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEndX(e.touches[0]!.clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (touchStartX - touchEndX > 50) {
-      nextImage();
-    } else if (touchEndX - touchStartX > 50) {
-      prevImage();
-    }
-  };
-
-  const getColorSwatch = (color: string) => {
-    const colorValue = color.toLowerCase();
-    if (colorValue.includes('black')) return '#1a1a1a';
-    if (colorValue.includes('white')) return '#f5f5f5';
-    if (colorValue.includes('red')) return '#ef4444';
-    if (colorValue.includes('blue')) return '#3b82f6';
-    if (colorValue.includes('green')) return '#22c55e';
-    if (colorValue.includes('yellow')) return '#eab308';
-    if (colorValue.includes('gold')) return '#f59e0b';
-    if (colorValue.includes('silver')) return '#9ca3af';
-    if (colorValue.includes('brown')) return '#92400e';
-    if (colorValue.includes('purple')) return '#8b5cf6';
-    if (colorValue.includes('pink')) return '#ec4899';
-    if (colorValue.includes('orange')) return '#f97316';
-    if (colorValue.includes('gray') || colorValue.includes('grey')) return '#6b7280';
-    return colorValue;
-  };
-
-  const addVariant = () => {
-    if (product.colors && product.colors.length > 0 && !selectedColor) {
-      alert('Please select a color.');
-      return;
-    }
-    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
-      alert('Please select a size.');
-      return;
-    }
-
-    const exists = selectedVariants.some(
-      (v) => v.color === selectedColor && v.size === selectedSize
-    );
-
-    if (exists) {
-      alert('This variant is already in your list.');
-      return;
-    }
-
-    const newVariant = {
-      color: selectedColor,
-      size: selectedSize,
-      quantity: quantity || 1,
-    };
-
-    setSelectedVariants([...selectedVariants, newVariant]);
-    setSelectedColor(null);
-    setSelectedSize(null);
-    setQuantity(1);
-  };
-
-  const removeVariant = (index: number) => {
-    setSelectedVariants((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const updateVariantQuantity = (index: number, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    setSelectedVariants((prev) =>
-      prev.map((v, i) => i === index ? { ...v, quantity: newQuantity } : v)
-    );
-  };
-
-  const handleAddAllToCart = () => {
-    if (!isAuthenticated) {
-      onAddToCart(product, false);
-      return;
-    }
-
-    if (selectedVariants.length === 0) {
-      alert('Please add at least one variant to your cart.');
-      return;
-    }
-
-    selectedVariants.forEach((variant) => {
-      const variantKey = `${product.id}_${variant.color || 'any'}_${variant.size || 'any'}`;
-      onAddToCart({
-        ...product,
-        quantity: variant.quantity,
-        selectedColor: variant.color || undefined,
-        selectedSize: variant.size || undefined,
-        variant_key: variantKey,
-      }, true);
-    });
-
-    setTimeout(() => {
-      setSelectedVariants([]);
-      onClose();
-    }, 500);
-  };
-
-  // A plain function rather than useCallback. This component returns early
-  // when there is no product, which sits above this line, so a hook here ran
-  // on some renders and not others and React throws when hook order changes.
-  // The memoisation bought nothing: the function is only used as a button's
-  // onClick and appears in no dependency array.
-  const handleAddToCart = () => {
-    if (!isAuthenticated) {
-      onAddToCart(product, false);
-      return;
-    }
-    if (isInCart) {
-      onClose();
-      return;
-    }
-
-    if (product.colors && product.colors.length > 0 && !selectedColor) {
-      alert('Please select a color before adding to cart.');
-      return;
-    }
-
-    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
-      alert('Please select a size before adding to cart.');
-      return;
-    }
-
-    const variantKey = `${product.id}_${selectedColor || 'any'}_${selectedSize || 'any'}`;
-    onAddToCart({
-      ...product,
-      quantity: quantity,
-      selectedColor: selectedColor || undefined,
-      selectedSize: selectedSize || undefined,
-      variant_key: variantKey,
-    }, true);
-    setTimeout(onClose, 500);
-  };
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'details':
-        return (
-          <div className="space-y-3 pb-4">
-            {product.materials && product.materials.length > 0 && (
-              <p className="text-sm"><strong>Materials:</strong> {product.materials.join(', ')}</p>
-            )}
-            {product.dimensions && (
-              <p className="text-sm"><strong>Dimensions:</strong> {product.dimensions}</p>
-            )}
-            {product.weight && (
-              <p className="text-sm"><strong>Weight:</strong> {product.weight}</p>
-            )}
-            {product.care_instructions && (
-              <p className="text-sm"><strong>Care:</strong> {product.care_instructions}</p>
-            )}
-            {product.origin && (
-              <p className="text-sm"><strong>Origin:</strong> {product.origin}</p>
-            )}
-            {product.tags && product.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {product.tags.map((tag: string) => (
-                  <span key={tag} className="px-2 py-0.5 text-xs rounded-full" style={{
-                    background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
-                    color: isDimMode ? colors.textSecondary : colors.textSecondary,
-                  }}>
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            )}
-            {finalImages.length > 0 && (
-              <p className="text-xs mt-2" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
-                <FontAwesomeIcon icon={faImage} className="mr-1" />
-                {finalImages.length} images available
-              </p>
-            )}
-          </div>
-        );
-      case 'shipping':
-        return (
-          <div className="space-y-3 pb-4">
-            <div className="p-3 rounded-lg" style={{
-              background: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
-              border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
-            }}>
-              <p className="text-sm flex items-center gap-2"><FontAwesomeIcon icon={faTruck} className="w-4 h-4" style={{ color: isDimMode ? colors.primary : '#139EA2' }} /> Free shipping on orders over {currency.symbol}200</p>
-            </div>
-            <div className="p-3 rounded-lg" style={{
-              background: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
-              border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
-            }}>
-              <p className="text-sm flex items-center gap-2"><FontAwesomeIcon icon={faShieldAlt} className="w-4 h-4" style={{ color: isDimMode ? colors.primary : '#139EA2' }} /> Secure payment with SSL encryption</p>
-            </div>
-            <div className="p-3 rounded-lg" style={{
-              background: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
-              border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
-            }}>
-              <p className="text-sm flex items-center gap-2"><FontAwesomeIcon icon={faUndo} className="w-4 h-4" style={{ color: isDimMode ? colors.primary : '#139EA2' }} /> 30-day money-back guarantee</p>
-            </div>
-            <div className="p-3 rounded-lg" style={{
-              background: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
-              border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
-            }}>
-              <p className="text-sm"><strong>Shipping from:</strong> Accra, Ghana</p>
-              <p className="text-sm"><strong>Estimated delivery:</strong> 3-7 business days</p>
-            </div>
-          </div>
-        );
-      case 'artisan':
-        const artisanData = product.artisan;
-        const artisanName = typeof artisanData === 'object' ? artisanData?.name : artisanData;
-        const artisanBio = typeof artisanData === 'object' ? artisanData?.bio : product.artisan_bio;
-        const artisanImage = typeof artisanData === 'object' ? artisanData?.profile_image : product.artisan_image;
-        const artisanLocation = typeof artisanData === 'object' ? artisanData?.location : product.origin;
-        const artisanCraft = typeof artisanData === 'object' ? artisanData?.craft_type : null;
-        
-        return (
-          <div className="space-y-3 pb-4">
-            {artisanName ? (
-              <>
-                <div className="flex items-center gap-3 p-3 rounded-lg" style={{
-                  background: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
-                  border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
-                }}>
-                  {artisanImage ? (
-                    <img
-                      src={artisanImage}
-                      alt={artisanName}
-                      className="w-14 h-14 rounded-full object-cover border-2 flex-shrink-0"
-                      style={{ borderColor: isDimMode ? colors.primary : '#139EA2' }}
-                      onError={(e) => { e.currentTarget.src = '/placeholder-user.jpg'; }}
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0" style={{
-                      background: isDimMode ? 'rgba(230,166,77,0.2)' : 'rgba(19,158,162,0.1)',
-                      color: isDimMode ? colors.primary : '#139EA2',
-                    }}>
-                      <FontAwesomeIcon icon={faUser} className="text-xl" />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-sm truncate" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
-                      {artisanName}
-                    </p>
-                    {artisanLocation && (
-                      <p className="text-xs truncate" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
-                        <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1" />
-                        {artisanLocation}
-                      </p>
-                    )}
-                    {artisanCraft && (
-                      <span className="inline-block mt-0.5 px-2 py-0.5 text-[10px] rounded-full truncate max-w-full" style={{
-                        background: isDimMode ? 'rgba(230,166,77,0.15)' : 'rgba(19,158,162,0.1)',
-                        color: isDimMode ? colors.primary : '#139EA2',
-                      }}>
-                        {artisanCraft}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {artisanBio && (
-                  <div className="p-3 rounded-lg" style={{
-                    background: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
-                    border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
-                  }}>
-                    <p className="text-sm leading-relaxed" style={{ color: isDimMode ? colors.textSecondary : colors.textSecondary }}>
-                      {artisanBio}
-                    </p>
-                  </div>
-                )}
-                <div className="flex flex-wrap gap-3 text-sm" style={{ color: isDimMode ? colors.textSecondary : colors.textSecondary }}>
-                  <span className="flex items-center gap-1.5">
-                    <FontAwesomeIcon icon={faCheckCircle} style={{ color: isDimMode ? colors.primary : '#139EA2' }} />
-                    Verified Artisan
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <FontAwesomeIcon icon={faGem} style={{ color: isDimMode ? colors.primary : '#139EA2' }} />
-                    Handcrafted
-                  </span>
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <FontAwesomeIcon icon={faCrown} className="text-4xl mb-3" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }} />
-                <p className="text-sm" style={{ color: isDimMode ? colors.textSecondary : colors.textSecondary }}>
-                  Handcrafted by skilled Ghanaian artisans.
-                </p>
-              </div>
-            )}
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const renderPage1 = () => (
-    <div 
-      className="p-4 md:p-6 lg:p-8 overflow-y-auto flex-1"
-      style={{ 
-        maxHeight: isMobile ? 'calc(100vh - 280px)' : 'calc(90vh - 80px)',
-        overscrollBehavior: 'contain',
-        WebkitOverflowScrolling: 'touch',
-      }}
-    >
-      <div className="pb-4">
-        <div className="mb-3">
-          <div className="flex flex-wrap items-center gap-1.5 mb-1">
-            {product.category_name && (
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{
-                background: isDimMode ? 'rgba(230,166,77,0.15)' : 'rgba(19,158,162,0.1)',
-                color: isDimMode ? colors.primary : '#139EA2'
-              }}>
-                {product.category_name}
-              </span>
-            )}
-            {product.is_in_stock && (
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{
-                background: 'rgba(16,185,129,0.1)',
-                color: '#10B981'
-              }}>
-                <FontAwesomeIcon icon={faCheckCircle} className="mr-0.5 text-[8px]" />
-                In Stock
-              </span>
-            )}
-            {isInCart && isAuthenticated && (
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{
-                background: 'rgba(16,185,129,0.15)',
-                color: '#10B981'
-              }}>
-                <FontAwesomeIcon icon={faCheckCircle} className="mr-0.5 text-[8px]" />
-                In Cart
-              </span>
-            )}
-          </div>
-          <h2 className="text-lg md:text-2xl font-bold" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
-            {product.title}
-          </h2>
-          <p className="text-[10px] mt-0.5" style={{ color: isDimMode ? colors.textSecondary : colors.textSecondary }}>
-            SKU: {product.sku || 'N/A'}
-          </p>
-        </div>
-
-        <div className="mb-3">
-          {hasDiscount ? (
-            <div className="flex items-center gap-2">
-              <span className="text-xl md:text-2xl font-bold" style={{ color: colors.secondary }}>
-                {currency.symbol}{displayDiscountPrice.toFixed(2)}
-              </span>
-              <span className="text-sm line-through" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
-                {currency.symbol}{displayPrice.toFixed(2)}
-              </span>
-            </div>
-          ) : (
-            <span className="text-xl md:text-2xl font-bold" style={{ color: isDimMode ? colors.primary : '#139EA2' }}>
-              {currency.symbol}{displayPrice.toFixed(2)}
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1.5 mb-3">
-          {product.is_in_stock ? (
-            <>
-              <FontAwesomeIcon icon={faCheckCircle} className="w-3 h-3 text-green-500" />
-              <span className="text-xs font-medium text-green-500">
-                In Stock ({product.stock_quantity} available)
-              </span>
-            </>
-          ) : (
-            <>
-              <FontAwesomeIcon icon={faTimes} className="w-3 h-3 text-red-500" />
-              <span className="text-xs font-medium text-red-500">Out of Stock</span>
-            </>
-          )}
-        </div>
-
-        <p className="text-xs leading-relaxed mb-3" style={{ color: isDimMode ? colors.textSecondary : colors.textSecondary }}>
-          {product.description || 'No description available.'}
-        </p>
-
-        {(product.colors && product.colors.length > 0) || (product.sizes && product.sizes.length > 0) ? (
-          <div className="mb-3 p-3 rounded-lg" style={{
-            background: isDimMode ? 'rgba(230,166,77,0.05)' : 'rgba(19,158,162,0.03)',
-            border: `1px solid ${isDimMode ? 'rgba(230,166,77,0.1)' : 'rgba(19,158,162,0.08)'}`
-          }}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium" style={{ color: isDimMode ? colors.textSecondary : colors.textSecondary }}>
-                Choose your variants
-              </span>
-              <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
-                {selectedVariants.length} variant{selectedVariants.length !== 1 ? 's' : ''} selected
-              </span>
-            </div>
-
-            {product.colors && product.colors.length > 0 && (
-              <div className="mb-2">
-                <label className="block text-xs font-medium mb-1" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
-                  Color {selectedColor ? `✓ ${selectedColor}` : ''}
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {product.colors.map((color: string) => {
-                    const isSelected = selectedColor === color;
-                    const colorValue = color.toLowerCase();
-                    let swatchColor = colorValue;
-                    if (colorValue.includes('black')) swatchColor = '#1a1a1a';
-                    else if (colorValue.includes('white')) swatchColor = '#f5f5f5';
-                    else if (colorValue.includes('red')) swatchColor = '#ef4444';
-                    else if (colorValue.includes('blue')) swatchColor = '#3b82f6';
-                    else if (colorValue.includes('green')) swatchColor = '#22c55e';
-                    else if (colorValue.includes('yellow')) swatchColor = '#eab308';
-                    else if (colorValue.includes('gold')) swatchColor = '#f59e0b';
-                    else if (colorValue.includes('silver')) swatchColor = '#9ca3af';
-                    else if (colorValue.includes('brown')) swatchColor = '#92400e';
-                    else if (colorValue.includes('purple')) swatchColor = '#8b5cf6';
-                    else if (colorValue.includes('pink')) swatchColor = '#ec4899';
-                    else if (colorValue.includes('orange')) swatchColor = '#f97316';
-                    else if (colorValue.includes('gray') || colorValue.includes('grey')) swatchColor = '#6b7280';
-
-                    return (
-                      <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={`px-2.5 py-1 text-xs rounded-full border-2 transition-all duration-200 flex items-center gap-1.5 ${isSelected ? 'border-2 shadow-md' : 'border'}`}
-                        style={{
-                          background: isSelected ? (isDimMode ? colors.primary : '#139EA2') : 'transparent',
-                          color: isSelected ? (isDimMode ? '#0A0A0A' : 'white') : (isDimMode ? colors.textSecondary : colors.textSecondary),
-                          borderColor: isSelected ? (isDimMode ? colors.primary : '#139EA2') : (isDimMode ? 'rgba(255,255,255,0.15)' : '#E5E7EB'),
-                        }}
-                      >
-                        <span
-                          className="w-3 h-3 rounded-full border border-gray-300 flex-shrink-0"
-                          style={{
-                            background: swatchColor,
-                            border: colorValue === 'white' ? '1px solid #d1d5db' : 'none'
-                          }}
-                        />
-                        <span>{color}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {product.sizes && product.sizes.length > 0 && (
-              <div className="mb-2">
-                <label className="block text-xs font-medium mb-1" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
-                  Size {selectedSize ? `✓ ${selectedSize}` : ''}
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {product.sizes.map((size: string) => {
-                    const isSelected = selectedSize === size;
-                    return (
-                      <button
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
-                        className={`px-3 py-1 text-xs font-medium rounded-lg border-2 transition-all duration-200 ${isSelected ? 'border-2 shadow-md' : 'border'}`}
-                        style={{
-                          background: isSelected ? (isDimMode ? colors.primary : '#139EA2') : 'transparent',
-                          color: isSelected ? (isDimMode ? '#0A0A0A' : 'white') : (isDimMode ? colors.textSecondary : colors.textSecondary),
-                          borderColor: isSelected ? (isDimMode ? colors.primary : '#139EA2') : (isDimMode ? 'rgba(255,255,255,0.15)' : '#E5E7EB'),
-                        }}
-                      >
-                        {size}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-center gap-2 mt-2">
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
-                  style={{
-                    background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
-                    border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
-                    color: isDimMode ? colors.textSecondary : colors.textSecondary,
-                  }}
-                >
-                  <FontAwesomeIcon icon={faMinus} className="text-xs" />
-                </button>
-                <span className="text-sm font-semibold w-6 text-center" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
-                  {quantity}
-                </span>
-                <button
-                  onClick={() => setQuantity(Math.min(product.stock_quantity || 10, quantity + 1))}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
-                  style={{
-                    background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
-                    border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
-                    color: isDimMode ? colors.textSecondary : colors.textSecondary,
-                  }}
-                >
-                  <FontAwesomeIcon icon={faPlus} className="text-xs" />
-                </button>
-              </div>
-              <button
-                onClick={addVariant}
-                disabled={(!selectedColor && product.colors?.length > 0) || (!selectedSize && product.sizes?.length > 0)}
-                className="px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105"
-                style={{
-                  background: (selectedColor || !product.colors?.length) && (selectedSize || !product.sizes?.length)
-                    ? (isDimMode ? colors.primary : '#139EA2')
-                    : (isDimMode ? '#2A2A2A' : '#E5E7EB'),
-                  color: (selectedColor || !product.colors?.length) && (selectedSize || !product.sizes?.length)
-                    ? (isDimMode ? '#0A0A0A' : 'white')
-                    : (isDimMode ? '#6B7280' : '#9CA3AF'),
-                  border: 'none',
-                  cursor: (selectedColor || !product.colors?.length) && (selectedSize || !product.sizes?.length) ? 'pointer' : 'not-allowed',
-                }}
-              >
-                <FontAwesomeIcon icon={faPlus} className="mr-1 text-xs" />
-                Add Variant
-              </button>
-            </div>
-          </div>
-        ) : null}
-
-        {selectedVariants.length > 0 && (
-          <div className="mb-3">
-            <label className="block text-xs font-medium mb-1.5" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
-              <FontAwesomeIcon icon={faShoppingCart} className="mr-1.5" style={{ color: colors.primary }} />
-              Your Variants ({selectedVariants.length})
-            </label>
-            <div className="space-y-1.5 max-h-[120px] overflow-y-auto">
-              {selectedVariants.map((variant, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-2 rounded-lg"
-                  style={{
-                    background: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
-                    border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
-                  }}
-                >
-                  <div className="flex items-center gap-2 text-xs">
-                    <span style={{ color: isDimMode ? colors.textSecondary : colors.textSecondary }}>
-                      {variant.color || 'Any Color'}
-                      {variant.color && variant.size ? ' / ' : ''}
-                      {variant.size || 'Any Size'}
-                    </span>
-                    <span className="font-medium" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
-                      × {variant.quantity}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => updateVariantQuantity(index, variant.quantity - 1)}
-                      className="w-6 h-6 rounded flex items-center justify-center transition-all duration-200 hover:scale-105"
-                      style={{
-                        background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
-                        border: 'none',
-                        color: isDimMode ? colors.textSecondary : colors.textSecondary,
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faMinus} className="text-[10px]" />
-                    </button>
-                    <span className="text-xs font-semibold w-4 text-center" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
-                      {variant.quantity}
-                    </span>
-                    <button
-                      onClick={() => updateVariantQuantity(index, variant.quantity + 1)}
-                      className="w-6 h-6 rounded flex items-center justify-center transition-all duration-200 hover:scale-105"
-                      style={{
-                        background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
-                        border: 'none',
-                        color: isDimMode ? colors.textSecondary : colors.textSecondary,
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faPlus} className="text-[10px]" />
-                    </button>
-                    <button
-                      onClick={() => removeVariant(index)}
-                      className="w-6 h-6 rounded flex items-center justify-center transition-all duration-200 hover:scale-110"
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: isDimMode ? '#6B7280' : '#9CA3AF',
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = '#EF4444'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = isDimMode ? '#6B7280' : '#9CA3AF'}
-                    >
-                      <FontAwesomeIcon icon={faTimes} className="text-[10px]" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {selectedVariants.length > 0 ? (
-          <button
-            onClick={handleAddAllToCart}
-            disabled={!product.is_in_stock}
-            className={`w-full py-2.5 md:py-3 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${product.is_in_stock ? 'hover:scale-[1.02]' : 'opacity-50 cursor-not-allowed'}`}
-            style={{
-              background: product.is_in_stock ? (isDimMode ? colors.primary : '#139EA2') : (isDimMode ? '#2A2A2A' : '#E5E7EB'),
-              color: product.is_in_stock ? (isDimMode ? '#0A0A0A' : 'white') : (isDimMode ? '#6B7280' : '#9CA3AF'),
-            }}
-          >
-            <FontAwesomeIcon icon={faShoppingCart} className="text-sm" />
-            {!isAuthenticated ? 'Login to Add' : `Add ${selectedVariants.length} Variant${selectedVariants.length > 1 ? 's' : ''} to Cart`}
-          </button>
-        ) : (
-          <button
-            onClick={handleAddToCart}
-            disabled={!product.is_in_stock || isInCart}
-            className={`w-full py-2.5 md:py-3 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${(!product.is_in_stock || isInCart) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'}`}
-            style={{
-              background: (!product.is_in_stock || isInCart) ? (isDimMode ? '#2A2A2A' : '#E5E7EB') : (isDimMode ? colors.primary : '#139EA2'),
-              color: (!product.is_in_stock || isInCart) ? (isDimMode ? '#6B7280' : '#9CA3AF') : (isDimMode ? '#0A0A0A' : 'white'),
-            }}
-          >
-            <FontAwesomeIcon icon={faShoppingCart} className="text-sm" />
-            {!isAuthenticated ? 'Login to Add' : isInCart ? 'In Cart ✓' : product.is_in_stock ? 'Add to Cart' : 'Out of Stock'}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderPage2 = () => (
-    <div 
-      className="p-4 md:p-6 lg:p-8 overflow-y-auto flex-1"
-      style={{ 
-        maxHeight: isMobile ? 'calc(100vh - 280px)' : 'calc(90vh - 80px)',
-        overscrollBehavior: 'contain',
-        WebkitOverflowScrolling: 'touch',
-      }}
-    >
-      <div className="pb-4">
-        <div className="flex gap-1 border-b" style={{ borderColor: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB' }}>
-          {['details', 'shipping', 'artisan'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab as any)}
-              className={`px-3 py-2 text-xs font-medium rounded-t-lg transition-all duration-200 ${activeTab === tab ? 'bg-opacity-10' : ''}`}
-              style={{
-                background: activeTab === tab ? (isDimMode ? 'rgba(230,166,77,0.15)' : 'rgba(19,158,162,0.1)') : 'transparent',
-                color: activeTab === tab ? (isDimMode ? colors.primary : '#139EA2') : (isDimMode ? colors.textSecondary : colors.textSecondary),
-                borderBottom: activeTab === tab ? `2px solid ${isDimMode ? colors.primary : '#139EA2'}` : '2px solid transparent',
-              }}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-3 text-xs md:text-sm leading-relaxed" style={{ color: isDimMode ? colors.textSecondary : colors.textSecondary }}>
-          {renderTabContent()}
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4"
-      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
-      onClick={onClose}
-    >
-      <div
-        className="relative w-full max-w-4xl rounded-xl md:rounded-2xl shadow-2xl flex flex-col"
-        style={{
-          background: isDimMode ? colors.background : '#FFFFFF',
-          border: `1px solid ${isDimMode ? 'rgba(230,166,77,0.2)' : 'rgba(19,158,162,0.1)'}`,
-          maxHeight: '95vh',
-          margin: 'auto',
-          position: 'relative',
-          top: 'auto',
-          transform: 'none',
-          overflow: 'hidden',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex flex-col md:grid md:grid-cols-2 gap-0 flex-1 overflow-hidden">
-          <div
-            className="relative aspect-square md:aspect-auto md:h-full min-h-[280px] md:min-h-[400px] overflow-hidden flex-shrink-0"
-            style={{ background: isDimMode ? '#1A1A1A' : '#F5F5F5' }}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            <div className="w-full h-full">
-              <img
-                src={imageUrl}
-                alt={currentImage?.alt_text || product.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = '/placeholder-product.jpg';
-                }}
-              />
-            </div>
-
-            {hasDiscount && (
-              <div className="absolute top-3 left-3 z-10">
-                <span className="px-2 py-1 text-[10px] font-bold text-white rounded-full" style={{ background: colors.secondary }}>
-                  {Math.round(((price - discountPrice) / price) * 100)}% OFF
-                </span>
-              </div>
-            )}
-
-            {!product.is_in_stock && (
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
-                <span className="px-4 py-2 text-sm font-bold text-white bg-red-500/90 rounded-lg">
-                  Out of Stock
-                </span>
-              </div>
-            )}
-
-            {finalImages.length > 1 && (
-              <div className="absolute top-3 right-3 z-10 px-2 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-[10px] font-medium">
-                {currentIndex + 1} / {finalImages.length}
-              </div>
-            )}
-
-            {finalImages.length > 1 && (
-              <>
-                <button
-                  onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                  className="absolute left-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 bg-black/50 hover:bg-black/70 text-white"
-                >
-                  <FontAwesomeIcon icon={faChevronLeft} className="w-3 h-3" />
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); nextImage(); }}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 bg-black/50 hover:bg-black/70 text-white"
-                >
-                  <FontAwesomeIcon icon={faChevronRight} className="w-3 h-3" />
-                </button>
-              </>
-            )}
-
-            {finalImages.length > 1 && (
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1.5 z-20 max-w-[85%] overflow-x-auto">
-                {finalImages.map((img, idx) => (
-                  <button
-                    key={img.id || idx}
-                    onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
-                    className={`w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all duration-200 ${currentIndex === idx ? 'border-white' : 'border-transparent hover:border-white/50'}`}
-                  >
-                    <img
-                      src={img.url}
-                      alt={img.alt_text || `Image ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = '/placeholder-product.jpg';
-                      }}
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="relative flex flex-col overflow-hidden">
-            {currentPage === 1 ? renderPage1() : renderPage2()}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between p-3 md:p-4 border-t flex-shrink-0" style={{
-          borderColor: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-          background: isDimMode ? 'rgba(255,255,255,0.02)' : '#FAFAFA',
-        }}>
-          <button
-            onClick={onClose}
-            className="flex items-center gap-2 text-sm font-medium transition-all duration-200 hover:scale-105 px-3 py-1.5 rounded-lg"
-            style={{
-              color: isDimMode ? colors.textSecondary : colors.textSecondary,
-              background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
-            }}
-          >
-            <FontAwesomeIcon icon={faTimes} className="text-sm" />
-            <span>Close</span>
-          </button>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage(1)}
-              className={`w-9 h-9 rounded-full text-sm font-medium transition-all duration-200 flex items-center justify-center ${currentPage === 1 ? 'text-white' : ''}`}
-              style={{
-                background: currentPage === 1 ? (isDimMode ? colors.primary : '#139EA2') : 'transparent',
-                color: currentPage === 1 ? (isDimMode ? '#0A0A0A' : 'white') : (isDimMode ? colors.textSecondary : colors.textSecondary),
-                border: currentPage === 1 ? 'none' : `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
-              }}
-            >
-              1
-            </button>
-            <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>/</span>
-            <button
-              onClick={() => setCurrentPage(2)}
-              className={`w-9 h-9 rounded-full text-sm font-medium transition-all duration-200 flex items-center justify-center ${currentPage === 2 ? 'text-white' : ''}`}
-              style={{
-                background: currentPage === 2 ? (isDimMode ? colors.primary : '#139EA2') : 'transparent',
-                color: currentPage === 2 ? (isDimMode ? '#0A0A0A' : 'white') : (isDimMode ? colors.textSecondary : colors.textSecondary),
-                border: currentPage === 2 ? 'none' : `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
-              }}
-            >
-              2
-            </button>
-          </div>
-
-          <div className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
-            Page {currentPage} of 2
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // ===== SUB-NAVIGATION LINKS =====
 const SUB_NAV_LINKS = [
@@ -1755,8 +684,6 @@ function MarketPage() {
   const [selectedOrder, setSelectedOrder] = useState<MarketOrder | null>(null);
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
 
-  const [selectedProduct, setSelectedProduct] = useState<MarketProduct | null>(null);
-  const [showProductModal, setShowProductModal] = useState(false);
   const [wishlist, setWishlist] = useState<Set<string>>(new Set());
 
   const [showLoginToast, setShowLoginToast] = useState(false);
@@ -1828,9 +755,6 @@ function MarketPage() {
   // re-ordered the queryset by the product's `order` field, which overwrote
   // that sort. The dropdown was effectively decorative. We reproduce that: the
   // query below always orders by sort_order regardless of sortBy.
-  const splitCsv = (value: string | null | undefined): string[] =>
-    value ? value.split(',').map((v) => v.trim()).filter(Boolean) : [];
-
   const fetchAllData = useCallback(async () => {
     try {
       const supabase = createBrowserClient();
@@ -1838,7 +762,7 @@ function MarketPage() {
       const [productsRes, categoriesRes] = await Promise.all([
         supabase
           .from('market_products')
-          .select('*, market_categories(name), artisans(id, name, slug, bio, profile_image_url, location, craft_type), product_gallery(*)')
+          .select(PRODUCT_SELECT)
           .eq('is_active', true)
           .order('sort_order', { ascending: true }),
         supabase
@@ -1851,69 +775,7 @@ function MarketPage() {
       let parsedProducts: MarketProduct[] = [];
 
       if (!productsRes.error && productsRes.data) {
-        parsedProducts = productsRes.data.map((p: any) => {
-          const gallery = (p.product_gallery || [])
-            .filter((g: any) => g.is_active)
-            .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
-          const primaryGallery = gallery.find((g: any) => g.is_primary) || gallery[0] || null;
-          const imageUrl = primaryGallery?.image_url || p.image_url || null;
-
-          const artisanRow = p.artisans || null;
-          const artisanInfo = artisanRow
-            ? {
-                id: artisanRow.id,
-                name: artisanRow.name,
-                slug: artisanRow.slug,
-                bio: artisanRow.bio,
-                profile_image: artisanRow.profile_image_url || null,
-                location: artisanRow.location,
-                craft_type: artisanRow.craft_type,
-              }
-            : null;
-
-          return {
-            id: p.id,
-            title: p.title,
-            slug: p.slug,
-            description: p.description || '',
-            sku: p.sku || '',
-            price: parseFloat(p.price) || 0,
-            discount_price: p.discount_price ? parseFloat(p.discount_price) : null,
-            stock_quantity: parseInt(p.stock_quantity, 10) || 0,
-            is_in_stock: p.is_in_stock,
-            image: imageUrl,
-            image_url: imageUrl,
-            gallery_images: gallery.map((g: any) => ({
-              id: g.id,
-              image_url: g.image_url,
-              alt_text: g.alt_text || '',
-              is_primary: g.is_primary,
-              order: g.sort_order,
-            })),
-            button_text: p.button_text || 'Shop Now',
-            button_link: p.button_link || `/market/${p.slug}`,
-            is_featured: p.is_featured,
-            order: p.sort_order,
-            created_at: p.created_at,
-            updated_at: p.updated_at,
-            category_id: p.category_id,
-            category_name: p.market_categories?.name || null,
-            colors: splitCsv(p.colors),
-            sizes: splitCsv(p.sizes),
-            materials: splitCsv(p.materials),
-            dimensions: p.dimensions || '',
-            weight: p.weight || '',
-            care_instructions: p.care_instructions || '',
-            origin: p.origin || '',
-            artisan: artisanInfo,
-            artisan_bio: artisanRow?.bio || p.artisan_bio || '',
-            artisan_image: artisanRow?.profile_image_url || p.artisan_image_url || '',
-            tags: splitCsv(p.tags),
-            rating: p.rating ? parseFloat(p.rating) : 0,
-            review_count: p.review_count || 0,
-            is_active: p.is_active,
-          } as MarketProduct;
-        });
+        parsedProducts = productsRes.data.map((p) => toMarketProduct(p) as unknown as MarketProduct);
         setProducts(parsedProducts);
       }
 
@@ -2027,18 +889,13 @@ function MarketPage() {
     fetchUserStatus();
   }, [fetchUserStatus]);
 
-  // ===== OPEN PRODUCT FROM URL PARAMETER =====
+  // ===== OLD ?product=<id> LINKS GO TO THE PRODUCT PAGE =====
   useEffect(() => {
     const productId = searchParams.get('product');
-    if (productId && products.length > 0) {
-      const product = products.find(p => String(p.id) === productId);
-      if (product) {
-        setSelectedProduct(product);
-        setShowProductModal(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }
-  }, [searchParams, products]);
+    if (!productId || products.length === 0) return;
+    const product = products.find((p) => String(p.id) === productId);
+    if (product) router.replace(`/market/${product.slug}`);
+  }, [searchParams, products, router]);
 
   // ===== LISTEN FOR PAYMENT EVENT FROM CART =====
   useEffect(() => {
@@ -2153,11 +1010,6 @@ function MarketPage() {
   }, []);
 
   // ===== HANDLERS =====
-  const handleQuickView = useCallback((product: MarketProduct) => {
-    setSelectedProduct(product);
-    setShowProductModal(true);
-  }, []);
-
   const handleAddToCart = useCallback((product: MarketProduct, isLoggedIn: boolean) => {
     if (!isLoggedIn || !isAuthenticated) {
       setLoginToastMessage(`Please log in to add "${product.title}" to your cart.`);
@@ -2484,7 +1336,6 @@ function MarketPage() {
                     product={product}
                     colors={colors}
                     isDimMode={isDimMode}
-                    onQuickView={handleQuickView}
                     onAddToCart={handleAddToCart}
                     isWishlisted={wishlist.has(product.id)}
                     onWishlistToggle={handleWishlistToggle}
@@ -2659,20 +1510,6 @@ function MarketPage() {
             </table>
           </div>
         </section>
-      )}
-
-      {showProductModal && selectedProduct && (
-        <ProductDetailsModal
-          product={selectedProduct}
-          onClose={() => setShowProductModal(false)}
-          onAddToCart={handleAddToCart}
-          colors={colors}
-          isDimMode={isDimMode}
-          currency={selectedCurrency}
-          convertPrice={convertPrice}
-          isAuthenticated={isAuthenticated}
-          isInCart={getItemCount(selectedProduct.id as any) > 0}
-        />
       )}
 
       {showPaymentModal && paymentOrderDetails && (
