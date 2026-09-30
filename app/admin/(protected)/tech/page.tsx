@@ -15,7 +15,7 @@ import {
 import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs, EmptyBlock } from '@/components/admin/ui';
+import { Tabs, EmptyBlock, ListSkeleton, reportError } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -166,19 +166,19 @@ export default function AdminTechPage() {
 
   const deleteInnovation = async (id: string, title: string) => {
     if (!window.confirm(`Delete innovation "${title}"?`)) return;
-    await supabase.from('tech_innovations').delete().eq('id', id);
+    reportError((await supabase.from('tech_innovations').delete().eq('id', id)).error);
     fetchAll();
   };
 
   const deleteEvent = async (id: string, title: string) => {
     if (!window.confirm(`Delete event "${title}"?`)) return;
-    await supabase.from('tech_events').delete().eq('id', id);
+    reportError((await supabase.from('tech_events').delete().eq('id', id)).error);
     fetchAll();
   };
 
   const deleteResource = async (id: string, title: string) => {
     if (!window.confirm(`Delete resource "${title}"?`)) return;
-    await supabase.from('tech_resources').delete().eq('id', id);
+    reportError((await supabase.from('tech_resources').delete().eq('id', id)).error);
     fetchAll();
   };
 
@@ -188,9 +188,9 @@ export default function AdminTechPage() {
     setSaving(true);
     const d = innovationModal.data;
     if (innovationModal.id) {
-      await supabase.from('tech_innovations').update(d).eq('id', innovationModal.id);
+      reportError((await supabase.from('tech_innovations').update(d).eq('id', innovationModal.id)).error);
     } else {
-      await supabase.from('tech_innovations').insert(d);
+      reportError((await supabase.from('tech_innovations').insert(d)).error);
     }
     setSaving(false);
     setInnovationModal({ open: false, data: blankInnovation(), id: null });
@@ -201,9 +201,9 @@ export default function AdminTechPage() {
     setSaving(true);
     const d = eventModal.data;
     if (eventModal.id) {
-      await supabase.from('tech_events').update(d).eq('id', eventModal.id);
+      reportError((await supabase.from('tech_events').update(d).eq('id', eventModal.id)).error);
     } else {
-      await supabase.from('tech_events').insert(d);
+      reportError((await supabase.from('tech_events').insert(d)).error);
     }
     setSaving(false);
     setEventModal({ open: false, data: blankEvent(), id: null });
@@ -214,9 +214,9 @@ export default function AdminTechPage() {
     setSaving(true);
     const d = resourceModal.data;
     if (resourceModal.id) {
-      await supabase.from('tech_resources').update(d).eq('id', resourceModal.id);
+      reportError((await supabase.from('tech_resources').update(d).eq('id', resourceModal.id)).error);
     } else {
-      await supabase.from('tech_resources').insert(d);
+      reportError((await supabase.from('tech_resources').insert(d)).error);
     }
     setSaving(false);
     setResourceModal({ open: false, data: blankResource(), id: null });
@@ -254,9 +254,7 @@ export default function AdminTechPage() {
   if (loading) {
     return (
       <AdminLayout title="Tech Hub" subtitle="Manage tech innovations, events and resources">
-        <div className="flex items-center justify-center h-48">
-          <div className="w-8 h-8 border-4 rounded-full animate-spin" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }} />
-        </div>
+        <ListSkeleton />
       </AdminLayout>
     );
   }

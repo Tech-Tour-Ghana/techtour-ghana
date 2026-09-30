@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faPen, faTrash, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs } from '@/components/admin/ui';
+import { Tabs, ListSkeleton, reportError } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -63,12 +63,12 @@ export default function HomepagePage() {
     const { type, data } = modal;
     if (type === 'feature_cards') {
       const row = { title: data.title ?? '', subtitle: data.subtitle ?? '', description: data.description ?? '', button_text: data.button_text ?? '', button_link: data.button_link ?? '', is_active: data.is_active ?? true, sort_order: Number(data.sort_order) || 0 };
-      if (data.id) await supabase.from('main_feature_cards').update(row).eq('id', data.id);
-      else await supabase.from('main_feature_cards').insert(row);
+      if (data.id) reportError((await supabase.from('main_feature_cards').update(row).eq('id', data.id)).error);
+      else reportError((await supabase.from('main_feature_cards').insert(row)).error);
     } else {
       const row = { title: data.title ?? '', description: data.description ?? '', category: data.category ?? '', card_type: (data.card_type ?? 'wide') as 'wide' | 'short', media_type: (data.media_type ?? 'none') as 'video' | 'image' | 'none', video_url: data.video_url ?? '', image_url: data.image_url ?? '', is_active: data.is_active ?? true, sort_order: Number(data.sort_order) || 0 };
-      if (data.id) await supabase.from('video_sections').update(row).eq('id', data.id);
-      else await supabase.from('video_sections').insert(row);
+      if (data.id) reportError((await supabase.from('video_sections').update(row).eq('id', data.id)).error);
+      else reportError((await supabase.from('video_sections').insert(row)).error);
     }
     await fetchAll();
     setSaving(false);
@@ -78,7 +78,7 @@ export default function HomepagePage() {
   async function del(table: 'main_feature_cards' | 'video_sections', id: string) {
     if (!window.confirm('Delete this item?')) return;
     const supabase = createBrowserClient();
-    await supabase.from(table).delete().eq('id', id);
+    reportError((await supabase.from(table).delete().eq('id', id)).error);
     fetchAll();
   }
 
@@ -94,9 +94,7 @@ export default function HomepagePage() {
   if (loading) {
     return (
       <AdminLayout title="Homepage" subtitle="Manage homepage sections">
-        <div className="flex items-center justify-center h-48">
-          <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }} />
-        </div>
+        <ListSkeleton />
       </AdminLayout>
     );
   }

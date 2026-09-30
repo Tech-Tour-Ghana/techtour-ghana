@@ -15,7 +15,7 @@ import {
 import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs, EmptyBlock } from '@/components/admin/ui';
+import { Tabs, EmptyBlock, ListSkeleton, reportError } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -134,19 +134,19 @@ export default function AdminTeamPage() {
 
   const deleteMember = async (id: string, name: string) => {
     if (!window.confirm(`Delete team member "${name}"?`)) return;
-    await supabase.from('team_members').delete().eq('id', id);
+    reportError((await supabase.from('team_members').delete().eq('id', id)).error);
     fetchAll();
   };
 
   const deleteCategory = async (id: string, name: string) => {
     if (!window.confirm(`Delete category "${name}"?`)) return;
-    await supabase.from('job_categories').delete().eq('id', id);
+    reportError((await supabase.from('job_categories').delete().eq('id', id)).error);
     fetchAll();
   };
 
   const deleteOpening = async (id: string, title: string) => {
     if (!window.confirm(`Delete job opening "${title}"?`)) return;
-    await supabase.from('job_openings').delete().eq('id', id);
+    reportError((await supabase.from('job_openings').delete().eq('id', id)).error);
     fetchAll();
   };
 
@@ -156,9 +156,9 @@ export default function AdminTeamPage() {
     setSaving(true);
     const d = memberModal.data;
     if (memberModal.id) {
-      await supabase.from('team_members').update(d).eq('id', memberModal.id);
+      reportError((await supabase.from('team_members').update(d).eq('id', memberModal.id)).error);
     } else {
-      await supabase.from('team_members').insert(d);
+      reportError((await supabase.from('team_members').insert(d)).error);
     }
     setSaving(false);
     setMemberModal({ open: false, data: blankMember(), id: null });
@@ -169,9 +169,9 @@ export default function AdminTeamPage() {
     setSaving(true);
     const d = categoryModal.data;
     if (categoryModal.id) {
-      await supabase.from('job_categories').update(d).eq('id', categoryModal.id);
+      reportError((await supabase.from('job_categories').update(d).eq('id', categoryModal.id)).error);
     } else {
-      await supabase.from('job_categories').insert(d);
+      reportError((await supabase.from('job_categories').insert(d)).error);
     }
     setSaving(false);
     setCategoryModal({ open: false, data: blankCategory(), id: null });
@@ -182,9 +182,9 @@ export default function AdminTeamPage() {
     setSaving(true);
     const d = openingModal.data;
     if (openingModal.id) {
-      await supabase.from('job_openings').update(d).eq('id', openingModal.id);
+      reportError((await supabase.from('job_openings').update(d).eq('id', openingModal.id)).error);
     } else {
-      await supabase.from('job_openings').insert(d);
+      reportError((await supabase.from('job_openings').insert(d)).error);
     }
     setSaving(false);
     setOpeningModal({ open: false, data: blankOpening(), id: null });
@@ -225,9 +225,7 @@ export default function AdminTeamPage() {
   if (loading) {
     return (
       <AdminLayout title="Team & Careers" subtitle="Manage team members and job openings">
-        <div className="flex items-center justify-center h-48">
-          <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }} />
-        </div>
+        <ListSkeleton />
       </AdminLayout>
     );
   }

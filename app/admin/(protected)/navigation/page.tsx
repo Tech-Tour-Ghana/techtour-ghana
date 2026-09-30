@@ -7,7 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs } from '@/components/admin/ui';
+import { Tabs, ListSkeleton, reportError } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -84,30 +84,30 @@ export default function NavigationPage() {
     const b = (v: unknown) => (v == null ? true : Boolean(v));
     if (type === 'menu_edit' || type === 'menu_add') {
       const row = { label: s(data.label), url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) await supabase.from('navbar_menus').update(row).eq('id', String(data.id));
-      else await supabase.from('navbar_menus').insert(row);
+      if (data.id) reportError((await supabase.from('navbar_menus').update(row).eq('id', String(data.id))).error);
+      else reportError((await supabase.from('navbar_menus').insert(row)).error);
     } else if (type === 'dropdown_edit' || type === 'dropdown_add') {
       const row = { parent_menu_id: s(data.parent_menu_id), label: s(data.label), url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) await supabase.from('navbar_dropdowns').update(row).eq('id', String(data.id));
-      else await supabase.from('navbar_dropdowns').insert(row);
+      if (data.id) reportError((await supabase.from('navbar_dropdowns').update(row).eq('id', String(data.id))).error);
+      else reportError((await supabase.from('navbar_dropdowns').insert(row)).error);
     } else if (type === 'footer_link_edit' || type === 'footer_link_add') {
       const row = { label: s(data.label), url: s(data.url), category: (s(data.category) || 'company') as 'destinations' | 'services' | 'company' | 'support', sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) await supabase.from('footer_quick_links').update(row).eq('id', String(data.id));
-      else await supabase.from('footer_quick_links').insert(row);
+      if (data.id) reportError((await supabase.from('footer_quick_links').update(row).eq('id', String(data.id))).error);
+      else reportError((await supabase.from('footer_quick_links').insert(row)).error);
     } else if (type === 'social_edit' || type === 'social_add') {
       const row = { platform: (s(data.platform) || 'other') as 'facebook' | 'twitter' | 'instagram' | 'linkedin' | 'youtube' | 'tiktok' | 'whatsapp' | 'other', url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) await supabase.from('social_links').update(row).eq('id', String(data.id));
-      else await supabase.from('social_links').insert(row);
+      if (data.id) reportError((await supabase.from('social_links').update(row).eq('id', String(data.id))).error);
+      else reportError((await supabase.from('social_links').insert(row)).error);
     } else if (type === 'legal_edit' || type === 'legal_add') {
       const row = { label: s(data.label), url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) await supabase.from('legal_links').update(row).eq('id', String(data.id));
-      else await supabase.from('legal_links').insert(row);
+      if (data.id) reportError((await supabase.from('legal_links').update(row).eq('id', String(data.id))).error);
+      else reportError((await supabase.from('legal_links').insert(row)).error);
     } else if (type === 'footer_settings') {
-      if (data.id) await supabase.from('footer_settings').update({ company_name: s(data.company_name), tagline: s(data.tagline), copyright_text: s(data.copyright_text) }).eq('id', String(data.id));
+      if (data.id) reportError((await supabase.from('footer_settings').update({ company_name: s(data.company_name), tagline: s(data.tagline), copyright_text: s(data.copyright_text) }).eq('id', String(data.id))).error);
     } else if (type === 'footer_contact_edit' || type === 'footer_contact_add') {
       const row = { icon: s(data.icon), text: s(data.text), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) await supabase.from('footer_contacts').update(row).eq('id', String(data.id));
-      else await supabase.from('footer_contacts').insert(row);
+      if (data.id) reportError((await supabase.from('footer_contacts').update(row).eq('id', String(data.id))).error);
+      else reportError((await supabase.from('footer_contacts').insert(row)).error);
     }
 
     await fetchAll();
@@ -118,7 +118,7 @@ export default function NavigationPage() {
   async function del(table: 'navbar_menus' | 'navbar_dropdowns' | 'footer_quick_links' | 'social_links' | 'legal_links' | 'footer_contacts', id: string) {
     if (!window.confirm('Delete this item?')) return;
     const supabase = createBrowserClient();
-    await supabase.from(table).delete().eq('id', id);
+    reportError((await supabase.from(table).delete().eq('id', id)).error);
     fetchAll();
   }
 
@@ -151,9 +151,7 @@ export default function NavigationPage() {
   if (loading) {
     return (
       <AdminLayout title="Navigation" subtitle="Manage navbar and footer content">
-        <div className="flex items-center justify-center h-48">
-          <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }} />
-        </div>
+        <ListSkeleton />
       </AdminLayout>
     );
   }

@@ -5,9 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner, faSave } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
+import { ListSkeleton } from '@/components/admin/ui';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
-
-const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
 interface SiteSettings {
   id: string;
@@ -27,6 +26,7 @@ export default function SettingsAdminPage() {
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const fetchAll = useCallback(async () => {
     const supabase = createBrowserClient();
@@ -57,8 +57,9 @@ export default function SettingsAdminPage() {
   async function saveSiteSettings() {
     if (!siteSettings) return;
     setSavingSettings(true);
+    setError('');
     const supabase = createBrowserClient();
-    await supabase.from('site_settings').update({
+    const { error: saveErr } = await supabase.from('site_settings').update({
       logo_url: settingsForm.logo_url ?? '',
       favicon_url: settingsForm.favicon_url ?? '',
       login_background_url: settingsForm.login_background_url ?? '',
@@ -69,6 +70,7 @@ export default function SettingsAdminPage() {
       register_description: settingsForm.register_description ?? '',
     }).eq('id', siteSettings.id);
     setSavingSettings(false);
+    if (saveErr) { setError('Could not save settings. Please try again.'); return; }
     setSettingsSaved(true);
     setTimeout(() => setSettingsSaved(false), 3000);
   }
@@ -79,22 +81,20 @@ export default function SettingsAdminPage() {
   if (loading) {
     return (
       <AdminLayout title="Settings" subtitle="Site configuration">
-        <div className="flex items-center justify-center h-48">
-          <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }} />
-        </div>
+        <ListSkeleton />
       </AdminLayout>
     );
   }
 
   return (
     <AdminLayout title="Settings" subtitle="Site configuration">
-      <div className="rounded-xl p-6 space-y-5" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
+      <div className="max-w-3xl rounded-[var(--adm-radius-card)] p-6 space-y-5" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
         {!siteSettings ? (
           <p className="text-sm" style={{ color: themeStyles.textMuted }}>No site settings row found.</p>
         ) : (
           <>
             <h2 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Branding</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Logo URL</label>
                 <UrlWithPicker inputStyle={inputStyle} value={settingsForm.logo_url ?? ''} onChange={v => setField('logo_url', v)} /></div>
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Favicon URL</label>
@@ -124,11 +124,12 @@ export default function SettingsAdminPage() {
             <div className="flex items-center gap-3 pt-2">
               <button onClick={saveSiteSettings} disabled={savingSettings}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
-                style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
+                style={{ background: 'var(--adm-primary)', color: 'white' }}>
                 {savingSettings ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faSave} />}
                 Save Settings
               </button>
-              {settingsSaved && <span className="text-xs" style={{ color: '#10B981' }}>Saved successfully</span>}
+              {settingsSaved && <span className="text-xs" style={{ color: 'var(--adm-success)' }}>Saved successfully</span>}
+              {error && <span role="alert" className="text-xs" style={{ color: 'var(--adm-error)' }}>{error}</span>}
             </div>
           </>
         )}

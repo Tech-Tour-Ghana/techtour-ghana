@@ -16,7 +16,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock } from '@/components/admin/ui';
+import { ListSkeleton, EmptyBlock, reportError } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -63,7 +63,7 @@ export default function AdminUsersPage() {
   async function toggleActive(user: Profile) {
     setTogglingId(user.id);
     const supabase = createBrowserClient();
-    await supabase.from('profiles').update({ is_active: !user.is_active }).eq('id', user.id);
+    reportError((await supabase.from('profiles').update({ is_active: !user.is_active }).eq('id', user.id)).error);
     setUsers((prev) => prev.map((u) => u.id === user.id ? { ...u, is_active: !u.is_active } : u));
     if (viewUser?.id === user.id) setViewUser((v) => v ? { ...v, is_active: !v.is_active } : v);
     setTogglingId(null);
@@ -75,7 +75,7 @@ export default function AdminUsersPage() {
     if (!window.confirm(`Are you sure you want to ${action} ${name}?`)) return;
     setTogglingId(user.id);
     const supabase = createBrowserClient();
-    await supabase.from('profiles').update({ is_admin: !user.is_admin }).eq('id', user.id);
+    reportError((await supabase.from('profiles').update({ is_admin: !user.is_admin }).eq('id', user.id)).error);
     setUsers((prev) => prev.map((u) => u.id === user.id ? { ...u, is_admin: !u.is_admin } : u));
     if (viewUser?.id === user.id) setViewUser((v) => v ? { ...v, is_admin: !v.is_admin } : v);
     setTogglingId(null);

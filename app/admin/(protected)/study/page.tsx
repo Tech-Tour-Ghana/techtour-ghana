@@ -9,7 +9,7 @@ import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { useTheme } from '@/context/ThemeContext';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock, Tabs } from '@/components/admin/ui';
+import { ListSkeleton, EmptyBlock, Tabs, reportError } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -153,9 +153,9 @@ function DestinationsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
       is_active: form.is_active,
     };
     if (editingId) {
-      await supabase.from('study_destinations').update(payload).eq('id', editingId);
+      reportError((await supabase.from('study_destinations').update(payload).eq('id', editingId)).error);
     } else {
-      await supabase.from('study_destinations').insert(payload);
+      reportError((await supabase.from('study_destinations').insert(payload)).error);
     }
     setSaving(false);
     closeModal();
@@ -166,7 +166,7 @@ function DestinationsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
   async function handleDelete(r: Destination) {
     if (!window.confirm(`Delete "${r.country_name}"? This cannot be undone.`)) return;
     const supabase = createBrowserClient();
-    await supabase.from('study_destinations').delete().eq('id', r.id);
+    reportError((await supabase.from('study_destinations').delete().eq('id', r.id)).error);
     setLoading(true);
     fetchRows();
   }
@@ -362,9 +362,9 @@ function ScholarshipsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
       is_active: form.is_active,
     };
     if (editingId) {
-      await supabase.from('scholarships').update(payload).eq('id', editingId);
+      reportError((await supabase.from('scholarships').update(payload).eq('id', editingId)).error);
     } else {
-      await supabase.from('scholarships').insert(payload);
+      reportError((await supabase.from('scholarships').insert(payload)).error);
     }
     setSaving(false);
     closeModal();
@@ -375,7 +375,7 @@ function ScholarshipsTab({ themeStyles, isDimMode, inputClass, inputStyle, label
   async function handleDelete(r: Scholarship) {
     if (!window.confirm(`Delete "${r.title}"? This cannot be undone.`)) return;
     const supabase = createBrowserClient();
-    await supabase.from('scholarships').delete().eq('id', r.id);
+    reportError((await supabase.from('scholarships').delete().eq('id', r.id)).error);
     setLoading(true);
     fetchRows();
   }

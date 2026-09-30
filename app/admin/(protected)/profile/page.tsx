@@ -7,7 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton } from '@/components/admin/ui';
+import { ListSkeleton, reportError } from '@/components/admin/ui';
 
 const BRAND = '#139EA2';
 
@@ -33,6 +33,7 @@ export default function AdminProfilePage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
 
   const themeStyles = {
     cardBg: 'var(--adm-card)',
@@ -57,7 +58,7 @@ export default function AdminProfilePage() {
 
   const loadProfile = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) { setLoading(false); return; }
 
     const { data } = await supabase
       .from('profiles')
@@ -65,7 +66,7 @@ export default function AdminProfilePage() {
       .eq('id', user.id)
       .single();
 
-    if (!data) return;
+    if (!data) { setLoading(false); return; }
     const p = data as Profile;
     setProfile(p);
     setForm({
@@ -88,6 +89,8 @@ export default function AdminProfilePage() {
 
   async function handleAvatarUpload(file: File) {
     if (!profile) return;
+    if (file.size > 5 * 1024 * 1024) { setError('Photo must be 5 MB or smaller.'); return; }
+    setError('');
     setUploading(true);
     const ext = file.name.split('.').pop() ?? 'jpg';
     const path = `${profile.id}/${Date.now()}.${ext}`;
@@ -97,9 +100,10 @@ export default function AdminProfilePage() {
       await supabase.storage.from('avatars').remove([profile.avatar_path]);
     }
 
-    const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
-    if (!error) {
-      await supabase.from('profiles').update({ avatar_path: path, avatar_url: null }).eq('id', profile.id);
+    const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+    if (upErr) setError('Could not upload the photo. Please try again.');
+    else {
+      reportError((await supabase.from('profiles').update({ avatar_path: path, avatar_url: null }).eq('id', profile.id)).error);
       const { data: signed } = await supabase.storage.from('avatars').createSignedUrl(path, 3600);
       if (signed) setAvatarPreview(signed.signedUrl);
       setProfile(prev => prev ? { ...prev, avatar_path: path } : prev);
@@ -110,7 +114,8 @@ export default function AdminProfilePage() {
   async function handleSave() {
     if (!profile) return;
     setSaving(true);
-    await supabase.from('profiles').update({
+    setError('');
+    const { error: saveErr } = await supabase.from('profiles').update({
       first_name: form.first_name.trim(),
       last_name: form.last_name.trim(),
       phone_number: form.phone_number.trim() || null,
@@ -118,6 +123,7 @@ export default function AdminProfilePage() {
       updated_at: new Date().toISOString(),
     }).eq('id', profile.id);
     setSaving(false);
+    if (saveErr) { setError('Could not save your changes. Please try again.'); return; }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
@@ -130,7 +136,7 @@ export default function AdminProfilePage() {
         <div className="max-w-2xl space-y-6">
 
           {/* Avatar card */}
-          <div className="rounded-2xl p-6 flex items-center gap-6"
+          <div className="rounded-[var(--adm-radius-card)] p-6 flex flex-col sm:flex-row sm:items-center gap-6"
             style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
             <div className="relative flex-shrink-0">
               <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center"
@@ -173,11 +179,11 @@ export default function AdminProfilePage() {
           </div>
 
           {/* Profile fields */}
-          <div className="rounded-2xl p-6 space-y-4"
+          <div className="rounded-[var(--adm-radius-card)] p-6 space-y-4"
             style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
             <h3 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Profile Details</h3>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs mb-1.5" style={{ color: themeStyles.textSecondary }}>First name</label>
                 <input
@@ -221,11 +227,12 @@ export default function AdminProfilePage() {
               />
             </div>
 
+            {error && <p role="alert" className="text-xs" style={{ color: 'var(--adm-error)' }}>{error}</p>}
             <button
               onClick={handleSave}
               disabled={saving || saved}
               className="flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-medium text-white disabled:opacity-70"
-              style={{ background: saved ? '#22C55E' : BRAND }}
+              style={{ background: saved ? 'var(--adm-success)' : 'var(--adm-primary)' }}
             >
               {saving
                 ? <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />

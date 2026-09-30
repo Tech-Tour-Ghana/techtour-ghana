@@ -12,7 +12,7 @@ import {
   faTags,
 } from '@fortawesome/free-solid-svg-icons';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, Tabs, EmptyBlock } from '@/components/admin/ui';
+import { ListSkeleton, Tabs, EmptyBlock, reportError } from '@/components/admin/ui';
 import { createBrowserClient } from '@/lib/supabase/client';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
@@ -166,9 +166,9 @@ export default function AdminMarketPage() {
       artisan_id: productForm.artisan_id || null,
     };
     if (editingProduct) {
-      await supabase.from('market_products').update(payload).eq('id', editingProduct.id);
+      reportError((await supabase.from('market_products').update(payload).eq('id', editingProduct.id)).error);
     } else {
-      await supabase.from('market_products').insert(payload);
+      reportError((await supabase.from('market_products').insert(payload)).error);
     }
     setSaving(false);
     closeModal();
@@ -179,9 +179,9 @@ export default function AdminMarketPage() {
     setSaving(true);
     const payload = { ...categoryForm, description: categoryForm.description || undefined };
     if (editingCategory) {
-      await supabase.from('market_categories').update(payload).eq('id', editingCategory.id);
+      reportError((await supabase.from('market_categories').update(payload).eq('id', editingCategory.id)).error);
     } else {
-      await supabase.from('market_categories').insert(payload);
+      reportError((await supabase.from('market_categories').insert(payload)).error);
     }
     setSaving(false);
     closeModal();
@@ -190,13 +190,13 @@ export default function AdminMarketPage() {
 
   async function deleteProduct(id: string) {
     if (!window.confirm('Delete this product? This cannot be undone.')) return;
-    await supabase.from('market_products').delete().eq('id', id);
+    reportError((await supabase.from('market_products').delete().eq('id', id)).error);
     fetchAll();
   }
 
   async function deleteCategory(id: string) {
     if (!window.confirm('Delete this category? This cannot be undone.')) return;
-    await supabase.from('market_categories').delete().eq('id', id);
+    reportError((await supabase.from('market_categories').delete().eq('id', id)).error);
     fetchAll();
   }
 

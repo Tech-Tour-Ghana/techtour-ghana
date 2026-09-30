@@ -13,7 +13,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock, Tabs } from '@/components/admin/ui';
+import { ListSkeleton, EmptyBlock, Tabs, reportError } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -78,7 +78,7 @@ export default function AdminContactsPage() {
     if (!window.confirm(`Delete message from ${from}? This cannot be undone.`)) return;
     setBusyId(msg.id);
     const supabase = createBrowserClient();
-    await supabase.from('contact_messages').delete().eq('id', msg.id);
+    reportError((await supabase.from('contact_messages').delete().eq('id', msg.id)).error);
     setMessages((prev) => prev.filter((m) => m.id !== msg.id));
     if (viewMsg?.id === msg.id) setViewMsg(null);
     setBusyId(null);

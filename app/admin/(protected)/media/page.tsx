@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton } from '@/components/admin/ui';
+import { ListSkeleton, reportError } from '@/components/admin/ui';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faFolder, faFolderPlus, faUpload, faTrash, faCopy,
@@ -11,7 +11,7 @@ import {
   faCheck, faPencil, faImages,
 } from '@fortawesome/free-solid-svg-icons';
 
-const BRAND = '#139EA2';
+const BRAND = 'var(--adm-primary)';
 const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 interface Folder { id: string; name: string; slug: string; description: string | null; }
@@ -45,6 +45,7 @@ export default function MediaLibraryPage() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [notice, setNotice] = useState('');
 
   const [folderModal, setFolderModal] = useState<{ open: boolean; id: string | null; name: string; description: string }>({
     open: false, id: null, name: '', description: '',
@@ -93,12 +94,11 @@ export default function MediaLibraryPage() {
     if (!folderModal.name.trim()) return;
     setSavingFolder(true);
     const slug = toSlug(folderModal.name);
-    if (folderModal.id) {
-      await supabase.from('media_folders').update({ name: folderModal.name, description: folderModal.description || null }).eq('id', folderModal.id);
-    } else {
-      await supabase.from('media_folders').insert({ name: folderModal.name, slug, description: folderModal.description || null });
-    }
+    const { error } = folderModal.id
+      ? await supabase.from('media_folders').update({ name: folderModal.name, description: folderModal.description || null }).eq('id', folderModal.id)
+      : await supabase.from('media_folders').insert({ name: folderModal.name, slug, description: folderModal.description || null });
     setSavingFolder(false);
+    if (error) { setNotice('Could not save the folder. The name may already be in use.'); return; }
     setFolderModal({ open: false, id: null, name: '', description: '' });
     fetchFolders();
   }
@@ -106,13 +106,15 @@ export default function MediaLibraryPage() {
   async function handleUpload(files: FileList | null) {
     if (!files || files.length === 0 || !activeFolderId || !activeFolder) return;
     setUploading(true);
+    setNotice('');
+    let failed = 0;
     for (const file of Array.from(files)) {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
       const path = `${activeFolder.slug}/${Date.now()}-${safeName}`;
       const { error } = await supabase.storage.from('media').upload(path, file, { upsert: false });
-      if (error) continue;
+      if (error) { failed++; continue; }
       const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(path);
-      await supabase.from('media_assets').insert({
+      const { error: rowErr } = await supabase.from('media_assets').insert({
         folder_id: activeFolderId,
         name: file.name,
         storage_path: path,
@@ -120,44 +122,52 @@ export default function MediaLibraryPage() {
         size_bytes: file.size,
         mime_type: file.type || null,
       });
+      if (rowErr) {
+        failed++;
+        await supabase.storage.from('media').remove([path]);
+      }
     }
     setUploading(false);
+    if (failed) setNotice(`${failed} file${failed > 1 ? 's' : ''} could not be uploaded.`);
+    if (fileInputRef.current) fileInputRef.current.value = '';
     fetchAssets(activeFolderId);
   }
 
   async function confirmDelete() {
     if (!deleteConfirm) return;
     if (deleteConfirm.type === 'folder') {
-      const folderAssets = assets.filter(a => a.folder_id === deleteConfirm.id);
-      for (const a of folderAssets) {
-        await supabase.storage.from('media').remove([a.storage_path]);
-      }
-      await supabase.from('media_folders').delete().eq('id', deleteConfirm.id);
-      if (activeFolderId === deleteConfirm.id) setActiveFolderId(null);
+      const { data: folderAssets } = await supabase.from('media_assets').select('storage_path').eq('folder_id', deleteConfirm.id);
+      const paths = (folderAssets ?? []).map(a => a.storage_path);
+      if (paths.length) await supabase.storage.from('media').remove(paths);
+      const { error } = await supabase.from('media_folders').delete().eq('id', deleteConfirm.id);
+      if (error) { setNotice('Could not delete the folder.'); setDeleteConfirm(null); return; }
+      const next = activeFolderId === deleteConfirm.id ? null : activeFolderId;
+      setActiveFolderId(next);
       fetchFolders();
-      fetchAssets(activeFolderId);
+      fetchAssets(next);
     } else {
       const asset = assets.find(a => a.id === deleteConfirm.id);
       if (asset) await supabase.storage.from('media').remove([asset.storage_path]);
-      await supabase.from('media_assets').delete().eq('id', deleteConfirm.id);
+      reportError((await supabase.from('media_assets').delete().eq('id', deleteConfirm.id)).error);
       fetchAssets(activeFolderId);
     }
     setDeleteConfirm(null);
   }
 
   function copyUrl(url: string) {
-    navigator.clipboard.writeText(url);
-    setCopied(url);
-    setTimeout(() => setCopied(null), 2000);
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(url);
+      setTimeout(() => setCopied(null), 2000);
+    }, () => setNotice('Could not copy the link.'));
   }
 
   return (
     <AdminLayout title="Media Library" subtitle="Upload and organise site assets">
-      <div className="flex gap-4 h-[calc(100vh-140px)]">
+      <div className="flex flex-col gap-4 md:h-[calc(100vh-140px)] md:flex-row">
 
         {/* Folder sidebar */}
-        <div className="w-56 flex-shrink-0 rounded-xl flex flex-col overflow-hidden"
-          style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
+        <div className="max-h-56 w-full flex-shrink-0 rounded-[var(--adm-radius-card)] flex flex-col overflow-hidden md:max-h-none md:w-56"
+          style={{ background: ts.cardBg, border: `1px solid ${ts.border}`, boxShadow: 'var(--adm-shadow)' }}>
           <div className="px-3 py-3 border-b flex items-center justify-between"
             style={{ borderColor: ts.border }}>
             <span className="text-xs font-semibold" style={{ color: ts.textMuted }}>Folders</span>
@@ -207,7 +217,7 @@ export default function MediaLibraryPage() {
                 <button
                   onClick={() => setDeleteConfirm({ type: 'folder', id: f.id, label: f.name })}
                   className="opacity-0 group-hover:opacity-100 p-1 pr-2 transition"
-                  style={{ color: activeFolderId === f.id ? 'rgba(255,255,255,0.7)' : '#EF4444' }}
+                  style={{ color: activeFolderId === f.id ? 'rgba(255,255,255,0.7)' : 'var(--adm-error)' }}
                   title="Delete folder"
                 >
                   <FontAwesomeIcon icon={faTrash} className="w-2.5 h-2.5" />
@@ -224,8 +234,8 @@ export default function MediaLibraryPage() {
         </div>
 
         {/* Main panel */}
-        <div className="flex-1 rounded-xl flex flex-col overflow-hidden"
-          style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
+        <div className="min-h-[24rem] min-w-0 flex-1 rounded-[var(--adm-radius-card)] flex flex-col overflow-hidden"
+          style={{ background: ts.cardBg, border: `1px solid ${ts.border}`, boxShadow: 'var(--adm-shadow)' }}>
 
           {/* Toolbar */}
           <div className="px-4 py-3 border-b flex items-center gap-3 flex-shrink-0"
@@ -262,6 +272,8 @@ export default function MediaLibraryPage() {
             )}
           </div>
 
+          {notice && <p role="alert" className="px-4 py-2 text-xs" style={{ background: 'var(--adm-error-soft)', color: 'var(--adm-error)' }}>{notice}</p>}
+
           {/* Asset grid */}
           <div className="flex-1 overflow-y-auto p-4">
             {loading ? (
@@ -284,7 +296,7 @@ export default function MediaLibraryPage() {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
                 {assets.map(a => {
                   const isImg = a.mime_type?.startsWith('image/');
                   const isCopied = copied === a.public_url;
@@ -307,7 +319,7 @@ export default function MediaLibraryPage() {
                           <button
                             onClick={() => copyUrl(a.public_url)}
                             className="w-8 h-8 rounded-lg flex items-center justify-center"
-                            style={{ background: isCopied ? '#10B981' : BRAND }}
+                            style={{ background: isCopied ? 'var(--adm-success)' : BRAND }}
                             title="Copy URL"
                           >
                             <FontAwesomeIcon icon={isCopied ? faCheck : faCopy} className="w-3.5 h-3.5 text-white" />
@@ -315,7 +327,7 @@ export default function MediaLibraryPage() {
                           <button
                             onClick={() => setDeleteConfirm({ type: 'asset', id: a.id, label: a.name })}
                             className="w-8 h-8 rounded-lg flex items-center justify-center"
-                            style={{ background: '#EF4444' }}
+                            style={{ background: 'var(--adm-error)' }}
                             title="Delete"
                           >
                             <FontAwesomeIcon icon={faTrash} className="w-3.5 h-3.5 text-white" />
@@ -403,7 +415,7 @@ export default function MediaLibraryPage() {
               </button>
               <button onClick={confirmDelete}
                 className="px-4 py-2 rounded-lg text-xs font-medium text-white"
-                style={{ background: '#EF4444' }}>
+                style={{ background: 'var(--adm-error)' }}>
                 Delete
               </button>
             </div>

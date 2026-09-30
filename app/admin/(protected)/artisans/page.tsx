@@ -14,7 +14,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, EmptyBlock } from '@/components/admin/ui';
+import { ListSkeleton, EmptyBlock, reportError } from '@/components/admin/ui';
 
 const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
@@ -153,9 +153,9 @@ export default function AdminArtisansPage() {
     };
 
     if (editingId) {
-      await supabase.from('artisans').update(payload).eq('id', editingId);
+      reportError((await supabase.from('artisans').update(payload).eq('id', editingId)).error);
     } else {
-      await supabase.from('artisans').insert(payload);
+      reportError((await supabase.from('artisans').insert(payload)).error);
     }
 
     setSaving(false);
@@ -167,7 +167,7 @@ export default function AdminArtisansPage() {
   async function handleDelete(a: Artisan) {
     if (!window.confirm(`Delete "${a.name}"? This cannot be undone.`)) return;
     const supabase = createBrowserClient();
-    await supabase.from('artisans').delete().eq('id', a.id);
+    reportError((await supabase.from('artisans').delete().eq('id', a.id)).error);
     setLoading(true);
     fetch();
   }
