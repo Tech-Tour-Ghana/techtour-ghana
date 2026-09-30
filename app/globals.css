@@ -881,3 +881,5 @@ body:has(.dashboard-layout-wrapper) {
 }
 .tt-prose img.img-md { max-width: 70%; margin-inline: auto; display: block; }
 .tt-prose img.img-sm { max-width: 40%; margin-inline: auto; display: block; }
+
+.tt-prose :is(h2, h3) { scroll-margin-top: 6rem; }

@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 
 import CategoryNav from '@/components/content/CategoryNav';
 import ContentShell from '@/components/content/ContentShell';
-import PostList from '@/components/content/PostList';
-import { createClient } from '@/lib/supabase/server';
+import PostList, { Pagination } from '@/components/content/PostList';
+import { getBlogListing } from '@/lib/content/blog.server';
 
 export const metadata: Metadata = {
   title: 'Blog Updates',
@@ -13,22 +13,23 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-export default async function BlogPage() {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from('blog_posts')
-    .select('slug, category, title, excerpt, image_url, author, published_at')
-    .eq('is_published', true)
-    .order('published_at', { ascending: false });
+export default async function BlogPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const { posts, counts, page, pages } = await getBlogListing(undefined, (await searchParams).page);
 
   return (
     <ContentShell
+      wide
       title="Blog"
       titleAccent="Updates"
       description="Stories, destination guides, student experiences and travel tips from across Ghana."
     >
-      <CategoryNav />
-      <PostList posts={data ?? []} />
+      <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
+        <CategoryNav counts={counts} />
+        <div>
+          <PostList posts={posts} />
+          <Pagination page={page} pages={pages} basePath="/blog" />
+        </div>
+      </div>
     </ContentShell>
   );
 }

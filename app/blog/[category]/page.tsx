@@ -3,11 +3,11 @@ import { notFound } from 'next/navigation';
 
 import CategoryNav from '@/components/content/CategoryNav';
 import ContentShell from '@/components/content/ContentShell';
-import PostList from '@/components/content/PostList';
+import PostList, { Pagination } from '@/components/content/PostList';
 import { BLOG_CATEGORIES, isBlogCategory } from '@/lib/content/blog';
+import { getBlogListing } from '@/lib/content/blog.server';
 import { resolveSeo } from '@/lib/seo/resolve';
 import { getSeoFields, getSiteSeo, toMetadata } from '@/lib/seo/load.server';
-import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,23 +22,22 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return toMetadata(resolved, { type: 'website', siteName: site.siteName });
 }
 
-export default async function BlogCategoryPage({ params }: Params) {
+export default async function BlogCategoryPage({ params, searchParams }: Params & { searchParams: Promise<{ page?: string }> }) {
   const { category } = await params;
   if (!isBlogCategory(category)) notFound();
 
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from('blog_posts')
-    .select('slug, category, title, excerpt, image_url, author, published_at')
-    .eq('is_published', true)
-    .eq('category', category)
-    .order('published_at', { ascending: false });
+  const { posts, counts, page, pages } = await getBlogListing(category, (await searchParams).page);
 
   const { label, blurb } = BLOG_CATEGORIES[category];
   return (
-    <ContentShell title={label} titleAccent="" description={blurb}>
-      <CategoryNav active={category} />
-      <PostList posts={data ?? []} />
+    <ContentShell wide title={label} titleAccent="" description={blurb}>
+      <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
+        <CategoryNav active={category} counts={counts} />
+        <div>
+          <PostList posts={posts} />
+          <Pagination page={page} pages={pages} basePath={`/blog/${category}`} />
+        </div>
+      </div>
     </ContentShell>
   );
 }

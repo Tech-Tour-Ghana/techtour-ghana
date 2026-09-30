@@ -10,19 +10,21 @@ export default function ContentShell({
   titleAccent,
   description,
   accent = 'teal',
+  wide = false,
   children,
 }: {
   title: string;
   titleAccent: string;
   description: string;
   accent?: 'teal' | 'orange';
+  wide?: boolean;
   children: ReactNode;
 }) {
   return (
     <ServiceTheme>
       <main style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
         <ServiceHero title={title} titleAccent={titleAccent} description={description} accentColor={accent} />
-        <div className="mx-auto w-full max-w-5xl px-4 py-12">{children}</div>
+        <div className={`mx-auto w-full px-4 py-12 ${wide ? 'max-w-6xl' : 'max-w-5xl'}`}>{children}</div>
       </main>
     </ServiceTheme>
   );
