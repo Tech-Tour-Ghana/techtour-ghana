@@ -28,8 +28,8 @@ export async function POST(request: Request) {
   const ack = contactAck(message.name);
   const notifyTo = getServerEnv().CONTACT_NOTIFY_EMAIL;
   await Promise.all([
-    sendEmail({ to: message.email, ...ack }),
-    notifyTo ? sendEmail({ to: notifyTo, replyTo: message.email, ...contactNotify(message) }) : undefined,
+    sendEmail({ to: message.email, template: 'contact_ack', ...ack }),
+    notifyTo ? sendEmail({ to: notifyTo, template: 'contact_notify', replyTo: message.email, ...contactNotify(message) }) : undefined,
   ]);
 
   return NextResponse.json({ ok: true });

@@ -6,6 +6,8 @@ import "server-only";
 // any one user's RLS grants: the Paystack initialize, verify and webhook
 // routes, which price a cart and write orders that orders_insert (admin only,
 // 0013) would otherwise refuse (architecture.md section 6, design.md B7).
+// The email sender (lib/email/send.server.ts) also uses it, to write email_log,
+// which has no client write policy.
 // Everything else must use lib/supabase/server or lib/supabase/client, where
 // RLS is the enforcement boundary.
 //

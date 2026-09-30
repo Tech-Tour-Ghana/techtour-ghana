@@ -568,6 +568,47 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          changed_columns: string[]
+          created_at: string
+          id: string
+          record_id: string
+          summary: string
+          table_name: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          changed_columns?: string[]
+          created_at?: string
+          id?: string
+          record_id?: string
+          summary?: string
+          table_name: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          changed_columns?: string[]
+          created_at?: string
+          id?: string
+          record_id?: string
+          summary?: string
+          table_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author: string
