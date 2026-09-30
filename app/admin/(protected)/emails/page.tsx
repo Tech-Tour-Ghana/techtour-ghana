@@ -75,7 +75,7 @@ export default function AdminEmailsPage() {
         />
 
         {error ? (
-          <p className="text-sm" style={{ color: '#EF4444' }}>Could not load the email log: {error}</p>
+          <p className="text-sm" style={{ color: 'var(--adm-error)' }}>Could not load the email log: {error}</p>
         ) : (
           <TableCard loading={loading} empty={rows.length === 0} headers={['When', 'To', 'Type', 'Subject', 'Status', '']}>
             {rows.map((r) => (
@@ -87,7 +87,7 @@ export default function AdminEmailsPage() {
                 <td className="px-4 py-3">
                   <span
                     className="rounded-full px-2 py-0.5 text-xs font-semibold"
-                    style={r.status === 'failed' ? { background: '#EF444422', color: '#EF4444' } : { background: '#10B98122', color: '#10B981' }}
+                    style={r.status === 'failed' ? { background: 'var(--adm-error-soft)', color: 'var(--adm-error)' } : { background: 'var(--adm-success-soft)', color: 'var(--adm-success)' }}
                     title={r.error_message || undefined}
                   >
                     {r.status}

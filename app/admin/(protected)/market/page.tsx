@@ -9,10 +9,8 @@ import {
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 import AdminLayout from '@/components/AdminLayout';
-import { ListSkeleton, Tabs, EmptyBlock, reportError, Modal, Button } from '@/components/admin/ui';
+import { Button, IconButton, Modal, SearchInput, StatusPill, TableCard, Tabs, Toolbar, confirmAction, reportError, rowClass } from '@/components/admin/ui';
 import { createBrowserClient } from '@/lib/supabase/client';
-
-const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
 
 function toSlug(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -68,6 +66,7 @@ const EMPTY_CATEGORY: Omit<Category, 'id'> = {
 
 export default function AdminMarketPage() {
   const [tab, setTab] = useState<Tab>('products');
+  const [search, setSearch] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -163,9 +162,9 @@ export default function AdminMarketPage() {
       artisan_id: productForm.artisan_id || null,
     };
     if (editingProduct) {
-      reportError((await supabase.from('market_products').update(payload).eq('id', editingProduct.id)).error);
+      if (reportError((await supabase.from('market_products').update(payload).eq('id', editingProduct.id)).error)) { setSaving(false); return; }
     } else {
-      reportError((await supabase.from('market_products').insert(payload)).error);
+      if (reportError((await supabase.from('market_products').insert(payload)).error)) { setSaving(false); return; }
     }
     setSaving(false);
     closeModal();
@@ -176,9 +175,9 @@ export default function AdminMarketPage() {
     setSaving(true);
     const payload = { ...categoryForm, description: categoryForm.description || undefined };
     if (editingCategory) {
-      reportError((await supabase.from('market_categories').update(payload).eq('id', editingCategory.id)).error);
+      if (reportError((await supabase.from('market_categories').update(payload).eq('id', editingCategory.id)).error)) { setSaving(false); return; }
     } else {
-      reportError((await supabase.from('market_categories').insert(payload)).error);
+      if (reportError((await supabase.from('market_categories').insert(payload)).error)) { setSaving(false); return; }
     }
     setSaving(false);
     closeModal();
@@ -186,14 +185,14 @@ export default function AdminMarketPage() {
   }
 
   async function deleteProduct(id: string) {
-    if (!window.confirm('Delete this product? This cannot be undone.')) return;
-    reportError((await supabase.from('market_products').delete().eq('id', id)).error);
+    if (!(await confirmAction({ message: 'Delete this product? This cannot be undone.', danger: true }))) return;
+    if (reportError((await supabase.from('market_products').delete().eq('id', id)).error)) { return; }
     fetchAll();
   }
 
   async function deleteCategory(id: string) {
-    if (!window.confirm('Delete this category? This cannot be undone.')) return;
-    reportError((await supabase.from('market_categories').delete().eq('id', id)).error);
+    if (!(await confirmAction({ message: 'Delete this category? This cannot be undone.', danger: true }))) return;
+    if (reportError((await supabase.from('market_categories').delete().eq('id', id)).error)) { return; }
     fetchAll();
   }
 
@@ -202,117 +201,78 @@ export default function AdminMarketPage() {
     background: themeStyles.inputBg,
     border: `1px solid ${themeStyles.inputBorder}`,
     color: themeStyles.textPrimary,
-    '--tw-ring-color': BRAND_COLORS.tropicalTeal,
+    '--tw-ring-color': 'var(--adm-primary)',
   } as React.CSSProperties;
 
-  const Badge = ({ active }: { active: boolean }) => (
-    <span
-      className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-      style={{
-        background: active ? '#10B98122' : '#EF444422',
-        color: active ? '#10B981' : '#EF4444',
-      }}
-    >
-      {active ? 'Active' : 'Inactive'}
-    </span>
-  );
+  const q = search.trim().toLowerCase();
+  const visibleProducts = products.filter((p) => !q || p.title.toLowerCase().includes(q));
+  const visibleCategories = categories.filter((c) => !q || c.name.toLowerCase().includes(q));
 
   const isProductModal = tab === 'products';
 
   return (
     <AdminLayout title="Market Products" subtitle="Manage products and categories">
-      <div className="space-y-4">
-        {/* Tabs */}
-        <Tabs value={tab} onChange={setTab} tabs={[{ key: 'products' as Tab, label: 'Products' }, { key: 'categories' as Tab, label: 'Categories' }]} />
+      <Toolbar
+        actions={
+          <Button onClick={tab === 'products' ? openAddProduct : openAddCategory}>
+            <FontAwesomeIcon icon={faPlus} className="mr-2 h-3 w-3" />{tab === 'products' ? 'Add product' : 'Add category'}
+          </Button>
+        }
+      >
+        <Tabs value={tab} onChange={(t) => { setTab(t); setSearch(''); }} tabs={[{ key: 'products' as Tab, label: 'Products', count: products.length }, { key: 'categories' as Tab, label: 'Categories', count: categories.length }]} />
+        <SearchInput className="min-w-[12rem] flex-1 sm:max-w-xs" value={search} onChange={setSearch} placeholder={tab === 'products' ? 'Search products' : 'Search categories'} label="Search" />
+      </Toolbar>
 
-        {/* Table card */}
-        <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
-          <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: themeStyles.border }}>
-            <h2 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>
-              {tab === 'products' ? 'Products' : 'Categories'}
-            </h2>
-            <button
-              onClick={tab === 'products' ? openAddProduct : openAddCategory}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition hover:opacity-90"
-              style={{ background: BRAND_COLORS.tropicalTeal, color: '#FFFFFF' }}
-            >
-              <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
-              Add New
-            </button>
-          </div>
-
-          {loading ? (
-            <ListSkeleton />
-          ) : tab === 'products' ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
-                    {['Title', 'Price', 'Stock', 'Status', 'Actions'].map((h) => (
-                      <th key={h} className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: themeStyles.textMuted }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y" style={{ borderColor: themeStyles.border }}>
-                  {products.length === 0 ? (
-                    <tr><td colSpan={5}><EmptyBlock title="No products yet." /></td></tr>
-                  ) : products.map((p) => (
-                    <tr key={p.id}>
-                      <td className="px-5 py-3 font-medium" style={{ color: themeStyles.textPrimary }}>{p.title}</td>
-                      <td className="px-5 py-3" style={{ color: themeStyles.textSecondary }}>{p.currency} {Number(p.price).toFixed(2)}</td>
-                      <td className="px-5 py-3" style={{ color: themeStyles.textSecondary }}>{p.stock_quantity}</td>
-                      <td className="px-5 py-3"><Badge active={p.is_active} /></td>
-                      <td className="px-5 py-3">
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => openEditProduct(p)} className="p-1.5 rounded-md hover:opacity-80 transition" style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}>
-                            <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
-                          </button>
-                          <button onClick={() => deleteProduct(p.id)} className="p-1.5 rounded-md hover:opacity-80 transition" style={{ background: '#EF444422', color: '#EF4444' }}>
-                            <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
-                    {['Name', 'Sort Order', 'Status', 'Actions'].map((h) => (
-                      <th key={h} className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: themeStyles.textMuted }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y" style={{ borderColor: themeStyles.border }}>
-                  {categories.length === 0 ? (
-                    <tr><td colSpan={4}><EmptyBlock title="No categories yet." /></td></tr>
-                  ) : categories.map((c) => (
-                    <tr key={c.id}>
-                      <td className="px-5 py-3 font-medium" style={{ color: themeStyles.textPrimary }}>{c.name}</td>
-                      <td className="px-5 py-3" style={{ color: themeStyles.textSecondary }}>{c.sort_order}</td>
-                      <td className="px-5 py-3"><Badge active={c.is_active} /></td>
-                      <td className="px-5 py-3">
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => openEditCategory(c)} className="p-1.5 rounded-md hover:opacity-80 transition" style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}>
-                            <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
-                          </button>
-                          <button onClick={() => deleteCategory(c.id)} className="p-1.5 rounded-md hover:opacity-80 transition" style={{ background: '#EF444422', color: '#EF4444' }}>
-                            <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
+      {tab === 'products' ? (
+        <TableCard
+          loading={loading}
+          empty={visibleProducts.length === 0}
+          emptyTitle={products.length === 0 ? 'No products yet' : 'No products match'}
+          emptyBody={products.length === 0 ? 'Add your first product to the marketplace.' : 'Try a different search.'}
+          headers={['Product', 'Price', 'Stock', 'Status', '']}
+        >
+          {visibleProducts.map((p) => (
+            <tr key={p.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+              <td className="px-4 py-3 font-medium" style={{ color: 'var(--adm-text)' }}>{p.title}</td>
+              <td className="px-4 py-3 text-xs font-semibold" style={{ color: 'var(--adm-text-2)' }}>{p.currency} {Number(p.price).toFixed(2)}</td>
+              <td className="px-4 py-3">
+                {p.stock_quantity <= 0 ? <StatusPill tone="danger">Out of stock</StatusPill>
+                  : p.stock_quantity <= 5 ? <StatusPill tone="warning">{p.stock_quantity} left</StatusPill>
+                  : <span className="text-xs" style={{ color: 'var(--adm-text-2)' }}>{p.stock_quantity}</span>}
+              </td>
+              <td className="px-4 py-3"><StatusPill tone={p.is_active ? 'success' : 'neutral'}>{p.is_active ? 'Active' : 'Inactive'}</StatusPill></td>
+              <td className="px-4 py-3">
+                <div className="flex gap-2">
+                  <IconButton title="Edit" onClick={() => openEditProduct(p)}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></IconButton>
+                  <IconButton title="Delete" color="var(--adm-error)" onClick={() => deleteProduct(p.id)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </TableCard>
+      ) : (
+        <TableCard
+          loading={loading}
+          empty={visibleCategories.length === 0}
+          emptyTitle={categories.length === 0 ? 'No categories yet' : 'No categories match'}
+          emptyBody={categories.length === 0 ? 'Categories group products in the marketplace.' : 'Try a different search.'}
+          headers={['Category', 'Sort order', 'Status', '']}
+        >
+          {visibleCategories.map((c) => (
+            <tr key={c.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+              <td className="px-4 py-3 font-medium" style={{ color: 'var(--adm-text)' }}>{c.name}</td>
+              <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{c.sort_order}</td>
+              <td className="px-4 py-3"><StatusPill tone={c.is_active ? 'success' : 'neutral'}>{c.is_active ? 'Active' : 'Inactive'}</StatusPill></td>
+              <td className="px-4 py-3">
+                <div className="flex gap-2">
+                  <IconButton title="Edit" onClick={() => openEditCategory(c)}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></IconButton>
+                  <IconButton title="Delete" color="var(--adm-error)" onClick={() => deleteCategory(c.id)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </TableCard>
+      )}
 
       {/* Modal */}
       {modalOpen && (
@@ -334,7 +294,7 @@ Cancel
         >
 <div className="space-y-4">
             {/* Modal body */}
-            <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div className="space-y-4">
               {isProductModal ? (
                 <>
                   <div className="grid grid-cols-2 gap-4">
@@ -425,7 +385,7 @@ Cancel
                           checked={productForm.is_featured}
                           onChange={(e) => setProductForm((f) => ({ ...f, is_featured: e.target.checked }))}
                           className="rounded"
-                          style={{ accentColor: BRAND_COLORS.tropicalTeal }}
+                          style={{ accentColor: 'var(--adm-primary)' }}
                         />
                         <span className="text-xs" style={{ color: themeStyles.textSecondary }}>Featured</span>
                       </label>
@@ -435,7 +395,7 @@ Cancel
                           checked={productForm.is_active}
                           onChange={(e) => setProductForm((f) => ({ ...f, is_active: e.target.checked }))}
                           className="rounded"
-                          style={{ accentColor: BRAND_COLORS.tropicalTeal }}
+                          style={{ accentColor: 'var(--adm-primary)' }}
                         />
                         <span className="text-xs" style={{ color: themeStyles.textSecondary }}>Active</span>
                       </label>
@@ -490,7 +450,7 @@ Cancel
                       checked={categoryForm.is_active}
                       onChange={(e) => setCategoryForm((f) => ({ ...f, is_active: e.target.checked }))}
                       className="rounded"
-                      style={{ accentColor: BRAND_COLORS.tropicalTeal }}
+                      style={{ accentColor: 'var(--adm-primary)' }}
                     />
                     <span className="text-xs" style={{ color: themeStyles.textSecondary }}>Active</span>
                   </label>

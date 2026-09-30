@@ -14,9 +14,7 @@ import {
 import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs, EmptyBlock, ListSkeleton, reportError, Modal, Button } from '@/components/admin/ui';
-
-const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
+import { Avatar, Button, IconButton, ListSkeleton, Modal, SearchInput, StatusPill, TableCard, Tabs, Toolbar, confirmAction, reportError, rowClass } from '@/components/admin/ui';
 
 const toSlug = (str: string) =>
   str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -87,6 +85,7 @@ const blankOpening = (): Omit<JobOpening, 'id'> => ({
 
 export default function AdminTeamPage() {
   const [tab, setTab] = useState<Tab>('team');
+  const [search, setSearch] = useState('');
 
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [categories, setCategories] = useState<JobCategory[]>([]);
@@ -132,20 +131,20 @@ export default function AdminTeamPage() {
   // ── Delete helpers ─────────────────────────────────────────────────────────
 
   const deleteMember = async (id: string, name: string) => {
-    if (!window.confirm(`Delete team member "${name}"?`)) return;
-    reportError((await supabase.from('team_members').delete().eq('id', id)).error);
+    if (!(await confirmAction({ message: `Delete team member "${name}"?`, danger: true }))) return;
+    if (reportError((await supabase.from('team_members').delete().eq('id', id)).error)) { return; }
     fetchAll();
   };
 
   const deleteCategory = async (id: string, name: string) => {
-    if (!window.confirm(`Delete category "${name}"?`)) return;
-    reportError((await supabase.from('job_categories').delete().eq('id', id)).error);
+    if (!(await confirmAction({ message: `Delete category "${name}"?`, danger: true }))) return;
+    if (reportError((await supabase.from('job_categories').delete().eq('id', id)).error)) { return; }
     fetchAll();
   };
 
   const deleteOpening = async (id: string, title: string) => {
-    if (!window.confirm(`Delete job opening "${title}"?`)) return;
-    reportError((await supabase.from('job_openings').delete().eq('id', id)).error);
+    if (!(await confirmAction({ message: `Delete job opening "${title}"?`, danger: true }))) return;
+    if (reportError((await supabase.from('job_openings').delete().eq('id', id)).error)) { return; }
     fetchAll();
   };
 
@@ -155,9 +154,9 @@ export default function AdminTeamPage() {
     setSaving(true);
     const d = memberModal.data;
     if (memberModal.id) {
-      reportError((await supabase.from('team_members').update(d).eq('id', memberModal.id)).error);
+      if (reportError((await supabase.from('team_members').update(d).eq('id', memberModal.id)).error)) { setSaving(false); return; }
     } else {
-      reportError((await supabase.from('team_members').insert(d)).error);
+      if (reportError((await supabase.from('team_members').insert(d)).error)) { setSaving(false); return; }
     }
     setSaving(false);
     setMemberModal({ open: false, data: blankMember(), id: null });
@@ -168,9 +167,9 @@ export default function AdminTeamPage() {
     setSaving(true);
     const d = categoryModal.data;
     if (categoryModal.id) {
-      reportError((await supabase.from('job_categories').update(d).eq('id', categoryModal.id)).error);
+      if (reportError((await supabase.from('job_categories').update(d).eq('id', categoryModal.id)).error)) { setSaving(false); return; }
     } else {
-      reportError((await supabase.from('job_categories').insert(d)).error);
+      if (reportError((await supabase.from('job_categories').insert(d)).error)) { setSaving(false); return; }
     }
     setSaving(false);
     setCategoryModal({ open: false, data: blankCategory(), id: null });
@@ -181,9 +180,9 @@ export default function AdminTeamPage() {
     setSaving(true);
     const d = openingModal.data;
     if (openingModal.id) {
-      reportError((await supabase.from('job_openings').update(d).eq('id', openingModal.id)).error);
+      if (reportError((await supabase.from('job_openings').update(d).eq('id', openingModal.id)).error)) { setSaving(false); return; }
     } else {
-      reportError((await supabase.from('job_openings').insert(d)).error);
+      if (reportError((await supabase.from('job_openings').insert(d)).error)) { setSaving(false); return; }
     }
     setSaving(false);
     setOpeningModal({ open: false, data: blankOpening(), id: null });
@@ -191,15 +190,6 @@ export default function AdminTeamPage() {
   };
 
   // ── Shared UI bits ─────────────────────────────────────────────────────────
-
-  const Badge = ({ active }: { active: boolean }) => (
-    <span
-      className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
-      style={{ background: active ? '#10B98122' : '#EF444422', color: active ? '#10B981' : '#EF4444' }}
-    >
-      {active ? 'Active' : 'Inactive'}
-    </span>
-  );
 
   const inputStyle: React.CSSProperties = {
     background: ts.inputBg,
@@ -229,6 +219,12 @@ export default function AdminTeamPage() {
     );
   }
 
+  const q = search.trim().toLowerCase();
+  const has = (...t: (string | null | undefined)[]) => !q || t.some((x) => (x ?? '').toLowerCase().includes(q));
+  const vMembers = members.filter((m) => has(m.name, m.position, m.email));
+  const vOpenings = openings.filter((o) => has(o.title, o.location, o.employment_type));
+  const vCategories = categories.filter((c) => has(c.name, c.slug));
+
   const tabs: { key: Tab; label: string; icon: typeof faUsers; count: number }[] = [
     { key: 'team', label: 'Team Members', icon: faUsers, count: members.length },
     { key: 'jobs', label: 'Job Openings', icon: faBriefcase, count: openings.length },
@@ -237,185 +233,80 @@ export default function AdminTeamPage() {
 
   return (
     <AdminLayout title="Team & Careers" subtitle="Manage team members and job openings">
-      <div className="space-y-5">
+      <Toolbar
+        actions={
+          <Button onClick={() => (tab === 'team' ? setMemberModal({ open: true, data: blankMember(), id: null }) : tab === 'jobs' ? setOpeningModal({ open: true, data: blankOpening(), id: null }) : setCategoryModal({ open: true, data: blankCategory(), id: null }))}>
+            <FontAwesomeIcon icon={faPlus} className="mr-2 h-3 w-3" />{tab === 'team' ? 'Add member' : tab === 'jobs' ? 'Add opening' : 'Add category'}
+          </Button>
+        }
+      >
+        <Tabs value={tab} onChange={(t) => { setTab(t); setSearch(''); }} tabs={tabs.map((t) => ({ key: t.key, label: t.label, count: t.count }))} />
+        <SearchInput className="min-w-[12rem] flex-1 sm:max-w-xs" value={search} onChange={setSearch} placeholder="Search" label="Search" />
+      </Toolbar>
 
-        {/* Tab bar */}
-        <Tabs value={tab} onChange={setTab} tabs={tabs.map((t) => ({ key: t.key, label: t.label, count: t.count }))} />
+      {tab === 'team' && (
+        <TableCard loading={false} empty={vMembers.length === 0} emptyTitle={members.length === 0 ? 'No team members yet' : 'No team members match'} headers={['Member', 'Email', 'Order', 'Status', '']}>
+          {vMembers.map((m) => (
+            <tr key={m.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+              <td className="px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <Avatar name={m.name} size={36} />
+                  <div className="min-w-0">
+                    <p className="truncate font-medium" style={{ color: 'var(--adm-text)' }}>{m.name}</p>
+                    <p className="truncate text-xs" style={{ color: 'var(--adm-muted)' }}>{m.position}</p>
+                  </div>
+                </div>
+              </td>
+              <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{m.email}</td>
+              <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{m.sort_order}</td>
+              <td className="px-4 py-3"><StatusPill tone={m.is_active ? 'success' : 'neutral'}>{m.is_active ? 'Active' : 'Inactive'}</StatusPill></td>
+              <td className="px-4 py-3">
+                <div className="flex gap-2">
+                  <IconButton title="Edit" onClick={() => setMemberModal({ open: true, data: { name: m.name, position: m.position, email: m.email, bio: m.bio, image_path: m.image_path, linkedin: m.linkedin, sort_order: m.sort_order, is_active: m.is_active }, id: m.id })}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></IconButton>
+                  <IconButton title="Delete" color="var(--adm-error)" onClick={() => deleteMember(m.id, m.name)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </TableCard>
+      )}
 
-        {/* ── Team Members ── */}
-        {tab === 'team' && (
-          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: ts.border }}>
-              <h2 className="text-sm font-semibold" style={{ color: ts.textPrimary }}>Team Members</h2>
-              <button
-                onClick={() => setMemberModal({ open: true, data: blankMember(), id: null })}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white transition hover:opacity-90"
-                style={{ background: BRAND_COLORS.tropicalTeal }}
-              >
-                <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
-                Add New
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${ts.border}` }}>
-                    {['Name', 'Position', 'Email', 'Order', 'Status', 'Actions'].map((h) => (
-                      <th key={h} className="px-5 py-2.5 text-left font-semibold" style={{ color: ts.textMuted }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {members.length === 0 ? (
-                    <tr><td colSpan={6}><EmptyBlock title="No team members yet." /></td></tr>
-                  ) : members.map((m) => (
-                    <tr key={m.id} style={{ borderBottom: `1px solid ${ts.border}` }} className="transition" onMouseEnter={e => (e.currentTarget.style.background = ts.rowHover)} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                      <td className="px-5 py-2.5 font-medium" style={{ color: ts.textPrimary }}>{m.name}</td>
-                      <td className="px-5 py-2.5" style={{ color: ts.textSecondary }}>{m.position}</td>
-                      <td className="px-5 py-2.5" style={{ color: ts.textSecondary }}>{m.email}</td>
-                      <td className="px-5 py-2.5" style={{ color: ts.textSecondary }}>{m.sort_order}</td>
-                      <td className="px-5 py-2.5"><Badge active={m.is_active} /></td>
-                      <td className="px-5 py-2.5">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setMemberModal({ open: true, data: { name: m.name, position: m.position, email: m.email, bio: m.bio, image_path: m.image_path, linkedin: m.linkedin, sort_order: m.sort_order, is_active: m.is_active }, id: m.id })}
-                            className="p-1.5 rounded-lg transition hover:opacity-80"
-                            style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}
-                          >
-                            <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
-                          </button>
-                          <button
-                            onClick={() => deleteMember(m.id, m.name)}
-                            className="p-1.5 rounded-lg transition hover:opacity-80"
-                            style={{ background: '#EF444422', color: '#EF4444' }}
-                          >
-                            <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+      {tab === 'jobs' && (
+        <TableCard loading={false} empty={vOpenings.length === 0} emptyTitle={openings.length === 0 ? 'No job openings yet' : 'No openings match'} headers={['Opening', 'Location', 'Type', 'Status', '']}>
+          {vOpenings.map((o) => (
+            <tr key={o.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+              <td className="px-4 py-3 font-medium" style={{ color: 'var(--adm-text)' }}>{o.title}</td>
+              <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{o.location}</td>
+              <td className="px-4 py-3 text-xs capitalize" style={{ color: 'var(--adm-text-2)' }}>{o.employment_type.replace(/_/g, ' ')}</td>
+              <td className="px-4 py-3"><StatusPill tone={o.is_active ? 'success' : 'neutral'}>{o.is_active ? 'Open' : 'Closed'}</StatusPill></td>
+              <td className="px-4 py-3">
+                <div className="flex gap-2">
+                  <IconButton title="Edit" onClick={() => setOpeningModal({ open: true, data: { title: o.title, slug: o.slug, category_id: o.category_id, location: o.location, employment_type: o.employment_type, description: o.description, requirements: o.requirements, closing_date: o.closing_date, is_active: o.is_active }, id: o.id })}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></IconButton>
+                  <IconButton title="Delete" color="var(--adm-error)" onClick={() => deleteOpening(o.id, o.title)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </TableCard>
+      )}
 
-        {/* ── Job Openings ── */}
-        {tab === 'jobs' && (
-          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: ts.border }}>
-              <h2 className="text-sm font-semibold" style={{ color: ts.textPrimary }}>Job Openings</h2>
-              <button
-                onClick={() => setOpeningModal({ open: true, data: blankOpening(), id: null })}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white transition hover:opacity-90"
-                style={{ background: BRAND_COLORS.tropicalTeal }}
-              >
-                <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
-                Add New
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${ts.border}` }}>
-                    {['Title', 'Location', 'Type', 'Status', 'Actions'].map((h) => (
-                      <th key={h} className="px-5 py-2.5 text-left font-semibold" style={{ color: ts.textMuted }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {openings.length === 0 ? (
-                    <tr><td colSpan={5}><EmptyBlock title="No job openings yet." /></td></tr>
-                  ) : openings.map((o) => (
-                    <tr key={o.id} style={{ borderBottom: `1px solid ${ts.border}` }} className="transition" onMouseEnter={e => (e.currentTarget.style.background = ts.rowHover)} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                      <td className="px-5 py-2.5 font-medium" style={{ color: ts.textPrimary }}>{o.title}</td>
-                      <td className="px-5 py-2.5" style={{ color: ts.textSecondary }}>{o.location}</td>
-                      <td className="px-5 py-2.5" style={{ color: ts.textSecondary }}>{o.employment_type.replace(/_/g, ' ')}</td>
-                      <td className="px-5 py-2.5"><Badge active={o.is_active} /></td>
-                      <td className="px-5 py-2.5">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setOpeningModal({ open: true, data: { title: o.title, slug: o.slug, category_id: o.category_id, location: o.location, employment_type: o.employment_type, description: o.description, requirements: o.requirements, closing_date: o.closing_date, is_active: o.is_active }, id: o.id })}
-                            className="p-1.5 rounded-lg transition hover:opacity-80"
-                            style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}
-                          >
-                            <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
-                          </button>
-                          <button
-                            onClick={() => deleteOpening(o.id, o.title)}
-                            className="p-1.5 rounded-lg transition hover:opacity-80"
-                            style={{ background: '#EF444422', color: '#EF4444' }}
-                          >
-                            <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* ── Job Categories ── */}
-        {tab === 'categories' && (
-          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: ts.cardBg, border: `1px solid ${ts.border}` }}>
-            <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: ts.border }}>
-              <h2 className="text-sm font-semibold" style={{ color: ts.textPrimary }}>Job Categories</h2>
-              <button
-                onClick={() => setCategoryModal({ open: true, data: blankCategory(), id: null })}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white transition hover:opacity-90"
-                style={{ background: BRAND_COLORS.tropicalTeal }}
-              >
-                <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
-                Add New
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${ts.border}` }}>
-                    {['Name', 'Slug', 'Status', 'Actions'].map((h) => (
-                      <th key={h} className="px-5 py-2.5 text-left font-semibold" style={{ color: ts.textMuted }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {categories.length === 0 ? (
-                    <tr><td colSpan={4}><EmptyBlock title="No categories yet." /></td></tr>
-                  ) : categories.map((c) => (
-                    <tr key={c.id} style={{ borderBottom: `1px solid ${ts.border}` }} className="transition" onMouseEnter={e => (e.currentTarget.style.background = ts.rowHover)} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                      <td className="px-5 py-2.5 font-medium" style={{ color: ts.textPrimary }}>{c.name}</td>
-                      <td className="px-5 py-2.5 font-mono" style={{ color: ts.textMuted }}>{c.slug}</td>
-                      <td className="px-5 py-2.5"><Badge active={c.is_active} /></td>
-                      <td className="px-5 py-2.5">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setCategoryModal({ open: true, data: { name: c.name, slug: c.slug, sort_order: c.sort_order, is_active: c.is_active }, id: c.id })}
-                            className="p-1.5 rounded-lg transition hover:opacity-80"
-                            style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}
-                          >
-                            <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
-                          </button>
-                          <button
-                            onClick={() => deleteCategory(c.id, c.name)}
-                            className="p-1.5 rounded-lg transition hover:opacity-80"
-                            style={{ background: '#EF444422', color: '#EF4444' }}
-                          >
-                            <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>
+      {tab === 'categories' && (
+        <TableCard loading={false} empty={vCategories.length === 0} emptyTitle={categories.length === 0 ? 'No categories yet' : 'No categories match'} headers={['Category', 'Slug', 'Status', '']}>
+          {vCategories.map((c) => (
+            <tr key={c.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+              <td className="px-4 py-3 font-medium" style={{ color: 'var(--adm-text)' }}>{c.name}</td>
+              <td className="px-4 py-3 font-mono text-xs" style={{ color: 'var(--adm-muted)' }}>{c.slug}</td>
+              <td className="px-4 py-3"><StatusPill tone={c.is_active ? 'success' : 'neutral'}>{c.is_active ? 'Active' : 'Inactive'}</StatusPill></td>
+              <td className="px-4 py-3">
+                <div className="flex gap-2">
+                  <IconButton title="Edit" onClick={() => setCategoryModal({ open: true, data: { name: c.name, slug: c.slug, sort_order: c.sort_order, is_active: c.is_active }, id: c.id })}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></IconButton>
+                  <IconButton title="Delete" color="var(--adm-error)" onClick={() => deleteCategory(c.id, c.name)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </TableCard>
+      )}
 
       {/* ═══════════════════════════════════════════════
           Modal: Team Member
@@ -462,7 +353,7 @@ Cancel
                 </Field>
                 <Field label="Active">
                   <div className="flex items-center gap-2 mt-1">
-                    <input type="checkbox" id="m-active" checked={memberModal.data.is_active} onChange={e => setMemberModal(s => ({ ...s, data: { ...s.data, is_active: e.target.checked } }))} className="w-4 h-4 cursor-pointer" style={{ accentColor: BRAND_COLORS.tropicalTeal }} />
+                    <input type="checkbox" id="m-active" checked={memberModal.data.is_active} onChange={e => setMemberModal(s => ({ ...s, data: { ...s.data, is_active: e.target.checked } }))} className="w-4 h-4 cursor-pointer" style={{ accentColor: 'var(--adm-primary)' }} />
                     <label htmlFor="m-active" className="text-xs cursor-pointer" style={{ color: ts.textSecondary }}>Visible on site</label>
                   </div>
                 </Field>
@@ -539,7 +430,7 @@ Cancel
               </Field>
               <Field label="Active">
                 <div className="flex items-center gap-2 mt-1">
-                  <input type="checkbox" id="o-active" checked={openingModal.data.is_active} onChange={e => setOpeningModal(s => ({ ...s, data: { ...s.data, is_active: e.target.checked } }))} className="w-4 h-4 cursor-pointer" style={{ accentColor: BRAND_COLORS.tropicalTeal }} />
+                  <input type="checkbox" id="o-active" checked={openingModal.data.is_active} onChange={e => setOpeningModal(s => ({ ...s, data: { ...s.data, is_active: e.target.checked } }))} className="w-4 h-4 cursor-pointer" style={{ accentColor: 'var(--adm-primary)' }} />
                   <label htmlFor="o-active" className="text-xs cursor-pointer" style={{ color: ts.textSecondary }}>Visible on site</label>
                 </div>
               </Field>
@@ -583,7 +474,7 @@ Cancel
               </Field>
               <Field label="Active">
                 <div className="flex items-center gap-2 mt-1">
-                  <input type="checkbox" id="c-active" checked={categoryModal.data.is_active} onChange={e => setCategoryModal(s => ({ ...s, data: { ...s.data, is_active: e.target.checked } }))} className="w-4 h-4 cursor-pointer" style={{ accentColor: BRAND_COLORS.tropicalTeal }} />
+                  <input type="checkbox" id="c-active" checked={categoryModal.data.is_active} onChange={e => setCategoryModal(s => ({ ...s, data: { ...s.data, is_active: e.target.checked } }))} className="w-4 h-4 cursor-pointer" style={{ accentColor: 'var(--adm-primary)' }} />
                   <label htmlFor="c-active" className="text-xs cursor-pointer" style={{ color: ts.textSecondary }}>Visible on site</label>
                 </div>
               </Field>

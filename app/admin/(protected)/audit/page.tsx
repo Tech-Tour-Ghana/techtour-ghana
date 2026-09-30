@@ -20,7 +20,7 @@ interface AuditRow {
 }
 
 const PAGE = 100;
-const ACTION_COLOR = { insert: '#10B981', update: '#139EA2', delete: '#EF4444' } as const;
+const ACTION_COLOR = { insert: 'var(--adm-success)', update: 'var(--adm-primary)', delete: 'var(--adm-error)' } as const;
 
 const fmtTime = (s: string) =>
   new Date(s).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
@@ -78,7 +78,7 @@ export default function AdminAuditPage() {
         </div>
 
         {error ? (
-          <p className="text-sm" style={{ color: '#EF4444' }}>Could not load the audit log: {error}</p>
+          <p className="text-sm" style={{ color: 'var(--adm-error)' }}>Could not load the audit log: {error}</p>
         ) : (
           <TableCard loading={loading} empty={rows.length === 0} headers={['When', 'Who', 'Action', 'Table', 'Item', 'Changed']}>
             {rows.map((r) => (

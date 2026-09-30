@@ -9,7 +9,7 @@ import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
 import { ListSkeleton, reportError } from '@/components/admin/ui';
 
-const BRAND = '#139EA2';
+const BRAND = 'var(--adm-primary)';
 
 interface Profile {
   id: string;
@@ -103,7 +103,7 @@ export default function AdminProfilePage() {
     const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
     if (upErr) setError('Could not upload the photo. Please try again.');
     else {
-      reportError((await supabase.from('profiles').update({ avatar_path: path, avatar_url: null }).eq('id', profile.id)).error);
+      if (reportError((await supabase.from('profiles').update({ avatar_path: path, avatar_url: null }).eq('id', profile.id)).error)) { setUploading(false); return; }
       const { data: signed } = await supabase.storage.from('avatars').createSignedUrl(path, 3600);
       if (signed) setAvatarPreview(signed.signedUrl);
       setProfile(prev => prev ? { ...prev, avatar_path: path } : prev);

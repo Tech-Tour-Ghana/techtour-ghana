@@ -7,9 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { Tabs, ListSkeleton, reportError, Modal, Button } from '@/components/admin/ui';
-
-const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
+import { Tabs, ListSkeleton, reportError, Modal, Button, confirmAction } from '@/components/admin/ui';
 
 type Tab = 'navbar' | 'footer_links' | 'footer_info';
 
@@ -83,30 +81,30 @@ export default function NavigationPage() {
     const b = (v: unknown) => (v == null ? true : Boolean(v));
     if (type === 'menu_edit' || type === 'menu_add') {
       const row = { label: s(data.label), url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) reportError((await supabase.from('navbar_menus').update(row).eq('id', String(data.id))).error);
-      else reportError((await supabase.from('navbar_menus').insert(row)).error);
+      if (data.id) { if (reportError((await supabase.from('navbar_menus').update(row).eq('id', String(data.id))).error)) { setSaving(false); return; } }
+      else { if (reportError((await supabase.from('navbar_menus').insert(row)).error)) { setSaving(false); return; } }
     } else if (type === 'dropdown_edit' || type === 'dropdown_add') {
       const row = { parent_menu_id: s(data.parent_menu_id), label: s(data.label), url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) reportError((await supabase.from('navbar_dropdowns').update(row).eq('id', String(data.id))).error);
-      else reportError((await supabase.from('navbar_dropdowns').insert(row)).error);
+      if (data.id) { if (reportError((await supabase.from('navbar_dropdowns').update(row).eq('id', String(data.id))).error)) { setSaving(false); return; } }
+      else { if (reportError((await supabase.from('navbar_dropdowns').insert(row)).error)) { setSaving(false); return; } }
     } else if (type === 'footer_link_edit' || type === 'footer_link_add') {
       const row = { label: s(data.label), url: s(data.url), category: (s(data.category) || 'company') as 'destinations' | 'services' | 'company' | 'support', sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) reportError((await supabase.from('footer_quick_links').update(row).eq('id', String(data.id))).error);
-      else reportError((await supabase.from('footer_quick_links').insert(row)).error);
+      if (data.id) { if (reportError((await supabase.from('footer_quick_links').update(row).eq('id', String(data.id))).error)) { setSaving(false); return; } }
+      else { if (reportError((await supabase.from('footer_quick_links').insert(row)).error)) { setSaving(false); return; } }
     } else if (type === 'social_edit' || type === 'social_add') {
       const row = { platform: (s(data.platform) || 'other') as 'facebook' | 'twitter' | 'instagram' | 'linkedin' | 'youtube' | 'tiktok' | 'whatsapp' | 'other', url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) reportError((await supabase.from('social_links').update(row).eq('id', String(data.id))).error);
-      else reportError((await supabase.from('social_links').insert(row)).error);
+      if (data.id) { if (reportError((await supabase.from('social_links').update(row).eq('id', String(data.id))).error)) { setSaving(false); return; } }
+      else { if (reportError((await supabase.from('social_links').insert(row)).error)) { setSaving(false); return; } }
     } else if (type === 'legal_edit' || type === 'legal_add') {
       const row = { label: s(data.label), url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) reportError((await supabase.from('legal_links').update(row).eq('id', String(data.id))).error);
-      else reportError((await supabase.from('legal_links').insert(row)).error);
+      if (data.id) { if (reportError((await supabase.from('legal_links').update(row).eq('id', String(data.id))).error)) { setSaving(false); return; } }
+      else { if (reportError((await supabase.from('legal_links').insert(row)).error)) { setSaving(false); return; } }
     } else if (type === 'footer_settings') {
-      if (data.id) reportError((await supabase.from('footer_settings').update({ company_name: s(data.company_name), tagline: s(data.tagline), copyright_text: s(data.copyright_text) }).eq('id', String(data.id))).error);
+      if (data.id) { if (reportError((await supabase.from('footer_settings').update({ company_name: s(data.company_name), tagline: s(data.tagline), copyright_text: s(data.copyright_text) }).eq('id', String(data.id))).error)) { setSaving(false); return; } }
     } else if (type === 'footer_contact_edit' || type === 'footer_contact_add') {
       const row = { icon: s(data.icon), text: s(data.text), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
-      if (data.id) reportError((await supabase.from('footer_contacts').update(row).eq('id', String(data.id))).error);
-      else reportError((await supabase.from('footer_contacts').insert(row)).error);
+      if (data.id) { if (reportError((await supabase.from('footer_contacts').update(row).eq('id', String(data.id))).error)) { setSaving(false); return; } }
+      else { if (reportError((await supabase.from('footer_contacts').insert(row)).error)) { setSaving(false); return; } }
     }
 
     await fetchAll();
@@ -115,9 +113,9 @@ export default function NavigationPage() {
   }
 
   async function del(table: 'navbar_menus' | 'navbar_dropdowns' | 'footer_quick_links' | 'social_links' | 'legal_links' | 'footer_contacts', id: string) {
-    if (!window.confirm('Delete this item?')) return;
+    if (!(await confirmAction({ message: 'Delete this item?', danger: true }))) return;
     const supabase = createBrowserClient();
-    reportError((await supabase.from(table).delete().eq('id', id)).error);
+    if (reportError((await supabase.from(table).delete().eq('id', id)).error)) { return; }
     fetchAll();
   }
 
@@ -126,17 +124,17 @@ export default function NavigationPage() {
 
   const BtnRow = ({ table, row, onEdit }: { table: 'navbar_menus' | 'navbar_dropdowns' | 'footer_quick_links' | 'social_links' | 'legal_links' | 'footer_contacts'; row: { id: string }; onEdit: () => void }) => (
     <div className="flex gap-1">
-      <button onClick={onEdit} className="px-2 py-1 rounded text-xs" style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}>
+      <button onClick={onEdit} className="px-2 py-1 rounded text-xs" style={{ background: 'var(--adm-primary-soft)', color: 'var(--adm-primary)' }}>
         <FontAwesomeIcon icon={faPen} className="w-3 h-3" />
       </button>
-      <button onClick={() => del(table, row.id)} className="px-2 py-1 rounded text-xs" style={{ background: '#EF444422', color: '#EF4444' }}>
+      <button onClick={() => del(table, row.id)} className="px-2 py-1 rounded text-xs" style={{ background: 'var(--adm-error-soft)', color: 'var(--adm-error)' }}>
         <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
       </button>
     </div>
   );
 
   const Badge = ({ active }: { active: boolean }) => (
-    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: active ? '#10B98122' : '#EF444422', color: active ? '#10B981' : '#EF4444' }}>
+    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: active ? 'var(--adm-success-soft)' : 'var(--adm-error-soft)', color: active ? 'var(--adm-success)' : 'var(--adm-error)' }}>
       {active ? 'Active' : 'Inactive'}
     </span>
   );
@@ -167,7 +165,7 @@ export default function NavigationPage() {
             <h2 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Navbar Menus ({menus.length})</h2>
             <button onClick={() => setModal({ type: 'menu_add', data: { label: '', url: '', sort_order: 0, is_active: true } })}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
+              style={{ background: 'var(--adm-primary)', color: 'white' }}>
               <FontAwesomeIcon icon={faPlus} className="w-3 h-3" /> Add Menu
             </button>
           </div>
@@ -197,7 +195,7 @@ export default function NavigationPage() {
                       <p className="text-xs font-medium" style={{ color: themeStyles.textMuted }}>Dropdown items</p>
                       <button onClick={() => setModal({ type: 'dropdown_add', data: { parent_menu_id: menu.id, label: '', url: '', sort_order: 0, is_active: true } })}
                         className="flex items-center gap-1 px-2 py-1 rounded text-xs"
-                        style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}>
+                        style={{ background: 'var(--adm-primary-soft)', color: 'var(--adm-primary)' }}>
                         <FontAwesomeIcon icon={faPlus} className="w-2.5 h-2.5" /> Add Item
                       </button>
                     </div>
@@ -233,7 +231,7 @@ export default function NavigationPage() {
               <h2 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Quick Links ({footerLinks.length})</h2>
               <button onClick={() => setModal({ type: 'footer_link_add', data: { label: '', url: '', category: 'company', sort_order: 0, is_active: true } })}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium"
-                style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
+                style={{ background: 'var(--adm-primary)', color: 'white' }}>
                 <FontAwesomeIcon icon={faPlus} className="w-3 h-3" /> Add Link
               </button>
             </div>
@@ -249,7 +247,7 @@ export default function NavigationPage() {
                     <tr key={link.id} style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
                       <td className="px-4 py-2 font-medium" style={{ color: themeStyles.textPrimary }}>{link.label}</td>
                       <td className="px-4 py-2" style={{ color: themeStyles.textSecondary }}>{link.url}</td>
-                      <td className="px-4 py-2"><span className="px-2 py-0.5 rounded-full text-[10px]" style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}>{link.category}</span></td>
+                      <td className="px-4 py-2"><span className="px-2 py-0.5 rounded-full text-[10px]" style={{ background: 'var(--adm-primary-soft)', color: 'var(--adm-primary)' }}>{link.category}</span></td>
                       <td className="px-4 py-2" style={{ color: themeStyles.textMuted }}>{link.sort_order}</td>
                       <td className="px-4 py-2"><Badge active={link.is_active} /></td>
                       <td className="px-4 py-2"><BtnRow table="footer_quick_links" row={link} onEdit={() => setModal({ type: 'footer_link_edit', data: { ...link } })} /></td>
@@ -266,7 +264,7 @@ export default function NavigationPage() {
               <h2 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Social Links ({socialLinks.length})</h2>
               <button onClick={() => setModal({ type: 'social_add', data: { platform: 'facebook', url: '', sort_order: 0, is_active: true } })}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium"
-                style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
+                style={{ background: 'var(--adm-primary)', color: 'white' }}>
                 <FontAwesomeIcon icon={faPlus} className="w-3 h-3" /> Add Social
               </button>
             </div>
@@ -298,7 +296,7 @@ export default function NavigationPage() {
               <h2 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Legal Links ({legalLinks.length})</h2>
               <button onClick={() => setModal({ type: 'legal_add', data: { label: '', url: '', sort_order: 0, is_active: true } })}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium"
-                style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
+                style={{ background: 'var(--adm-primary)', color: 'white' }}>
                 <FontAwesomeIcon icon={faPlus} className="w-3 h-3" /> Add Legal Link
               </button>
             </div>
@@ -336,7 +334,7 @@ export default function NavigationPage() {
                 <h2 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Footer Settings</h2>
                 <button onClick={() => setModal({ type: 'footer_settings', data: { ...footerSettings } })}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium"
-                  style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}>
+                  style={{ background: 'var(--adm-primary-soft)', color: 'var(--adm-primary)' }}>
                   <FontAwesomeIcon icon={faPen} className="w-3 h-3" /> Edit
                 </button>
               </div>
@@ -354,7 +352,7 @@ export default function NavigationPage() {
               <h2 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Footer Contacts ({footerContacts.length})</h2>
               <button onClick={() => setModal({ type: 'footer_contact_add', data: { icon: '', text: '', sort_order: 0, is_active: true } })}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium"
-                style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
+                style={{ background: 'var(--adm-primary)', color: 'white' }}>
                 <FontAwesomeIcon icon={faPlus} className="w-3 h-3" /> Add Contact
               </button>
             </div>

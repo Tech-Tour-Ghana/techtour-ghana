@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { BRAND, TableCard, fmtDate, rowClass, useAdminTheme } from '@/components/admin/ui';
+import { BRAND, TableCard, fmtDate, rowClass, useAdminTheme, confirmAction } from '@/components/admin/ui';
 
 type NoteType = 'general' | 'order' | 'tour' | 'promotion' | 'wishlist';
 const TYPES: NoteType[] = ['general', 'order', 'tour', 'promotion', 'wishlist'];
@@ -58,7 +58,7 @@ export default function AdminSendNotificationsPage() {
     e.preventDefault();
     const recipients = form.to === 'all' ? customers : customers.filter((c) => c.id === form.to);
     if (recipients.length === 0) return setStatus({ ok: false, text: 'There is nobody to send this to.' });
-    if (form.to === 'all' && !window.confirm(`Send this to all ${recipients.length} active customers?`)) return;
+    if (form.to === 'all' && !(await confirmAction({ message: `Send this to all ${recipients.length} active customers?`, confirmLabel: 'Send' }))) return;
 
     setBusy(true);
     setStatus(null);
@@ -101,7 +101,7 @@ export default function AdminSendNotificationsPage() {
             <button type="submit" disabled={busy} className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-60" style={{ background: BRAND.teal }}>
               {busy ? 'Sending...' : 'Send notification'}
             </button>
-            {status && <span className="text-sm" style={{ color: status.ok ? '#10B981' : '#EF4444' }}>{status.text}</span>}
+            {status && <span className="text-sm" style={{ color: status.ok ? 'var(--adm-success)' : 'var(--adm-error)' }}>{status.text}</span>}
           </div>
         </form>
 
@@ -115,7 +115,7 @@ export default function AdminSendNotificationsPage() {
                 <p className="font-medium truncate">{n.title}</p>
                 <p className="text-xs truncate" style={{ color: t.textMuted }}>{n.message}</p>
               </td>
-              <td className="px-4 py-3 text-xs" style={{ color: n.is_read ? '#10B981' : t.textMuted }}>{n.is_read ? 'Read' : 'Unread'}</td>
+              <td className="px-4 py-3 text-xs" style={{ color: n.is_read ? 'var(--adm-success)' : t.textMuted }}>{n.is_read ? 'Read' : 'Unread'}</td>
             </tr>
           ))}
         </TableCard>

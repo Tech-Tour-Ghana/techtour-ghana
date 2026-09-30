@@ -6,9 +6,7 @@ import { faPlus, faPen, faTrash, faSpinner } from '@fortawesome/free-solid-svg-i
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
-import { Tabs, ListSkeleton, reportError, Modal, Button } from '@/components/admin/ui';
-
-const BRAND_COLORS = { tropicalTeal: '#139EA2', sandyOrange: '#E6A64D' };
+import { Button, IconButton, ListSkeleton, Modal, StatusPill, TableCard, Tabs, Toolbar, confirmAction, reportError, rowClass } from '@/components/admin/ui';
 
 type Tab = 'feature_cards' | 'video_sections';
 
@@ -64,12 +62,12 @@ export default function HomepagePage() {
     const { type, data } = modal;
     if (type === 'feature_cards') {
       const row = { title: data.title ?? '', subtitle: data.subtitle ?? '', description: data.description ?? '', button_text: data.button_text ?? '', button_link: data.button_link ?? '', is_active: data.is_active ?? true, sort_order: Number(data.sort_order) || 0 };
-      if (data.id) reportError((await supabase.from('main_feature_cards').update(row).eq('id', data.id)).error);
-      else reportError((await supabase.from('main_feature_cards').insert(row)).error);
+      if (data.id) { if (reportError((await supabase.from('main_feature_cards').update(row).eq('id', data.id)).error)) { setSaving(false); return; } }
+      else { if (reportError((await supabase.from('main_feature_cards').insert(row)).error)) { setSaving(false); return; } }
     } else {
       const row = { title: data.title ?? '', description: data.description ?? '', category: data.category ?? '', card_type: (data.card_type ?? 'wide') as 'wide' | 'short', media_type: (data.media_type ?? 'none') as 'video' | 'image' | 'none', video_url: data.video_url ?? '', image_url: data.image_url ?? '', is_active: data.is_active ?? true, sort_order: Number(data.sort_order) || 0 };
-      if (data.id) reportError((await supabase.from('video_sections').update(row).eq('id', data.id)).error);
-      else reportError((await supabase.from('video_sections').insert(row)).error);
+      if (data.id) { if (reportError((await supabase.from('video_sections').update(row).eq('id', data.id)).error)) { setSaving(false); return; } }
+      else { if (reportError((await supabase.from('video_sections').insert(row)).error)) { setSaving(false); return; } }
     }
     await fetchAll();
     setSaving(false);
@@ -77,20 +75,14 @@ export default function HomepagePage() {
   }
 
   async function del(table: 'main_feature_cards' | 'video_sections', id: string) {
-    if (!window.confirm('Delete this item?')) return;
+    if (!(await confirmAction({ message: 'Delete this item?', danger: true }))) return;
     const supabase = createBrowserClient();
-    reportError((await supabase.from(table).delete().eq('id', id)).error);
+    if (reportError((await supabase.from(table).delete().eq('id', id)).error)) { return; }
     fetchAll();
   }
 
   const setField = (key: string, value: unknown) =>
     setModal((m) => m ? { ...m, data: { ...m.data, [key]: value } } : m);
-
-  const Badge = ({ active }: { active: boolean }) => (
-    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: active ? '#10B98122' : '#EF444422', color: active ? '#10B981' : '#EF4444' }}>
-      {active ? 'Active' : 'Inactive'}
-    </span>
-  );
 
   if (loading) {
     return (
@@ -102,82 +94,62 @@ export default function HomepagePage() {
 
   return (
     <AdminLayout title="Homepage" subtitle="Manage homepage feature cards and video sections">
-      <div className="mb-6"><Tabs value={tab} onChange={setTab} tabs={[{ key: 'feature_cards' as Tab, label: 'Feature Cards' }, { key: 'video_sections' as Tab, label: 'Video Sections' }]} /></div>
+      <Toolbar
+        actions={
+          tab === 'feature_cards' ? (
+            <Button onClick={() => setModal({ type: 'feature_cards', data: { title: '', subtitle: '', description: '', button_text: 'Learn More', button_link: '', is_active: true, sort_order: 0 } })}>
+              <FontAwesomeIcon icon={faPlus} className="mr-2 h-3 w-3" />Add card
+            </Button>
+          ) : (
+            <Button onClick={() => setModal({ type: 'video_sections', data: { title: '', description: '', category: '', card_type: 'wide', media_type: 'none', video_url: '', image_url: '', is_active: true, sort_order: 0 } })}>
+              <FontAwesomeIcon icon={faPlus} className="mr-2 h-3 w-3" />Add section
+            </Button>
+          )
+        }
+      >
+        <Tabs value={tab} onChange={setTab} tabs={[{ key: 'feature_cards' as Tab, label: 'Feature Cards', count: featureCards.length }, { key: 'video_sections' as Tab, label: 'Video Sections', count: videoSections.length }]} />
+      </Toolbar>
 
-      {/* Feature Cards */}
       {tab === 'feature_cards' && (
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Feature Cards ({featureCards.length})</h2>
-            <button onClick={() => setModal({ type: 'feature_cards', data: { title: '', subtitle: '', description: '', button_text: 'Learn More', button_link: '', is_active: true, sort_order: 0 } })}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
-              <FontAwesomeIcon icon={faPlus} className="w-3 h-3" /> Add Card
-            </button>
-          </div>
-          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
-            <table className="w-full text-xs">
-              <thead><tr style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
-                {['Title', 'Subtitle', 'Button', 'Order', 'Status', ''].map((h) => <th key={h} className="px-4 py-2 text-left font-medium" style={{ color: themeStyles.textMuted }}>{h}</th>)}
-              </tr></thead>
-              <tbody>
-                {featureCards.map((c) => (
-                  <tr key={c.id} style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
-                    <td className="px-4 py-2 font-medium" style={{ color: themeStyles.textPrimary }}>{c.title}</td>
-                    <td className="px-4 py-2 max-w-xs truncate" style={{ color: themeStyles.textSecondary }}>{c.subtitle}</td>
-                    <td className="px-4 py-2" style={{ color: themeStyles.textMuted }}>{c.button_text}</td>
-                    <td className="px-4 py-2" style={{ color: themeStyles.textMuted }}>{c.sort_order}</td>
-                    <td className="px-4 py-2"><Badge active={c.is_active} /></td>
-                    <td className="px-4 py-2">
-                      <div className="flex gap-1">
-                        <button onClick={() => setModal({ type: 'feature_cards', data: { ...c } })} className="px-2 py-1 rounded text-xs" style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}><FontAwesomeIcon icon={faPen} className="w-3 h-3" /></button>
-                        <button onClick={() => del('main_feature_cards', c.id)} className="px-2 py-1 rounded text-xs" style={{ background: '#EF444422', color: '#EF4444' }}><FontAwesomeIcon icon={faTrash} className="w-3 h-3" /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <TableCard loading={false} empty={featureCards.length === 0} emptyTitle="No feature cards yet" emptyBody="Feature cards appear on the home page." headers={['Card', 'Button', 'Order', 'Status', '']}>
+          {featureCards.map((c) => (
+            <tr key={c.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+              <td className="max-w-xs px-4 py-3">
+                <p className="truncate font-medium" style={{ color: 'var(--adm-text)' }}>{c.title}</p>
+                <p className="truncate text-xs" style={{ color: 'var(--adm-muted)' }}>{c.subtitle}</p>
+              </td>
+              <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{c.button_text}</td>
+              <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{c.sort_order}</td>
+              <td className="px-4 py-3"><StatusPill tone={c.is_active ? 'success' : 'neutral'}>{c.is_active ? 'Active' : 'Inactive'}</StatusPill></td>
+              <td className="px-4 py-3">
+                <div className="flex gap-2">
+                  <IconButton title="Edit" onClick={() => setModal({ type: 'feature_cards', data: { ...c } })}><FontAwesomeIcon icon={faPen} className="h-3 w-3" /></IconButton>
+                  <IconButton title="Delete" color="var(--adm-error)" onClick={() => del('main_feature_cards', c.id)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </TableCard>
       )}
 
-      {/* Video Sections */}
       {tab === 'video_sections' && (
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Video Sections ({videoSections.length})</h2>
-            <button onClick={() => setModal({ type: 'video_sections', data: { title: '', description: '', category: '', card_type: 'wide', media_type: 'none', video_url: '', image_url: '', is_active: true, sort_order: 0 } })}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
-              <FontAwesomeIcon icon={faPlus} className="w-3 h-3" /> Add Section
-            </button>
-          </div>
-          <div className="rounded-[var(--adm-radius-card)] overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
-            <table className="w-full text-xs">
-              <thead><tr style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
-                {['Title', 'Card Type', 'Media Type', 'Order', 'Status', ''].map((h) => <th key={h} className="px-4 py-2 text-left font-medium" style={{ color: themeStyles.textMuted }}>{h}</th>)}
-              </tr></thead>
-              <tbody>
-                {videoSections.map((v) => (
-                  <tr key={v.id} style={{ borderBottom: `1px solid ${themeStyles.border}` }}>
-                    <td className="px-4 py-2 font-medium" style={{ color: themeStyles.textPrimary }}>{v.title}</td>
-                    <td className="px-4 py-2"><span className="px-2 py-0.5 rounded-full text-[10px]" style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}>{v.card_type}</span></td>
-                    <td className="px-4 py-2"><span className="px-2 py-0.5 rounded-full text-[10px]" style={{ background: `${BRAND_COLORS.sandyOrange}22`, color: BRAND_COLORS.sandyOrange }}>{v.media_type}</span></td>
-                    <td className="px-4 py-2" style={{ color: themeStyles.textMuted }}>{v.sort_order}</td>
-                    <td className="px-4 py-2"><Badge active={v.is_active} /></td>
-                    <td className="px-4 py-2">
-                      <div className="flex gap-1">
-                        <button onClick={() => setModal({ type: 'video_sections', data: { ...v } })} className="px-2 py-1 rounded text-xs" style={{ background: `${BRAND_COLORS.tropicalTeal}22`, color: BRAND_COLORS.tropicalTeal }}><FontAwesomeIcon icon={faPen} className="w-3 h-3" /></button>
-                        <button onClick={() => del('video_sections', v.id)} className="px-2 py-1 rounded text-xs" style={{ background: '#EF444422', color: '#EF4444' }}><FontAwesomeIcon icon={faTrash} className="w-3 h-3" /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <TableCard loading={false} empty={videoSections.length === 0} emptyTitle="No video sections yet" emptyBody="Video sections appear on the home page." headers={['Section', 'Layout', 'Media', 'Order', 'Status', '']}>
+          {videoSections.map((v) => (
+            <tr key={v.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
+              <td className="px-4 py-3 font-medium" style={{ color: 'var(--adm-text)' }}>{v.title}</td>
+              <td className="px-4 py-3"><StatusPill tone="info"><span className="capitalize">{v.card_type}</span></StatusPill></td>
+              <td className="px-4 py-3"><StatusPill tone="warning"><span className="capitalize">{v.media_type}</span></StatusPill></td>
+              <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{v.sort_order}</td>
+              <td className="px-4 py-3"><StatusPill tone={v.is_active ? 'success' : 'neutral'}>{v.is_active ? 'Active' : 'Inactive'}</StatusPill></td>
+              <td className="px-4 py-3">
+                <div className="flex gap-2">
+                  <IconButton title="Edit" onClick={() => setModal({ type: 'video_sections', data: { ...v } })}><FontAwesomeIcon icon={faPen} className="h-3 w-3" /></IconButton>
+                  <IconButton title="Delete" color="var(--adm-error)" onClick={() => del('video_sections', v.id)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </TableCard>
       )}
 
       {/* Modal */}

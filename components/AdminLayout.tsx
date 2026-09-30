@@ -4,6 +4,7 @@ import { ReactNode, useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Toaster } from '@/components/admin/toast';
+import { ConfirmHost } from '@/components/admin/ui';
 import { motion, useReducedMotion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -384,6 +385,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
         </div>
       </div>
       <Toaster />
+      <ConfirmHost />
     </div>
   );
 }

@@ -7,8 +7,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
+import { notify } from '@/components/admin/toast';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
-import { BRAND, IconButton, TableCard, Toggle, rowClass, useAdminTheme } from '@/components/admin/ui';
+import { BRAND, IconButton, TableCard, Toggle, rowClass, useAdminTheme, confirmAction } from '@/components/admin/ui';
 import type { Database } from '@/types/database';
 
 type Destination = Database['public']['Tables']['destinations']['Row'];
@@ -38,7 +39,7 @@ export default function AdminDestinationsPage() {
     const { error } = editingId
       ? await supabase.from('destinations').update(values).eq('id', editingId)
       : await supabase.from('destinations').insert({ ...values, sort_order: rows.length + 1 });
-    if (error) return window.alert(`Could not save: ${error.message}`);
+    if (error) return notify(`Could not save: ${error.message}`);
     setForm(EMPTY);
     setEditingId(null);
     load();
@@ -52,14 +53,14 @@ export default function AdminDestinationsPage() {
 
   async function toggleActive(d: Destination) {
     const { error } = await createBrowserClient().from('destinations').update({ is_active: !d.is_active }).eq('id', d.id);
-    if (error) return window.alert(`Could not update: ${error.message}`);
+    if (error) return notify(`Could not update: ${error.message}`);
     setRows((prev) => prev.map((x) => (x.id === d.id ? { ...x, is_active: !d.is_active } : x)));
   }
 
   async function remove(id: string) {
-    if (!window.confirm('Delete this destination? This cannot be undone.')) return;
+    if (!(await confirmAction({ message: 'Delete this destination? This cannot be undone.', danger: true }))) return;
     const { error } = await createBrowserClient().from('destinations').delete().eq('id', id);
-    if (error) return window.alert(`Could not delete: ${error.message}`);
+    if (error) return notify(`Could not delete: ${error.message}`);
     setRows((prev) => prev.filter((x) => x.id !== id));
   }
 

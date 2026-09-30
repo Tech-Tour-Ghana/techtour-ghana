@@ -9,7 +9,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
-import { BRAND, IconButton, StatusSelect, TableCard, Tabs, Toggle, fmtDate, rowClass, useAdminTheme } from '@/components/admin/ui';
+import { notify } from '@/components/admin/toast';
+import { BRAND, IconButton, StatusSelect, TableCard, Tabs, Toggle, fmtDate, rowClass, useAdminTheme, confirmAction } from '@/components/admin/ui';
 import type { Database } from '@/types/database';
 
 type SuggestionStatus = Database['public']['Enums']['suggestion_status'];
@@ -42,20 +43,20 @@ export default function AdminFeedbackPage() {
 
   async function patchSuggestion(id: string, patch: Partial<Suggestion>) {
     const { error } = await createBrowserClient().from('suggestions').update(patch).eq('id', id);
-    if (error) return window.alert(`Could not update: ${error.message}`);
+    if (error) return notify(`Could not update: ${error.message}`);
     setSuggestions((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   }
 
   async function patchIssue(id: string, patch: Partial<Issue>) {
     const { error } = await createBrowserClient().from('issue_reports').update(patch).eq('id', id);
-    if (error) return window.alert(`Could not update: ${error.message}`);
+    if (error) return notify(`Could not update: ${error.message}`);
     setIssues((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   }
 
   async function remove(table: 'suggestions' | 'issue_reports', id: string) {
-    if (!window.confirm('Delete this item? This cannot be undone.')) return;
+    if (!(await confirmAction({ message: 'Delete this item? This cannot be undone.', danger: true }))) return;
     const { error } = await createBrowserClient().from(table).delete().eq('id', id);
-    if (error) return window.alert(`Could not delete: ${error.message}`);
+    if (error) return notify(`Could not delete: ${error.message}`);
     if (table === 'suggestions') setSuggestions((prev) => prev.filter((r) => r.id !== id));
     else setIssues((prev) => prev.filter((r) => r.id !== id));
   }

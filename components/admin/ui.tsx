@@ -5,8 +5,9 @@
 // bright and dim themes, radii, shadows and colours stay in one place.
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInbox, faXmark } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useRef, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { faInbox, faMagnifyingGlass, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { useEffect, useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
 
 import { notify } from '@/components/admin/toast';
 import { Skeleton } from '@/components/admin/analytics/AnalyticsSkeleton';
@@ -325,7 +326,169 @@ export function Modal({
   );
 }
 
-/** Tell the admin when a write failed instead of letting the form close as if it worked. */
-export function reportError(error: { message: string } | null | undefined) {
+/** Tell the admin when a write failed. Returns true on failure so the caller can keep the form open. */
+export function reportError(error: { message: string } | null | undefined): boolean {
   if (error) notify(`That didn't save: ${error.message}`);
+  return !!error;
+}
+
+/** Search box used by every list page: same look, clear button, accessible label. */
+export function SearchInput({
+  value,
+  onChange,
+  placeholder = 'Search…',
+  label = 'Search',
+  className = '',
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  label?: string;
+  className?: string;
+}) {
+  return (
+    <div className={`relative ${className}`}>
+      <FontAwesomeIcon icon={faMagnifyingGlass} className="pointer-events-none absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2" style={{ color: 'var(--adm-muted)' }} />
+      <input
+        type="search"
+        aria-label={label}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full py-2 pl-8 pr-8 text-sm"
+        style={controlStyle}
+      />
+      {value && (
+        <button type="button" aria-label="Clear search" onClick={() => onChange('')} className="absolute right-2 top-1/2 -translate-y-1/2 p-1" style={{ color: 'var(--adm-muted)' }}>
+          <FontAwesomeIcon icon={faXmark} className="h-3 w-3" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+const TONES = {
+  success: { bg: 'var(--adm-success-soft)', color: 'var(--adm-success)' },
+  danger: { bg: 'var(--adm-error-soft)', color: 'var(--adm-error)' },
+  warning: { bg: 'rgba(245, 158, 11, 0.15)', color: '#B45309' },
+  info: { bg: 'var(--adm-primary-soft)', color: 'var(--adm-primary)' },
+  neutral: { bg: 'var(--adm-track)', color: 'var(--adm-text-2)' },
+} as const;
+
+export type Tone = keyof typeof TONES;
+
+/** Small status label. Always carries text (and optionally an icon), never colour alone. */
+export function StatusPill({ tone = 'neutral', icon, children }: { tone?: Tone; icon?: IconDefinition; children: ReactNode }) {
+  const t = TONES[tone];
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold" style={{ background: t.bg, color: t.color }}>
+      {icon && <FontAwesomeIcon icon={icon} className="h-2.5 w-2.5" />}
+      {children}
+    </span>
+  );
+}
+
+/** Round avatar: the photo when there is one, otherwise initials on a brand tint. */
+export function Avatar({ name, src, size = 32 }: { name: string; src?: string | null; size?: number }) {
+  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join('') || '?';
+  return (
+    <span className="inline-flex flex-shrink-0 items-center justify-center overflow-hidden rounded-full font-bold" style={{ width: size, height: size, fontSize: size * 0.38, background: 'var(--adm-primary-soft)', color: 'var(--adm-primary)' }}>
+      {src
+        // eslint-disable-next-line @next/next/no-img-element
+        ? <img src={src} alt="" className="h-full w-full object-cover" />
+        : initials}
+    </span>
+  );
+}
+
+/** Row above a list: search and filters on the left, the primary action on the right. */
+export function Toolbar({ children, actions }: { children?: ReactNode; actions?: ReactNode }) {
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-2">
+      {children}
+      {actions && <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div>}
+    </div>
+  );
+}
+
+export interface ConfirmOptions {
+  title?: string;
+  message: string;
+  confirmLabel?: string;
+  /** Destructive actions get the red button. */
+  danger?: boolean;
+}
+
+const CONFIRM_EVENT = 'admin:confirm';
+
+/**
+ * Replacement for window.confirm that works from any handler, no hook needed:
+ *   if (!(await confirmAction({ message: 'Delete this?', danger: true }))) return;
+ * <ConfirmHost /> is mounted once in AdminLayout.
+ */
+export function confirmAction(options: ConfirmOptions | string): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') return resolve(false);
+    const detail = { ...(typeof options === 'string' ? { message: options } : options), resolve };
+    window.dispatchEvent(new CustomEvent(CONFIRM_EVENT, { detail }));
+  });
+}
+
+export function ConfirmHost() {
+  const [pending, setPending] = useState<(ConfirmOptions & { resolve: (ok: boolean) => void }) | null>(null);
+
+  useEffect(() => {
+    const onAsk = (e: Event) => setPending((e as CustomEvent).detail);
+    window.addEventListener(CONFIRM_EVENT, onAsk);
+    return () => window.removeEventListener(CONFIRM_EVENT, onAsk);
+  }, []);
+
+  if (!pending) return null;
+  const close = (ok: boolean) => {
+    pending.resolve(ok);
+    setPending(null);
+  };
+  return (
+    <Modal
+      title={pending.title ?? (pending.danger ? 'Are you sure?' : 'Please confirm')}
+      maxWidth="max-w-sm"
+      onClose={() => close(false)}
+      footer={
+        <>
+          <Button variant="secondary" onClick={() => close(false)}>Cancel</Button>
+          <Button variant={pending.danger ? 'danger' : 'primary'} onClick={() => close(true)}>{pending.confirmLabel ?? (pending.danger ? 'Delete' : 'Confirm')}</Button>
+        </>
+      }
+    >
+      <p className="text-sm" style={{ color: 'var(--adm-text-2)' }}>{pending.message}</p>
+    </Modal>
+  );
+}
+
+/** Small headline number with a label, used above lists. */
+export function StatTile({ icon, label, value, tone = 'info' }: { icon: IconDefinition; label: string; value: number | string; tone?: Tone }) {
+  const t = TONES[tone];
+  return (
+    <Surface className="flex items-center gap-3 px-4 py-3">
+      <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg" style={{ background: t.bg, color: t.color }}>
+        <FontAwesomeIcon icon={icon} className="h-4 w-4" />
+      </span>
+      <div>
+        <p className="text-xl font-bold leading-tight" style={{ color: 'var(--adm-text)' }}>{value}</p>
+        <p className="text-xs" style={{ color: 'var(--adm-muted)' }}>{label}</p>
+      </div>
+    </Surface>
+  );
+}
+
+/** Download rows as a CSV file, quoting every cell so commas and quotes survive. */
+export function downloadCsv(filename: string, header: string[], rows: (string | number | null | undefined)[][]) {
+  const cell = (v: string | number | null | undefined) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const body = [header, ...rows].map((r) => r.map(cell).join(',')).join('\r\n');
+  const url = URL.createObjectURL(new Blob(['﻿' + body], { type: 'text/csv;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
 }
