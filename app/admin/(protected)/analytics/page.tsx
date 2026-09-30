@@ -78,8 +78,11 @@ export default function AdminAnalyticsPage() {
       setNewUsers(profilesRes.data?.length ?? 0);
       setTotalOrders(ordersRes.data?.length ?? 0);
 
+      // paystack_transactions.amount is stored in GHS (major units), see
+      // app/api/paystack/initialize/route.ts. Only the request to Paystack
+      // itself uses pesewas, so no conversion here.
       const ghsRevenue = ((paystackRes.data as PaystackRow[]) ?? [])
-        .reduce((sum, r) => sum + (r.amount ?? 0), 0) / 100;
+        .reduce((sum, r) => sum + (r.amount ?? 0), 0);
       setRevenue(ghsRevenue);
 
       setLoading(false);
