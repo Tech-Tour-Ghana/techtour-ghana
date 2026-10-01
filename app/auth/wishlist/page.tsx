@@ -6,6 +6,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
@@ -128,13 +129,7 @@ export default function WishlistPage() {
           <FontAwesomeIcon icon={faHeart} className="text-6xl mb-4" style={{ color: themeStyles.textMuted }} />
           <h3 className="text-xl font-semibold mb-2" style={{ color: themeStyles.textPrimary }}>Your wishlist is empty</h3>
           <p className="text-sm" style={{ color: themeStyles.textSecondary }}>Start adding items you love to your wishlist.</p>
-          <button
-            className="mt-4 px-6 py-2.5 rounded-xl font-medium transition-all duration-200 hover:scale-105"
-            style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}
-            onClick={() => router.push('/market')}
-          >
-            Browse Products
-          </button>
+          <Button variant="accent" className="mt-4" href="/market">Browse Products</Button>
         </div>
       )}
 

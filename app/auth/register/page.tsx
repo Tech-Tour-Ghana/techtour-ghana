@@ -8,6 +8,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -400,13 +401,7 @@ function RegisterContent() {
               )}
             </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-2.5 bg-[#F59E0B] hover:bg-[#D97706] rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-60 shadow-lg shadow-[#F59E0B]/20 hover:shadow-[#F59E0B]/40"
-            >
-              {isSubmitting ? 'Creating account...' : 'Create account'}
-            </button>
+            <Button type="submit" variant="gold" full loading={isSubmitting}>{isSubmitting ? 'Creating account...' : 'Create account'}</Button>
           </form>
 
           <div className="flex items-center gap-4 my-6">

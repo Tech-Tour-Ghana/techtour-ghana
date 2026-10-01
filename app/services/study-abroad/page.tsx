@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import BackToTop from '@/components/BackToTop';
@@ -353,10 +354,7 @@ export default function StudyAbroadPage() {
             <p className="study-cta-text">
               Book a free consultation with our study abroad experts and get personalized guidance.
             </p>
-            <Link href="/about/contact-us" className="study-cta-btn">
-              Book Free Consultation
-              <FontAwesomeIcon icon={faArrowRight} />
-            </Link>
+            <Button href="/about/contact-us" variant="accent">Book Free Consultation</Button>
           </div>
         </section>
 

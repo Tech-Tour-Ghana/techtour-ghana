@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React from 'react';
 import Link from 'next/link';
 import BackToTop from '@/components/BackToTop';
@@ -185,13 +186,8 @@ export default function OurTeamPage() {
               We're always looking for passionate people who share our vision for African tourism.
             </p>
             <div className="team-cta-actions">
-              <Link href="/about/careers" className="team-cta-btn primary">
-                View Open Roles
-                <FontAwesomeIcon icon={faArrowRight} />
-              </Link>
-              <Link href="/about/contact-us" className="team-cta-btn secondary">
-                Get in Touch
-              </Link>
+              <Button href="/about/careers" variant="gold">View Open Roles</Button>
+              <Button href="/about/contact-us" variant="onDark">Get in Touch</Button>
             </div>
           </div>
         </section>

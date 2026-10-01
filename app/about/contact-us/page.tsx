@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import BackToTop from '@/components/BackToTop';
@@ -369,10 +370,7 @@ export default function ContactUsPage() {
                       />
                     </div>
 
-                    <button type="submit" className="contact-form-submit">
-                      <FontAwesomeIcon icon={faPaperPlane} />
-                      Send Message
-                    </button>
+                    <Button type="submit" variant="accent" full icon={faPaperPlane}>Send Message</Button>
                   </form>
                 )}
               </div>
@@ -389,13 +387,8 @@ export default function ContactUsPage() {
               Browse our experiences or plan a custom trip with our travel specialists.
             </p>
             <div className="contact-cta-actions">
-              <Link href="/services/onsite-tourism" className="contact-cta-btn primary">
-                Browse Experiences
-                <FontAwesomeIcon icon={faArrowRight} />
-              </Link>
-              <Link href="/services/dream-vacations" className="contact-cta-btn secondary">
-                View Dream Vacations
-              </Link>
+              <Button href="/services/onsite-tourism" variant="gold">Browse Experiences</Button>
+              <Button href="/services/dream-vacations" variant="onDark">View Dream Vacations</Button>
             </div>
           </div>
         </section>

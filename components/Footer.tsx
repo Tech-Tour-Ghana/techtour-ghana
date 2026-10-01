@@ -1,6 +1,7 @@
 // components/Footer.tsx
 'use client';
 
+import Button from '@/components/ui/Button';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -444,20 +445,7 @@ const Footer = () => {
                   disabled={isSubmitting}
                   required
                 />
-                <button
-                  type="submit"
-                  className="newsletter-btn-wide"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <span className="flex items-center gap-2">
-                      <span className="spinner-ring"></span>
-                      Sending...
-                    </span>
-                  ) : (
-                    `${settings?.newsletter_button || 'Subscribe'} `
-                  )}
-                </button>
+                <Button type="submit" variant="gold" loading={isSubmitting} className="newsletter-btn-wide-btn">{isSubmitting ? 'Sending...' : (settings?.newsletter_button || 'Subscribe')}</Button>
               </div>
 
               {newsletterError && (

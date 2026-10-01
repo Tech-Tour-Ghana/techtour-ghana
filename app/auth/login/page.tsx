@@ -8,6 +8,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -271,13 +272,7 @@ export default function LoginClient() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-2.5 bg-[#F59E0B] hover:bg-[#D97706] rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-60 shadow-lg shadow-[#F59E0B]/20 hover:shadow-[#F59E0B]/40"
-            >
-              {isSubmitting ? 'Signing in...' : 'Sign in'}
-            </button>
+            <Button type="submit" variant="gold" full loading={isSubmitting}>{isSubmitting ? 'Signing in...' : 'Sign in'}</Button>
           </form>
 
           <div className="flex items-center gap-4 my-6">

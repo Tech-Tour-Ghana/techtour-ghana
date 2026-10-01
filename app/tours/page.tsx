@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import ContentShell, { cardStyle } from '@/components/content/ContentShell';
+import Button from '@/components/ui/Button';
 import TourCard from '@/components/tours/TourCard';
 import { SORTS, getTourListing, type TourSort } from '@/lib/tours/load.server';
 
@@ -59,7 +60,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Search
         <select name="sort" defaultValue={sort} aria-label="Sort tours" className="min-h-[2.75rem] w-full rounded-full px-4 text-sm" style={field}>
           {SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
-        <button type="submit" className="min-h-[2.75rem] rounded-full px-6 text-sm font-semibold text-white" style={{ background: 'var(--sp-primary)' }}>Search</button>
+        <Button type="submit" variant="accent">Search</Button>
       </form>
 
       <p className="mb-4 text-sm" style={{ color: 'var(--sp-text-muted)' }} aria-live="polite">

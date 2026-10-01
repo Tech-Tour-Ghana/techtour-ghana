@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -501,9 +502,7 @@ export default function AllUniversitiesPage() {
                 <FontAwesomeIcon icon={faSearch} />
                 <h3>No universities found</h3>
                 <p>Try adjusting your filters or search query</p>
-                <button className="all-empty-btn" onClick={clearFilters}>
-                  Clear All Filters
-                </button>
+                <Button variant="accent" onClick={clearFilters}>Clear All Filters</Button>
               </div>
             )}
           </div>

@@ -2,6 +2,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import { Suspense } from 'react';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -472,16 +473,9 @@ const ProductCard = React.memo(({
               <FontAwesomeIcon icon={faHeart} className="text-sm" />
               <span className="hidden sm:inline">{isWishlisted ? 'Saved' : 'Wishlist'}</span>
             </button>
-            <button
-              type="button"
-              onClick={handleAddToCartClick}
-              disabled={isDisabled}
-              className={`flex items-center justify-center gap-2 rounded-lg px-3.5 py-2.5 text-sm font-semibold transition-opacity ${isDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-90'}`}
-              style={getButtonStyles()}
-            >
-              <FontAwesomeIcon icon={faShoppingCart} className="text-sm" />
+            <Button size="sm" variant={buttonVariant === 'secondary' ? 'secondary' : 'accent'} arrow={!isDisabled} onClick={handleAddToCartClick} disabled={isDisabled} icon={faShoppingCart} full style={getButtonStyles()}>
               {buttonText}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -634,15 +628,9 @@ const ProductCard = React.memo(({
               <FontAwesomeIcon icon={faEye} className="text-[10px] md:text-xs" />
               View details
             </Link>
-            <button
-              onClick={handleAddToCartClick}
-              disabled={isDisabled}
-              className={`px-3.5 py-1.5 md:px-5 md:py-2 rounded-lg text-[10px] md:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 ${!isDisabled ? 'hover:scale-[1.02]' : 'opacity-60 cursor-not-allowed'}`}
-              style={getButtonStyles()}
-            >
-              <FontAwesomeIcon icon={faShoppingCart} className="text-[10px] md:text-xs" />
+            <Button size="sm" variant={buttonVariant === 'secondary' ? 'secondary' : 'accent'} arrow={!isDisabled} onClick={handleAddToCartClick} disabled={isDisabled} icon={faShoppingCart} style={getButtonStyles()}>
               {buttonText}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

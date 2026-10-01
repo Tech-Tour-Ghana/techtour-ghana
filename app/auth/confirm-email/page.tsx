@@ -10,6 +10,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -25,9 +26,6 @@ import { createBrowserClient } from '@/lib/supabase/client';
 import { resendConfirmationEmail } from '@/lib/api';
 
 type Status = 'loading' | 'success' | 'error' | 'pending';
-
-const buttonClass =
-  'inline-block w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl text-white font-semibold text-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-purple-500/30 text-center disabled:opacity-60';
 
 function ConfirmEmailContent() {
   const searchParams = useSearchParams();
@@ -79,13 +77,9 @@ function ConfirmEmailContent() {
             The verification link is invalid or has expired. Please request a new verification email.
           </p>
           {emailParam ? (
-            <button onClick={resend} disabled={resending} className={buttonClass}>
-              <FontAwesomeIcon icon={faRedo} className="mr-2" /> Resend Verification Email
-            </button>
+            <Button onClick={resend} loading={resending} full>Resend Verification Email</Button>
           ) : (
-            <Link href="/auth/register" className={buttonClass}>
-              <FontAwesomeIcon icon={faRedo} className="mr-2" /> Register Again
-            </Link>
+            <Button href="/auth/register" full>Register Again</Button>
           )}
           {resendNote && <p className="text-white/60 text-xs mt-3">{resendNote}</p>}
         </>
@@ -102,9 +96,7 @@ function ConfirmEmailContent() {
           <p className="text-white/60 text-sm leading-relaxed my-3">
             We sent a verification link to <span className="text-white">{emailParam}</span>. Open it to finish creating your account.
           </p>
-          <button onClick={resend} disabled={resending} className={buttonClass}>
-            <FontAwesomeIcon icon={faRedo} className="mr-2" /> Resend Verification Email
-          </button>
+          <Button onClick={resend} loading={resending} full>Resend Verification Email</Button>
           {resendNote && <p className="text-white/60 text-xs mt-3">{resendNote}</p>}
         </>
       );
@@ -119,9 +111,7 @@ function ConfirmEmailContent() {
         <p className="text-white/60 text-sm leading-relaxed my-3">
           Your email has been successfully verified. Welcome to TechTour Ghana.
         </p>
-        <Link href="/auth/dashboard" className={buttonClass}>
-          <FontAwesomeIcon icon={faArrowRightToBracket} className="mr-2" /> Go to Dashboard
-        </Link>
+        <Button href="/auth/dashboard" full>Go to Dashboard</Button>
       </>
     );
   };

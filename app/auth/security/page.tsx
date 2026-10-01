@@ -9,6 +9,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -266,21 +267,7 @@ export default function SecurityPage() {
                 </button>
               </div>
             </div>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-6 py-2.5 rounded-xl font-medium transition-all duration-200 hover:scale-105 disabled:opacity-50"
-              style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}
-            >
-              {saving ? (
-                <>
-                  <FontAwesomeIcon icon={faSpinner} className="w-4 h-4 mr-2 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                'Update Password'
-              )}
-            </button>
+            <Button type="submit" variant="accent" loading={saving}>{saving ? 'Updating...' : 'Update Password'}</Button>
           </form>
         </div>
 
@@ -344,9 +331,7 @@ export default function SecurityPage() {
                   className="px-4 py-2.5 rounded-xl text-sm"
                   style={{ background: themeStyles.inputBg, border: `1px solid ${themeStyles.inputBorder}`, color: themeStyles.inputText }}
                 />
-                <button type="submit" className="px-4 py-2 text-sm font-medium rounded-xl" style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}>
-                  Verify
-                </button>
+                <Button type="submit" variant="accent" size="sm">Verify</Button>
               </div>
             </form>
           )}

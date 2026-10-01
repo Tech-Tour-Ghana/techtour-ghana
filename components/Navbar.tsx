@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -516,9 +517,7 @@ const Navbar = () => {
                     )}
                   </div>
                 ) : (
-                  <Link href="/auth/login" className="nav-login-btn">
-                    Register / Login
-                  </Link>
+                  <Button href="/auth/login" size="sm" variant="accent">Register / Login</Button>
                 )}
               </div>
 
@@ -648,9 +647,7 @@ const Navbar = () => {
                 </button>
               </>
             ) : (
-              <Link href="/auth/login" className="mobile-login-btn" onClick={closeMobileMenu}>
-                Register / Login
-              </Link>
+              <Button href="/auth/login" variant="accent" full onClick={closeMobileMenu}>Register / Login</Button>
             )}
           </div>
         </div>

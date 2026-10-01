@@ -7,6 +7,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -84,13 +85,7 @@ export default function UpdatePasswordPage() {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full mt-1 py-2.5 bg-amber-500 hover:bg-amber-600 rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-60"
-          >
-            {isSubmitting ? 'Saving...' : 'Save new password'}
-          </button>
+          <Button type="submit" variant="gold" full loading={isSubmitting} className="mt-1">{isSubmitting ? 'Saving...' : 'Save new password'}</Button>
         </form>
 
         <div className="mt-4 text-center">
