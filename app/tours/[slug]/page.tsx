@@ -1,3 +1,4 @@
+import ArrowCircle, { darkPill } from '@/components/ArrowCircle';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -203,7 +204,7 @@ export default async function TourPage({ params }: Params) {
         <div className="fixed inset-x-0 bottom-0 z-30 border-t px-4 py-3 lg:hidden" style={{ background: 'var(--sp-bg-card)', borderColor: 'var(--sp-border)' }}>
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
             <p className="leading-tight"><span className="block text-xs" style={muted}>From</span><span className="text-lg font-bold" style={{ color: 'var(--sp-primary)' }}>{tourMoney(price, tour.currency)}</span> <span className="text-xs" style={muted}>per person</span></p>
-            <a href="#reserve-mobile" className="rounded-full px-6 py-3 text-sm font-semibold text-white" style={{ background: 'linear-gradient(180deg, #2b2b2b 0%, #0b0b0b 100%)' }}>{departures.length ? 'Check dates' : 'Enquire'}</a>
+            <a href="#reserve-mobile" className="group inline-flex items-center rounded-full py-2 pl-5 pr-2 text-sm font-semibold text-white" style={darkPill}>{departures.length ? 'Check dates' : 'Enquire'}<ArrowCircle /></a>
           </div>
         </div>
       </main>
