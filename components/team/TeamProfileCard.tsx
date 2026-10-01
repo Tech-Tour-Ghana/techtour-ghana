@@ -25,7 +25,7 @@ export interface TeamProfile {
   linkedin?: string;
 }
 
-const initialsOf = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+const initialsOf = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w.charAt(0).toUpperCase()).join('');
 
 export default function TeamProfileCard({ member, contactHref = '/about/contact-us' }: { member: TeamProfile; contactHref?: string }) {
   const [broken, setBroken] = useState(false);

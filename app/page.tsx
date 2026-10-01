@@ -876,6 +876,9 @@ function HomePage() {
   }, {} as Record<string, SmallGlassCard[]>);
 
   useEffect(() => { setAnimate(false); setPos(slides.length > 1 ? 1 : 0); }, [slides.length]);
+  const heroFirst = slides[0];
+  const heroLast = slides[slides.length - 1];
+  const heroTrack = slides.length > 1 && heroFirst && heroLast ? [heroLast, ...slides, heroFirst] : slides;
   const nextSlide = () => { setAnimate(true); setPos((p) => Math.min(p + 1, slides.length + 1)); };
   const goToSlide = (i: number) => { setAnimate(true); setPos(i + 1); };
   const settleLoop = () => {
@@ -915,7 +918,7 @@ function HomePage() {
       <section className="relative h-[70vh] min-h-[400px] md:h-[85vh] overflow-hidden">
         <div className="relative h-full">
           <div className={`flex h-full ${animate ? 'transition-transform duration-700 ease-out' : ''}`} style={{ transform: `translateX(-${pos * 100}%)` }} onTransitionEnd={(e) => { if (e.target === e.currentTarget) settleLoop(); }}>
-            {(slides.length > 1 ? [slides[slides.length - 1], ...slides, slides[0]] : slides).map((slide, idx) => (
+            {heroTrack.map((slide, idx) => (
               <div key={`${slide.id}-${idx}`} className="w-full flex-shrink-0 relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30 z-10"></div>
                 <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: `url(${slide.image})` }}></div>
