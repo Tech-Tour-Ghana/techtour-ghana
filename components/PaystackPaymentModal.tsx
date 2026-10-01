@@ -2,6 +2,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -461,34 +462,7 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
           </div>
 
           {/* Pay Button with TechTour Branding */}
-          <button
-            onClick={handlePayment}
-            disabled={processing}
-            className="w-full py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2"
-            style={{
-              background: processing
-                ? (isDimMode ? '#2A2A2A' : '#E5E7EB')
-                : (isDimMode 
-                    ? `linear-gradient(135deg, ${brandColors.sandyOrange} 0%, #D4953A 100%)`
-                    : `linear-gradient(135deg, ${brandColors.tropicalTeal} 0%, #0D7A7D 100%)`),
-              color: processing
-                ? (isDimMode ? '#6B7280' : '#9CA3AF')
-                : (isDimMode ? '#0A0A0A' : 'white'),
-              cursor: processing ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {processing ? (
-              <>
-                <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
-                Processing...
-              </>
-            ) : (
-              <>
-                <FontAwesomeIcon icon={faShieldAlt} />
-                Pay {paystackService.formatAmount(amount, currency)} Securely
-              </>
-            )}
-          </button>
+          <Button onClick={handlePayment} loading={processing} variant="accent" full icon={faShieldAlt} style={{ background: isDimMode ? `linear-gradient(135deg, ${brandColors.sandyOrange} 0%, #D4953A 100%)` : `linear-gradient(135deg, ${brandColors.tropicalTeal} 0%, #0D7A7D 100%)`, color: isDimMode ? '#0A0A0A' : 'white' }}>{processing ? 'Processing...' : `Pay ${paystackService.formatAmount(amount, currency)} Securely`}</Button>
 
           {/* Footer */}
           <div className="mt-3 text-center">

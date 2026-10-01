@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import { Suspense } from 'react';
 
 import React, {
@@ -880,13 +881,7 @@ function JobList({
           <div className="positions-list-empty">
             <FontAwesomeIcon icon={faSearch} />
             <p>No roles match your filters.</p>
-            <button
-              type="button"
-              className="positions-list-empty-btn"
-              onClick={clearAllFilters}
-            >
-              Clear filters
-            </button>
+            <Button variant="accent" size="sm" onClick={clearAllFilters}>Clear filters</Button>
           </div>
         )}
       </div>

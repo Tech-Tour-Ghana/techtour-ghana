@@ -5,6 +5,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
@@ -160,13 +161,7 @@ export default function StudyPage() {
           <FontAwesomeIcon icon={faGraduationCap} className="text-6xl mb-4" style={{ color: themeStyles.textMuted }} />
           <h3 className="text-xl font-semibold mb-2" style={{ color: themeStyles.textPrimary }}>No applications yet</h3>
           <p className="text-sm" style={{ color: themeStyles.textSecondary }}>Start your study abroad journey today.</p>
-          <button
-            className="mt-4 px-6 py-2.5 rounded-xl font-medium transition-all duration-200 hover:scale-105"
-            style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}
-            onClick={() => router.push('/study')}
-          >
-            Explore Programs
-          </button>
+          <Button variant="accent" className="mt-4" href="/study">Explore Programs</Button>
         </div>
       )}
 

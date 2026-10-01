@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import BackToTop from '@/components/BackToTop';
@@ -463,10 +464,7 @@ export default function CareersPage() {
                   at TechTour Ghana.
                 </p>
                 <div className="careers-final-cta-actions">
-                  <a href="#positions" className="careers-final-cta-btn">
-                    <span>See All Roles</span>
-                    <FontAwesomeIcon icon={faArrowRight} />
-                  </a>
+                  <Button href="#positions" variant="gold"><span>See All Roles</span></Button>
                   <Link
                     href="/about/contact-us"
                     className="careers-final-cta-btn"

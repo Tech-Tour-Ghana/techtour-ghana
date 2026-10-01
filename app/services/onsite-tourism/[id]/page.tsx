@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -391,10 +392,7 @@ export default function SiteDetailPage() {
                   </span>
                 </div>
 
-                <button className="booking-submit">
-                  Book This Tour
-                  <FontAwesomeIcon icon={faArrowRight} />
-                </button>
+                <Button type="submit" variant="accent" full>Book This Tour</Button>
 
                 <p className="booking-note">
                   <FontAwesomeIcon icon={faShieldAlt} />
@@ -448,10 +446,7 @@ export default function SiteDetailPage() {
             <p className="detail-cta-text">
               Discover more unforgettable experiences across Ghana.
             </p>
-            <Link href="/services/onsite-tourism/all" className="detail-cta-btn">
-              View All Sites
-              <FontAwesomeIcon icon={faArrowRight} />
-            </Link>
+            <Button href="/services/onsite-tourism/all" variant="gold">View All Sites</Button>
           </div>
         </section>
 

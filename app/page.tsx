@@ -4,6 +4,7 @@
 
 export const dynamic = 'force-dynamic';
 
+import Button from '@/components/ui/Button';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -916,18 +917,7 @@ function HomePage() {
                   <p className="text-sm sm:text-base md:text-lg max-w-2xl mb-6 opacity-95 font-medium leading-relaxed drop-shadow-md line-clamp-2">
                     {slide.description}
                   </p>
-                  <Link
-                    href={slide.button_link}
-                    className="inline-flex items-center gap-2.5 px-6 py-3 md:px-7 md:py-3.5 rounded-full font-semibold text-sm md:text-base transition-all duration-300 hover:scale-105 shadow-lg"
-                    style={{
-                      background: isDimMode ? colors.primary : '#139EA2',
-                      color: isDimMode ? '#0A0A0A' : 'white',
-                      boxShadow: isDimMode ? `0 8px 25px ${colors.primary}40` : `0 8px 25px #139EA240`
-                    }}
-                  >
-                    {slide.button_text}
-                    <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4" />
-                  </Link>
+                  <Button href={slide.button_link} variant="accent" size="lg" style={{ background: isDimMode ? colors.primary : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>{slide.button_text}</Button>
                 </div>
               </div>
             ))}
@@ -1052,18 +1042,7 @@ function HomePage() {
         </div>
 
         <div className="text-center mt-10 md:mt-12">
-          <Link
-            href="/destinations"
-            className="inline-flex items-center gap-3 font-bold text-sm md:text-base px-8 py-3.5 rounded-full shadow-lg transition-all duration-300 group hover:scale-105"
-            style={{
-              background: isDimMode ? colors.primary : '#139EA2',
-              color: isDimMode ? '#0A0A0A' : 'white',
-              boxShadow: isDimMode ? `0 8px 25px ${colors.primary}40` : `0 8px 25px #139EA240`
-            }}
-          >
-            <span>Show More Destinations</span>
-            <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
+          <Button href="/tours" variant="accent" size="lg" style={{ background: isDimMode ? colors.primary : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>Show More Tours</Button>
         </div>
       </section>
 
@@ -1208,17 +1187,7 @@ function HomePage() {
                         )}
 
                         {hasButton && (
-                          <Link
-                            href={card.button_link}
-                            className="inline-flex items-center gap-2 rounded-full font-semibold transition hover:scale-105 self-start px-5 py-2.5 text-sm md:text-base"
-                            style={{
-                              background: isDimMode ? colors.primary : '#139EA2',
-                              color: isDimMode ? '#0A0A0A' : 'white',
-                            }}
-                          >
-                            {card.button_text}
-                            <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3 md:w-4 h-4" />
-                          </Link>
+                          <Button href={card.button_link} variant="accent" style={{ background: isDimMode ? colors.primary : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }} className="self-start">{card.button_text}</Button>
                         )}
                       </div>
                     </div>

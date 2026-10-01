@@ -11,7 +11,7 @@ import { faCheckCircle, faMinus, faPlus } from '@fortawesome/free-solid-svg-icon
 
 import { getAuthStatus } from '@/lib/api';
 import { createBrowserClient } from '@/lib/supabase/client';
-import ArrowCircle, { darkPill } from '@/components/ArrowCircle';
+import Button from '@/components/ui/Button';
 import { tourMoney } from './TourCard';
 
 export interface Departure { id: string; start_date: string; end_date: string; spots_left: number }
@@ -117,11 +117,9 @@ export default function TourBooking({ tour, departures }: {
           {error && <p role="alert" className="mt-3 rounded-xl p-3 text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#B91C1C' }}>{error}</p>}
 
           {signedIn === false ? (
-            <Link href="/auth/login" className="group mt-4 flex items-center justify-between rounded-full py-2 pl-5 pr-2 text-sm font-semibold text-white" style={darkPill}>Sign in to reserve<ArrowCircle /></Link>
+            <Button href="/auth/login" full className="mt-4">Sign in to reserve</Button>
           ) : (
-            <button type="button" onClick={reserve} disabled={busy || signedIn === null} className="group mt-4 flex w-full items-center justify-between rounded-full py-2 pl-5 pr-2 text-sm font-semibold text-white disabled:opacity-60" style={darkPill}>
-              {busy ? 'Reserving…' : 'Reserve your booking'}<ArrowCircle />
-            </button>
+            <Button onClick={reserve} disabled={signedIn === null} loading={busy} full className="mt-4">{busy ? 'Reserving…' : 'Reserve your booking'}</Button>
           )}
           <p className="mt-3 text-center text-[11px]" style={{ color: 'var(--sp-text-muted)' }}>You are not charged yet. We confirm your place by email first.</p>
         </>

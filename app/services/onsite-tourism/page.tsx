@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import BackToTop from '@/components/BackToTop';
@@ -299,10 +300,7 @@ export default function OnsiteTourismPage() {
                         <p className="onsite-cta-text">
                             Tell us your dream experience and we'll craft a custom itinerary just for you.
                         </p>
-                        <Link href="/about/contact-us" className="onsite-cta-btn">
-                            Request Custom Tour
-                            <FontAwesomeIcon icon={faArrowRight} />
-                        </Link>
+                        <Button href="/about/contact-us" variant="gold">Request Custom Tour</Button>
                     </div>
                 </section>
 

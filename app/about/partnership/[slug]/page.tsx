@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -177,10 +178,7 @@ export default function PartnerDirectoryPage() {
           <div className="partner-notfound-inner">
             <h1>Category Not Found</h1>
             <p>We couldn't find that partner category.</p>
-            <Link href="/about/partnership" className="partner-notfound-btn">
-              <FontAwesomeIcon icon={faArrowLeft} />
-              Back to Partnership
-            </Link>
+            <Button href="/about/partnership" variant="accent">Back to Partnership</Button>
           </div>
           <BackToTop accentColor="teal" />
         </main>

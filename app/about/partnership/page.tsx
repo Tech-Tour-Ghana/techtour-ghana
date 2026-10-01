@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import BackToTop from '@/components/BackToTop';
@@ -228,13 +229,8 @@ export default function PartnershipPage() {
               future of African tourism — together.
             </p>
             <div className="partnership-hero-actions">
-              <a href="#apply" className="partnership-hero-btn primary">
-                Become a Partner
-                <FontAwesomeIcon icon={faArrowRight} />
-              </a>
-              <a href="#types" className="partnership-hero-btn secondary">
-                Explore Partnership Types
-              </a>
+              <Button href="#apply" variant="gold">Become a Partner</Button>
+              <Button href="#types" variant="onDark">Explore Partnership Types</Button>
             </div>
           </div>
         </section>
@@ -508,10 +504,7 @@ export default function PartnershipPage() {
                       />
                     </div>
 
-                    <button type="submit" className="partnership-form-submit">
-                      Submit Application
-                      <FontAwesomeIcon icon={faArrowRight} />
-                    </button>
+                    <Button type="submit" variant="accent" full>Submit Application</Button>
                   </>
                 )}
               </form>

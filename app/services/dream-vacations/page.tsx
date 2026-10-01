@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import BackToTop from '@/components/BackToTop';
@@ -401,10 +402,7 @@ export default function DreamVacationsPage() {
             <p className="vacations-cta-text">
               Speak with our vacation specialists and start crafting the trip you've always imagined.
             </p>
-            <Link href="/about/contact-us" className="vacations-cta-btn">
-              Plan My Vacation
-              <FontAwesomeIcon icon={faArrowRight} />
-            </Link>
+            <Button href="/about/contact-us" variant="gold">Plan My Vacation</Button>
           </div>
         </section>
 

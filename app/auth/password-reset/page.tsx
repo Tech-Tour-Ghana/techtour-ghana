@@ -4,6 +4,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -138,20 +139,7 @@ function PasswordResetContent() {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full mt-4 py-2.5 bg-amber-500 hover:bg-amber-600 rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isSubmitting ? (
-              <>
-                <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                Sending...
-              </>
-            ) : (
-              'Send Reset Link'
-            )}
-          </button>
+          <Button type="submit" variant="gold" full loading={isSubmitting} className="mt-4">{isSubmitting ? 'Sending...' : 'Send Reset Link'}</Button>
         </form>
 
         <div className="mt-4 text-center">

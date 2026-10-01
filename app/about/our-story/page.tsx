@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React from 'react';
 import Link from 'next/link';
 import BackToTop from '@/components/BackToTop';
@@ -343,13 +344,8 @@ export default function OurStoryPage() {
               TechTour Ghana journey.
             </p>
             <div className="story-cta-actions">
-              <Link href="/about/contact-us" className="story-cta-btn primary">
-                Get in Touch
-                <FontAwesomeIcon icon={faArrowRight} />
-              </Link>
-              <Link href="/about/our-team" className="story-cta-btn secondary">
-                Meet the Team
-              </Link>
+              <Button href="/about/contact-us" variant="gold">Get in Touch</Button>
+              <Button href="/about/our-team" variant="onDark">Meet the Team</Button>
             </div>
           </div>
         </section>

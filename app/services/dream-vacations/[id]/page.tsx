@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -430,10 +431,7 @@ export default function VacationDetailPage() {
                   </span>
                 </div>
 
-                <button className="booking-submit">
-                  Book This Vacation
-                  <FontAwesomeIcon icon={faArrowRight} />
-                </button>
+                <Button type="submit" variant="accent" full>Book This Vacation</Button>
 
                 <p className="booking-note">
                   <FontAwesomeIcon icon={faShieldAlt} />
@@ -489,10 +487,7 @@ export default function VacationDetailPage() {
             <p className="detail-cta-text">
               Discover more unforgettable all-inclusive experiences worldwide.
             </p>
-            <Link href="/services/dream-vacations/all" className="detail-cta-btn">
-              View All Vacations
-              <FontAwesomeIcon icon={faArrowRight} />
-            </Link>
+            <Button href="/services/dream-vacations/all" variant="gold">View All Vacations</Button>
           </div>
         </section>
 

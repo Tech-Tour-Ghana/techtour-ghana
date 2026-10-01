@@ -1,4 +1,4 @@
-import ArrowCircle, { darkPill } from '@/components/ArrowCircle';
+import Button from '@/components/ui/Button';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faLocationDot, faStar } from '@fortawesome/free-solid-svg-icons';
@@ -62,10 +62,7 @@ export default function TourCard({ tour }: { tour: TourCardData }) {
 
         <div className="mt-auto pt-4">
           {tour.spots_left !== null && tour.spots_left <= 5 && <p className="mb-2 text-xs font-semibold" style={{ color: '#C2410C' }}>Only {tour.spots_left} spot{tour.spots_left === 1 ? '' : 's'} left</p>}
-          <Link href={href} className="group flex items-center justify-between rounded-full py-2 pl-5 pr-2 text-sm font-semibold text-white transition hover:opacity-90"
-            style={darkPill}>
-            {tour.next_departure ? 'Reserve your booking' : 'View tour'}<ArrowCircle />
-          </Link>
+          <Button href={href} full>{tour.next_departure ? 'Reserve your booking' : 'View tour'}</Button>
         </div>
       </div>
     </article>

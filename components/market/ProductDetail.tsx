@@ -4,6 +4,7 @@
 // state, wishlist, currency, theme); the page around it loads the product on the
 // server so it can be indexed.
 
+import Button from '@/components/ui/Button';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -210,16 +211,12 @@ export default function ProductDetail({ product, related }: { product: MarketPro
               {currency.code !== 'GHS' && <p className="mt-1 text-[11px]" style={{ color: c.textMuted }}>Approximate price. You are charged in Ghana cedis (₵{(onSale ? product.discount_price! : product.price).toFixed(2)}). <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" className="underline">Rates By Exchange Rate API</a></p>}
 
               <div className="mt-4 flex flex-wrap gap-3">
-                <button type="button" disabled={!product.is_in_stock} onClick={() => add(false)}
-                  className="min-w-[6.5rem] flex-1 rounded-xl px-3 py-3 text-sm font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{ border: `1.5px solid ${accent}`, color: accent, background: 'transparent' }}>
-                  <FontAwesomeIcon icon={faShoppingCart} className="mr-2 h-3.5 w-3.5" />{product.is_in_stock ? (inCart ? 'Add another' : 'Add to cart') : 'Out of stock'}
-                </button>
-                <button type="button" disabled={!product.is_in_stock} onClick={() => add(true)}
-                  className="min-w-[6.5rem] flex-1 rounded-xl px-3 py-3 text-sm font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{ background: accent, color: dim ? '#0A0A0A' : '#fff' }}>
+                <Button variant="secondary" disabled={!product.is_in_stock} onClick={() => add(false)} icon={faShoppingCart} className="min-w-[8rem] flex-1" style={{ color: accent }}>
+                  {product.is_in_stock ? (inCart ? 'Add another' : 'Add to cart') : 'Out of stock'}
+                </Button>
+                <Button disabled={!product.is_in_stock} onClick={() => add(true)} className="min-w-[8rem] flex-1" style={{ background: accent, color: dim ? '#0A0A0A' : '#fff' }}>
                   Buy it now
-                </button>
+                </Button>
                 <button type="button" onClick={toggleWishlist} aria-pressed={wishlisted} aria-label={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
                   className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ border: `1px solid ${c.border}`, color: wishlisted ? '#EF4444' : c.textMuted }}>
                   <FontAwesomeIcon icon={faHeart} />

@@ -10,6 +10,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -223,21 +224,7 @@ export default function SettingsPage() {
                       </button>
                     </div>
                   </div>
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="px-6 py-2.5 rounded-xl font-medium transition-all duration-200 hover:scale-105 disabled:opacity-50"
-                    style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}
-                  >
-                    {saving ? (
-                      <>
-                        <FontAwesomeIcon icon={faSpinner} className="w-4 h-4 mr-2 animate-spin" />
-                        Updating...
-                      </>
-                    ) : (
-                      'Update Password'
-                    )}
-                  </button>
+                  <Button type="submit" variant="accent" loading={saving}>{saving ? 'Updating...' : 'Update Password'}</Button>
                 </form>
               </div>
             )}

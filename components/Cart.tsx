@@ -2,6 +2,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/context/CartContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -545,28 +546,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                 {selectedCurrency.symbol}{convertPrice(total).toFixed(2)}
               </span>
             </div>
-            <button
-              onClick={handleCheckout}
-              style={{
-                width: '100%',
-                padding: '14px',
-                background: isDimMode ? '#E6A64D' : '#139EA2',
-                color: isDimMode ? '#0A0A0A' : 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: '600',
-                fontSize: '16px',
-                transition: 'transform 0.2s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-              }}
-            >
-              <FontAwesomeIcon icon={faLock} className="w-4 h-4" />
-              Proceed to Checkout
-            </button>
+            <Button onClick={handleCheckout} variant="accent" full icon={faLock} style={{ background: isDimMode ? '#E6A64D' : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>Proceed to Checkout</Button>
             <button
               onClick={clearCart}
               style={{

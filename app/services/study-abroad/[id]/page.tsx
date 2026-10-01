@@ -1,5 +1,6 @@
 "use client";
 
+import Button from '@/components/ui/Button';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -616,10 +617,7 @@ export default function UniversityDetailPage() {
                   <span className="total-value">Free</span>
                 </div>
 
-                <button className="booking-submit">
-                  Book Free Consultation
-                  <FontAwesomeIcon icon={faArrowRight} />
-                </button>
+                <Button type="submit" variant="accent" full>Book Free Consultation</Button>
 
                 <p className="booking-note">
                   <FontAwesomeIcon icon={faShieldAlt} />
@@ -694,10 +692,7 @@ export default function UniversityDetailPage() {
             <p className="detail-cta-text">
               Discover more top-ranked universities around the world.
             </p>
-            <Link href="/services/study-abroad/all" className="detail-cta-btn">
-              View All Universities
-              <FontAwesomeIcon icon={faArrowRight} />
-            </Link>
+            <Button href="/services/study-abroad/all" variant="gold">View All Universities</Button>
           </div>
         </section>
 

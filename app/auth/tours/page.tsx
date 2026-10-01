@@ -7,6 +7,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
@@ -115,9 +116,7 @@ export default function ToursPage() {
           <FontAwesomeIcon icon={faCalendarCheck} className="text-6xl mb-4" style={{ color: themeStyles.textMuted }} />
           <h3 className="text-xl font-semibold mb-2" style={{ color: themeStyles.textPrimary }}>No tours booked yet</h3>
           <p className="text-sm" style={{ color: themeStyles.textSecondary }}>Explore our destinations and book an unforgettable experience.</p>
-          <button className="mt-4 px-6 py-2.5 rounded-xl font-medium transition-all duration-200 hover:scale-105" style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }} onClick={() => router.push('/services/onsite-tourism')}>
-            Explore Tours
-          </button>
+          <Button variant="accent" className="mt-4" href="/services/onsite-tourism">Explore Tours</Button>
         </div>
       )}
 
