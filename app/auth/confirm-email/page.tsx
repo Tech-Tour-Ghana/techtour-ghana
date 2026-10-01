@@ -111,9 +111,7 @@ function ConfirmEmailContent() {
         <p className="text-white/60 text-sm leading-relaxed my-3">
           Your email has been successfully verified. Welcome to TechTour Ghana.
         </p>
-        <Link href="/auth/dashboard" className={buttonClass}>
-          <FontAwesomeIcon icon={faArrowRightToBracket} className="mr-2" /> Go to Dashboard
-        </Link>
+        <Button href="/auth/dashboard" full>Go to Dashboard</Button>
       </>
     );
   };
