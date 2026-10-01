@@ -25,7 +25,7 @@ interface Form {
 const EMPTY: Form = {
   title: '', slug: '', category_id: '', destination_id: '', short_description: '', description: '', location: '', region: '', price: '', discount_price: '',
   currency: 'GHS', duration_days: '1', min_group_size: '1', max_group_size: '20', meeting_point: '', featured_image_url: '', gallery: '',
-  video_url: '', video_preview_seconds: '0', highlights: '', itinerary: '', includes: '', excludes: '', is_active: true, is_featured: false,
+  video_url: '', video_preview_seconds: '15', highlights: '', itinerary: '', includes: '', excludes: '', is_active: true, is_featured: false,
 };
 
 const toForm = (t: Tour): Form => ({
@@ -55,7 +55,7 @@ function build(f: Form): { error: string } | { row: TourInsert } {
       short_description: f.short_description.trim(), description: f.description.trim(), location: f.location.trim(), region: f.region.trim(),
       price, discount_price: discount, currency: f.currency, duration_days: Number(f.duration_days), min_group_size: min, max_group_size: max,
       meeting_point: f.meeting_point.trim(), featured_image_url: f.featured_image_url.trim(), gallery: f.gallery.trim(), video_url: f.video_url.trim(),
-      video_preview_seconds: Math.max(0, Number(f.video_preview_seconds) || 0), highlights: f.highlights.trim(), itinerary: f.itinerary.trim(),
+      video_preview_seconds: Math.max(1, Number(f.video_preview_seconds) || 15), highlights: f.highlights.trim(), itinerary: f.itinerary.trim(),
       includes: f.includes.trim(), excludes: f.excludes.trim(), is_active: f.is_active, is_featured: f.is_featured,
     },
   };
@@ -264,7 +264,7 @@ export default function ToursPanel({ tours, categories, destinations, loading, r
             <Field label="Main image" className="sm:col-span-2"><UrlWithPicker inputStyle={fieldStyle} value={form.featured_image_url} onChange={(v) => set('featured_image_url', v)} /></Field>
             <Field label="More images" hint="One image address per line." className="sm:col-span-2"><textarea rows={3} className={inputCls} style={fieldStyle} value={form.gallery} onChange={(e) => set('gallery', e.target.value)} /></Field>
             <Field label="Video link"><input className={inputCls} style={fieldStyle} value={form.video_url} onChange={(e) => set('video_url', e.target.value)} placeholder="https://..." /></Field>
-            <Field label="Video preview (seconds)"><input type="number" min={0} className={inputCls} style={fieldStyle} value={form.video_preview_seconds} onChange={(e) => set('video_preview_seconds', e.target.value)} /></Field>
+            <Field label="Video preview (seconds)"><input type="number" min={1} className={inputCls} style={fieldStyle} value={form.video_preview_seconds} onChange={(e) => set('video_preview_seconds', e.target.value)} /></Field>
           </Section>
 
           <Section title="What guests get">
