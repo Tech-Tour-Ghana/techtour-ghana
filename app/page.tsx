@@ -562,8 +562,12 @@ function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const [currentSlide, setCurrentSlide] = useState(0);
+  // Hero loop: the track is [last, ...slides, first]. Sliding onto a clone is followed
+  // by a silent jump to the real slide, so the slider never rewinds.
+  const [pos, setPos] = useState(0);
+  const [animate, setAnimate] = useState(true);
   const [slides, setSlides] = useState<Slide[]>([]);
+  const currentSlide = slides.length > 1 ? (pos - 1 + slides.length) % slides.length : 0;
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [filteredDestinations, setFilteredDestinations] = useState<Destination[]>([]);
   const [tourCategories, setTourCategories] = useState<TourCategory[]>([]);
@@ -843,7 +847,8 @@ function HomePage() {
   useEffect(() => {
     if (slides.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
+      setAnimate(true);
+      setPos((prev) => Math.min(prev + 1, slides.length + 1));
     }, 6000);
     return () => clearInterval(interval);
   }, [slides.length]);
@@ -870,8 +875,18 @@ function HomePage() {
     return acc;
   }, {} as Record<string, SmallGlassCard[]>);
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  useEffect(() => { setAnimate(false); setPos(slides.length > 1 ? 1 : 0); }, [slides.length]);
+  const heroFirst = slides[0];
+  const heroLast = slides[slides.length - 1];
+  const heroTrack = slides.length > 1 && heroFirst && heroLast ? [heroLast, ...slides, heroFirst] : slides;
+  const nextSlide = () => { setAnimate(true); setPos((p) => Math.min(p + 1, slides.length + 1)); };
+  const goToSlide = (i: number) => { setAnimate(true); setPos(i + 1); };
+  const settleLoop = () => {
+    const n = slides.length;
+    if (n < 2) return;
+    if (pos === n + 1) { setAnimate(false); setPos(1); }
+    else if (pos === 0) { setAnimate(false); setPos(n); }
+  };
 
   const getAlignmentClass = (alignment: string) => {
     switch (alignment) {
@@ -902,9 +917,9 @@ function HomePage() {
       {/* Hero Slider Section */}
       <section className="relative h-[70vh] min-h-[400px] md:h-[85vh] overflow-hidden">
         <div className="relative h-full">
-          <div className="flex h-full transition-transform duration-700 ease-out" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-            {slides.map((slide, idx) => (
-              <div key={slide.id} className="w-full flex-shrink-0 relative">
+          <div className={`flex h-full ${animate ? 'transition-transform duration-700 ease-out' : ''}`} style={{ transform: `translateX(-${pos * 100}%)` }} onTransitionEnd={(e) => { if (e.target === e.currentTarget) settleLoop(); }}>
+            {heroTrack.map((slide, idx) => (
+              <div key={`${slide.id}-${idx}`} className="w-full flex-shrink-0 relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30 z-10"></div>
                 <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: `url(${slide.image})` }}></div>
                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-white text-center px-4">
@@ -926,23 +941,26 @@ function HomePage() {
           {slides.length > 1 && (
             <>
               <button
-                onClick={prevSlide}
-                className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-300 hover:scale-110"
+                aria-label="Previous slide"
+                onClick={() => { setAnimate(true); setPos((p) => Math.max(p - 1, 0)); }}
+                className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 z-30 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full items-center justify-center hover:bg-white/30 transition-all duration-300 hover:scale-110"
               >
-                <FontAwesomeIcon icon={faChevronLeft} className="text-white text-lg md:text-xl" />
+                <FontAwesomeIcon icon={faChevronLeft} className="text-white text-xl" />
               </button>
               <button
+                aria-label="Next slide"
                 onClick={nextSlide}
-                className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-300 hover:scale-110"
+                className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 z-30 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full items-center justify-center hover:bg-white/30 transition-all duration-300 hover:scale-110"
               >
-                <FontAwesomeIcon icon={faChevronRight} className="text-white text-lg md:text-xl" />
+                <FontAwesomeIcon icon={faChevronRight} className="text-white text-xl" />
               </button>
 
               <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2.5">
                 {slides.map((_, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setCurrentSlide(idx)}
+                    aria-label={`Go to slide ${idx + 1}`}
+                    onClick={() => goToSlide(idx)}
                     className={`h-1.5 rounded-full transition-all duration-300 ${currentSlide === idx ? 'w-8' : 'w-2 bg-white/50 hover:bg-white/70'}`}
                     style={{ background: currentSlide === idx ? (isDimMode ? colors.primary : '#139EA2') : 'rgba(255,255,255,0.5)' }}
                   />

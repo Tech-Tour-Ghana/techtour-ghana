@@ -3,6 +3,7 @@
 import Button from '@/components/ui/Button';
 import React from 'react';
 import Link from 'next/link';
+import TeamProfileCard from '@/components/team/TeamProfileCard';
 import BackToTop from '@/components/BackToTop';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -113,50 +114,9 @@ export default function OurTeamPage() {
               </p>
             </div>
 
-            <div className="team-grid">
-              {teamMembers.map((member, idx) => (
-                <article
-                  key={idx}
-                  className={`team-card ${
-                    member.isLead ? 'team-card--lead' : ''
-                  } ${member.isCoLead ? 'team-card--colead' : ''}`}
-                >
-                  <div className="team-card-image">
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        const fallback = target.parentElement?.querySelector(
-                          '.team-avatar-fallback'
-                        ) as HTMLElement;
-                        if (fallback) fallback.style.display = 'flex';
-                      }}
-                    />
-                    <div className="team-avatar-fallback">{member.initials}</div>
-
-                    {member.isLead && (
-                      <span className="team-lead-badge">
-                        <FontAwesomeIcon icon={faAward} />
-                        Founder
-                      </span>
-                    )}
-
-                    {member.isCoLead && (
-                      <span className="team-colead-badge">
-                        <FontAwesomeIcon icon={faAward} />
-                        Co-Founder
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="team-card-content">
-                    <h3 className="team-card-name">{member.name}</h3>
-                    <span className="team-card-role">{member.role}</span>
-                    <p className="team-card-bio">{member.bio}</p>
-                  </div>
-                </article>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {teamMembers.map((member) => (
+                <TeamProfileCard key={member.name} member={{ ...member, badge: member.isLead ? 'Founder' : member.isCoLead ? 'Co-Founder' : 'Leadership' }} />
               ))}
             </div>
           </div>
