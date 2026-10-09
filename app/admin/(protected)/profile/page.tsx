@@ -141,8 +141,8 @@ export default function AdminProfilePage() {
       ) : !profile ? (
         <Surface className="p-6 text-sm" style={{ color: 'var(--adm-text-2)' }}>Could not load your profile. Try signing in again.</Surface>
       ) : (
-        <div className="max-w-2xl space-y-5 pb-10">
-          <Surface className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
+        <div className="grid items-start gap-5 pb-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+          <Surface className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center lg:col-span-2">
             <div className="relative flex-shrink-0">
               <Avatar name={fullName} src={avatar} size={88} />
               <button
@@ -174,6 +174,7 @@ export default function AdminProfilePage() {
             </Button>
           </Surface>
 
+          <div className="min-w-0 space-y-5">
           <Card title="Your details" description="Your name as shown to other admins. Your email is your sign-in and cannot be changed here.">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field id="pf-first" label="First name"><input id="pf-first" className={textClass} style={fieldStyle} value={form.first_name} onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} /></Field>
@@ -197,6 +198,8 @@ export default function AdminProfilePage() {
               <FontAwesomeIcon icon={faKey} className="mr-2 h-3 w-3" />{pwBusy ? 'Changing…' : 'Change password'}
             </Button>
           </Card>
+
+          </div>
 
           {actions && (
             <Card title="Your recent activity" description="The last changes you made in the admin.">

@@ -17,6 +17,8 @@ export interface User {
   last_name: string;
   full_name: string;
   display_name: string;
+  /** Uploaded photo (signed URL) or external avatar. Empty when the user has none, so callers show initials. */
+  avatar_url?: string;
   is_admin: boolean;
   created_at?: string;
 }
@@ -24,6 +26,19 @@ export interface User {
 export interface AuthStatusResponse {
   is_authenticated: boolean;
   user?: User;
+}
+
+// Signed URLs last an hour; reuse one for 50 minutes instead of signing on every call.
+const avatarCache = new Map<string, { path: string; url: string; at: number }>();
+
+async function resolveAvatar(userId: string, path: string | null, external: string | null): Promise<string> {
+  if (!path) return external ?? "";
+  const hit = avatarCache.get(userId);
+  if (hit && hit.path === path && Date.now() - hit.at < 50 * 60 * 1000) return hit.url;
+  const { data } = await createBrowserClient().storage.from("avatars").createSignedUrl(path, 3600);
+  const url = data?.signedUrl ?? external ?? "";
+  if (url) avatarCache.set(userId, { path, url, at: Date.now() });
+  return url;
 }
 
 /**
@@ -41,10 +56,11 @@ export async function getAuthStatus(): Promise<AuthStatusResponse> {
   const authUser = data.user;
   const { data: profile } = await supabase
     .from("profiles")
-    .select("first_name, last_name, is_admin, created_at")
+    .select("first_name, last_name, is_admin, created_at, avatar_path, avatar_url")
     .eq("id", authUser.id)
     .maybeSingle();
 
+  const avatar = await resolveAvatar(authUser.id, profile?.avatar_path ?? null, profile?.avatar_url ?? null);
   const email = authUser.email ?? "";
   const first = profile?.first_name ?? "";
   const last = profile?.last_name ?? "";
@@ -59,6 +75,7 @@ export async function getAuthStatus(): Promise<AuthStatusResponse> {
       last_name: last,
       full_name: full,
       display_name: full || email.split("@")[0] || "User",
+      avatar_url: avatar,
       is_admin: profile?.is_admin ?? false,
       created_at: profile?.created_at,
     },

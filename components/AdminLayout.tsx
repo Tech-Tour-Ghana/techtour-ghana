@@ -51,6 +51,7 @@ import {
   faAnglesRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from '@/context/ThemeContext';
+import AvatarContent from '@/components/AvatarContent';
 import { getAuthStatus, logoutUser, type User } from '@/lib/api';
 
 const BRAND_COLORS = {
@@ -203,12 +204,6 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
     router.push('/admin/login');
   };
 
-  const getInitials = () => {
-    if (!user) return 'A';
-    const name = user.display_name || user.email || 'Admin';
-    return name.charAt(0).toUpperCase();
-  };
-
   const themeStyles = {
     // Values now come from the --adm-* tokens in globals.css, the same ones the
     // analytics dashboard uses, so admin pages stop repeating inline hex.
@@ -349,10 +344,10 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                 style={{ background: 'var(--adm-track)' }}
               >
                 <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                  className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold"
                   style={{ background: `linear-gradient(135deg, ${BRAND_COLORS.tropicalTeal}, ${BRAND_COLORS.sandyOrange})`, color: 'white' }}
                 >
-                  {getInitials()}
+                  <AvatarContent src={user?.avatar_url} name={user?.display_name || user?.email || 'Admin'} />
                 </div>
                 <span className="text-xs font-medium" style={{ color: themeStyles.textPrimary }}>
                   {user?.display_name || 'Admin'}
