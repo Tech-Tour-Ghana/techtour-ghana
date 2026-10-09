@@ -5,6 +5,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -33,11 +34,18 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  useEffect(() => {
-    getNotifications()
+  const [failed, setFailed] = useState(false);
+
+  const load = () => {
+    setFailed(false);
+    setLoading(true);
+    getNotifications(true)
       .then(setNotifications)
+      .catch(() => setFailed(true))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(load, []);
 
   const markAsRead = (id: string) => {
     setNotifications((list) => list.map((n) => (n.id === id ? { ...n, read: true } : n)));
@@ -90,6 +98,17 @@ export default function NotificationsPage() {
           <p className="mt-4 text-sm" style={{ color: themeStyles.textSecondary }}>Loading notifications...</p>
         </div>
       </div>
+    );
+  }
+
+  if (failed) {
+    return (
+      <DashboardLayout title="Notifications" subtitle={`${unreadCount} unread notifications`}>
+        <div role="alert" className="text-center py-12">
+          <p className="mb-4 text-sm" style={{ color: themeStyles.textSecondary }}>We could not load this right now. Please try again.</p>
+          <Button variant="accent" size="sm" onClick={load}>Try again</Button>
+        </div>
+      </DashboardLayout>
     );
   }
 

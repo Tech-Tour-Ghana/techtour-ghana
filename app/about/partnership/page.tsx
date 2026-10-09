@@ -202,14 +202,44 @@ export default function PartnershipPage() {
     message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({ name: '', email: '', company: '', type: '', message: '' });
-    }, 4000);
+    if (sending) return;
+    setSending(true);
+    setError('');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: 'Partnership enquiry',
+          message: `Company: ${formData.company}
+Partnership type: ${formData.type}
+
+${formData.message}`.trim(),
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        const fields = data?.errors ? Object.values(data.errors as Record<string, string>).join(' ') : '';
+        setError(fields || data?.error || 'Could not send your message. Please try again.');
+        return;
+      }
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({ name: '', email: '', company: '', type: '', message: '' });
+      }, 4000);
+    } catch {
+      setError('Network problem. Check your connection and try again.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -504,7 +534,10 @@ export default function PartnershipPage() {
                       />
                     </div>
 
-                    <Button type="submit" variant="accent" full>Submit Application</Button>
+                    {error && (
+                      <div role="alert" style={{ color: '#B91C1C', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 8, padding: '10px 14px', fontSize: 14, marginBottom: 12 }}>{error}</div>
+                    )}
+                    <Button type="submit" variant="accent" full loading={sending}>Submit Application</Button>
                   </>
                 )}
               </form>

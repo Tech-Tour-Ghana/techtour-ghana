@@ -83,6 +83,8 @@ export default function ContactUsPage() {
     message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
 
@@ -147,20 +149,31 @@ export default function ContactUsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch('/api/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
-    if (!res.ok) {
-      console.error('Failed to send contact message:', res.status);
-      return;
+    if (sending) return;
+    setSending(true);
+    setError('');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        const fields = data?.errors ? Object.values(data.errors as Record<string, string>).join(' ') : '';
+        setError(fields || data?.error || 'Could not send your message. Please try again.');
+        return;
+      }
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+      }, 4000);
+    } catch {
+      setError('Network problem. Check your connection and try again.');
+    } finally {
+      setSending(false);
     }
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
-    }, 4000);
   };
 
   return (
@@ -370,7 +383,10 @@ export default function ContactUsPage() {
                       />
                     </div>
 
-                    <Button type="submit" variant="accent" full icon={faPaperPlane}>Send Message</Button>
+                    {error && (
+                      <div role="alert" style={{ color: '#B91C1C', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 8, padding: '10px 14px', fontSize: 14, marginBottom: 12 }}>{error}</div>
+                    )}
+                    <Button type="submit" variant="accent" full icon={faPaperPlane} loading={sending}>Send Message</Button>
                   </form>
                 )}
               </div>

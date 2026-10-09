@@ -182,7 +182,7 @@ export async function getUserOrders(): Promise<Order[]> {
     .select('id, order_number, quantity, unit_price, total_price, currency, order_status, payment_status, shipping_address, shipping_city, shipping_region, shipping_country, phone_number, tracking_number, created_at, updated_at, market_products(title)')
     .order('created_at', { ascending: false });
 
-  if (error || !data) return [];
+  if (error || !data) throw new Error(error?.message ?? 'Request failed');
 
   return data.map((row) => ({
     id: row.id,
@@ -216,7 +216,7 @@ export async function getUserPayments(): Promise<Payment[]> {
     .select('id, reference, amount, currency, status, channel, created_at, paid_at')
     .order('created_at', { ascending: false });
 
-  if (error || !data) return [];
+  if (error || !data) throw new Error(error?.message ?? 'Request failed');
   return data;
 }
 
@@ -227,7 +227,7 @@ export async function getUserTours(): Promise<TourBooking[]> {
     .select('id, booking_reference, participants, total_price, currency, status, tour_schedules(start_date), tours(title, location, duration_days)')
     .order('created_at', { ascending: false });
 
-  if (error || !data) return [];
+  if (error || !data) throw new Error(error?.message ?? 'Request failed');
 
   return data.map((row) => ({
     id: row.id,
@@ -371,7 +371,7 @@ export async function getUserWishlist(): Promise<WishlistItem[]> {
     .select('id, product_id, created_at, market_products(title, price, discount_price, image_url)')
     .order('created_at', { ascending: false });
 
-  if (error || !data) return [];
+  if (error || !data) throw new Error(error?.message ?? 'Request failed');
 
   return data.map((row) => ({
     id: row.id,
@@ -414,7 +414,7 @@ export async function getUserStudy(): Promise<StudyApplication[]> {
     .select('id, program_name, university, location, start_date, status, duration, created_at')
     .order('created_at', { ascending: false });
 
-  if (error || !data) return [];
+  if (error || !data) throw new Error(error?.message ?? 'Request failed');
   return data.map((row) => ({ ...row, start_date: row.start_date ?? '' }));
 }
 
@@ -428,13 +428,17 @@ export interface Notification {
 }
 
 // RLS (0017) scopes notifications to the signed in user.
-export async function getNotifications(): Promise<Notification[]> {
+// strict: throw on failure so a page can show an error instead of an empty list.
+export async function getNotifications(strict = false): Promise<Notification[]> {
   const { data, error } = await createBrowserClient()
     .from('notifications')
     .select('id, title, message, created_at, is_read, type')
     .order('created_at', { ascending: false });
 
-  if (error || !data) return [];
+  if (error || !data) {
+    if (strict) throw new Error(error?.message ?? 'Request failed');
+    return [];
+  }
   return data.map((row) => ({
     id: row.id,
     title: row.title,

@@ -35,11 +35,18 @@ export default function WishlistPage() {
   const [loading, setLoading] = useState(true);
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
 
-  useEffect(() => {
+  const [failed, setFailed] = useState(false);
+
+  const load = () => {
+    setFailed(false);
+    setLoading(true);
     getUserWishlist()
       .then(setWishlistItems)
+      .catch(() => setFailed(true))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(load, []);
 
   const removeFromWishlist = async (id: string) => {
     if (await removeWishlistItem(id)) {
@@ -67,6 +74,17 @@ export default function WishlistPage() {
     );
   }
 
+  if (failed) {
+    return (
+      <DashboardLayout title="Wishlist" subtitle="Your saved items">
+        <div role="alert" className="text-center py-12">
+          <p className="mb-4 text-sm" style={{ color: themeStyles.textSecondary }}>We could not load this right now. Please try again.</p>
+          <Button variant="accent" size="sm" onClick={load}>Try again</Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout title="Wishlist" subtitle="Your saved items">
       {wishlistItems.length > 0 ? (
@@ -79,7 +97,7 @@ export default function WishlistPage() {
             >
               <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
                 <img
-                  src={item.image_url || '/placeholder-product.jpg'}
+                  src={item.image_url || '/placeholder-product.svg'}
                   alt={item.title}
                   className="w-full h-full object-cover"
                 />
