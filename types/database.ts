@@ -1237,6 +1237,7 @@ export type Database = {
       }
       job_openings: {
         Row: {
+          benefits: string | null
           category_id: string | null
           closing_date: string | null
           created_at: string
@@ -1245,13 +1246,17 @@ export type Database = {
           id: string
           is_active: boolean
           legacy_id: number | null
+          level: string | null
           location: string
           requirements: string
+          responsibilities: string | null
           slug: string
+          tags: string[] | null
           title: string
           updated_at: string
         }
         Insert: {
+          benefits?: string | null
           category_id?: string | null
           closing_date?: string | null
           created_at?: string
@@ -1260,13 +1265,17 @@ export type Database = {
           id?: string
           is_active?: boolean
           legacy_id?: number | null
+          level?: string | null
           location?: string
           requirements: string
+          responsibilities?: string | null
           slug: string
+          tags?: string[] | null
           title: string
           updated_at?: string
         }
         Update: {
+          benefits?: string | null
           category_id?: string | null
           closing_date?: string | null
           created_at?: string
@@ -1275,9 +1284,12 @@ export type Database = {
           id?: string
           is_active?: boolean
           legacy_id?: number | null
+          level?: string | null
           location?: string
           requirements?: string
+          responsibilities?: string | null
           slug?: string
+          tags?: string[] | null
           title?: string
           updated_at?: string
         }

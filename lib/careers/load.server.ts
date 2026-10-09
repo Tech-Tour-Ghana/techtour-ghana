@@ -29,6 +29,8 @@ export interface TeamMember {
   isCoLead?: boolean;
 }
 
+const lines = (s: string | null) => (s ?? '').split('\n').map((r) => r.trim()).filter(Boolean);
+
 const TYPE_LABEL = {
   full_time: 'Full-time',
   part_time: 'Part-time',
@@ -58,7 +60,7 @@ export const getJobs = cache(async (): Promise<Job[]> => {
   const supabase = await createClient();
   const { data } = await supabase
     .from('job_openings')
-    .select('id, title, location, employment_type, description, requirements, closing_date, job_categories(name)')
+    .select('*, job_categories(name)')
     .eq('is_active', true)
     .order('created_at', { ascending: false });
   const today = new Date().toISOString().slice(0, 10);
@@ -70,13 +72,13 @@ export const getJobs = cache(async (): Promise<Job[]> => {
       department: j.job_categories?.name ?? 'General',
       location: j.location,
       type: TYPE_LABEL[j.employment_type],
-      level: '',
+      level: j.level ?? '',
       description: j.description,
       about: j.description,
-      responsibilities: [],
-      requirements: j.requirements.split('\n').map((r) => r.trim()).filter(Boolean),
+      responsibilities: lines(j.responsibilities),
+      requirements: lines(j.requirements),
       niceToHave: [],
-      benefits: [],
-      tags: [],
+      benefits: lines(j.benefits),
+      tags: j.tags ?? [],
     }));
 });
