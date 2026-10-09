@@ -1,5 +1,4 @@
-// Ported from docs/old-sites/techtour-frontend/app/auth/dashboard/page.tsx.
-// Markup and styling are unchanged. getDashboardStats (lib/api.ts) gathers
+// getDashboardStats (lib/api.ts) gathers
 // the counts, profile completeness and recent orders directly through
 // Supabase, replacing the single Django stats endpoint. The old endpoint
 // hardcoded profile completeness at 80% plus bonuses, here it is the share of
@@ -8,8 +7,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarCheck, faShoppingBag, faShieldAlt, faGlobeAfrica, faCheckCircle, faGraduationCap, faHeart, faClock } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarCheck, faShoppingBag, faGraduationCap, faHeart, faClock } from '@fortawesome/free-solid-svg-icons';
 import { getAuthStatus, getDashboardStats, type User, type DashboardStats } from '@/lib/api';
 import { useTheme } from '@/context/ThemeContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -76,27 +76,24 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout title="Dashboard" subtitle={`${getGreeting()}, ${user?.display_name || 'User'}!`}>
-      <div className="rounded-2xl p-6 mb-6 text-white" style={{ background: `linear-gradient(135deg, ${BRAND_COLORS.tropicalTeal}, ${BRAND_COLORS.sandyOrange})` }}>
-        <div className="flex items-start gap-4">
-          <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold flex-shrink-0">
-            {(user?.display_name || 'U').charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold">Welcome back, {user?.display_name || 'User'}!</h2>
-            <p className="text-white/80 text-sm mt-1">Here&apos;s a summary of your activity on TechTour Ghana.</p>
-            <div className="flex items-center gap-4 mt-3 flex-wrap">
-              <span className="text-xs bg-white/20 px-3 py-1 rounded-full">
-                <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
-                Profile {stats?.profile_complete || 0}% complete
-              </span>
-              <span className="text-xs bg-white/20 px-3 py-1 rounded-full">
-                <FontAwesomeIcon icon={faShieldAlt} className="mr-1" />
-                Verified Member
-              </span>
+      <section className="mb-6 flex items-start gap-4 rounded-2xl p-5 sm:p-6" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full text-xl font-bold text-white" style={{ background: BRAND_COLORS.tropicalTeal }} aria-hidden>
+          {(user?.display_name || 'U').charAt(0).toUpperCase()}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-xl font-bold sm:text-2xl" style={{ color: themeStyles.textPrimary }}>Welcome back, {user?.display_name || 'User'}</h2>
+          <p className="mt-1 text-sm" style={{ color: themeStyles.textSecondary }}>Here is a summary of your activity on TechTour Ghana.</p>
+          <div className="mt-4" role="group" aria-label="Profile completeness">
+            <div className="mb-1.5 flex items-center justify-between text-xs" style={{ color: themeStyles.textSecondary }}>
+              <span>Profile {stats?.profile_complete || 0}% complete</span>
+              {(stats?.profile_complete || 0) < 100 && <Link href="/auth/profile" className="font-semibold underline" style={{ color: BRAND_COLORS.tropicalTeal }}>Finish your profile</Link>}
+            </div>
+            <div className="h-2 overflow-hidden rounded-full" style={{ background: isDimMode ? 'rgba(255,255,255,0.08)' : '#E5E7EB' }}>
+              <div className="h-full rounded-full" style={{ width: `${stats?.profile_complete || 0}%`, background: BRAND_COLORS.tropicalTeal }} />
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={faCalendarCheck} label="Tours Booked" value={stats?.tours_booked || 0} color={BRAND_COLORS.tropicalTeal} />
@@ -144,7 +141,6 @@ export default function DashboardPage() {
 
       <div className="mt-8 text-center">
         <p className="text-xs" style={{ color: themeStyles.textMuted }}>
-          <FontAwesomeIcon icon={faGlobeAfrica} className="mr-1" />
           TechTour Ghana — Redefining African Tourism Through Innovation
         </p>
       </div>

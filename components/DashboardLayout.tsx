@@ -1,11 +1,5 @@
-// Ported from docs/old-sites/techtour-frontend/app/components/DashboardLayout.tsx.
-// Markup and styling are unchanged. Two things changed:
-//
-// 1. User identity comes from getAuthStatus() (Supabase, lib/api.ts) instead
-//    of a localStorage 'user' blob left over from the JWT-era client.
-// 2. Study and Wishlist are back in the sidebar. The old endpoints behind them
-//    never worked, so 0016 adds wishlist_items and study_applications and the
-//    pages read those through Supabase.
+// Signed-in customer shell. Sidebar on large screens; below lg the section links
+// become a scrollable bar under the header, so nothing is fixed-width on a phone.
 
 'use client';
 
@@ -26,8 +20,6 @@ import {
   faCog,
   faSignOutAlt,
   faChevronRight,
-  faGlobeAfrica,
-  faCrown,
   faArrowLeft,
   faSun,
   faMoon,
@@ -135,90 +127,70 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
 
   return (
     <div className="dashboard-layout-wrapper flex h-screen overflow-hidden" style={{ background: themeStyles.background, margin: 0, padding: 0 }}>
-      {/* ===== SIDEBAR - Far Left ===== */}
-      <div
-        className="w-[280px] flex-shrink-0 h-full overflow-y-auto relative"
-        style={{
-          background: 'linear-gradient(180deg, #0A0A0A, #1A1A1A)',
-          borderRight: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.1)'}`,
-          margin: 0,
-          padding: 0,
-        }}
+      {/* ===== SIDEBAR (large screens) ===== */}
+      <aside
+        className="hidden h-full w-64 flex-shrink-0 flex-col overflow-y-auto lg:flex"
+        style={{ background: '#111111', borderRight: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.1)'}` }}
       >
-        <div className="px-5 py-3 border-b" style={{ borderColor: 'rgba(255,255,255,0.05)', margin: 0 }}>
+        <div className="border-b px-5 py-4" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: BRAND_COLORS.tropicalTeal }}>
-              <FontAwesomeIcon icon={faCrown} className="text-white text-sm" />
-            </div>
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-base font-extrabold text-white" style={{ background: BRAND_COLORS.tropicalTeal }} aria-hidden>T</div>
             <div>
-              <span className="text-white font-bold text-sm block leading-tight">TECHTOUR</span>
+              <span className="block text-sm font-bold leading-tight text-white">TECHTOUR</span>
               <span className="text-xs" style={{ color: BRAND_COLORS.sandyOrange }}>GHANA</span>
             </div>
           </div>
-          <Link
-            href="/"
-            className="flex items-center gap-2 mt-2 text-xs transition-colors duration-200 hover:text-white"
-            style={{ color: 'rgba(255,255,255,0.4)' }}
-          >
-            <FontAwesomeIcon icon={faArrowLeft} className="w-3 h-3" />
-            Back to Site
+          <Link href="/" className="mt-3 flex items-center gap-2 text-xs transition-colors hover:text-white" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            <FontAwesomeIcon icon={faArrowLeft} className="h-3 w-3" />
+            Back to site
           </Link>
         </div>
 
-        <nav className="p-3">
+        <nav className="flex-1 p-3" aria-label="Account sections">
           {SIDEBAR_ITEMS.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  isActive ? 'bg-opacity-20' : 'hover:bg-opacity-10'
-                }`}
+                aria-current={isActive ? 'page' : undefined}
+                className="mb-1 flex min-h-[2.75rem] items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors hover:bg-white/5"
                 style={{
                   background: isActive ? `${BRAND_COLORS.tropicalTeal}33` : 'transparent',
-                  color: isActive ? BRAND_COLORS.tropicalTeal : 'rgba(255,255,255,0.6)',
+                  color: isActive ? '#5FD3D6' : 'rgba(255,255,255,0.72)',
                 }}
               >
-                <FontAwesomeIcon icon={item.icon} className="w-4 h-4" />
+                <FontAwesomeIcon icon={item.icon} className="h-4 w-4" />
                 <span>{item.label}</span>
-                {isActive && (
-                  <FontAwesomeIcon icon={faChevronRight} className="w-3 h-3 ml-auto" style={{ color: BRAND_COLORS.tropicalTeal }} />
-                )}
+                {isActive && <FontAwesomeIcon icon={faChevronRight} className="ml-auto h-3 w-3" />}
               </Link>
             );
           })}
         </nav>
-
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t text-center" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-          <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>
-            <FontAwesomeIcon icon={faGlobeAfrica} className="mr-1" />
-            TechTour Ghana
-          </p>
-        </div>
-      </div>
+      </aside>
 
       {/* ===== MAIN CONTENT ===== */}
-      <div className="flex-1 flex flex-col overflow-hidden" style={{ margin: 0, padding: 0 }}>
-        <div
-          className="flex items-center justify-between px-8 py-4 border-b flex-shrink-0"
-          style={{ background: themeStyles.topBarBg, borderColor: themeStyles.border, margin: 0, paddingTop: '16px', paddingBottom: '16px' }}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header
+          className="flex flex-shrink-0 items-center justify-between gap-3 border-b px-4 py-3 sm:px-6 lg:px-8 lg:py-4"
+          style={{ background: themeStyles.topBarBg, borderColor: themeStyles.border }}
         >
-          <div>
-            <h1 className="text-xl font-bold" style={{ color: themeStyles.textPrimary }}>{title}</h1>
+          <div className="min-w-0">
+            <h1 className="truncate text-lg font-bold sm:text-xl" style={{ color: themeStyles.textPrimary }}>{title}</h1>
             {subtitle ? (
-              <p className="text-sm" style={{ color: themeStyles.textSecondary }}>{subtitle}</p>
+              <p className="truncate text-sm" style={{ color: themeStyles.textSecondary }}>{subtitle}</p>
             ) : (
-              <p className="text-sm" style={{ color: themeStyles.textSecondary }}>
+              <p className="truncate text-sm" style={{ color: themeStyles.textSecondary }}>
                 {getGreeting()}, {getFullName()}!
               </p>
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
             <button
               onClick={toggleTheme}
-              className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
+              aria-label={isDimMode ? 'Switch to light theme' : 'Switch to dark theme'}
+              className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
               style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textSecondary }}
             >
               <FontAwesomeIcon icon={isDimMode ? faSun : faMoon} className="w-4 h-4" />
@@ -227,7 +199,9 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
             <div className="relative" ref={notificationRef}>
               <button
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 relative"
+                aria-label={unreadNotifications > 0 ? `Notifications, ${unreadNotifications} unread` : 'Notifications'}
+                aria-expanded={isNotificationsOpen}
+                className="relative flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
                 style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textSecondary }}
               >
                 <FontAwesomeIcon icon={faBell} className="w-4 h-4" />
@@ -239,7 +213,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
               </button>
               {isNotificationsOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-72 rounded-xl shadow-lg overflow-hidden z-50"
+                  className="absolute right-0 z-50 mt-2 w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-xl"
                   style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}
                 >
                   <div className="p-3 border-b" style={{ borderColor: themeStyles.border }}>
@@ -269,22 +243,25 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200 hover:bg-opacity-10"
+                aria-label="Account menu"
+                aria-expanded={isDropdownOpen}
+                aria-haspopup="menu"
+                className="flex min-h-[2.75rem] items-center gap-2 rounded-lg px-2 sm:px-3"
                 style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6' }}
               >
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-                  style={{ background: `linear-gradient(135deg, ${BRAND_COLORS.tropicalTeal}, ${BRAND_COLORS.sandyOrange})`, color: 'white' }}
+                  style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}
                 >
                   {getUserInitials()}
                 </div>
-                <span className="text-sm font-medium" style={{ color: themeStyles.textPrimary }}>{getFullName()}</span>
+                <span className="hidden max-w-[10rem] truncate text-sm font-medium sm:inline" style={{ color: themeStyles.textPrimary }}>{getFullName()}</span>
                 <FontAwesomeIcon icon={faChevronDown} className={`w-3 h-3 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} style={{ color: themeStyles.textMuted }} />
               </button>
 
               {isDropdownOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-56 rounded-xl shadow-lg overflow-hidden z-50"
+                  className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl"
                   style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}
                 >
                   <div className="p-3 border-b" style={{ borderColor: themeStyles.border }}>
@@ -296,7 +273,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
                     <Link
                       key={item.label}
                       href={item.href}
-                      className="flex items-center gap-3 px-3 py-2 text-sm transition-all duration-200 hover:bg-opacity-5"
+                      className="flex min-h-[2.75rem] items-center gap-3 px-3 text-sm hover:bg-black/5"
                       style={{ color: themeStyles.textSecondary }}
                       onClick={() => setIsDropdownOpen(false)}
                     >
@@ -309,7 +286,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
 
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 px-3 py-2 text-sm w-full text-left transition-all duration-200 hover:bg-red-500/10"
+                    className="flex min-h-[2.75rem] w-full items-center gap-3 px-3 text-left text-sm hover:bg-red-500/10"
                     style={{ color: '#EF4444' }}
                   >
                     <FontAwesomeIcon icon={faSignOutAlt} className="w-4 h-4" />
@@ -319,9 +296,30 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
               )}
             </div>
           </div>
-        </div>
+        </header>
 
-        <div className="flex-1 overflow-y-auto p-8" style={{ paddingTop: '24px' }}>
+        <nav className="flex-shrink-0 overflow-x-auto border-b px-3 py-2 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden" aria-label="Account sections" style={{ background: themeStyles.topBarBg, borderColor: themeStyles.border }}>
+          <ul className="flex w-max gap-2">
+            {SIDEBAR_ITEMS.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    aria-current={isActive ? 'page' : undefined}
+                    className="flex min-h-[2.5rem] items-center gap-2 whitespace-nowrap rounded-full px-4 text-sm font-medium"
+                    style={{ background: isActive ? BRAND_COLORS.tropicalTeal : 'transparent', color: isActive ? '#FFFFFF' : themeStyles.textSecondary, border: `1px solid ${isActive ? BRAND_COLORS.tropicalTeal : themeStyles.border}` }}
+                  >
+                    <FontAwesomeIcon icon={item.icon} className="h-3.5 w-3.5" />
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {children}
         </div>
       </div>
