@@ -34,11 +34,18 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filter, setFilter] = useState('all');
 
-  useEffect(() => {
+  const [failed, setFailed] = useState(false);
+
+  const load = () => {
+    setFailed(false);
+    setLoading(true);
     getUserOrders()
       .then(setOrders)
+      .catch(() => setFailed(true))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(load, []);
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -82,6 +89,17 @@ export default function OrdersPage() {
           <p className="mt-4 text-sm" style={{ color: themeStyles.textSecondary }}>Loading orders...</p>
         </div>
       </div>
+    );
+  }
+
+  if (failed) {
+    return (
+      <DashboardLayout title="My Orders" subtitle="Track and manage your orders">
+        <div role="alert" className="text-center py-12">
+          <p className="mb-4 text-sm" style={{ color: themeStyles.textSecondary }}>We could not load this right now. Please try again.</p>
+          <Button variant="accent" size="sm" onClick={load}>Try again</Button>
+        </div>
+      </DashboardLayout>
     );
   }
 

@@ -58,24 +58,6 @@ interface Slide {
   button_link: string;
 }
 
-interface Destination {
-  id: string;
-  title: string;
-  slug: string;
-  short_description: string;
-  description: string;
-  category: string;
-  location: string;
-  region: string;
-  featured_image: string;
-  video_url: string;
-  video_thumbnail: string | null;
-  media_type: 'image' | 'video' | 'none';
-  rating: number;
-  review_count: number;
-  price: number;
-}
-
 interface MainFeatureCard {
   id: string;
   card_type: string;
@@ -116,12 +98,6 @@ interface SmallGlassCard {
   description_size: string;
 }
 
-interface TourCategory {
-  id: string;
-  name: string;
-  slug: string;
-}
-
 interface VideoSection {
   id: string;
   title: string;
@@ -139,19 +115,6 @@ interface VideoSection {
   social_button_text?: string;
   social_icon?: string;
 }
-
-// Tour.get_video_id and Tour.get_video_thumbnail from the old backend.
-const getTourVideoThumbnail = (videoUrl: string): string | null => {
-  if (videoUrl.includes('youtube') || videoUrl.includes('youtu.be')) {
-    const match = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-    return match ? `https://img.youtube.com/vi/${match[1]}/maxresdefault.jpg` : null;
-  }
-  if (videoUrl.includes('vimeo')) {
-    const match = videoUrl.match(/(?:vimeo\.com\/)(\d+)/);
-    return match ? `https://vumbnail.com/${match[1]}.jpg` : null;
-  }
-  return null;
-};
 
 // VideoSection.get_social_icon from the old backend.
 const SOCIAL_ICONS: Record<string, string> = {
@@ -568,15 +531,12 @@ function HomePage() {
   const [animate, setAnimate] = useState(true);
   const [slides, setSlides] = useState<Slide[]>([]);
   const currentSlide = slides.length > 1 ? (pos - 1 + slides.length) % slides.length : 0;
-  const [destinations, setDestinations] = useState<Destination[]>([]);
-  const [filteredDestinations, setFilteredDestinations] = useState<Destination[]>([]);
-  const [tourCategories, setTourCategories] = useState<TourCategory[]>([]);
   const [mainCards, setMainCards] = useState<MainFeatureCard[]>([]);
   const [smallCards, setSmallCards] = useState<SmallGlassCard[]>([]);
   const [videoSection, setVideoSection] = useState<VideoSection[]>([]);
-  const [activeCategory, setActiveCategory] = useState('All');
   const [loading, setLoading] = useState(true);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [isDimMode, setIsDimMode] = useState(false);
   const [visibleVideos, setVisibleVideos] = useState<Set<string>>(new Set());
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
@@ -590,52 +550,25 @@ function HomePage() {
   const fetchAllData = useCallback(async () => {
     try {
       const supabase = createBrowserClient();
-      const [slidesRes, toursRes, categoriesRes, mainCardsRes, smallCardsRes, videoRes] = await Promise.all([
+      const [slidesRes, mainCardsRes, smallCardsRes, videoRes] = await Promise.all([
         supabase.from('homepage_slides').select('*').order('sort_order'),
-        supabase.from('tours').select('*, tour_categories(name)').order('is_featured', { ascending: false }).order('created_at', { ascending: false }),
-        supabase.from('tour_categories').select('id, name, slug').order('sort_order'),
         supabase.from('main_feature_cards').select('*').order('sort_order'),
         supabase.from('small_glass_cards').select('*').order('sort_order'),
         supabase.from('video_sections').select('*').order('sort_order'),
       ]);
 
+      setLoadError([slidesRes, mainCardsRes, smallCardsRes, videoRes].some((r) => r.error));
       if (!slidesRes.error) {
         setSlides(slidesRes.data.map((s) => ({
           id: s.id,
           title: s.title,
           subtitle: s.subtitle,
           description: s.description,
-          image: s.image_url || '/images/placeholder-slide.jpg',
+          image: s.image_url || '/images/placeholder-slide.svg',
           button_text: s.button_text,
           button_link: s.button_link,
         })));
       }
-      if (!toursRes.error) {
-        const toursData: Destination[] = toursRes.data.map((t) => {
-          const mediaType = t.video_url ? 'video' : t.featured_image_url ? 'image' : 'none';
-          const finalPrice = t.discount_price ? t.discount_price : t.price;
-          return {
-            id: t.id,
-            title: t.title,
-            slug: t.slug,
-            short_description: t.short_description || (t.description ? t.description.slice(0, 100) : ''),
-            description: t.description,
-            category: t.tour_categories?.name ?? 'Nature',
-            location: t.location || 'Ghana',
-            region: t.region || t.location || 'Ghana',
-            featured_image: t.featured_image_url,
-            video_url: t.video_url,
-            video_thumbnail: mediaType === 'video' ? getTourVideoThumbnail(t.video_url) : null,
-            media_type: mediaType,
-            rating: Number(t.rating) || 0,
-            review_count: t.review_count || 0,
-            price: Number(finalPrice) || 0,
-          };
-        });
-        setDestinations(toursData);
-        setFilteredDestinations(toursData.slice(0, 4));
-      }
-      if (!categoriesRes.error) setTourCategories(categoriesRes.data);
       if (!mainCardsRes.error) {
         // desktop_card_height and desktop_card_width have no columns and are left undefined.
         setMainCards(mainCardsRes.data.map((c) => ({
@@ -708,6 +641,7 @@ function HomePage() {
       }
     } catch (error) {
       console.error('Error fetching data:', error);
+      setLoadError(true);
     }
   }, []);
 
@@ -853,19 +787,6 @@ function HomePage() {
     return () => clearInterval(interval);
   }, [slides.length]);
 
-  // ===== FILTER DESTINATIONS =====
-  useEffect(() => {
-    if (activeCategory === 'All') {
-      setFilteredDestinations(destinations.slice(0, 4));
-    } else {
-      setFilteredDestinations(
-        destinations
-          .filter(d => d.category === activeCategory)
-          .slice(0, 4)
-      );
-    }
-  }, [activeCategory, destinations]);
-
   // ===== GROUP SMALL CARDS =====
   const smallCardsByMainCard = smallCards.reduce((acc, card) => {
     if (card.main_card_id) {
@@ -970,6 +891,15 @@ function HomePage() {
           )}
         </div>
       </section>
+
+      {loadError && (
+        <div role="alert" className="max-w-3xl mx-auto my-8 px-4 text-center">
+          <p className="mb-3 text-sm" style={{ color: colors.textSecondary }}>
+            Some content could not be loaded. Please check your connection and try again.
+          </p>
+          <Button variant="accent" size="sm" onClick={() => { void fetchAllData(); }}>Try again</Button>
+        </div>
+      )}
 
       {/* Video Section */}
       <section className="py-12 md:py-16 px-4 max-w-7xl mx-auto">
