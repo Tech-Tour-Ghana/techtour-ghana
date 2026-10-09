@@ -1,302 +1,129 @@
-// Ported from docs/old-sites/techtour-frontend/app/auth/settings/page.tsx.
-// Markup and styling are unchanged for the parts that were real. Two-Factor
-// Authentication, Active Sessions, and the Language "Change" button were
-// hardcoded mock UI on the old site (local state only, no fetch, no save
-// handler) with no backing table or column anywhere, so they are dropped
-// rather than ported as if they worked. Change Password now calls
-// supabase.auth.updateUser; the notification toggles now persist to their
-// real profiles columns (email_notifications/sms_notifications/marketing_emails) -
-// order_updates had no backing column on the old or new schema and is dropped.
+// Preferences: theme and shop currency (both stored in this browser, the same
+// keys the rest of the site reads) and notification choices (saved to the
+// profiles email/sms/marketing columns as soon as they change).
 
 'use client';
 
+import { useEffect, useState } from 'react';
 import Button from '@/components/ui/Button';
-import { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faLock,
-  faMoon,
-  faSun,
-  faBell,
-  faGlobeAfrica,
-  faSpinner,
-  faCheckCircle,
-  faExclamationCircle,
-  faPalette,
-  faEye,
-  faEyeSlash,
-} from '@fortawesome/free-solid-svg-icons';
-import { getProfile, changePassword, updateNotificationPreferences, type Profile } from '@/lib/api';
+import AccountShell, { Section, StatusMessage, inputClass, useAccountTheme, type Status } from '@/components/account/AccountShell';
 import { useTheme } from '@/context/ThemeContext';
-import DashboardLayout from '@/components/DashboardLayout';
+import { CURRENCIES, useCurrencies } from '@/lib/currency';
+import { getProfile, updateNotificationPreferences } from '@/lib/api';
 
-const BRAND_COLORS = {
-  tropicalTeal: '#139EA2',
-  sandyOrange: '#E6A64D',
+type Notifications = { email_notifications: boolean; sms_notifications: boolean; marketing_emails: boolean };
+
+const NOTIFICATION_LABELS: Record<keyof Notifications, { title: string; description: string }> = {
+  email_notifications: { title: 'Email notifications', description: 'Booking, order and payment updates by email.' },
+  sms_notifications: { title: 'SMS notifications', description: 'Important updates by text message.' },
+  marketing_emails: { title: 'Offers and news', description: 'Promotions and travel news by email.' },
 };
 
 export default function SettingsPage() {
+  const t = useAccountTheme();
   const { isDimMode, toggleTheme } = useTheme();
+  const { currencies } = useCurrencies();
+  const [currencyCode, setCurrencyCode] = useState('GHS');
+  const [notifications, setNotifications] = useState<Notifications | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<'security' | 'preferences' | 'notifications'>('security');
-
-  const [passwordData, setPasswordData] = useState({ new_password: '', confirm_password: '' });
-  const [showPassword, setShowPassword] = useState({ new: false, confirm: false });
-
-  const [notifications, setNotifications] = useState({ email_notifications: true, sms_notifications: false, marketing_emails: true });
+  const [status, setStatus] = useState<Status>(null);
 
   useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('selectedCurrency') ?? 'null');
+      if (saved && typeof saved.code === 'string') setCurrencyCode(saved.code);
+    } catch { /* storage blocked or malformed, keep the default */ }
     getProfile()
-      .then((profile: Profile | null) => {
-        if (profile) {
-          setNotifications({
-            email_notifications: profile.email_notifications,
-            sms_notifications: profile.sms_notifications,
-            marketing_emails: profile.marketing_emails,
-          });
-        }
+      .then((p) => {
+        if (p) setNotifications({ email_notifications: p.email_notifications, sms_notifications: p.sms_notifications, marketing_emails: p.marketing_emails });
       })
       .finally(() => setLoading(false));
   }, []);
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passwordData.new_password !== passwordData.confirm_password) {
-      setMessage({ type: 'error', text: 'New passwords do not match' });
-      return;
+  const changeCurrency = (code: string) => {
+    const next = currencies.find((c) => c.code === code) ?? CURRENCIES[0];
+    if (!next) return;
+    setCurrencyCode(code);
+    try {
+      localStorage.setItem('selectedCurrency', JSON.stringify(next));
+      window.dispatchEvent(new CustomEvent('currencyChanged', { detail: { currency: next } }));
+      setStatus({ type: 'success', text: `Prices will show in ${next.name}.` });
+    } catch {
+      setStatus({ type: 'error', text: 'Your browser blocked saving this preference.' });
     }
-    if (passwordData.new_password.length < 8) {
-      setMessage({ type: 'error', text: 'Password must be at least 8 characters' });
-      return;
-    }
-
-    setSaving(true);
-    setMessage(null);
-
-    const result = await changePassword(passwordData.new_password);
-    if (result.success) {
-      setMessage({ type: 'success', text: 'Password changed successfully!' });
-      setPasswordData({ new_password: '', confirm_password: '' });
-    } else {
-      setMessage({ type: 'error', text: result.message || 'Failed to change password' });
-    }
-    setSaving(false);
   };
 
-  const toggleNotification = async (key: keyof typeof notifications) => {
+  const toggle = async (key: keyof Notifications) => {
+    if (!notifications) return;
+    const previous = notifications;
     const next = { ...notifications, [key]: !notifications[key] };
     setNotifications(next);
+    setStatus(null);
     const result = await updateNotificationPreferences({ [key]: next[key] });
-    if (!result.success) {
-      setNotifications(notifications);
-      setMessage({ type: 'error', text: result.message || 'Failed to update preference' });
+    if (result.success) {
+      setStatus({ type: 'success', text: `${NOTIFICATION_LABELS[key].title} turned ${next[key] ? 'on' : 'off'}.` });
+    } else {
+      setNotifications(previous);
+      setStatus({ type: 'error', text: result.message || 'Could not save that change.' });
     }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: isDimMode ? '#0A0A0A' : '#F9F9F9' }}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }}></div>
-          <p className="mt-4 text-sm" style={{ color: isDimMode ? '#B0B0B0' : '#4A4A4A' }}>Loading settings...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#000000',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4A4A4A',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
-    inputText: isDimMode ? '#FFFFFF' : '#000000',
-  };
-
-  const notificationLabels: Record<keyof typeof notifications, { title: string; description: string }> = {
-    email_notifications: { title: 'Email Notifications', description: 'Receive updates via email' },
-    sms_notifications: { title: 'SMS Notifications', description: 'Receive updates via SMS' },
-    marketing_emails: { title: 'Marketing Updates', description: 'Receive marketing and promotional emails' },
   };
 
   return (
-    <DashboardLayout title="Settings" subtitle="Manage your account settings">
-      <div className="max-w-3xl mx-auto">
-        {message && (
-          <div className={`p-4 rounded-xl mb-6 flex items-center gap-3 ${
-            message.type === 'success'
-              ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-400'
-              : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-400'
-          }`}>
-            <FontAwesomeIcon icon={message.type === 'success' ? faCheckCircle : faExclamationCircle} />
-            <span>{message.text}</span>
-          </div>
-        )}
+    <AccountShell title="Preferences" subtitle="Appearance, currency and notifications">
+      <StatusMessage status={status} />
 
-        <div className="rounded-2xl shadow-lg overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
-          <div className="flex border-b" style={{ borderColor: themeStyles.border }}>
-            <button
-              onClick={() => setActiveTab('security')}
-              className="px-6 py-3 text-sm font-medium transition-all duration-200"
-              style={{
-                borderBottom: activeTab === 'security' ? `2px solid ${BRAND_COLORS.tropicalTeal}` : '2px solid transparent',
-                color: activeTab === 'security' ? BRAND_COLORS.tropicalTeal : themeStyles.textSecondary,
-              }}
-            >
-              <FontAwesomeIcon icon={faLock} className="w-4 h-4 mr-2" />
-              Security
-            </button>
-            <button
-              onClick={() => setActiveTab('preferences')}
-              className="px-6 py-3 text-sm font-medium transition-all duration-200"
-              style={{
-                borderBottom: activeTab === 'preferences' ? `2px solid ${BRAND_COLORS.tropicalTeal}` : '2px solid transparent',
-                color: activeTab === 'preferences' ? BRAND_COLORS.tropicalTeal : themeStyles.textSecondary,
-              }}
-            >
-              <FontAwesomeIcon icon={faPalette} className="w-4 h-4 mr-2" />
-              Preferences
-            </button>
-            <button
-              onClick={() => setActiveTab('notifications')}
-              className="px-6 py-3 text-sm font-medium transition-all duration-200"
-              style={{
-                borderBottom: activeTab === 'notifications' ? `2px solid ${BRAND_COLORS.tropicalTeal}` : '2px solid transparent',
-                color: activeTab === 'notifications' ? BRAND_COLORS.tropicalTeal : themeStyles.textSecondary,
-              }}
-            >
-              <FontAwesomeIcon icon={faBell} className="w-4 h-4 mr-2" />
-              Notifications
-            </button>
-          </div>
-
-          <div className="p-6">
-            {activeTab === 'security' && (
-              <div>
-                <h3 className="text-lg font-semibold mb-4" style={{ color: themeStyles.textPrimary }}>
-                  <FontAwesomeIcon icon={faLock} className="w-5 h-5 mr-2" style={{ color: BRAND_COLORS.tropicalTeal }} />
-                  Change Password
-                </h3>
-                <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
-                  <div>
-                    <label htmlFor="set-new" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>New Password</label>
-                    <div className="relative">
-                      <input
-                        id="set-new"
-                        type={showPassword.new ? 'text' : 'password'}
-                        value={passwordData.new_password}
-                        onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
-                        className="w-full px-4 py-2 pr-10 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
-                        style={{ background: themeStyles.inputBg, borderColor: themeStyles.inputBorder, color: themeStyles.inputText }}
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword({ ...showPassword, new: !showPassword.new })}
-                        aria-label={showPassword.new ? 'Hide password' : 'Show password'}
-                        aria-pressed={showPassword.new}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 p-2.5"
-                        style={{ color: themeStyles.textSecondary }}
-                      >
-                        <FontAwesomeIcon icon={showPassword.new ? faEyeSlash : faEye} />
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor="set-confirm" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Confirm New Password</label>
-                    <div className="relative">
-                      <input
-                        id="set-confirm"
-                        type={showPassword.confirm ? 'text' : 'password'}
-                        value={passwordData.confirm_password}
-                        onChange={(e) => setPasswordData({ ...passwordData, confirm_password: e.target.value })}
-                        className="w-full px-4 py-2 pr-10 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
-                        style={{ background: themeStyles.inputBg, borderColor: themeStyles.inputBorder, color: themeStyles.inputText }}
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword({ ...showPassword, confirm: !showPassword.confirm })}
-                        aria-label={showPassword.confirm ? 'Hide password' : 'Show password'}
-                        aria-pressed={showPassword.confirm}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 p-2.5"
-                        style={{ color: themeStyles.textSecondary }}
-                      >
-                        <FontAwesomeIcon icon={showPassword.confirm ? faEyeSlash : faEye} />
-                      </button>
-                    </div>
-                  </div>
-                  <Button type="submit" variant="accent" loading={saving}>{saving ? 'Updating...' : 'Update Password'}</Button>
-                </form>
-              </div>
-            )}
-
-            {activeTab === 'preferences' && (
-              <div>
-                <h3 className="text-lg font-semibold mb-4" style={{ color: themeStyles.textPrimary }}>
-                  <FontAwesomeIcon icon={isDimMode ? faMoon : faSun} className="w-5 h-5 mr-2" style={{ color: BRAND_COLORS.tropicalTeal }} />
-                  Theme
-                </h3>
-                <div className="flex items-center justify-between p-4 rounded-xl" style={{ background: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9', border: `1px solid ${themeStyles.border}` }}>
-                  <div>
-                    <p className="font-medium" style={{ color: themeStyles.textPrimary }}>{isDimMode ? 'Dark Mode' : 'Light Mode'}</p>
-                    <p className="text-sm" style={{ color: themeStyles.textSecondary }}>{isDimMode ? 'Currently using dark theme' : 'Currently using light theme'}</p>
-                  </div>
-                  <Button variant="secondary" size="sm" arrow={false} icon={isDimMode ? faSun : faMoon} onClick={toggleTheme} style={{ color: themeStyles.textPrimary }}>
-                    Switch to {isDimMode ? 'Light' : 'Dark'}
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'notifications' && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold mb-4" style={{ color: themeStyles.textPrimary }}>
-                  <FontAwesomeIcon icon={faBell} className="w-5 h-5 mr-2" style={{ color: BRAND_COLORS.tropicalTeal }} />
-                  Notification Preferences
-                </h3>
-                <div className="space-y-3">
-                  {(Object.keys(notifications) as (keyof typeof notifications)[]).map((key) => (
-                    <div key={key} className="flex items-center justify-between p-4 rounded-xl" style={{ background: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9', border: `1px solid ${themeStyles.border}` }}>
-                      <div>
-                        <p className="font-medium" style={{ color: themeStyles.textPrimary }}>{notificationLabels[key].title}</p>
-                        <p className="text-sm" style={{ color: themeStyles.textSecondary }}>{notificationLabels[key].description}</p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          aria-label={notificationLabels[key].title}
-                          checked={notifications[key]}
-                          onChange={() => toggleNotification(key)}
-                        />
-                        <div
-                          className="w-11 h-6 rounded-full peer peer-checked:after:translate-x-full peer-focus-visible:ring-2 peer-focus-visible:ring-teal-600 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
-                          style={{
-                            background: notifications[key] ? BRAND_COLORS.tropicalTeal : '#CBD5E1',
-                            borderColor: notifications[key] ? BRAND_COLORS.tropicalTeal : '#CBD5E1',
-                          }}
-                        />
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-8 text-center">
-          <p className="text-xs" style={{ color: themeStyles.textMuted }}>
-            <FontAwesomeIcon icon={faGlobeAfrica} className="mr-1" />
-            TechTour Ghana — Redefining African Tourism Through Innovation
+      <Section id="appearance" title="Appearance">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm" style={{ color: t.text }}>
+            Theme: <span className="font-medium">{isDimMode ? 'Dark' : 'Light'}</span>
           </p>
+          <Button variant="secondary" size="sm" arrow={false} onClick={toggleTheme} style={{ color: t.text }}>
+            Switch to {isDimMode ? 'light' : 'dark'}
+          </Button>
         </div>
-      </div>
-    </DashboardLayout>
+      </Section>
+
+      <Section id="currency" title="Currency" description="Prices are charged in cedis. This only changes how they are displayed on this device.">
+        <label htmlFor="pref-currency" className="block text-sm font-medium mb-1.5" style={{ color: t.textSecondary }}>Show prices in</label>
+        <select
+          id="pref-currency"
+          value={currencyCode}
+          onChange={(e) => changeCurrency(e.target.value)}
+          className={`${inputClass} max-w-xs`}
+          style={{ background: t.inputBg, borderColor: t.inputBorder, color: t.text }}
+        >
+          {currencies.map((c) => (
+            <option key={c.code} value={c.code}>{c.name} ({c.code})</option>
+          ))}
+        </select>
+      </Section>
+
+      <Section id="notifications" title="Notifications" description="Choose what we contact you about. Changes save straight away.">
+        {loading ? (
+          <p role="status" className="text-sm" style={{ color: t.textSecondary }}>Loading...</p>
+        ) : !notifications ? (
+          <p role="alert" className="text-sm" style={{ color: t.textSecondary }}>We could not load your notification settings.</p>
+        ) : (
+          <ul className="divide-y" style={{ borderColor: t.border }}>
+            {(Object.keys(NOTIFICATION_LABELS) as (keyof Notifications)[]).map((key) => (
+              <li key={key} className="py-3 first:pt-0 last:pb-0" style={{ borderColor: t.border }}>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={notifications[key]}
+                    onChange={() => toggle(key)}
+                    className="mt-1 h-4 w-4 accent-teal-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
+                  />
+                  <span>
+                    <span className="block text-sm font-medium" style={{ color: t.text }}>{NOTIFICATION_LABELS[key].title}</span>
+                    <span className="block text-sm" style={{ color: t.textSecondary }}>{NOTIFICATION_LABELS[key].description}</span>
+                  </span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+    </AccountShell>
   );
 }

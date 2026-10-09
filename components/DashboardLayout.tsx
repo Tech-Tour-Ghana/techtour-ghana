@@ -53,7 +53,7 @@ export const SIDEBAR_ITEMS = [
 
 export const TOP_BAR_ITEMS = [
   { icon: faUser, label: 'Profile', href: '/auth/profile' },
-  { icon: faCog, label: 'Settings', href: '/auth/settings' },
+  { icon: faCog, label: 'Preferences', href: '/auth/settings' },
   { icon: faShieldAlt, label: 'Security', href: '/auth/security' },
 ];
 
