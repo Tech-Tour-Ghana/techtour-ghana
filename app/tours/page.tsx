@@ -6,15 +6,25 @@ import Button from '@/components/ui/Button';
 import TourCard from '@/components/tours/TourCard';
 import { SORTS, getTourListing, type TourSort } from '@/lib/tours/load.server';
 
-export const metadata: Metadata = {
-  title: 'Tours Listings',
-  description: 'Guided tours across Ghana: Accra, Kumasi, Cape Coast, the Volta Region and the Northern Region. Pick a date and reserve your place.',
-  alternates: { canonical: '/tours' },
-};
-
 export const dynamic = 'force-dynamic';
 
 type SearchParams = Promise<{ destination?: string; q?: string; sort?: string; page?: string }>;
+
+const description = 'Guided tours across Ghana: Accra, Kumasi, Cape Coast, the Volta Region and the Northern Region. Pick a date and reserve your place.';
+
+// Filtered, searched, sorted and paginated views canonicalise to /tours and stay out of the index.
+export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
+  const sp = await searchParams;
+  const variant = Object.values(sp).some((v) => v !== undefined && v !== '');
+  return {
+    title: 'Tours Listings',
+    description,
+    alternates: { canonical: '/tours' },
+    openGraph: { title: 'Tours Listings', description, url: '/tours', type: 'website' },
+    twitter: { card: 'summary', title: 'Tours Listings', description },
+    ...(variant ? { robots: { index: false, follow: true } } : {}),
+  };
+}
 
 export default async function ToursPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
