@@ -438,6 +438,7 @@ function ArtisansPage() {
             />
             <input
               type="text"
+              aria-label="Search artisans"
               placeholder="Search artisans..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}

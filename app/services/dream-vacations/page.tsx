@@ -171,27 +171,6 @@ export default function DreamVacationsPage() {
         />
 
         {/* ===== INTRO STATS ===== */}
-        <section className="intro-stats-section">
-          <div className="intro-stats-container">
-            <div className="intro-stat">
-              <div className="intro-stat-value">100+</div>
-              <div className="intro-stat-label">Destinations</div>
-            </div>
-            <div className="intro-stat">
-              <div className="intro-stat-value">300+</div>
-              <div className="intro-stat-label">Partner Resorts</div>
-            </div>
-            <div className="intro-stat">
-              <div className="intro-stat-value">5K+</div>
-              <div className="intro-stat-label">Dream Trips</div>
-            </div>
-            <div className="intro-stat">
-              <div className="intro-stat-value">4.9</div>
-              <div className="intro-stat-label">Client Rating</div>
-            </div>
-          </div>
-        </section>
-
         {/* ===== VACATIONS SECTION ===== */}
         <section className="vacations-section">
           <div className="vacations-container">

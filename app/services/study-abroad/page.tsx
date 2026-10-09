@@ -171,27 +171,6 @@ export default function StudyAbroadPage() {
         />
 
         {/* ===== INTRO STATS ===== */}
-        <section className="intro-stats-section">
-          <div className="intro-stats-container">
-            <div className="intro-stat">
-              <div className="intro-stat-value">500+</div>
-              <div className="intro-stat-label">Partner Universities</div>
-            </div>
-            <div className="intro-stat">
-              <div className="intro-stat-value">25+</div>
-              <div className="intro-stat-label">Countries</div>
-            </div>
-            <div className="intro-stat">
-              <div className="intro-stat-value">2K+</div>
-              <div className="intro-stat-label">Students Placed</div>
-            </div>
-            <div className="intro-stat">
-              <div className="intro-stat-value">95%</div>
-              <div className="intro-stat-label">Visa Success Rate</div>
-            </div>
-          </div>
-        </section>
-
         {/* ===== UNIVERSITIES SECTION ===== */}
         <section className="universities-section">
           <div className="universities-container">

@@ -250,7 +250,7 @@ export default function LoginClient() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword}
                   className={`absolute right-3 top-1/2 -translate-y-1/2 ${isDarkMode ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-600'}`}
                 >
                   {showPassword ? (

@@ -497,6 +497,7 @@ function TechInnovationPage() {
             />
             <input
               type="text"
+              aria-label="Search innovations"
               placeholder="Search innovations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

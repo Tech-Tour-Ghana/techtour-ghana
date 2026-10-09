@@ -438,6 +438,7 @@ const Footer = () => {
               <div className="newsletter-input-group-wide">
                 <input
                   type="email"
+                  aria-label="Email address"
                   placeholder={settings?.newsletter_placeholder || "Enter your email address"}
                   className="newsletter-input-wide"
                   value={newsletterEmail}
