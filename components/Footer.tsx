@@ -6,20 +6,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  /*   faFacebookF,
-    faInstagram,
-    faLinkedinIn,
-    faYoutube,
-    faTiktok,
-    faWhatsapp,
-    faTwitter, */
-  faMapMarkerAlt,
-  faPhone,
-  faEnvelope,
-  faClock,
-  faChevronRight
-} from '@fortawesome/free-solid-svg-icons';
-import {
   faFacebookF as faFacebookBrand,
   faInstagram as faInstagramBrand,
   faLinkedinIn as faLinkedinBrand,
@@ -47,11 +33,6 @@ interface FooterQuickLinksData {
   destinations: FooterQuickLink[];
   company: FooterQuickLink[];
   support: FooterQuickLink[];
-}
-
-interface FooterContact {
-  icon: string;
-  text: string;
 }
 
 interface SocialLink {
@@ -92,29 +73,6 @@ const getSocialIcon = (platform: string) => {
   return icons[p] || faFacebookBrand;
 };
 
-// Helper to get FontAwesome icon for contact items
-const getContactIcon = (icon: string) => {
-  const iconMap: Record<string, any> = {
-    '': faMapMarkerAlt,
-    '': faPhone,
-    '': faEnvelope,
-    '': faClock,
-  };
-  return iconMap[icon] || null;
-};
-
-// Helper to format phone number for tel: link
-const formatPhoneForLink = (text: string) => {
-  const numbers = text.replace(/[^\d+]/g, '');
-  return numbers;
-};
-
-// Helper to extract email
-const extractEmail = (text: string) => {
-  const emailMatch = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
-  return emailMatch ? emailMatch[0] : text;
-};
-
 const Footer = () => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
@@ -131,7 +89,6 @@ const Footer = () => {
     company: [],
     support: []
   });
-  const [contacts, setContacts] = useState<FooterContact[]>([]);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [legalLinks, setLegalLinks] = useState<LegalLink[]>([]);
   const [settings, setSettings] = useState<FooterSettings | null>(null);
@@ -148,14 +105,12 @@ const Footer = () => {
         const [
           featuresRes,
           quickLinksRes,
-          contactsRes,
           socialRes,
           legalRes,
           settingsRes
         ] = await Promise.all([
           supabase.from('footer_features').select('icon, title, description').order('sort_order'),
           supabase.from('footer_quick_links').select('category, label, url').order('sort_order'),
-          supabase.from('footer_contacts').select('icon, text').order('sort_order'),
           supabase.from('social_links').select('platform, icon, url, color').order('sort_order'),
           supabase.from('legal_links').select('label, url').order('sort_order'),
           supabase.from('footer_settings').select('company_name, tagline, copyright_text, newsletter_placeholder, newsletter_button, newsletter_note').limit(1).maybeSingle(),
@@ -171,9 +126,6 @@ const Footer = () => {
             grouped[category].push({ label, url });
           }
           setQuickLinks(grouped);
-        }
-        if (!contactsRes.error) {
-          setContacts(contactsRes.data);
         }
         if (!socialRes.error) {
           setSocialLinks(socialRes.data);
@@ -258,55 +210,6 @@ const Footer = () => {
     }
   };
 
-  // Render contact item with appropriate link
-  const renderContactItem = (contact: FooterContact, index: number) => {
-    const text = contact.text;
-    const icon = contact.icon;
-    const faIcon = getContactIcon(icon);
-
-    // Phone number
-    if (text.includes('+233') || text.match(/[\d\s\+-]{10,}/)) {
-      const phoneLink = `tel:${formatPhoneForLink(text)}`;
-      return (
-        <div className="contact-item-wide" key={index}>
-          {faIcon ? (
-            <FontAwesomeIcon icon={faIcon} className="contact-icon-svg" />
-          ) : (
-            <span className="contact-emoji">{icon}</span>
-          )}
-          <a href={phoneLink} className="contact-link">{text}</a>
-        </div>
-      );
-    }
-
-    // Email address
-    if (text.includes('@')) {
-      const email = extractEmail(text);
-      return (
-        <div className="contact-item-wide" key={index}>
-          {faIcon ? (
-            <FontAwesomeIcon icon={faIcon} className="contact-icon-svg" />
-          ) : (
-            <span className="contact-emoji">{icon}</span>
-          )}
-          <a href={`mailto:${email}`} className="contact-link">{text}</a>
-        </div>
-      );
-    }
-
-    // Regular text (address, hours)
-    return (
-      <div className="contact-item-wide" key={index}>
-        {faIcon ? (
-          <FontAwesomeIcon icon={faIcon} className="contact-icon-svg" />
-        ) : (
-          <span className="contact-emoji">{icon}</span>
-        )}
-        <span>{text}</span>
-      </div>
-    );
-  };
-
   if (loading) {
     return (
       <footer className={`footer ${isDimMode ? 'dim' : 'bright'}`}>
@@ -341,9 +244,6 @@ const Footer = () => {
     section => quickLinks[section.key] && quickLinks[section.key].length > 0
   );
 
-  // Check if contacts exist
-  const hasContacts = contacts && contacts.length > 0;
-
   // Check if social links exist
   const hasSocialLinks = socialLinks && socialLinks.length > 0;
 
@@ -374,7 +274,7 @@ const Footer = () => {
 
         {/* Main Footer Content */}
         <div className="footer-main-wide">
-          {/* Brand & Contact Section */}
+          {/* Brand */}
           <div className="footer-brand-wide">
             <div className="footer-logo-wide">
               <span className="logo-main-wide">TECHTOUR</span>
@@ -383,18 +283,6 @@ const Footer = () => {
             <p className="footer-tagline-wide">
               {settings?.tagline || 'Your gateway to authentic Ghanaian experiences.'}
             </p>
-
-            {hasContacts && (
-              <div className="contact-info-wide">
-                <h4 className="contact-title-wide">
-                  <span className="contact-title-line"></span>
-                  Get In Touch
-                </h4>
-                <div className="contact-list">
-                  {contacts.map((contact, index) => renderContactItem(contact, index))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Quick Links Grid - Only show if there's data */}

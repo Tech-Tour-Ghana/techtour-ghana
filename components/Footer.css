@@ -242,13 +242,6 @@
 }
 
 /* Main Footer Content */
-.footer-main-wide {
-  display: grid;
-  grid-template-columns: 1.5fr 3fr 1.5fr;
-  gap: 3rem;
-  padding: 4rem 0;
-  border-bottom: 1px solid var(--footer-border);
-}
 
 /* Brand Section */
 .footer-brand-wide {
@@ -376,11 +369,6 @@
 }
 
 /* Quick Links */
-.footer-links-wide {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
-}
 
 .footer-links-section-wide {
   min-width: 0;
@@ -827,24 +815,7 @@
     padding: 0 2rem;
   }
 
-  .footer-main-wide {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-areas:
-      "brand news"
-      "links links";
-    gap: 2.5rem 3rem;
-    padding: 3rem 0;
-  }
 
-  .footer-brand-wide { grid-area: brand; max-width: none; }
-  .footer-newsletter-wide { grid-area: news; max-width: none; margin-left: 0; }
-  .footer-links-wide {
-    grid-area: links;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.5rem;
-    padding-top: 2.5rem;
-    border-top: 1px solid var(--footer-border);
-  }
 
   .footer-tagline-wide { margin-bottom: 1.5rem; }
   .social-section-wide { margin-top: 1.8rem; padding-top: 1.4rem; }
@@ -852,10 +823,6 @@
 }
 
 @media (max-width: 639px) {
-  .footer-links-wide {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem 2rem;
-  }
 }
 
 @media (max-width: 767px) {
@@ -863,19 +830,7 @@
     padding: 0 1.25rem;
   }
 
-  .footer-main-wide {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "brand"
-      "links"
-      "news";
-    gap: 2rem;
-    padding: 2.25rem 0;
-  }
 
-  .footer-links-wide {
-    padding-top: 2rem;
-  }
 
   .links-section-title-wide { margin-bottom: 1rem; padding-bottom: 0.6rem; }
   .footer-links-list-wide li { margin-bottom: 0.5rem; }
@@ -918,7 +873,6 @@
 @media (max-width: 400px) {
   .footer-wide-container { padding: 0 1rem; }
 
-  .footer-links-wide { gap: 1.25rem 1rem; }
 
   .footer-feature-wide {
     flex-direction: column;
@@ -944,8 +898,6 @@
   .social-section-wide { margin-top: 1.25rem; padding-top: 1.1rem; }
   .social-subtitle { display: none; }
   .social-header { margin-bottom: 0.8rem; }
-  .footer-main-wide { gap: 1.5rem; }
-  .footer-links-wide { gap: 1.25rem 1rem; }
   .footer-links-list-wide li { margin-bottom: 0.35rem; }
 }
 
@@ -958,4 +910,31 @@
     gap: 12px;
     max-width: 320px;
   }
+}
+
+
+/* ============================================================
+   Layout: a four column grid.
+   Row 1: brand (two columns) and newsletter (two columns).
+   Row 2: the four link columns.
+   Under 1024px it is two columns, and brand and newsletter go full width.
+   ============================================================ */
+.footer-main-wide {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2.5rem 2rem;
+  padding: 3.5rem 0;
+  border-bottom: 1px solid var(--footer-border);
+}
+.footer-links-wide { display: contents; }
+.footer-brand-wide { grid-column: span 2; order: 1; max-width: none; }
+.footer-newsletter-wide { grid-column: span 2; order: 2; max-width: none; margin-left: 0; }
+.footer-links-section-wide { order: 3; }
+
+@media (max-width: 1023px) {
+  .footer-main-wide { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 2.5rem 0; }
+  .footer-brand-wide, .footer-newsletter-wide { grid-column: 1 / -1; }
+}
+@media (max-width: 767px) {
+  .footer-main-wide { gap: 1.75rem 1.25rem; padding: 2rem 0; }
 }
