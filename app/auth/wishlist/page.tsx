@@ -85,7 +85,8 @@ export default function WishlistPage() {
                 />
                 <button
                   onClick={() => removeFromWishlist(item.id)}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+                  aria-label={`Remove ${item.title} from wishlist`}
+                  className="absolute top-1 right-1 w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-200 hover:bg-black/80 focus-visible:ring-2 focus-visible:ring-teal-600"
                   style={{ background: 'rgba(0,0,0,0.6)', color: 'white' }}
                 >
                   <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
@@ -101,23 +102,12 @@ export default function WishlistPage() {
                     ₵{item.price.toFixed(2)}
                   </span>
                   <div className="flex gap-2">
-                    <button
-                      className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105 flex items-center gap-1"
-                      style={{
-                        background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
-                        color: themeStyles.textSecondary,
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faEye} className="w-3 h-3" />
+                    <Button variant="secondary" size="sm" arrow={false} icon={faEye} style={{ color: themeStyles.textSecondary }}>
                       View
-                    </button>
-                    <button
-                      className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105 flex items-center gap-1"
-                      style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}
-                    >
-                      <FontAwesomeIcon icon={faShoppingCart} className="w-3 h-3" />
+                    </Button>
+                    <Button variant="accent" size="sm" arrow={false} icon={faShoppingCart}>
                       Add
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>

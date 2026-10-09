@@ -291,23 +291,23 @@ function RegisterContent() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className={`block text-sm font-medium mb-1.5 ${isDarkMode ? 'text-white/70' : 'text-gray-700'}`}>Name</label>
+              <label htmlFor="register-first_name" className={`block text-sm font-medium mb-1.5 ${isDarkMode ? 'text-white/70' : 'text-gray-700'}`}>Name</label>
               <div className="flex gap-3 w-full">
                 <input
                   type="text"
-                  name="first_name"
+                  id="register-first_name" name="first_name"
                   value={formData.first_name}
                   onChange={handleInputChange}
-                  className={`w-1/2 px-4 py-2.5 rounded-lg text-sm outline-none ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/30 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#F59E0B]'}`}
+                  className={`w-1/2 px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[#F59E0B]'}`}
                   placeholder="First"
                   required
                 />
                 <input
                   type="text"
-                  name="last_name"
+                  aria-label="Last name" name="last_name"
                   value={formData.last_name}
                   onChange={handleInputChange}
-                  className={`w-1/2 px-4 py-2.5 rounded-lg text-sm outline-none ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/30 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#F59E0B]'}`}
+                  className={`w-1/2 px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[#F59E0B]'}`}
                   placeholder="Last"
                   required
                 />
@@ -315,31 +315,31 @@ function RegisterContent() {
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-1.5 ${isDarkMode ? 'text-white/70' : 'text-gray-700'}`}>Email</label>
+              <label htmlFor="register-email" className={`block text-sm font-medium mb-1.5 ${isDarkMode ? 'text-white/70' : 'text-gray-700'}`}>Email</label>
               <input
                 type="email"
-                name="email"
+                id="register-email" name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-2.5 rounded-lg text-sm outline-none ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/30 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#F59E0B]'}`}
+                className={`w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[#F59E0B]'}`}
                 placeholder="johndoe@gmail.com"
                 required
               />
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-1.5 ${isDarkMode ? 'text-white/70' : 'text-gray-700'}`}>Password</label>
+              <label htmlFor="register-password1" className={`block text-sm font-medium mb-1.5 ${isDarkMode ? 'text-white/70' : 'text-gray-700'}`}>Password</label>
               <div className="relative">
                 <input
                   type={showPassword1 ? 'text' : 'password'}
-                  name="password1"
+                  id="register-password1" name="password1"
                   value={formData.password1}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-2.5 pr-10 rounded-lg text-sm outline-none ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/30 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#F59E0B]'}`}
+                  className={`w-full px-4 py-2.5 pr-10 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[#F59E0B]'}`}
                   placeholder="Create a strong password"
                   required
                 />
-                <button type="button" onClick={() => setShowPassword1(!showPassword1)} aria-label={showPassword1 ? 'Hide password' : 'Show password'} aria-pressed={showPassword1} className={`absolute right-3 top-1/2 -translate-y-1/2 ${isDarkMode ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-600'}`}>
+                <button type="button" onClick={() => setShowPassword1(!showPassword1)} aria-label={showPassword1 ? 'Hide password' : 'Show password'} aria-pressed={showPassword1} className={`absolute right-0 top-1/2 -translate-y-1/2 p-2.5 ${isDarkMode ? 'text-white/50 hover:text-white/70' : 'text-gray-500 hover:text-gray-700'}`}>
                   {showPassword1 ? (
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
@@ -370,18 +370,18 @@ function RegisterContent() {
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-1.5 ${isDarkMode ? 'text-white/70' : 'text-gray-700'}`}>Confirm Password</label>
+              <label htmlFor="register-password2" className={`block text-sm font-medium mb-1.5 ${isDarkMode ? 'text-white/70' : 'text-gray-700'}`}>Confirm Password</label>
               <div className="relative">
                 <input
                   type={showPassword2 ? 'text' : 'password'}
-                  name="password2"
+                  id="register-password2" name="password2"
                   value={formData.password2}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-2.5 pr-10 rounded-lg text-sm outline-none ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/30 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#F59E0B]'}`}
+                  className={`w-full px-4 py-2.5 pr-10 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[#F59E0B]'}`}
                   placeholder="Confirm your password"
                   required
                 />
-                <button type="button" onClick={() => setShowPassword2(!showPassword2)} aria-label={showPassword2 ? 'Hide password' : 'Show password'} aria-pressed={showPassword2} className={`absolute right-3 top-1/2 -translate-y-1/2 ${isDarkMode ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-600'}`}>
+                <button type="button" onClick={() => setShowPassword2(!showPassword2)} aria-label={showPassword2 ? 'Hide password' : 'Show password'} aria-pressed={showPassword2} className={`absolute right-0 top-1/2 -translate-y-1/2 p-2.5 ${isDarkMode ? 'text-white/50 hover:text-white/70' : 'text-gray-500 hover:text-gray-700'}`}>
                   {showPassword2 ? (
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
@@ -406,7 +406,7 @@ function RegisterContent() {
 
           <div className="flex items-center gap-4 my-6">
             <div className={`flex-1 h-px ${isDarkMode ? 'bg-white/10' : 'bg-gray-200'}`}></div>
-            <span className={`text-xs uppercase tracking-wider ${isDarkMode ? 'text-white/30' : 'text-gray-400'}`}>or</span>
+            <span className={`text-xs uppercase tracking-wider ${isDarkMode ? 'text-white/50' : 'text-gray-500'}`}>or</span>
             <div className={`flex-1 h-px ${isDarkMode ? 'bg-white/10' : 'bg-gray-200'}`}></div>
           </div>
 

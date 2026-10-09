@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
+import Button from '@/components/ui/Button';
 import { useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -33,6 +34,7 @@ import {
   faInfoCircle,
   faBriefcase,
   faUserCircle,
+  faPalette,
 } from '@fortawesome/free-solid-svg-icons';
 // Import brand icons from the brands package
 import {
@@ -375,18 +377,9 @@ function ArtisansPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Link
-                href="/market"
-                className="px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105"
-                style={{
-                  background: isDimMode ? 'rgba(230,166,77,0.2)' : 'rgba(255,255,255,0.15)',
-                  color: 'white',
-                  backdropFilter: 'blur(8px)',
-                }}
-              >
-                <FontAwesomeIcon icon={faStore} className="mr-2" />
+              <Button href="/market" variant="onDark" size="sm" arrow={false} icon={faStore}>
                 Visit Market
-              </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -403,7 +396,7 @@ function ArtisansPage() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="rounded-xl p-4 text-center transition-all duration-300 hover:scale-105"
+              className="rounded-xl p-4 text-center"
               style={{
                 background: isDimMode ? colors.backgroundCard : '#FFFFFF',
                 border: `1px solid ${isDimMode ? 'rgba(230,166,77,0.1)' : 'rgba(19,158,162,0.1)'}`,
@@ -442,7 +435,7 @@ function ArtisansPage() {
               placeholder="Search artisans..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm transition-all duration-200 focus:outline-none focus:ring-2"
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
               style={{
                 background: isDimMode ? colors.backgroundCard : '#FFFFFF',
                 border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
@@ -483,6 +476,8 @@ function ArtisansPage() {
           }}>
             <button
               onClick={() => setViewMode('grid')}
+              aria-label="Grid view"
+              aria-pressed={viewMode === 'grid'}
               className={`px-3 py-2 transition-all duration-200 ${viewMode === 'grid' ? 'text-white' : ''}`}
               style={{
                 background: viewMode === 'grid'
@@ -498,6 +493,8 @@ function ArtisansPage() {
             </button>
             <button
               onClick={() => setViewMode('list')}
+              aria-label="List view"
+              aria-pressed={viewMode === 'list'}
               className={`px-3 py-2 transition-all duration-200 ${viewMode === 'list' ? 'text-white' : ''}`}
               style={{
                 background: viewMode === 'list'
@@ -677,7 +674,7 @@ function ArtisansPage() {
           )
         ) : (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🔍</div>
+            <div className="text-6xl mb-4" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}><FontAwesomeIcon icon={faSearch} /></div>
             <h3 className="text-xl font-semibold mb-2" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
               No artisans found
             </h3>
@@ -702,7 +699,8 @@ function ArtisansPage() {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 z-50 hover:scale-110"
+          aria-label="Scroll to top"
+          className="fixed bottom-6 right-6 w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-opacity duration-300 z-50 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-teal-600"
           style={{
             background: isDimMode ? colors.primary : '#139EA2',
             color: isDimMode ? '#0A0A0A' : 'white',
@@ -785,7 +783,8 @@ function ArtisanDetailModal({ artisan, onClose, colors, isDimMode, API_URL }: an
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 z-20 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+            aria-label="Close"
+            className="absolute top-3 right-3 z-20 w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-300 hover:bg-black/80 focus-visible:ring-2 focus-visible:ring-white"
             style={{
               background: 'rgba(0,0,0,0.6)',
               color: 'white',
@@ -1055,7 +1054,7 @@ function ArtisanDetailModal({ artisan, onClose, colors, isDimMode, API_URL }: an
                 </div>
               ) : (
                 <div className="text-center py-12" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
-                  <div className="text-4xl mb-2">🎨</div>
+                  <div className="text-4xl mb-2"><FontAwesomeIcon icon={faPalette} /></div>
                   <p className="text-sm">No products available yet</p>
                   <p className="text-xs mt-1">Check back soon for new creations!</p>
                 </div>
@@ -1074,20 +1073,9 @@ function ArtisanDetailModal({ artisan, onClose, colors, isDimMode, API_URL }: an
             <FontAwesomeIcon icon={faCrown} className="mr-1" />
             {artisan.craft_type}
           </span>
-          <button
-            onClick={onClose}
-            className="px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center gap-2"
-            style={{
-              background: isDimMode ? colors.primary : '#139EA2',
-              color: isDimMode ? '#0A0A0A' : 'white',
-              boxShadow: '0 4px 12px rgba(19,158,162,0.3)',
-              outline: 'none',
-              border: 'none',
-            }}
-          >
-            <FontAwesomeIcon icon={faTimes} className="text-sm" />
+          <Button variant="accent" size="sm" arrow={false} icon={faTimes} onClick={onClose} style={{ background: isDimMode ? colors.primary : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>
             Close
-          </button>
+          </Button>
         </div>
       </div>
 

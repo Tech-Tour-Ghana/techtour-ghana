@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Button from '@/components/ui/Button';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -434,18 +435,9 @@ function TechInnovationPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Link
-                href="/market"
-                className="px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105"
-                style={{
-                  background: isDimMode ? 'rgba(230,166,77,0.2)' : 'rgba(255,255,255,0.15)',
-                  color: 'white',
-                  backdropFilter: 'blur(8px)',
-                }}
-              >
-                <FontAwesomeIcon icon={faStore} className="mr-2" />
+              <Button href="/market" variant="onDark" size="sm" arrow={false} icon={faStore}>
                 Visit Market
-              </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -462,7 +454,7 @@ function TechInnovationPage() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="rounded-xl p-4 text-center transition-all duration-300 hover:scale-105"
+              className="rounded-xl p-4 text-center"
               style={{
                 background: isDimMode ? colors.backgroundCard : '#FFFFFF',
                 border: `1px solid ${isDimMode ? 'rgba(230,166,77,0.1)' : 'rgba(19,158,162,0.1)'}`,
@@ -501,7 +493,7 @@ function TechInnovationPage() {
               placeholder="Search innovations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm transition-all duration-200 focus:outline-none focus:ring-2"
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
               style={{
                 background: isDimMode ? colors.backgroundCard : '#FFFFFF',
                 border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
@@ -574,7 +566,7 @@ function TechInnovationPage() {
                     </div>
                     <div className="absolute bottom-3 left-3 right-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl">{innovation.icon || '🚀'}</span>
+                        <span className="text-2xl">{innovation.icon || <FontAwesomeIcon icon={faRocket} />}</span>
                         <h3 className="font-bold text-white text-sm line-clamp-1">{innovation.title}</h3>
                       </div>
                     </div>
@@ -793,7 +785,8 @@ function TechInnovationPage() {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 z-50 hover:scale-110"
+          aria-label="Scroll to top"
+          className="fixed bottom-6 right-6 w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-opacity duration-300 z-50 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-teal-600"
           style={{
             background: isDimMode ? colors.primary : '#139EA2',
             color: isDimMode ? '#0A0A0A' : 'white',
@@ -957,51 +950,19 @@ function InnovationDetailModal({ innovation, onClose, colors, isDimMode }: any) 
 
           <div className="flex flex-wrap gap-3 pt-4 border-t" style={{ borderColor: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB' }}>
             {innovation.website && (
-              <a
-                href={innovation.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center gap-2"
-                style={{
-                  background: isDimMode ? colors.primary : '#139EA2',
-                  color: isDimMode ? '#0A0A0A' : 'white',
-                }}
-              >
-                <FontAwesomeIcon icon={faExternalLinkAlt} />
+              <Button href={innovation.website} target="_blank" variant="accent" size="sm" arrow={false} icon={faExternalLinkAlt} style={{ background: isDimMode ? colors.primary : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>
                 Visit Website
-              </a>
+              </Button>
             )}
             {innovation.demo_url && (
-              <a
-                href={innovation.demo_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center gap-2"
-                style={{
-                  background: isDimMode ? 'rgba(230,166,77,0.15)' : 'rgba(19,158,162,0.1)',
-                  color: isDimMode ? colors.primary : '#139EA2',
-                  border: `1px solid ${isDimMode ? 'rgba(230,166,77,0.2)' : 'rgba(19,158,162,0.2)'}`,
-                }}
-              >
-                <FontAwesomeIcon icon={faLink} />
+              <Button href={innovation.demo_url} target="_blank" variant="secondary" size="sm" arrow={false} icon={faLink} style={{ color: isDimMode ? colors.primary : '#139EA2' }}>
                 View Demo
-              </a>
+              </Button>
             )}
             {innovation.github_url && (
-              <a
-                href={innovation.github_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center gap-2"
-                style={{
-                  background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
-                  color: isDimMode ? colors.textSecondary : colors.textSecondary,
-                  border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
-                }}
-              >
-                <FontAwesomeIcon icon={faGithub} />
+              <Button href={innovation.github_url} target="_blank" variant="secondary" size="sm" arrow={false} icon={faGithub} style={{ color: isDimMode ? colors.textSecondary : colors.textSecondary }}>
                 GitHub
-              </a>
+              </Button>
             )}
           </div>
         </div>
@@ -1013,18 +974,9 @@ function InnovationDetailModal({ innovation, onClose, colors, isDimMode }: any) 
           borderTop: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
           borderRadius: '0 0 16px 16px',
         }}>
-          <button
-            onClick={onClose}
-            className="px-8 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center gap-2"
-            style={{
-              background: isDimMode ? colors.primary : '#139EA2',
-              color: isDimMode ? '#0A0A0A' : 'white',
-              boxShadow: '0 4px 12px rgba(19,158,162,0.3)',
-            }}
-          >
-            <FontAwesomeIcon icon={faTimes} className="text-sm" />
+          <Button variant="accent" arrow={false} icon={faTimes} onClick={onClose} style={{ background: isDimMode ? colors.primary : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>
             Close
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -1178,18 +1130,9 @@ function EventDetailModal({ event, onClose, colors, isDimMode }: any) {
           borderTop: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
           borderRadius: '0 0 16px 16px',
         }}>
-          <button
-            onClick={onClose}
-            className="px-8 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center gap-2"
-            style={{
-              background: isDimMode ? colors.primary : '#139EA2',
-              color: isDimMode ? '#0A0A0A' : 'white',
-              boxShadow: '0 4px 12px rgba(19,158,162,0.3)',
-            }}
-          >
-            <FontAwesomeIcon icon={faTimes} className="text-sm" />
+          <Button variant="accent" arrow={false} icon={faTimes} onClick={onClose} style={{ background: isDimMode ? colors.primary : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>
             Close
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -1303,19 +1246,9 @@ function ResourceDetailModal({ resource, onClose, colors, isDimMode }: any) {
             </div>
           )}
 
-          <a
-            href={resource.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 hover:scale-105 mb-4"
-            style={{
-              background: isDimMode ? colors.primary : '#139EA2',
-              color: isDimMode ? '#0A0A0A' : 'white',
-            }}
-          >
-            <FontAwesomeIcon icon={faExternalLinkAlt} />
+          <Button href={resource.url} target="_blank" variant="accent" arrow={false} icon={faExternalLinkAlt} className="mb-4" style={{ background: isDimMode ? colors.primary : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>
             View Resource
-          </a>
+          </Button>
         </div>
 
         {/* Close Button - Bottom Only */}
@@ -1325,18 +1258,9 @@ function ResourceDetailModal({ resource, onClose, colors, isDimMode }: any) {
           borderTop: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
           borderRadius: '0 0 16px 16px',
         }}>
-          <button
-            onClick={onClose}
-            className="px-8 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center gap-2"
-            style={{
-              background: isDimMode ? colors.primary : '#139EA2',
-              color: isDimMode ? '#0A0A0A' : 'white',
-              boxShadow: '0 4px 12px rgba(19,158,162,0.3)',
-            }}
-          >
-            <FontAwesomeIcon icon={faTimes} className="text-sm" />
+          <Button variant="accent" arrow={false} icon={faTimes} onClick={onClose} style={{ background: isDimMode ? colors.primary : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>
             Close
-          </button>
+          </Button>
         </div>
       </div>
 

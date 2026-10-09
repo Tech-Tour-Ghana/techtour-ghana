@@ -127,12 +127,13 @@ function PasswordResetContent() {
 
         <form onSubmit={handleSubmit} className="mt-4">
           <div>
-            <label className={`block text-sm font-medium mb-1.5 ${isDarkMode ? 'text-white/70' : 'text-gray-700'}`}>Email Address</label>
+            <label htmlFor="reset-email" className={`block text-sm font-medium mb-1.5 ${isDarkMode ? 'text-white/70' : 'text-gray-700'}`}>Email Address</label>
             <input
+              id="reset-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-all ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/30 focus:border-amber-400' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-amber-400'}`}
+              className={`w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 transition-all ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-amber-400' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-amber-400'}`}
               placeholder="you@business.com"
               required
               autoFocus

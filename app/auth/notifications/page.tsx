@@ -5,6 +5,7 @@
 
 'use client';
 
+import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -108,16 +109,9 @@ export default function NotificationsPage() {
           )}
         </div>
         {unreadCount > 0 && (
-          <button
-            onClick={markAllAsRead}
-            className="px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-105"
-            style={{
-              background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
-              color: themeStyles.textSecondary,
-            }}
-          >
+          <Button variant="secondary" size="sm" arrow={false} onClick={markAllAsRead} style={{ color: themeStyles.textSecondary }}>
             Mark all as read
-          </button>
+          </Button>
         )}
       </div>
 
@@ -171,6 +165,7 @@ export default function NotificationsPage() {
                       </p>
                     </div>
                     <button
+                      aria-label="More options"
                       className="p-1.5 rounded-lg transition-all duration-200 hover:bg-opacity-10"
                       style={{ color: themeStyles.textMuted }}
                     >

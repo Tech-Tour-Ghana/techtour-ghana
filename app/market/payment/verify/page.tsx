@@ -4,7 +4,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
+import Button from '@/components/ui/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCheckCircle,
@@ -28,7 +28,7 @@ const THEME_COLORS = {
     cardBackground: '#FFFFFF',
     textPrimary: '#000000',
     textSecondary: '#4A4A4A',
-    textMuted: '#9CA3AF',
+    textMuted: '#6B7280',
     border: '#E5E7EB',
     borderLight: '#F3F4F6',
     shadow: 'rgba(0,0,0,0.08)',
@@ -159,7 +159,7 @@ function PaymentVerifyPageContent() {
               <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(16,185,129,0.2)' }}>
                 <FontAwesomeIcon icon={faCheckCircle} className="text-5xl" style={{ color: '#10B981' }} />
               </div>
-              <h2 className="text-2xl font-bold mb-2" style={{ color: theme.textPrimary }}>Payment Successful! 🎉</h2>
+              <h2 className="text-2xl font-bold mb-2" style={{ color: theme.textPrimary }}>Payment Successful</h2>
               <p className="text-sm mb-4" style={{ color: theme.textSecondary }}>{message}</p>
               <div
                 className="p-3 rounded-lg mb-4 text-left"
@@ -195,29 +195,12 @@ function PaymentVerifyPageContent() {
           )}
 
           <div className="flex flex-col gap-2 mt-4">
-            <Link
-              href="/market"
-              className="w-full py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:scale-[1.02]"
-              style={{
-                background: `linear-gradient(135deg, ${primaryColor} 0%, ${isDimMode ? '#D4953A' : '#0D7A7D'} 100%)`,
-                color: isDimMode ? '#0A0A0A' : 'white',
-              }}
-            >
-              <FontAwesomeIcon icon={faShoppingCart} />
+            <Button href="/market" variant="accent" arrow={false} full icon={faShoppingCart} style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${isDimMode ? '#D4953A' : '#0D7A7D'} 100%)`, color: isDimMode ? '#0A0A0A' : 'white' }}>
               Continue Shopping
-            </Link>
-            <Link
-              href="/"
-              className="w-full py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:scale-[1.02]"
-              style={{
-                background: 'transparent',
-                color: primaryColor,
-                border: `1px solid ${isDimMode ? 'rgba(230,166,77,0.3)' : 'rgba(19,158,162,0.3)'}`,
-              }}
-            >
-              <FontAwesomeIcon icon={faHome} />
+            </Button>
+            <Button href="/" variant="secondary" arrow={false} full icon={faHome} style={{ color: primaryColor }}>
               Go Home
-            </Link>
+            </Button>
           </div>
 
           {/* Footer */}

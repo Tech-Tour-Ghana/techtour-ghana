@@ -410,7 +410,7 @@ const Navbar = () => {
               <div className="welcome-message">{welcomeMessage}</div>
               <div className="welcome-sub">Successfully logged in</div>
             </div>
-            <button className="welcome-close" onClick={() => setShowWelcome(false)}>
+            <button className="welcome-close h-11 w-11" onClick={() => setShowWelcome(false)} aria-label="Dismiss welcome message">
               <FontAwesomeIcon icon={faTimes} />
             </button>
           </div>
@@ -446,7 +446,7 @@ const Navbar = () => {
                     onMouseLeave={handleDropdownLeave}
                   >
                     {item.has_dropdown ? (
-                      <button className="nav-link-btn">
+                      <button className="nav-link-btn" aria-haspopup="true" aria-expanded={activeDropdown === item.id}>
                         {item.label}
                         <FontAwesomeIcon icon={faCaretDown} className="nav-arrow" />
                       </button>
@@ -466,7 +466,7 @@ const Navbar = () => {
                 <FontAwesomeIcon icon={faSearch} />
               </button>
 
-              <button className="nav-theme-btn desktop-only" onClick={toggleTheme}>
+              <button className="nav-theme-btn desktop-only" onClick={toggleTheme} aria-label={isDimMode ? 'Switch to light theme' : 'Switch to dark theme'}>
                 <FontAwesomeIcon icon={isDimMode ? faSun : faMoon} />
                 <span>{isDimMode ? 'Light' : 'Dark'}</span>
               </button>
@@ -477,6 +477,8 @@ const Navbar = () => {
                     <button
                       className="nav-user-btn"
                       onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                      aria-haspopup="true"
+                      aria-expanded={isUserDropdownOpen}
                     >
                       <div className="nav-user-avatar">{getUserInitials()}</div>
                       <span className="nav-user-name">{getUserDisplayName()}</span>
@@ -575,6 +577,7 @@ const Navbar = () => {
                       <button
                         className={`mobile-dropdown-btn ${mobileDropdown === item.id ? 'expanded' : ''} ${parentActive ? 'active' : ''} ${childActive ? 'has-active-child' : ''}`}
                         onClick={() => toggleMobileDropdown(item.id)}
+                        aria-expanded={mobileDropdown === item.id}
                       >
                         <span>{item.label}</span>
                         <FontAwesomeIcon
