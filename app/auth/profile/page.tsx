@@ -1,275 +1,182 @@
-// Ported from docs/old-sites/techtour-frontend/app/auth/profile/page.tsx.
-// Markup and styling are unchanged. getProfile/updateProfile (lib/api.ts) read
-// and write public.profiles directly. display_name and location had no
-// backing column anywhere in the old or new schema (display_name is derived
-// from first/last name, location was never a real field), so the display
-// name input and location field are dropped rather than invented.
+// Profile: avatar, name, phone and bio. profiles has no country column, so
+// there is no country field. Email is shown read-only (Supabase Auth owns it).
+// The avatar upload mirrors the admin profile page (avatars bucket, signed URL).
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faEdit,
-  faSave,
-  faTimes,
-  faSpinner,
-  faCheckCircle,
-  faExclamationCircle,
-  faCalendarAlt,
-  faGlobeAfrica,
-  faEnvelope,
-  faPhone,
-  faStar,
-  faShieldAlt,
-} from '@fortawesome/free-solid-svg-icons';
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { getProfile, updateProfile, type Profile } from '@/lib/api';
-import { useTheme } from '@/context/ThemeContext';
-import DashboardLayout from '@/components/DashboardLayout';
+import { createBrowserClient } from '@/lib/supabase/client';
 import Button from '@/components/ui/Button';
+import AccountShell, { Section, StatusMessage, inputClass, useAccountTheme, type Status } from '@/components/account/AccountShell';
 
-const BRAND_COLORS = {
-  tropicalTeal: '#139EA2',
-  sandyOrange: '#E6A64D',
-};
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 export default function ProfilePage() {
-  const { isDimMode } = useTheme();
+  const t = useAccountTheme();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [avatarPath, setAvatarPath] = useState<string | null>(null);
+  const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
+  const [form, setForm] = useState({ first_name: '', last_name: '', phone_number: '', bio: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  const [formData, setFormData] = useState({ first_name: '', last_name: '', phone_number: '', bio: '' });
+  const [uploading, setUploading] = useState(false);
+  const [status, setStatus] = useState<Status>(null);
 
   useEffect(() => {
-    getProfile()
-      .then((data) => {
-        if (data) {
-          setProfile(data);
-          setFormData({
-            first_name: data.first_name,
-            last_name: data.last_name,
-            phone_number: data.phone_number,
-            bio: data.bio,
-          });
+    const supabase = createBrowserClient();
+    (async () => {
+      const data = await getProfile();
+      if (data) {
+        setProfile(data);
+        setAvatarSrc(data.avatar_url);
+        setForm({ first_name: data.first_name, last_name: data.last_name, phone_number: data.phone_number, bio: data.bio });
+        const { data: auth } = await supabase.auth.getUser();
+        if (auth.user) {
+          setUserId(auth.user.id);
+          const { data: row } = await supabase.from('profiles').select('avatar_path').eq('id', auth.user.id).maybeSingle();
+          if (row?.avatar_path) {
+            setAvatarPath(row.avatar_path);
+            const { data: signed } = await supabase.storage.from('avatars').createSignedUrl(row.avatar_path, 3600);
+            if (signed) setAvatarSrc(signed.signedUrl);
+          }
         }
-      })
-      .finally(() => setLoading(false));
+      }
+      setLoading(false);
+    })();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setMessage(null);
-
-    const result = await updateProfile(formData);
+    setStatus(null);
+    const fields = {
+      first_name: form.first_name.trim(),
+      last_name: form.last_name.trim(),
+      phone_number: form.phone_number.trim(),
+      bio: form.bio.trim(),
+    };
+    const result = await updateProfile(fields);
     if (result.success) {
-      setMessage({ type: 'success', text: 'Profile updated successfully!' });
-      setProfile((prev) => (prev ? { ...prev, ...formData } : prev));
-      setIsEditing(false);
+      setForm(fields);
+      setStatus({ type: 'success', text: 'Profile saved.' });
     } else {
-      setMessage({ type: 'error', text: result.message || 'Failed to update profile' });
+      setStatus({ type: 'error', text: result.message || 'Could not save your profile.' });
     }
     setSaving(false);
   };
 
-  const getFullName = () => {
-    if (!profile) return 'User';
-    if (profile.first_name && profile.last_name) return `${profile.first_name} ${profile.last_name}`;
-    return profile.first_name || profile.email?.split('@')[0] || 'User';
+  const handleAvatar = async (file: File) => {
+    if (!userId) return;
+    if (!file.type.startsWith('image/')) { setStatus({ type: 'error', text: 'Choose an image file.' }); return; }
+    if (file.size > MAX_AVATAR_BYTES) { setStatus({ type: 'error', text: 'Photo must be 5 MB or smaller.' }); return; }
+    setStatus(null);
+    setUploading(true);
+    const supabase = createBrowserClient();
+    const ext = file.name.split('.').pop() ?? 'jpg';
+    const path = `${userId}/${Date.now()}.${ext}`;
+    if (avatarPath) await supabase.storage.from('avatars').remove([avatarPath]);
+    const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+    if (upErr) {
+      setStatus({ type: 'error', text: 'Could not upload the photo. Please try again.' });
+    } else {
+      const { error: saveErr } = await supabase.from('profiles').update({ avatar_path: path, avatar_url: null }).eq('id', userId);
+      if (saveErr) {
+        setStatus({ type: 'error', text: 'The photo uploaded but could not be saved to your profile.' });
+      } else {
+        const { data: signed } = await supabase.storage.from('avatars').createSignedUrl(path, 3600);
+        setAvatarPath(path);
+        setAvatarSrc(signed?.signedUrl ?? null);
+        setStatus({ type: 'success', text: 'Photo updated.' });
+      }
+    }
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = '';
   };
 
-  const getUserInitials = () => getFullName().charAt(0).toUpperCase();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: isDimMode ? '#0A0A0A' : '#F9F9F9' }}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }}></div>
-          <p className="mt-4 text-sm" style={{ color: isDimMode ? '#B0B0B0' : '#4A4A4A' }}>Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#000000',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4A4A4A',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
-    inputText: isDimMode ? '#FFFFFF' : '#000000',
-  };
+  const displayName = [form.first_name, form.last_name].filter(Boolean).join(' ') || profile?.email.split('@')[0] || 'Your account';
+  const labelCls = 'block text-sm font-medium mb-1.5';
+  const fieldStyle = { background: t.inputBg, borderColor: t.inputBorder, color: t.text };
 
   return (
-    <DashboardLayout title="My Profile" subtitle="Manage your personal information">
-      <div className="max-w-4xl mx-auto">
-        {message && (
-          <div className={`p-4 rounded-xl mb-6 flex items-center gap-3 ${
-            message.type === 'success'
-              ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-400'
-              : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-400'
-          }`}>
-            <FontAwesomeIcon icon={message.type === 'success' ? faCheckCircle : faExclamationCircle} />
-            <span>{message.text}</span>
-          </div>
-        )}
-
-        <div className="rounded-2xl shadow-lg overflow-hidden" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
-          <div className="h-28 relative" style={{ background: `linear-gradient(135deg, ${BRAND_COLORS.tropicalTeal}, ${BRAND_COLORS.sandyOrange})` }}>
-            <div className="absolute -bottom-12 left-6 flex items-end gap-4">
-              <div
-                className="w-24 h-24 rounded-full border-4 flex items-center justify-center text-3xl font-bold"
-                style={{ background: themeStyles.cardBg, borderColor: themeStyles.cardBg, color: BRAND_COLORS.tropicalTeal }}
-              >
-                {getUserInitials()}
-              </div>
-            </div>
-            <div className="absolute bottom-4 right-6 flex gap-2">
-              {!isEditing ? (
-                <Button variant="onDark" size="sm" arrow={false} icon={faEdit} onClick={() => setIsEditing(true)}>
-                  Edit Profile
-                </Button>
+    <AccountShell title="Profile" subtitle="Your name, photo and contact details">
+      <StatusMessage status={status} />
+      {loading ? (
+        <p role="status" className="text-sm" style={{ color: t.textSecondary }}>Loading profile...</p>
+      ) : !profile ? (
+        <p role="alert" className="text-sm" style={{ color: t.textSecondary }}>We could not load your profile. Refresh the page to try again.</p>
+      ) : (
+        <>
+          <Section title="Photo">
+            <div className="flex items-center gap-4">
+              {avatarSrc ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatarSrc} alt={`${displayName} profile photo`} className="w-20 h-20 rounded-full object-cover flex-shrink-0" />
               ) : (
-                <div className="flex gap-2">
-                  <Button variant="onDark" size="sm" arrow={false} icon={faTimes} onClick={() => setIsEditing(false)}>
-                    Cancel
-                  </Button>
-                  <Button variant="light" size="sm" arrow={false} icon={saving ? faSpinner : faSave} onClick={handleSubmit} disabled={saving}>
-                    {saving ? 'Saving...' : 'Save'}
-                  </Button>
+                <div aria-hidden className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-semibold flex-shrink-0" style={{ background: 'rgba(19,158,162,0.15)', color: '#0E7C80' }}>
+                  {displayName.charAt(0).toUpperCase()}
                 </div>
               )}
+              <div>
+                <input
+                  ref={fileRef}
+                  id="profile-avatar"
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleAvatar(f); }}
+                />
+                <Button variant="secondary" size="sm" arrow={false} loading={uploading} onClick={() => fileRef.current?.click()} style={{ color: t.text }}>
+                  {uploading ? 'Uploading...' : avatarSrc ? 'Change photo' : 'Upload photo'}
+                </Button>
+                <p className="text-xs mt-2" style={{ color: t.textMuted }}>JPG, PNG or WebP, up to 5 MB.</p>
+              </div>
             </div>
-          </div>
+          </Section>
 
-          <div className="pt-16 p-6">
-            {isEditing ? (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="profile-first_name" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>First Name</label>
-                    <input
-                      type="text"
-                      id="profile-first_name"
-                      name="first_name"
-                      value={formData.first_name}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
-                      style={{ background: themeStyles.inputBg, borderColor: themeStyles.inputBorder, color: themeStyles.inputText }}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="profile-last_name" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Last Name</label>
-                    <input
-                      type="text"
-                      id="profile-last_name"
-                      name="last_name"
-                      value={formData.last_name}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
-                      style={{ background: themeStyles.inputBg, borderColor: themeStyles.inputBorder, color: themeStyles.inputText }}
-                    />
-                  </div>
-                </div>
-
+          <Section title="Personal details">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="profile-phone_number" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Phone Number</label>
-                  <input
-                    type="tel"
-                    id="profile-phone_number"
-                      name="phone_number"
-                    value={formData.phone_number}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
-                    style={{ background: themeStyles.inputBg, borderColor: themeStyles.inputBorder, color: themeStyles.inputText }}
-                  />
+                  <label htmlFor="profile-first_name" className={labelCls} style={{ color: t.textSecondary }}>First name</label>
+                  <input id="profile-first_name" name="first_name" type="text" autoComplete="given-name" value={form.first_name} onChange={handleChange} className={inputClass} style={fieldStyle} />
                 </div>
-
                 <div>
-                  <label htmlFor="profile-bio" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Bio</label>
-                  <textarea
-                    id="profile-bio"
-                      name="bio"
-                    rows={3}
-                    value={formData.bio}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
-                    style={{ background: themeStyles.inputBg, borderColor: themeStyles.inputBorder, color: themeStyles.inputText }}
-                  />
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-wider" style={{ color: themeStyles.textMuted }}>Full Name</p>
-                    <p className="text-lg font-semibold mt-1" style={{ color: themeStyles.textPrimary }}>{getFullName()}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider" style={{ color: themeStyles.textMuted }}>Email</p>
-                    <p className="text-lg font-semibold mt-1" style={{ color: themeStyles.textPrimary }}>
-                      <FontAwesomeIcon icon={faEnvelope} className="w-4 h-4 mr-2" style={{ color: themeStyles.textMuted }} />
-                      {profile?.email}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider" style={{ color: themeStyles.textMuted }}>Phone</p>
-                    <p className="text-lg font-semibold mt-1" style={{ color: themeStyles.textPrimary }}>
-                      <FontAwesomeIcon icon={faPhone} className="w-4 h-4 mr-2" style={{ color: themeStyles.textMuted }} />
-                      {formData.phone_number || 'Not provided'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider" style={{ color: themeStyles.textMuted }}>Member Since</p>
-                    <p className="text-lg font-semibold mt-1" style={{ color: themeStyles.textPrimary }}>
-                      <FontAwesomeIcon icon={faCalendarAlt} className="w-4 h-4 mr-2" style={{ color: themeStyles.textMuted }} />
-                      {new Date(profile?.created_at || Date.now()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                    </p>
-                  </div>
-                </div>
-
-                {formData.bio && (
-                  <div className="pt-4 border-t" style={{ borderColor: themeStyles.border }}>
-                    <p className="text-xs uppercase tracking-wider" style={{ color: themeStyles.textMuted }}>Bio</p>
-                    <p className="mt-2" style={{ color: themeStyles.textPrimary }}>{formData.bio}</p>
-                  </div>
-                )}
-
-                <div className="pt-4 border-t flex items-center gap-3 flex-wrap" style={{ borderColor: themeStyles.border }}>
-                  <span className="px-4 py-1.5 text-xs font-medium rounded-full flex items-center gap-1.5" style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981' }}>
-                    <FontAwesomeIcon icon={faCheckCircle} className="w-3 h-3" />
-                    Active Member
-                  </span>
-                  <span className="px-4 py-1.5 text-xs font-medium rounded-full flex items-center gap-1.5" style={{ background: 'rgba(251,191,36,0.1)', color: '#F59E0B' }}>
-                    <FontAwesomeIcon icon={faStar} className="w-3 h-3" />
-                    Verified
-                  </span>
-                  <span className="px-4 py-1.5 text-xs font-medium rounded-full flex items-center gap-1.5" style={{ background: 'rgba(139,92,246,0.1)', color: '#8B5CF6' }}>
-                    <FontAwesomeIcon icon={faShieldAlt} className="w-3 h-3" />
-                    Trusted
-                  </span>
+                  <label htmlFor="profile-last_name" className={labelCls} style={{ color: t.textSecondary }}>Last name</label>
+                  <input id="profile-last_name" name="last_name" type="text" autoComplete="family-name" value={form.last_name} onChange={handleChange} className={inputClass} style={fieldStyle} />
                 </div>
               </div>
-            )}
-          </div>
-        </div>
+              <div>
+                <label htmlFor="profile-email" className={labelCls} style={{ color: t.textSecondary }}>Email</label>
+                <input id="profile-email" type="email" value={profile.email} readOnly aria-describedby="profile-email-help" className={inputClass} style={fieldStyle} />
+                <p id="profile-email-help" className="text-xs mt-1.5" style={{ color: t.textMuted }}>
+                  This is your sign-in email and cannot be edited here. Manage how you sign in under{' '}
+                  <Link href="/auth/security" className="underline" style={{ color: '#0E7C80' }}>Security</Link>.
+                </p>
+              </div>
+              <div>
+                <label htmlFor="profile-phone_number" className={labelCls} style={{ color: t.textSecondary }}>Phone number</label>
+                <input id="profile-phone_number" name="phone_number" type="tel" autoComplete="tel" value={form.phone_number} onChange={handleChange} className={inputClass} style={fieldStyle} />
+              </div>
+              <div>
+                <label htmlFor="profile-bio" className={labelCls} style={{ color: t.textSecondary }}>Bio</label>
+                <textarea id="profile-bio" name="bio" rows={4} value={form.bio} onChange={handleChange} className={inputClass} style={fieldStyle} />
+              </div>
+              <Button type="submit" variant="accent" arrow={false} loading={saving}>{saving ? 'Saving...' : 'Save changes'}</Button>
+            </form>
+          </Section>
 
-        <div className="mt-8 text-center">
-          <p className="text-xs" style={{ color: themeStyles.textMuted }}>
-            <FontAwesomeIcon icon={faGlobeAfrica} className="mr-1" />
-            TechTour Ghana — Redefining African Tourism Through Innovation
+          <p className="text-xs" style={{ color: t.textMuted }}>
+            Member since {new Date(profile.created_at).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
-        </div>
-      </div>
-    </DashboardLayout>
+        </>
+      )}
+    </AccountShell>
   );
 }

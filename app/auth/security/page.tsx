@@ -1,18 +1,13 @@
-// Ported from docs/old-sites/techtour-frontend/app/auth/security/page.tsx.
-// Markup and styling are unchanged where the feature exists. Change password
-// re-checks the current password then updates it through Supabase Auth. Two
-// factor authentication is a real authenticator app (TOTP) enrolment, the old
-// toggle only flipped local state. Supabase does not expose a list of other
-// sessions to the browser, so the two invented session rows are replaced by
-// this browser plus a button that signs out every other device.
-
+// Security: password (re-checks the current one), authenticator app two-factor,
+// and sign out of other devices. Supabase does not list other sessions to the
+// browser, so only this browser is shown.
 
 'use client';
 
+import { useEffect, useState } from 'react';
 import Button from '@/components/ui/Button';
-import { useState, useEffect } from 'react';
-import { useTheme } from '@/context/ThemeContext';
-import DashboardLayout from '@/components/DashboardLayout';
+import AccountShell, { Section, StatusMessage, inputClass, useAccountTheme, type Status } from '@/components/account/AccountShell';
+import PasswordInput from '@/components/account/PasswordInput';
 import {
   changePasswordWithCurrent,
   disableTotp,
@@ -21,104 +16,66 @@ import {
   signOutOtherSessions,
   verifyTotp,
 } from '@/lib/api';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faShieldAlt,
-  faGlobeAfrica,
-  faLock,
-  faKey,
-  faQrcode,
-  faCheckCircle,
-  faExclamationCircle,
-  faSpinner,
-  faEye,
-  faEyeSlash,
-  faMobileAlt,
-  faEnvelope,
-  faClock,
-  faTimes,
-} from '@fortawesome/free-solid-svg-icons';
-
-const BRAND_COLORS = {
-  tropicalTeal: '#139EA2',
-  sandyOrange: '#E6A64D',
-};
 
 export default function SecurityPage() {
-  const { isDimMode } = useTheme();
+  const t = useAccountTheme();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [passwordStatus, setPasswordStatus] = useState<Status>(null);
+  const [twoFactorStatus, setTwoFactorStatus] = useState<Status>(null);
+  const [sessionStatus, setSessionStatus] = useState<Status>(null);
+  const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' });
 
-  const [passwordData, setPasswordData] = useState({
-    current_password: '',
-    new_password: '',
-    confirm_password: '',
-  });
-  const [showPassword, setShowPassword] = useState({
-    current: false,
-    new: false,
-    confirm: false,
-  });
-
-  const [twoFactorFactorId, setTwoFactorFactorId] = useState<string | null>(null);
-  const twoFactorEnabled = twoFactorFactorId !== null;
+  const [factorId, setFactorId] = useState<string | null>(null);
   const [enrolment, setEnrolment] = useState<{ id: string; qrCode: string; secret: string } | null>(null);
   const [totpCode, setTotpCode] = useState('');
   const [browser, setBrowser] = useState('This browser');
 
   useEffect(() => {
-    getTotpFactorId()
-      .then(setTwoFactorFactorId)
-      .finally(() => setLoading(false));
+    getTotpFactorId().then(setFactorId).finally(() => setLoading(false));
     const ua = navigator.userAgent;
     const name = /Edg\//.test(ua) ? 'Edge' : /Chrome\//.test(ua) ? 'Chrome' : /Firefox\//.test(ua) ? 'Firefox' : /Safari\//.test(ua) ? 'Safari' : 'Browser';
     const os = /Windows/.test(ua) ? 'Windows' : /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : /Mac OS/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : '';
     setBrowser(os ? `${name} on ${os}` : name);
   }, []);
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
+  const handlePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordData.new_password !== passwordData.confirm_password) {
-      setMessage({ type: 'error', text: 'New passwords do not match' });
+    if (passwords.next !== passwords.confirm) {
+      setPasswordStatus({ type: 'error', text: 'The new passwords do not match.' });
       return;
     }
-    if (passwordData.new_password.length < 8) {
-      setMessage({ type: 'error', text: 'Password must be at least 8 characters' });
+    if (passwords.next.length < 8) {
+      setPasswordStatus({ type: 'error', text: 'The new password must be at least 8 characters.' });
       return;
     }
-
     setSaving(true);
-    setMessage(null);
-
-    const result = await changePasswordWithCurrent(passwordData.current_password, passwordData.new_password);
+    setPasswordStatus(null);
+    const result = await changePasswordWithCurrent(passwords.current, passwords.next);
     if (result.success) {
-      setMessage({ type: 'success', text: 'Password changed successfully!' });
-      setPasswordData({ current_password: '', new_password: '', confirm_password: '' });
+      setPasswordStatus({ type: 'success', text: 'Password updated.' });
+      setPasswords({ current: '', next: '', confirm: '' });
     } else {
-      setMessage({ type: 'error', text: result.message || 'Failed to change password' });
+      setPasswordStatus({ type: 'error', text: result.message || 'Could not update your password.' });
     }
     setSaving(false);
   };
 
   const toggleTwoFactor = async () => {
-    setMessage(null);
-    if (twoFactorFactorId) {
-      const result = await disableTotp(twoFactorFactorId);
+    setTwoFactorStatus(null);
+    if (factorId) {
+      const result = await disableTotp(factorId);
       if (result.success) {
-        setTwoFactorFactorId(null);
-        setMessage({ type: 'success', text: 'Two-factor authentication disabled.' });
+        setFactorId(null);
+        setTwoFactorStatus({ type: 'success', text: 'Two-factor authentication turned off.' });
       } else {
-        setMessage({ type: 'error', text: result.message || 'Could not disable two-factor authentication' });
+        setTwoFactorStatus({ type: 'error', text: result.message || 'Could not turn off two-factor authentication.' });
       }
       return;
     }
     const started = await enrollTotp();
-    if ('error' in started) {
-      setMessage({ type: 'error', text: started.error });
-      return;
-    }
-    setEnrolment(started);
+    if ('error' in started) setTwoFactorStatus({ type: 'error', text: started.error });
+    else setEnrolment(started);
   };
 
   const confirmTwoFactor = async (e: React.FormEvent) => {
@@ -126,255 +83,95 @@ export default function SecurityPage() {
     if (!enrolment) return;
     const result = await verifyTotp(enrolment.id, totpCode.trim());
     if (result.success) {
-      setTwoFactorFactorId(enrolment.id);
+      setFactorId(enrolment.id);
       setEnrolment(null);
       setTotpCode('');
-      setMessage({ type: 'success', text: 'Two-factor authentication enabled.' });
+      setTwoFactorStatus({ type: 'success', text: 'Two-factor authentication turned on.' });
     } else {
-      setMessage({ type: 'error', text: result.message || 'That code did not match, try again.' });
+      setTwoFactorStatus({ type: 'error', text: result.message || 'That code did not match, try again.' });
     }
   };
 
   const handleSignOutOthers = async () => {
     const ok = await signOutOtherSessions();
-    setMessage(ok
+    setSessionStatus(ok
       ? { type: 'success', text: 'Signed out of all other devices.' }
       : { type: 'error', text: 'Could not sign out other devices.' });
   };
 
-  const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#000000',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4A4A4A',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
-    inputText: isDimMode ? '#FFFFFF' : '#000000',
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: isDimMode ? '#0A0A0A' : '#F9F9F9' }}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }}></div>
-          <p className="mt-4 text-sm" style={{ color: themeStyles.textSecondary }}>Loading security settings...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <DashboardLayout title="Security" subtitle="Manage your account security">
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Message */}
-        {message && (
-          <div className={`p-4 rounded-xl flex items-center gap-3 ${
-            message.type === 'success'
-              ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-400'
-              : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-400'
-          }`}>
-            <FontAwesomeIcon icon={message.type === 'success' ? faCheckCircle : faExclamationCircle} />
-            <span>{message.text}</span>
-          </div>
-        )}
+    <AccountShell title="Security" subtitle="Password, two-factor authentication and devices">
+      {loading ? (
+        <p role="status" className="text-sm" style={{ color: t.textSecondary }}>Loading security settings...</p>
+      ) : (
+        <>
+          <Section id="password" title="Password" description="Enter your current password, then choose a new one of at least 8 characters.">
+            <form onSubmit={handlePassword} className="space-y-4 max-w-md">
+              <StatusMessage status={passwordStatus} />
+              <PasswordInput id="sec-current" label="Current password" autoComplete="current-password" value={passwords.current} onChange={(v) => setPasswords({ ...passwords, current: v })} />
+              <PasswordInput id="sec-new" label="New password" autoComplete="new-password" value={passwords.next} onChange={(v) => setPasswords({ ...passwords, next: v })} />
+              <PasswordInput id="sec-confirm" label="Confirm new password" autoComplete="new-password" value={passwords.confirm} onChange={(v) => setPasswords({ ...passwords, confirm: v })} />
+              <Button type="submit" variant="accent" arrow={false} loading={saving}>{saving ? 'Updating...' : 'Update password'}</Button>
+            </form>
+          </Section>
 
-        {/* Change Password */}
-        <div className="rounded-2xl p-6" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
-          <h3 className="text-lg font-semibold mb-4" style={{ color: themeStyles.textPrimary }}>
-            <FontAwesomeIcon icon={faLock} className="w-5 h-5 mr-2" style={{ color: BRAND_COLORS.tropicalTeal }} />
-            Change Password
-          </h3>
-          <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
-            <div>
-              <label htmlFor="sec-current" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>
-                Current Password
-              </label>
-              <div className="relative">
-                <input
-                  id="sec-current"
-                  type={showPassword.current ? 'text' : 'password'}
-                  value={passwordData.current_password}
-                  onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
-                  className="w-full px-4 py-2 pr-10 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
-                  style={{
-                    background: themeStyles.inputBg,
-                    borderColor: themeStyles.inputBorder,
-                    color: themeStyles.inputText,
-                  }}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword({ ...showPassword, current: !showPassword.current })}
-                  aria-label={showPassword.current ? 'Hide password' : 'Show password'}
-                  aria-pressed={showPassword.current}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2.5"
-                  style={{ color: themeStyles.textSecondary }}
-                >
-                  <FontAwesomeIcon icon={showPassword.current ? faEyeSlash : faEye} />
-                </button>
-              </div>
-            </div>
-            <div>
-              <label htmlFor="sec-new" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>
-                New Password
-              </label>
-              <div className="relative">
-                <input
-                  id="sec-new"
-                  type={showPassword.new ? 'text' : 'password'}
-                  value={passwordData.new_password}
-                  onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
-                  className="w-full px-4 py-2 pr-10 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
-                  style={{
-                    background: themeStyles.inputBg,
-                    borderColor: themeStyles.inputBorder,
-                    color: themeStyles.inputText,
-                  }}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword({ ...showPassword, new: !showPassword.new })}
-                  aria-label={showPassword.new ? 'Hide password' : 'Show password'}
-                  aria-pressed={showPassword.new}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2.5"
-                  style={{ color: themeStyles.textSecondary }}
-                >
-                  <FontAwesomeIcon icon={showPassword.new ? faEyeSlash : faEye} />
-                </button>
-              </div>
-            </div>
-            <div>
-              <label htmlFor="sec-confirm" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>
-                Confirm New Password
-              </label>
-              <div className="relative">
-                <input
-                  id="sec-confirm"
-                  type={showPassword.confirm ? 'text' : 'password'}
-                  value={passwordData.confirm_password}
-                  onChange={(e) => setPasswordData({ ...passwordData, confirm_password: e.target.value })}
-                  className="w-full px-4 py-2 pr-10 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
-                  style={{
-                    background: themeStyles.inputBg,
-                    borderColor: themeStyles.inputBorder,
-                    color: themeStyles.inputText,
-                  }}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword({ ...showPassword, confirm: !showPassword.confirm })}
-                  aria-label={showPassword.confirm ? 'Hide password' : 'Show password'}
-                  aria-pressed={showPassword.confirm}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2.5"
-                  style={{ color: themeStyles.textSecondary }}
-                >
-                  <FontAwesomeIcon icon={showPassword.confirm ? faEyeSlash : faEye} />
-                </button>
-              </div>
-            </div>
-            <Button type="submit" variant="accent" loading={saving}>{saving ? 'Updating...' : 'Update Password'}</Button>
-          </form>
-        </div>
-
-        {/* Two-Factor Authentication */}
-        <div className="rounded-2xl p-6" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
-          <h3 className="text-lg font-semibold mb-4" style={{ color: themeStyles.textPrimary }}>
-            <FontAwesomeIcon icon={faShieldAlt} className="w-5 h-5 mr-2" style={{ color: BRAND_COLORS.tropicalTeal }} />
-            Two-Factor Authentication
-          </h3>
-          <div className="flex items-center justify-between p-4 rounded-xl" style={{
-            background: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
-            border: `1px solid ${themeStyles.border}`,
-          }}>
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="font-medium" style={{ color: themeStyles.textPrimary }}>
-                  <FontAwesomeIcon icon={twoFactorEnabled ? faCheckCircle : faExclamationCircle} className="mr-2" style={{ color: twoFactorEnabled ? '#10B981' : '#EF4444' }} />
-                  {twoFactorEnabled ? '2FA Enabled' : '2FA Disabled'}
+          <Section id="two-factor" title="Two-factor authentication" description="Require a code from an authenticator app each time you sign in.">
+            <div className="space-y-4">
+              <StatusMessage status={twoFactorStatus} />
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm font-medium" style={{ color: t.text }}>
+                  Status: {factorId ? 'On' : 'Off'}
                 </p>
-                {twoFactorEnabled && (
-                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981' }}>
-                    Secure
-                  </span>
+                {!enrolment && (
+                  <Button variant={factorId ? 'danger' : 'accent'} size="sm" arrow={false} onClick={toggleTwoFactor}>
+                    {factorId ? 'Turn off' : 'Set up'}
+                  </Button>
                 )}
               </div>
-              <p className="text-sm" style={{ color: themeStyles.textSecondary }}>
-                {twoFactorEnabled
-                  ? 'Your account is protected with two-factor authentication'
-                  : 'Add an extra layer of security to your account'
-                }
-              </p>
+              {enrolment && (
+                <form onSubmit={confirmTwoFactor} className="space-y-3 pt-4 border-t" style={{ borderColor: t.border }}>
+                  <p className="text-sm" style={{ color: t.textSecondary }}>
+                    Scan this QR code with an authenticator app, then enter the 6 digit code it shows.
+                  </p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={enrolment.qrCode} alt="QR code for your authenticator app" className="w-40 h-40 bg-white p-2 rounded-lg" />
+                  <p className="text-xs break-all" style={{ color: t.textMuted }}>Or enter this key manually: {enrolment.secret}</p>
+                  <div>
+                    <label htmlFor="sec-totp" className="block text-sm font-medium mb-1.5" style={{ color: t.textSecondary }}>6 digit code</label>
+                    <div className="flex flex-wrap gap-2">
+                      <input
+                        id="sec-totp"
+                        value={totpCode}
+                        onChange={(e) => setTotpCode(e.target.value)}
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        maxLength={6}
+                        required
+                        className={`${inputClass} w-40`}
+                        style={{ background: t.inputBg, borderColor: t.inputBorder, color: t.text }}
+                      />
+                      <Button type="submit" variant="accent" size="sm" arrow={false}>Verify</Button>
+                      <Button variant="secondary" size="sm" arrow={false} onClick={() => { setEnrolment(null); setTotpCode(''); }} style={{ color: t.text }}>Cancel</Button>
+                    </div>
+                  </div>
+                </form>
+              )}
             </div>
-            <Button variant={twoFactorEnabled ? 'danger' : 'accent'} size="sm" arrow={false} icon={twoFactorEnabled ? faTimes : faQrcode} onClick={toggleTwoFactor}>
-              {twoFactorEnabled ? 'Disable' : 'Set Up'}
-            </Button>
-          </div>
-          {enrolment && (
-            <form onSubmit={confirmTwoFactor} className="mt-4 p-4 rounded-xl space-y-3" style={{ border: `1px solid ${themeStyles.border}` }}>
-              <p className="text-sm" style={{ color: themeStyles.textSecondary }}>
-                Scan this QR code with an authenticator app, then enter the 6 digit code it shows.
+          </Section>
+
+          <Section id="devices" title="Devices" description="Where you are signed in.">
+            <div className="space-y-4">
+              <StatusMessage status={sessionStatus} />
+              <p className="text-sm" style={{ color: t.text }}>
+                <span className="font-medium">{browser}</span>
+                <span style={{ color: t.textMuted }}> (this device, active now)</span>
               </p>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={enrolment.qrCode} alt="Authenticator QR code" className="w-40 h-40 bg-white p-2 rounded-lg" />
-              <p className="text-xs break-all" style={{ color: themeStyles.textMuted }}>Or enter this key manually: {enrolment.secret}</p>
-              <div className="flex gap-2">
-                <input
-                  value={totpCode}
-                  onChange={(e) => setTotpCode(e.target.value)}
-                  inputMode="numeric"
-                  maxLength={6}
-                  placeholder="123456"
-                  aria-label="6 digit authenticator code"
-                  className="px-4 py-2.5 rounded-xl text-sm focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none"
-                  style={{ background: themeStyles.inputBg, border: `1px solid ${themeStyles.inputBorder}`, color: themeStyles.inputText }}
-                />
-                <Button type="submit" variant="accent" size="sm">Verify</Button>
-              </div>
-            </form>
-          )}
-        </div>
-
-        {/* Session Management */}
-        <div className="rounded-2xl p-6" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
-          <h3 className="text-lg font-semibold mb-4" style={{ color: themeStyles.textPrimary }}>
-            <FontAwesomeIcon icon={faClock} className="w-5 h-5 mr-2" style={{ color: BRAND_COLORS.tropicalTeal }} />
-            Active Sessions
-          </h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-xl" style={{
-              background: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
-              border: `1px solid ${themeStyles.border}`,
-            }}>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.1)' }}>
-                  <FontAwesomeIcon icon={faMobileAlt} style={{ color: '#3B82F6' }} />
-                </div>
-                <div>
-                  <p className="font-medium text-sm" style={{ color: themeStyles.textPrimary }}>Current Session</p>
-                  <p className="text-xs" style={{ color: themeStyles.textMuted }}>{browser} • Active now</p>
-                </div>
-              </div>
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981' }}>
-                Active
-              </span>
+              <p className="text-xs" style={{ color: t.textMuted }}>Other devices cannot be listed, but you can sign them all out.</p>
+              <Button variant="danger" size="sm" arrow={false} onClick={handleSignOutOthers}>Sign out of all other devices</Button>
             </div>
-            <Button variant="secondary" size="sm" arrow={false} onClick={handleSignOutOthers} style={{ color: '#DC2626' }}>
-              Sign out of all other devices
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-8 text-center">
-        <p className="text-xs" style={{ color: themeStyles.textMuted }}>
-          <FontAwesomeIcon icon={faGlobeAfrica} className="mr-1" />
-          TechTour Ghana — Redefining African Tourism Through Innovation
-        </p>
-      </div>
-    </DashboardLayout>
+          </Section>
+        </>
+      )}
+    </AccountShell>
   );
 }
