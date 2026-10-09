@@ -250,7 +250,7 @@ export default function AdminTeamPage() {
             <tr key={m.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
               <td className="px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <Avatar name={m.name} size={36} />
+                  <Avatar name={m.name} src={m.image_path} size={36} />
                   <div className="min-w-0">
                     <p className="truncate font-medium" style={{ color: 'var(--adm-text)' }}>{m.name}</p>
                     <p className="truncate text-xs" style={{ color: 'var(--adm-muted)' }}>{m.position}</p>
@@ -341,7 +341,7 @@ Cancel
               <Field label="Bio">
                 <textarea rows={3} style={{ ...inputStyle, resize: 'vertical' }} value={memberModal.data.bio} onChange={e => setMemberModal(s => ({ ...s, data: { ...s.data, bio: e.target.value } }))} />
               </Field>
-              <Field label="Image Path">
+              <Field label="Photo">
                 <UrlWithPicker inputStyle={inputStyle} value={memberModal.data.image_path ?? ''} onChange={v => setMemberModal(s => ({ ...s, data: { ...s.data, image_path: v || null } }))} />
               </Field>
               <Field label="LinkedIn URL">
