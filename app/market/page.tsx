@@ -64,11 +64,14 @@ import {
   faPlay,
   faPause,
   faImage,
+  faLock,
+  faCheck,
 } from '@fortawesome/free-solid-svg-icons';
 import SearchParamsWrapper from '@/components/SearchParamsWrapper';
 import Loading from '@/components/Loading';
 import { useCart } from '@/context/CartContext';
 import Cart from '@/components/Cart';
+import Toast from '@/components/Toast';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { MARKET_COLORS as COLORS, PRODUCT_SELECT, toMarketProduct } from '@/components/market/shared';
 import { CURRENCIES, useCurrencies, type Currency } from '@/lib/currency';
@@ -197,7 +200,7 @@ const LoginToast = ({ message, onClose, isDimMode, colors }: any) => {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <span style={{ fontSize: '24px' }}>🔒</span>
+        <FontAwesomeIcon icon={faLock} style={{ fontSize: '24px', color: isDimMode ? '#E6A64D' : '#139EA2' }} />
         <div>
           <div style={{ fontWeight: '600', fontSize: '15px', color: isDimMode ? '#FFFFFF' : '#000000' }}>
             Login Required
@@ -208,13 +211,14 @@ const LoginToast = ({ message, onClose, isDimMode, colors }: any) => {
         </div>
         <button
           onClick={onClose}
+          aria-label="Dismiss"
           style={{
             background: 'transparent',
             border: 'none',
             cursor: 'pointer',
             fontSize: '16px',
-            color: isDimMode ? '#6B7280' : '#9CA3AF',
-            padding: '4px',
+            color: isDimMode ? '#B0B0B0' : '#6B7280',
+            padding: '10px',
           }}
         >
           <FontAwesomeIcon icon={faTimes} />
@@ -235,10 +239,7 @@ const LoginToast = ({ message, onClose, isDimMode, colors }: any) => {
             fontSize: '13px',
             textAlign: 'center',
             textDecoration: 'none',
-            transition: 'transform 0.2s',
           }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
           Login
         </Link>
@@ -318,7 +319,7 @@ const ProductCard = React.memo(({
     buttonText = 'Login to Add';
     buttonVariant = 'secondary';
   } else if (isInCart) {
-    buttonText = 'In Cart ✓';
+    buttonText = 'In Cart';
     buttonVariant = 'success';
   } else if (!product.is_in_stock) {
     buttonText = 'Out of Stock';
@@ -467,13 +468,14 @@ const ProductCard = React.memo(({
               type="button"
               onClick={() => onWishlistToggle && onWishlistToggle(product.id)}
               aria-pressed={isWishlisted}
+              aria-label={`Wishlist ${product.title}`}
               className="flex items-center justify-center gap-2 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-colors hover:bg-black/[0.03]"
               style={{ border: `1px solid ${isDimMode ? colors.border : '#E5E7EB'}`, color: isWishlisted ? '#EF4444' : colors.textSecondary, background: 'transparent' }}
             >
               <FontAwesomeIcon icon={faHeart} className="text-sm" />
               <span className="hidden sm:inline">{isWishlisted ? 'Saved' : 'Wishlist'}</span>
             </button>
-            <Button size="sm" variant={buttonVariant === 'secondary' ? 'secondary' : 'accent'} arrow={!isDisabled} onClick={handleAddToCartClick} disabled={isDisabled} icon={faShoppingCart} full style={getButtonStyles()}>
+            <Button size="sm" variant={buttonVariant === 'secondary' ? 'secondary' : 'accent'} arrow={!isDisabled} onClick={handleAddToCartClick} disabled={isDisabled} icon={isInCart ? faCheck : faShoppingCart} full style={getButtonStyles()}>
               {buttonText}
             </Button>
           </div>
@@ -619,7 +621,7 @@ const ProductCard = React.memo(({
           <div className="flex flex-wrap items-center gap-1.5">
             <Link
               href={`/market/${product.slug}`}
-              className="px-2.5 py-1.5 md:px-3.5 md:py-2 text-[10px] md:text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105 flex items-center gap-1.5"
+              className="px-2.5 py-1.5 md:px-3.5 md:py-2 text-[10px] md:text-xs font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5"
               style={{
                 background: isDimMode ? 'rgba(230,166,77,0.15)' : 'rgba(19,158,162,0.1)',
                 color: isDimMode ? colors.primary : '#139EA2',
@@ -628,7 +630,7 @@ const ProductCard = React.memo(({
               <FontAwesomeIcon icon={faEye} className="text-[10px] md:text-xs" />
               View details
             </Link>
-            <Button size="sm" variant={buttonVariant === 'secondary' ? 'secondary' : 'accent'} arrow={!isDisabled} onClick={handleAddToCartClick} disabled={isDisabled} icon={faShoppingCart} style={getButtonStyles()}>
+            <Button size="sm" variant={buttonVariant === 'secondary' ? 'secondary' : 'accent'} arrow={!isDisabled} onClick={handleAddToCartClick} disabled={isDisabled} icon={isInCart ? faCheck : faShoppingCart} style={getButtonStyles()}>
               {buttonText}
             </Button>
           </div>
@@ -679,6 +681,8 @@ function MarketPage() {
 
   const [showLoginToast, setShowLoginToast] = useState(false);
   const [loginToastMessage, setLoginToastMessage] = useState('');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const closeToast = useCallback(() => setToast(null), []);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
@@ -970,7 +974,7 @@ function MarketPage() {
     const total = getCartTotal ? getCartTotal() : 0;
 
     if (cartItems.length === 0) {
-      alert('Your cart is empty. Please add items before proceeding to payment.');
+      setToast({ message: 'Your cart is empty. Please add items before proceeding to payment.', type: 'error' });
       return;
     }
 
@@ -991,13 +995,13 @@ function MarketPage() {
   const handlePaymentSuccess = useCallback((reference: string, transaction: any) => {
     console.log('Payment successful:', reference, transaction);
     setShowPaymentModal(false);
-    alert(`✅ Payment successful! Your order #${paymentOrderDetails?.orderId} has been confirmed.`);
+    setToast({ message: `Payment successful! Your order #${paymentOrderDetails?.orderId} has been confirmed.`, type: 'success' });
   }, [paymentOrderDetails]);
 
   const handlePaymentError = useCallback((error: string) => {
     console.error('Payment error:', error);
     setShowPaymentModal(false);
-    alert(`❌ Payment failed: ${error}`);
+    setToast({ message: `Payment failed: ${error}`, type: 'error' });
   }, []);
 
   // ===== HANDLERS =====
@@ -1093,6 +1097,8 @@ function MarketPage() {
   return (
     <div className="min-h-screen transition-colors duration-300" style={{ background: isDimMode ? colors.background : colors.background }}>
 
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+
       {showLoginToast && (
         <LoginToast
           message={loginToastMessage}
@@ -1183,7 +1189,7 @@ function MarketPage() {
               }}
               onFocus={() => setShowSearchSuggestions(true)}
               onBlur={() => setTimeout(() => setShowSearchSuggestions(false), 200)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm transition-all duration-200 focus:outline-none focus:ring-2"
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
               style={{
                 background: isDimMode ? colors.backgroundCard : '#FFFFFF',
                 border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
@@ -1194,9 +1200,10 @@ function MarketPage() {
 
           <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
             <select
+              aria-label="Filter by category"
               value={selectedCategory}
               onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
-              className="px-3 py-2.5 rounded-lg text-sm transition-all duration-200 focus:outline-none focus:ring-2"
+              className="px-3 py-2.5 rounded-lg text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
               style={{
                 background: isDimMode ? colors.backgroundCard : '#FFFFFF',
                 border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
@@ -1210,9 +1217,10 @@ function MarketPage() {
             </select>
 
             <select
+              aria-label="Sort products"
               value={sortBy}
               onChange={(e) => { setSortBy(e.target.value as any); setCurrentPage(1); }}
-              className="px-3 py-2.5 rounded-lg text-sm transition-all duration-200 focus:outline-none focus:ring-2"
+              className="px-3 py-2.5 rounded-lg text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
               style={{
                 background: isDimMode ? colors.backgroundCard : '#FFFFFF',
                 border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
@@ -1228,6 +1236,8 @@ function MarketPage() {
             <div className="relative">
               <button
                 onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+                aria-label="Select currency"
+                aria-expanded={showCurrencyDropdown}
                 className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-sm transition-all duration-200"
                 style={{
                   background: isDimMode ? colors.backgroundCard : '#FFFFFF',
@@ -1293,6 +1303,8 @@ function MarketPage() {
             <div className="flex rounded-lg overflow-hidden border" style={{ borderColor: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB' }}>
               <button
                 onClick={() => setViewMode('grid')}
+                aria-label="Grid view"
+                aria-pressed={viewMode === 'grid'}
                 className={`px-3 py-2.5 transition-all duration-200 ${viewMode === 'grid' ? 'text-white' : ''}`}
                 style={{
                   background: viewMode === 'grid' ? (isDimMode ? colors.primary : '#139EA2') : 'transparent',
@@ -1303,6 +1315,8 @@ function MarketPage() {
               </button>
               <button
                 onClick={() => setViewMode('list')}
+                aria-label="List view"
+                aria-pressed={viewMode === 'list'}
                 className={`px-3 py-2.5 transition-all duration-200 ${viewMode === 'list' ? 'text-white' : ''}`}
                 style={{
                   background: viewMode === 'list' ? (isDimMode ? colors.primary : '#139EA2') : 'transparent',
@@ -1351,7 +1365,7 @@ function MarketPage() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="text-6xl mb-4">🔍</div>
+              <div className="text-6xl mb-4" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}><FontAwesomeIcon icon={faSearch} /></div>
               <h3 className="text-xl font-semibold mb-2" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
                 No products found
               </h3>
@@ -1548,7 +1562,8 @@ function MarketPage() {
           >
             <button
               onClick={() => setSelectedOrder(null)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+              aria-label="Close order details"
+              className="absolute top-3 right-3 w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-teal-600"
               style={{
                 background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
                 color: isDimMode ? colors.textSecondary : colors.textSecondary,
@@ -1596,7 +1611,8 @@ function MarketPage() {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 z-30 hover:scale-110"
+          aria-label="Scroll to top"
+          className="fixed bottom-6 right-6 w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-opacity duration-300 z-30 hover:opacity-90"
           style={{
             background: isDimMode ? colors.primary : '#139EA2',
             color: isDimMode ? '#0A0A0A' : 'white',

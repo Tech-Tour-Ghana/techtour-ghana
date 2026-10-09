@@ -26,6 +26,7 @@ import {
 import { getProfile, updateProfile, type Profile } from '@/lib/api';
 import { useTheme } from '@/context/ThemeContext';
 import DashboardLayout from '@/components/DashboardLayout';
+import Button from '@/components/ui/Button';
 
 const BRAND_COLORS = {
   tropicalTeal: '#139EA2',
@@ -134,42 +135,17 @@ export default function ProfilePage() {
             </div>
             <div className="absolute bottom-4 right-6 flex gap-2">
               {!isEditing ? (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-105 flex items-center gap-2"
-                  style={{ background: 'rgba(255,255,255,0.2)', color: 'white', backdropFilter: 'blur(8px)' }}
-                >
-                  <FontAwesomeIcon icon={faEdit} className="w-4 h-4" />
+                <Button variant="onDark" size="sm" arrow={false} icon={faEdit} onClick={() => setIsEditing(true)}>
                   Edit Profile
-                </button>
+                </Button>
               ) : (
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-105 flex items-center gap-2"
-                    style={{ background: 'rgba(255,255,255,0.2)', color: 'white', backdropFilter: 'blur(8px)' }}
-                  >
-                    <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
+                  <Button variant="onDark" size="sm" arrow={false} icon={faTimes} onClick={() => setIsEditing(false)}>
                     Cancel
-                  </button>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={saving}
-                    className="px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-105 flex items-center gap-2 disabled:opacity-50"
-                    style={{ background: 'white', color: BRAND_COLORS.tropicalTeal }}
-                  >
-                    {saving ? (
-                      <>
-                        <FontAwesomeIcon icon={faSpinner} className="w-4 h-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <FontAwesomeIcon icon={faSave} className="w-4 h-4" />
-                        Save
-                      </>
-                    )}
-                  </button>
+                  </Button>
+                  <Button variant="light" size="sm" arrow={false} icon={saving ? faSpinner : faSave} onClick={handleSubmit} disabled={saving}>
+                    {saving ? 'Saving...' : 'Save'}
+                  </Button>
                 </div>
               )}
             </div>
@@ -180,49 +156,53 @@ export default function ProfilePage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>First Name</label>
+                    <label htmlFor="profile-first_name" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>First Name</label>
                     <input
                       type="text"
+                      id="profile-first_name"
                       name="first_name"
                       value={formData.first_name}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-xl border focus:ring-2 focus:outline-none transition"
+                      className="w-full px-4 py-2 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
                       style={{ background: themeStyles.inputBg, borderColor: themeStyles.inputBorder, color: themeStyles.inputText }}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Last Name</label>
+                    <label htmlFor="profile-last_name" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Last Name</label>
                     <input
                       type="text"
+                      id="profile-last_name"
                       name="last_name"
                       value={formData.last_name}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-xl border focus:ring-2 focus:outline-none transition"
+                      className="w-full px-4 py-2 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
                       style={{ background: themeStyles.inputBg, borderColor: themeStyles.inputBorder, color: themeStyles.inputText }}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Phone Number</label>
+                  <label htmlFor="profile-phone_number" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Phone Number</label>
                   <input
                     type="tel"
-                    name="phone_number"
+                    id="profile-phone_number"
+                      name="phone_number"
                     value={formData.phone_number}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-xl border focus:ring-2 focus:outline-none transition"
+                    className="w-full px-4 py-2 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
                     style={{ background: themeStyles.inputBg, borderColor: themeStyles.inputBorder, color: themeStyles.inputText }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Bio</label>
+                  <label htmlFor="profile-bio" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Bio</label>
                   <textarea
-                    name="bio"
+                    id="profile-bio"
+                      name="bio"
                     rows={3}
                     value={formData.bio}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-xl border focus:ring-2 focus:outline-none transition"
+                    className="w-full px-4 py-2 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
                     style={{ background: themeStyles.inputBg, borderColor: themeStyles.inputBorder, color: themeStyles.inputText }}
                   />
                 </div>

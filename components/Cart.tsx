@@ -12,7 +12,8 @@ import {
   faPlus, 
   faMinus, 
   faTrash,
-  faLock
+  faLock,
+  faCheckCircle
 } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from '@/context/ThemeContext';
 import { getAuthStatus } from '@/lib/api';
@@ -183,6 +184,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
       <button
         ref={cartButtonRef}
         onClick={toggleCart}
+        aria-label={`Open cart, ${itemCount} ${itemCount === 1 ? 'item' : 'items'}`}
         style={{
           position: 'fixed',
           bottom: '90px',
@@ -245,7 +247,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
           alignItems: 'center',
           gap: '12px',
         }}>
-          <span style={{ fontSize: '20px' }}>✅</span>
+          <FontAwesomeIcon icon={faCheckCircle} style={{ fontSize: '20px', color: '#10B981' }} />
           <div>
             <div style={{ fontWeight: '600', fontSize: '14px', color: isDimMode ? '#FFFFFF' : '#000000' }}>
               Added to cart!
@@ -300,6 +302,8 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
             <div style={{ position: 'relative' }}>
               <button
                 onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+                aria-label="Select currency"
+                aria-expanded={showCurrencyDropdown}
                 style={{
                   padding: '4px 10px',
                   borderRadius: '6px',
@@ -366,14 +370,14 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
             </div>
             <button
               onClick={closeCart}
+              aria-label="Close cart"
               style={{
                 background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
                 fontSize: '20px',
                 color: isDimMode ? '#B0B0B0' : '#4A4A4A',
-                padding: '4px 8px',
-                transition: 'transform 0.2s',
+                padding: '10px 12px',
               }}
             >
               <FontAwesomeIcon icon={faTimes} />
@@ -393,26 +397,12 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
               padding: '60px 20px',
               color: isDimMode ? '#6B7280' : '#9CA3AF',
             }}>
-              <p style={{ fontSize: '48px', marginBottom: '16px' }}>🛒</p>
+              <p style={{ fontSize: '48px', marginBottom: '16px' }}><FontAwesomeIcon icon={faShoppingCart} /></p>
               <p style={{ fontSize: '16px', fontWeight: '500' }}>Your cart is empty</p>
               <p style={{ fontSize: '14px', marginTop: '4px' }}>Start shopping to add items</p>
-              <button
-                onClick={closeCart}
-                style={{
-                  marginTop: '20px',
-                  padding: '10px 32px',
-                  background: isDimMode ? '#E6A64D' : '#139EA2',
-                  color: isDimMode ? '#0A0A0A' : 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                  fontSize: '14px',
-                  transition: 'transform 0.2s',
-                }}
-              >
+              <Button onClick={closeCart} variant="accent" arrow={false} className="mt-5" style={{ background: isDimMode ? '#E6A64D' : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>
                 Continue Shopping
-              </button>
+              </Button>
             </div>
           ) : (
             cartItems.map((item) => {
@@ -473,6 +463,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
                     <button
                       onClick={() => updateQuantity(item.product_id, item.quantity - 1, item.variant_key)}
+                      aria-label={`Decrease quantity of ${item.title}`}
                       style={{
                         padding: '4px 8px',
                         background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
@@ -496,6 +487,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                     </span>
                     <button
                       onClick={() => updateQuantity(item.product_id, item.quantity + 1, item.variant_key)}
+                      aria-label={`Increase quantity of ${item.title}`}
                       style={{
                         padding: '4px 8px',
                         background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
@@ -510,6 +502,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                     </button>
                     <button
                       onClick={() => removeItem(item.product_id, item.variant_key)}
+                      aria-label={`Remove ${item.title} from cart`}
                       style={{
                         padding: '4px 8px',
                         background: 'transparent',
@@ -547,23 +540,9 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
               </span>
             </div>
             <Button onClick={handleCheckout} variant="accent" full icon={faLock} style={{ background: isDimMode ? '#E6A64D' : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>Proceed to Checkout</Button>
-            <button
-              onClick={clearCart}
-              style={{
-                width: '100%',
-                padding: '8px',
-                marginTop: '8px',
-                background: 'transparent',
-                border: `1px solid #EF4444`,
-                borderRadius: '8px',
-                cursor: 'pointer',
-                color: '#EF4444',
-                fontSize: '13px',
-                transition: 'background 0.2s',
-              }}
-            >
+            <Button onClick={clearCart} variant="secondary" size="sm" arrow={false} full className="mt-2" style={{ color: '#DC2626' }}>
               Clear Cart
-            </button>
+            </Button>
           </div>
         )}
       </div>

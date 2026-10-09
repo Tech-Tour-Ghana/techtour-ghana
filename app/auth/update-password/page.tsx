@@ -62,24 +62,26 @@ export default function UpdatePasswordPage() {
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1.5 text-white/70">New password</label>
+            <label htmlFor="update-password" className="block text-sm font-medium mb-1.5 text-white/70">New password</label>
             <input
+              id="update-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg text-sm outline-none bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/30 focus:border-amber-400"
+              className="w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-amber-400"
               placeholder="At least 8 characters"
               required
               autoFocus
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5 text-white/70">Confirm password</label>
+            <label htmlFor="update-confirm" className="block text-sm font-medium mb-1.5 text-white/70">Confirm password</label>
             <input
+              id="update-confirm"
               type="password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg text-sm outline-none bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/30 focus:border-amber-400"
+              className="w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-amber-400"
               placeholder="Repeat your password"
               required
             />

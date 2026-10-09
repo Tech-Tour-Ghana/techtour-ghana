@@ -160,16 +160,10 @@ export default function StudyPage() {
                     })}
                   </p>
                 </div>
-                <button
-                  className="px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-105 flex items-center gap-2"
-                  style={{
-                    background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
-                    color: themeStyles.textSecondary,
-                  }}
-                >
+                <Button variant="secondary" size="sm" arrow={false} style={{ color: themeStyles.textSecondary }}>
                   View Details
                   <FontAwesomeIcon icon={faChevronRight} className="w-3 h-3" />
-                </button>
+                </Button>
               </div>
             </div>
           ))}

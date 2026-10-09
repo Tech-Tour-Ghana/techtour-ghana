@@ -183,42 +183,48 @@ export default function SettingsPage() {
                 </h3>
                 <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>New Password</label>
+                    <label htmlFor="set-new" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>New Password</label>
                     <div className="relative">
                       <input
+                        id="set-new"
                         type={showPassword.new ? 'text' : 'password'}
                         value={passwordData.new_password}
                         onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
-                        className="w-full px-4 py-2 pr-10 rounded-xl border focus:ring-2 focus:outline-none transition"
+                        className="w-full px-4 py-2 pr-10 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
                         style={{ background: themeStyles.inputBg, borderColor: themeStyles.inputBorder, color: themeStyles.inputText }}
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword({ ...showPassword, new: !showPassword.new })}
-                        className="absolute right-3 top-1/2 -translate-y-1/2"
-                        style={{ color: themeStyles.textMuted }}
+                        aria-label={showPassword.new ? 'Hide password' : 'Show password'}
+                        aria-pressed={showPassword.new}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 p-2.5"
+                        style={{ color: themeStyles.textSecondary }}
                       >
                         <FontAwesomeIcon icon={showPassword.new ? faEyeSlash : faEye} />
                       </button>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Confirm New Password</label>
+                    <label htmlFor="set-confirm" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Confirm New Password</label>
                     <div className="relative">
                       <input
+                        id="set-confirm"
                         type={showPassword.confirm ? 'text' : 'password'}
                         value={passwordData.confirm_password}
                         onChange={(e) => setPasswordData({ ...passwordData, confirm_password: e.target.value })}
-                        className="w-full px-4 py-2 pr-10 rounded-xl border focus:ring-2 focus:outline-none transition"
+                        className="w-full px-4 py-2 pr-10 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
                         style={{ background: themeStyles.inputBg, borderColor: themeStyles.inputBorder, color: themeStyles.inputText }}
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword({ ...showPassword, confirm: !showPassword.confirm })}
-                        className="absolute right-3 top-1/2 -translate-y-1/2"
-                        style={{ color: themeStyles.textMuted }}
+                        aria-label={showPassword.confirm ? 'Hide password' : 'Show password'}
+                        aria-pressed={showPassword.confirm}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 p-2.5"
+                        style={{ color: themeStyles.textSecondary }}
                       >
                         <FontAwesomeIcon icon={showPassword.confirm ? faEyeSlash : faEye} />
                       </button>
@@ -240,14 +246,9 @@ export default function SettingsPage() {
                     <p className="font-medium" style={{ color: themeStyles.textPrimary }}>{isDimMode ? 'Dark Mode' : 'Light Mode'}</p>
                     <p className="text-sm" style={{ color: themeStyles.textSecondary }}>{isDimMode ? 'Currently using dark theme' : 'Currently using light theme'}</p>
                   </div>
-                  <button
-                    onClick={toggleTheme}
-                    className="px-4 py-2 rounded-xl font-medium transition-all duration-200 hover:scale-105 flex items-center gap-2"
-                    style={{ background: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB', color: themeStyles.textPrimary }}
-                  >
-                    <FontAwesomeIcon icon={isDimMode ? faSun : faMoon} className="w-4 h-4" />
+                  <Button variant="secondary" size="sm" arrow={false} icon={isDimMode ? faSun : faMoon} onClick={toggleTheme} style={{ color: themeStyles.textPrimary }}>
                     Switch to {isDimMode ? 'Light' : 'Dark'}
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -269,11 +270,12 @@ export default function SettingsPage() {
                         <input
                           type="checkbox"
                           className="sr-only peer"
+                          aria-label={notificationLabels[key].title}
                           checked={notifications[key]}
                           onChange={() => toggleNotification(key)}
                         />
                         <div
-                          className="w-11 h-6 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
+                          className="w-11 h-6 rounded-full peer peer-checked:after:translate-x-full peer-focus-visible:ring-2 peer-focus-visible:ring-teal-600 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
                           style={{
                             background: notifications[key] ? BRAND_COLORS.tropicalTeal : '#CBD5E1',
                             borderColor: notifications[key] ? BRAND_COLORS.tropicalTeal : '#CBD5E1',

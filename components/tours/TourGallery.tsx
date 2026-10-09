@@ -27,7 +27,7 @@ export default function TourGallery({ images, title }: { images: string[]; title
             <li key={`${src}-${i}`} className="aspect-[4/3] w-full flex-shrink-0 snap-center sm:aspect-[16/10]">
               {src && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={src} alt={i === 0 ? title : `${title}, photo ${i + 1}`} className="h-full w-full object-cover" loading={i === 0 ? 'eager' : 'lazy'} fetchPriority={i === 0 ? 'high' : undefined} draggable={false} />
+                <img src={src} alt={`${title} photo ${i + 1}`} className="h-full w-full object-cover" loading={i === 0 ? 'eager' : 'lazy'} fetchPriority={i === 0 ? 'high' : undefined} draggable={false} />
               )}
             </li>
           ))}
@@ -35,8 +35,8 @@ export default function TourGallery({ images, title }: { images: string[]; title
         {list.length > 1 && (
           <>
             <span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white">{index + 1} / {list.length}</span>
-            <button type="button" aria-label="Previous photo" onClick={() => go(index - 1)} className="absolute left-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow sm:flex"><FontAwesomeIcon icon={faChevronLeft} className="h-3.5 w-3.5" /></button>
-            <button type="button" aria-label="Next photo" onClick={() => go(index + 1)} className="absolute right-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow sm:flex"><FontAwesomeIcon icon={faChevronRight} className="h-3.5 w-3.5" /></button>
+            <button type="button" aria-label="Previous photo" onClick={() => go(index - 1)} className="absolute left-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow sm:flex"><FontAwesomeIcon icon={faChevronLeft} className="h-3.5 w-3.5" /></button>
+            <button type="button" aria-label="Next photo" onClick={() => go(index + 1)} className="absolute right-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow sm:flex"><FontAwesomeIcon icon={faChevronRight} className="h-3.5 w-3.5" /></button>
           </>
         )}
       </div>
@@ -47,7 +47,7 @@ export default function TourGallery({ images, title }: { images: string[]; title
               <button type="button" onClick={() => go(i)} aria-label={`Show photo ${i + 1}`} className="h-16 w-24 overflow-hidden rounded-xl"
                 style={{ outline: i === index ? '2px solid var(--sp-primary)' : '1px solid var(--sp-border)', outlineOffset: 1, opacity: i === index ? 1 : 0.7 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
+                <img src={src} alt={`${title} photo ${i + 1}`} className="h-full w-full object-cover" loading="lazy" />
               </button>
             </li>
           ))}

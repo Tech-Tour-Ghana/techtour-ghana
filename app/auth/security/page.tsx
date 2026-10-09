@@ -187,15 +187,16 @@ export default function SecurityPage() {
           </h3>
           <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>
+              <label htmlFor="sec-current" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>
                 Current Password
               </label>
               <div className="relative">
                 <input
+                  id="sec-current"
                   type={showPassword.current ? 'text' : 'password'}
                   value={passwordData.current_password}
                   onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
-                  className="w-full px-4 py-2 pr-10 rounded-xl border focus:ring-2 focus:outline-none transition"
+                  className="w-full px-4 py-2 pr-10 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
                   style={{
                     background: themeStyles.inputBg,
                     borderColor: themeStyles.inputBorder,
@@ -206,23 +207,26 @@ export default function SecurityPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword({ ...showPassword, current: !showPassword.current })}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                  style={{ color: themeStyles.textMuted }}
+                  aria-label={showPassword.current ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword.current}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2.5"
+                  style={{ color: themeStyles.textSecondary }}
                 >
                   <FontAwesomeIcon icon={showPassword.current ? faEyeSlash : faEye} />
                 </button>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>
+              <label htmlFor="sec-new" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>
                 New Password
               </label>
               <div className="relative">
                 <input
+                  id="sec-new"
                   type={showPassword.new ? 'text' : 'password'}
                   value={passwordData.new_password}
                   onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
-                  className="w-full px-4 py-2 pr-10 rounded-xl border focus:ring-2 focus:outline-none transition"
+                  className="w-full px-4 py-2 pr-10 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
                   style={{
                     background: themeStyles.inputBg,
                     borderColor: themeStyles.inputBorder,
@@ -233,23 +237,26 @@ export default function SecurityPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword({ ...showPassword, new: !showPassword.new })}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                  style={{ color: themeStyles.textMuted }}
+                  aria-label={showPassword.new ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword.new}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2.5"
+                  style={{ color: themeStyles.textSecondary }}
                 >
                   <FontAwesomeIcon icon={showPassword.new ? faEyeSlash : faEye} />
                 </button>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>
+              <label htmlFor="sec-confirm" className="block text-sm font-medium mb-1" style={{ color: themeStyles.textSecondary }}>
                 Confirm New Password
               </label>
               <div className="relative">
                 <input
+                  id="sec-confirm"
                   type={showPassword.confirm ? 'text' : 'password'}
                   value={passwordData.confirm_password}
                   onChange={(e) => setPasswordData({ ...passwordData, confirm_password: e.target.value })}
-                  className="w-full px-4 py-2 pr-10 rounded-xl border focus:ring-2 focus:outline-none transition"
+                  className="w-full px-4 py-2 pr-10 rounded-xl border focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none transition"
                   style={{
                     background: themeStyles.inputBg,
                     borderColor: themeStyles.inputBorder,
@@ -260,8 +267,10 @@ export default function SecurityPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword({ ...showPassword, confirm: !showPassword.confirm })}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                  style={{ color: themeStyles.textMuted }}
+                  aria-label={showPassword.confirm ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword.confirm}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2.5"
+                  style={{ color: themeStyles.textSecondary }}
                 >
                   <FontAwesomeIcon icon={showPassword.confirm ? faEyeSlash : faEye} />
                 </button>
@@ -284,7 +293,8 @@ export default function SecurityPage() {
             <div>
               <div className="flex items-center gap-2">
                 <p className="font-medium" style={{ color: themeStyles.textPrimary }}>
-                  {twoFactorEnabled ? '✅ 2FA Enabled' : '❌ 2FA Disabled'}
+                  <FontAwesomeIcon icon={twoFactorEnabled ? faCheckCircle : faExclamationCircle} className="mr-2" style={{ color: twoFactorEnabled ? '#10B981' : '#EF4444' }} />
+                  {twoFactorEnabled ? '2FA Enabled' : '2FA Disabled'}
                 </p>
                 {twoFactorEnabled && (
                   <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981' }}>
@@ -299,19 +309,9 @@ export default function SecurityPage() {
                 }
               </p>
             </div>
-            <button
-              onClick={toggleTwoFactor}
-              className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-105 ${
-                twoFactorEnabled ? '' : ''
-              }`}
-              style={{
-                background: twoFactorEnabled ? '#EF4444' : BRAND_COLORS.tropicalTeal,
-                color: 'white',
-              }}
-            >
-              <FontAwesomeIcon icon={twoFactorEnabled ? faTimes : faQrcode} className="w-4 h-4 mr-2" />
+            <Button variant={twoFactorEnabled ? 'danger' : 'accent'} size="sm" arrow={false} icon={twoFactorEnabled ? faTimes : faQrcode} onClick={toggleTwoFactor}>
               {twoFactorEnabled ? 'Disable' : 'Set Up'}
-            </button>
+            </Button>
           </div>
           {enrolment && (
             <form onSubmit={confirmTwoFactor} className="mt-4 p-4 rounded-xl space-y-3" style={{ border: `1px solid ${themeStyles.border}` }}>
@@ -328,7 +328,8 @@ export default function SecurityPage() {
                   inputMode="numeric"
                   maxLength={6}
                   placeholder="123456"
-                  className="px-4 py-2.5 rounded-xl text-sm"
+                  aria-label="6 digit authenticator code"
+                  className="px-4 py-2.5 rounded-xl text-sm focus-visible:ring-2 focus-visible:ring-teal-600 focus:outline-none"
                   style={{ background: themeStyles.inputBg, border: `1px solid ${themeStyles.inputBorder}`, color: themeStyles.inputText }}
                 />
                 <Button type="submit" variant="accent" size="sm">Verify</Button>
@@ -361,13 +362,9 @@ export default function SecurityPage() {
                 Active
               </span>
             </div>
-            <button
-              onClick={handleSignOutOthers}
-              className="text-sm font-medium px-4 py-2 rounded-xl transition-all duration-200 hover:scale-105"
-              style={{ color: '#EF4444', border: '1px solid #EF444440' }}
-            >
+            <Button variant="secondary" size="sm" arrow={false} onClick={handleSignOutOthers} style={{ color: '#DC2626' }}>
               Sign out of all other devices
-            </button>
+            </Button>
           </div>
         </div>
       </div>

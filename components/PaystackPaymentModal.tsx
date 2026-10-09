@@ -172,6 +172,7 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
   }) => (
     <button
       onClick={() => setPaymentMethod(method)}
+      aria-pressed={paymentMethod === method}
       className={`w-full p-3 rounded-lg border-2 transition-all duration-200 text-left ${
         paymentMethod === method ? 'border-opacity-100 shadow-md' : 'border-opacity-30'
       }`}
@@ -185,12 +186,12 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
       }}
     >
       <div className="flex items-center gap-3">
-        <span className="text-xl">{icon}</span>
+        <FontAwesomeIcon icon={icon} className="text-xl w-6" />
         <div>
           <div className="font-medium text-sm" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
             {label}
           </div>
-          <div className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+          <div className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
             {description}
           </div>
         </div>
@@ -246,7 +247,7 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <span
-              className="px-2 py-0.5 text-[8px] font-semibold rounded-full"
+              className="px-2 py-0.5 text-[10px] font-semibold rounded-full"
               style={{
                 background: paystackService.isLiveMode() 
                   ? 'rgba(239,68,68,0.2)' 
@@ -256,11 +257,12 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
                   : '#10B981',
               }}
             >
-              {paystackService.isLiveMode() ? '🔴 LIVE' : '🟢 TEST'}
+              {paystackService.isLiveMode() ? 'LIVE' : 'TEST'}
             </span>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+              aria-label="Close payment"
+              className="w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-200 hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white"
               style={{
                 background: 'rgba(255,255,255,0.1)',
                 color: 'white',
@@ -281,10 +283,10 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
             }}
           >
             <div className="flex justify-between items-center">
-              <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+              <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
                 Order #{orderDetails.orderId.slice(0, 8)}
               </span>
-              <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+              <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
                 {orderDetails.items.length} items
               </span>
             </div>
@@ -306,19 +308,19 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
             <div className="space-y-2">
               <PaymentMethodCard
                 method="card"
-                icon="💳"
+                icon={faCreditCard}
                 label="Card Payment"
                 description="Visa, Mastercard, Verve, American Express"
               />
               <PaymentMethodCard
                 method="mobile_money"
-                icon="📱"
+                icon={faMobileAlt}
                 label="Mobile Money"
                 description="MTN, Telecel, AirtelTigo (Instant)"
               />
               <PaymentMethodCard
                 method="bank_transfer"
-                icon="🏦"
+                icon={faUniversity}
                 label="Bank Transfer"
                 description="Manual bank transfer with auto-verification"
               />
@@ -363,19 +365,20 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
           {/* Mobile Money Phone Input */}
           {paymentMethod === 'mobile_money' && (
             <div className="mb-4">
-              <label className="text-sm font-medium block mb-1" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
+              <label htmlFor="paystack-phone" className="text-sm font-medium block mb-1" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
                 Mobile Money Phone Number
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-sm" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+                <span className="text-sm" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
                   +233
                 </span>
                 <input
+                  id="paystack-phone"
                   type="tel"
                   placeholder="24 123 4567"
                   value={mobilePhone}
                   onChange={(e) => setMobilePhone(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-lg text-sm transition-all duration-200 focus:outline-none focus:ring-2"
+                  className="flex-1 px-3 py-2 rounded-lg text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
                   style={{
                     background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
                     border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
@@ -384,7 +387,7 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
                   }}
                 />
               </div>
-              <p className="text-[10px] mt-1" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+              <p className="text-[10px] mt-1" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
                 Enter without leading zero (e.g., 241234567)
               </p>
             </div>
@@ -393,15 +396,16 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
           {/* Email Input */}
           {(paymentMethod === 'card' || paymentMethod === 'bank_transfer') && (
             <div className="mb-4">
-              <label className="text-sm font-medium block mb-1" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
+              <label htmlFor="paystack-email" className="text-sm font-medium block mb-1" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
                 Email Address
               </label>
               <input
+                id="paystack-email"
                 type="email"
                 placeholder="customer@example.com"
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg text-sm transition-all duration-200 focus:outline-none focus:ring-2"
+                className="w-full px-3 py-2 rounded-lg text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
                 style={{
                   background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
                   border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
@@ -415,15 +419,16 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
           {/* Name Input */}
           {(paymentMethod === 'card' || paymentMethod === 'bank_transfer') && (
             <div className="mb-4">
-              <label className="text-sm font-medium block mb-1" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
+              <label htmlFor="paystack-name" className="text-sm font-medium block mb-1" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
                 Full Name
               </label>
               <input
+                id="paystack-name"
                 type="text"
                 placeholder="John Doe"
                 value={nameInput}
                 onChange={(e) => setNameInput(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg text-sm transition-all duration-200 focus:outline-none focus:ring-2"
+                className="w-full px-3 py-2 rounded-lg text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
                 style={{
                   background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
                   border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
@@ -456,7 +461,7 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
             }}
           >
             <FontAwesomeIcon icon={faLock} className="text-xs" style={{ color: isDimMode ? brandColors.sandyOrange : brandColors.tropicalTeal }} />
-            <span className="text-[10px]" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+            <span className="text-[10px]" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
               Secured by Paystack • PCI DSS Level 1 Certified
             </span>
           </div>
@@ -466,7 +471,7 @@ const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
 
           {/* Footer */}
           <div className="mt-3 text-center">
-            <p className="text-[8px]" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+            <p className="text-[8px]" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
               <FontAwesomeIcon icon={faGlobeAfrica} className="mr-1" />
               TechTour Ghana • Redefining African Tourism Through Innovation
             </p>
