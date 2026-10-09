@@ -854,7 +854,7 @@ function PositionsPageContent({ jobs }: { jobs: Job[] }) {
         <section className="positions-split-section">
           <div className="positions-split-container">
             {jobs.length === 0 ? (
-              <p className="positions-hero-subtitle" style={{ textAlign: 'center' }}>
+              <p style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--sp-text-secondary, #4B5563)' }}>
                 There are no open roles right now. Check back soon.
               </p>
             ) : isMobile ? (
