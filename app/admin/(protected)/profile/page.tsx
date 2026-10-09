@@ -56,7 +56,7 @@ export default function AdminProfilePage() {
     if (!user) { setLoading(false); return; }
     const { data } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, email, is_admin, avatar_path')
+      .select('id, first_name, last_name, email, is_admin, avatar_path, avatar_url')
       .eq('id', user.id)
       .single();
     if (!data) { setLoading(false); return; }
@@ -68,6 +68,8 @@ export default function AdminProfilePage() {
     if (data.avatar_path) {
       const { data: signed } = await supabase.storage.from('avatars').createSignedUrl(data.avatar_path, 3600);
       if (signed) setAvatar(signed.signedUrl);
+    } else if (data.avatar_url) {
+      setAvatar(data.avatar_url);
     }
     // Admins can read the audit log; if the read is refused the list is simply hidden.
     const { data: log, error } = await supabase
