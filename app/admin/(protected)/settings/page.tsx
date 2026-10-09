@@ -28,7 +28,7 @@ type Tab = 'general' | 'branding' | 'screens' | 'more';
 const TABS: { key: Tab; label: string }[] = [
   { key: 'general', label: 'General' },
   { key: 'branding', label: 'Branding' },
-  { key: 'screens', label: 'Sign-in and registration' },
+  { key: 'screens', label: 'Sign-in screens' },
   { key: 'more', label: 'Related settings' },
 ];
 
