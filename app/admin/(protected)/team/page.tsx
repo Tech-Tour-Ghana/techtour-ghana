@@ -387,7 +387,7 @@ Cancel
                 <input
                   style={inputStyle}
                   value={openingModal.data.title}
-                  onChange={e => setOpeningModal(s => ({ ...s, data: { ...s.data, title: e.target.value, slug: toSlug(e.target.value) } }))}
+                  onChange={e => setOpeningModal(s => ({ ...s, data: { ...s.data, title: e.target.value, slug: s.id ? s.data.slug : toSlug(e.target.value) } }))}
                 />
               </Field>
               <Field label="Slug (auto-generated)">
@@ -463,7 +463,7 @@ Cancel
                 <input
                   style={inputStyle}
                   value={categoryModal.data.name}
-                  onChange={e => setCategoryModal(s => ({ ...s, data: { ...s.data, name: e.target.value, slug: toSlug(e.target.value) } }))}
+                  onChange={e => setCategoryModal(s => ({ ...s, data: { ...s.data, name: e.target.value, slug: s.id ? s.data.slug : toSlug(e.target.value) } }))}
                 />
               </Field>
               <Field label="Slug (auto-generated)">

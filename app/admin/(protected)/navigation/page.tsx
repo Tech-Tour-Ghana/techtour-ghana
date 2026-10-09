@@ -6,6 +6,7 @@ import {
   faPlus, faPen, faTrash, faSpinner, faChevronDown, faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
+import { notify } from '@/components/admin/toast';
 import AdminLayout from '@/components/AdminLayout';
 import { Button, IconButton, ListSkeleton, Modal, StatusPill, Tabs, confirmAction, reportError, rowClass } from '@/components/admin/ui';
 
@@ -80,29 +81,32 @@ export default function NavigationPage() {
     const s = (v: unknown) => String(v ?? '');
     const b = (v: unknown) => (v == null ? true : Boolean(v));
     if (type === 'menu_edit' || type === 'menu_add') {
-      const row = { label: s(data.label), url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
+      const row = { label: s(data.label), url: s(data.url), sort_order: Math.max(0, Math.floor(Number(data.sort_order) || 0)), is_active: b(data.is_active) };
       if (data.id) { if (reportError((await supabase.from('navbar_menus').update(row).eq('id', String(data.id))).error)) { setSaving(false); return; } }
       else { if (reportError((await supabase.from('navbar_menus').insert(row)).error)) { setSaving(false); return; } }
     } else if (type === 'dropdown_edit' || type === 'dropdown_add') {
-      const row = { parent_menu_id: s(data.parent_menu_id), label: s(data.label), url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
+      if (!s(data.parent_menu_id)) { setSaving(false); return notify('Choose which menu this item belongs to.'); }
+      const row = { parent_menu_id: s(data.parent_menu_id), label: s(data.label), url: s(data.url), sort_order: Math.max(0, Math.floor(Number(data.sort_order) || 0)), is_active: b(data.is_active) };
       if (data.id) { if (reportError((await supabase.from('navbar_dropdowns').update(row).eq('id', String(data.id))).error)) { setSaving(false); return; } }
       else { if (reportError((await supabase.from('navbar_dropdowns').insert(row)).error)) { setSaving(false); return; } }
+      // The navbar only renders a dropdown when its menu is flagged.
+      await supabase.from('navbar_menus').update({ has_dropdown: true }).eq('id', row.parent_menu_id);
     } else if (type === 'footer_link_edit' || type === 'footer_link_add') {
-      const row = { label: s(data.label), url: s(data.url), category: (s(data.category) || 'company') as 'destinations' | 'services' | 'company' | 'support', sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
+      const row = { label: s(data.label), url: s(data.url), category: (s(data.category) || 'company') as 'destinations' | 'services' | 'company' | 'support', sort_order: Math.max(0, Math.floor(Number(data.sort_order) || 0)), is_active: b(data.is_active) };
       if (data.id) { if (reportError((await supabase.from('footer_quick_links').update(row).eq('id', String(data.id))).error)) { setSaving(false); return; } }
       else { if (reportError((await supabase.from('footer_quick_links').insert(row)).error)) { setSaving(false); return; } }
     } else if (type === 'social_edit' || type === 'social_add') {
-      const row = { platform: (s(data.platform) || 'other') as 'facebook' | 'twitter' | 'instagram' | 'linkedin' | 'youtube' | 'tiktok' | 'whatsapp' | 'other', url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
+      const row = { platform: (s(data.platform) || 'other') as 'facebook' | 'twitter' | 'instagram' | 'linkedin' | 'youtube' | 'tiktok' | 'whatsapp' | 'other', url: s(data.url), sort_order: Math.max(0, Math.floor(Number(data.sort_order) || 0)), is_active: b(data.is_active) };
       if (data.id) { if (reportError((await supabase.from('social_links').update(row).eq('id', String(data.id))).error)) { setSaving(false); return; } }
       else { if (reportError((await supabase.from('social_links').insert(row)).error)) { setSaving(false); return; } }
     } else if (type === 'legal_edit' || type === 'legal_add') {
-      const row = { label: s(data.label), url: s(data.url), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
+      const row = { label: s(data.label), url: s(data.url), sort_order: Math.max(0, Math.floor(Number(data.sort_order) || 0)), is_active: b(data.is_active) };
       if (data.id) { if (reportError((await supabase.from('legal_links').update(row).eq('id', String(data.id))).error)) { setSaving(false); return; } }
       else { if (reportError((await supabase.from('legal_links').insert(row)).error)) { setSaving(false); return; } }
     } else if (type === 'footer_settings') {
       if (data.id) { if (reportError((await supabase.from('footer_settings').update({ company_name: s(data.company_name), tagline: s(data.tagline), copyright_text: s(data.copyright_text) }).eq('id', String(data.id))).error)) { setSaving(false); return; } }
     } else if (type === 'footer_contact_edit' || type === 'footer_contact_add') {
-      const row = { icon: s(data.icon), text: s(data.text), sort_order: Number(data.sort_order) || 0, is_active: b(data.is_active) };
+      const row = { icon: s(data.icon), text: s(data.text), sort_order: Math.max(0, Math.floor(Number(data.sort_order) || 0)), is_active: b(data.is_active) };
       if (data.id) { if (reportError((await supabase.from('footer_contacts').update(row).eq('id', String(data.id))).error)) { setSaving(false); return; } }
       else { if (reportError((await supabase.from('footer_contacts').insert(row)).error)) { setSaving(false); return; } }
     }

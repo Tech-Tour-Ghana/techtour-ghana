@@ -37,7 +37,7 @@ export default function AdminTestimonialsPage() {
   }
 
   async function remove(id: string) {
-    if (!(await confirmAction({ message: 'Delete this testimonial? This cannot be undone.', danger: true }))) return;
+    if (!(await confirmAction({ message: 'Delete this testimonial? You can restore it from Trash.', danger: true }))) return;
     const { error } = await createBrowserClient().from('testimonials').delete().eq('id', id);
     if (error) return notify(`Could not delete: ${error.message}`);
     setRows((prev) => prev.filter((r) => r.id !== id));

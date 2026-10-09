@@ -43,7 +43,7 @@ export default function CategoriesPanel({ categories, tours, loading, reload }: 
 
   async function remove(c: Category) {
     const n = count(c.id);
-    const message = n > 0 ? `"${c.name}" has ${n} tour${n === 1 ? '' : 's'}. They will stay, but lose their category. Delete it?` : `Delete "${c.name}"? This cannot be undone.`;
+    const message = n > 0 ? `"${c.name}" has ${n} tour${n === 1 ? '' : 's'}. They will stay, but lose their category. Delete it?` : `Delete "${c.name}"? You can restore it from Trash.`;
     if (!(await confirmAction({ message, danger: true, confirmLabel: 'Delete' }))) return;
     if (reportError((await supabase.from('tour_categories').delete().eq('id', c.id)).error)) return;
     await reload();

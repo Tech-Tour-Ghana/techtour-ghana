@@ -59,7 +59,7 @@ export default function SchedulesPanel({ schedules, tours, loading, reload }: { 
   }
 
   async function remove(s: Schedule) {
-    if (!(await confirmAction({ message: `Delete the ${fmtDate(s.start_date)} departure of ${title(s.tour_id)}? This cannot be undone.`, danger: true, confirmLabel: 'Delete' }))) return;
+    if (!(await confirmAction({ message: `Delete the ${fmtDate(s.start_date)} departure of ${title(s.tour_id)}? You can restore it from Trash.`, danger: true, confirmLabel: 'Delete' }))) return;
     if (reportError((await supabase.from('tour_schedules').delete().eq('id', s.id)).error)) return;
     await reload();
   }

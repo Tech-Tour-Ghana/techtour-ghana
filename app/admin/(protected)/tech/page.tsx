@@ -13,6 +13,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
+import { notify } from '@/components/admin/toast';
 import AdminLayout from '@/components/AdminLayout';
 import { Button, IconButton, ListSkeleton, Modal, SearchInput, StatusPill, TableCard, Tabs, Toolbar, confirmAction, fmtDate, reportError, rowClass, type Tone } from '@/components/admin/ui';
 
@@ -86,6 +87,14 @@ const EVENT_TYPES = [
 ] as const;
 
 // ─── Blank forms ──────────────────────────────────────────────────────────────
+
+// datetime-local wants "YYYY-MM-DDTHH:mm" in local time, the database returns an ISO string with an offset.
+const toLocalInput = (iso: string) => {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
 
 const blankInnovation = (): Omit<TechInnovation, 'id'> => ({
   title: '', slug: '', description: '', category: 'ai', status: 'planned',
@@ -190,8 +199,12 @@ export default function AdminTechPage() {
   };
 
   const saveEvent = async () => {
+    if (!eventModal.data.starts_at) return notify('Choose when the event starts.');
+    const start = new Date(eventModal.data.starts_at);
+    const end = eventModal.data.ends_at ? new Date(eventModal.data.ends_at) : null;
+    if (end && end < start) return notify('The event cannot end before it starts.');
+    const d = { ...eventModal.data, starts_at: start.toISOString(), ends_at: end ? end.toISOString() : null, is_upcoming: (end ?? start) >= new Date() };
     setSaving(true);
-    const d = eventModal.data;
     if (eventModal.id) {
       if (reportError((await supabase.from('tech_events').update(d).eq('id', eventModal.id)).error)) { setSaving(false); return; }
     } else {
@@ -293,7 +306,7 @@ export default function AdminTechPage() {
               <td className="px-4 py-3"><StatusPill tone={ev.is_active ? 'success' : 'neutral'}>{ev.is_active ? 'Visible' : 'Hidden'}</StatusPill></td>
               <td className="px-4 py-3">
                 <div className="flex gap-2">
-                  <IconButton title="Edit" onClick={() => setEventModal({ open: true, data: { title: ev.title, slug: ev.slug, description: ev.description, event_type: ev.event_type, starts_at: ev.starts_at, ends_at: ev.ends_at, location: ev.location, is_active: ev.is_active }, id: ev.id })}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></IconButton>
+                  <IconButton title="Edit" onClick={() => setEventModal({ open: true, data: { title: ev.title, slug: ev.slug, description: ev.description, event_type: ev.event_type, starts_at: toLocalInput(ev.starts_at), ends_at: ev.ends_at ? toLocalInput(ev.ends_at) : null, location: ev.location, is_active: ev.is_active }, id: ev.id })}><FontAwesomeIcon icon={faPencil} className="h-3 w-3" /></IconButton>
                   <IconButton title="Delete" color="var(--adm-error)" onClick={() => deleteEvent(ev.id, ev.title)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
                 </div>
               </td>
@@ -343,7 +356,7 @@ Cancel
                 <input
                   style={inputStyle}
                   value={innovationModal.data.title}
-                  onChange={e => setInnovationModal(s => ({ ...s, data: { ...s.data, title: e.target.value, slug: toSlug(e.target.value) } }))}
+                  onChange={e => setInnovationModal(s => ({ ...s, data: { ...s.data, title: e.target.value, slug: s.id ? s.data.slug : toSlug(e.target.value) } }))}
                 />
               </Field>
               <Field label="Slug (auto-generated)">
@@ -405,7 +418,7 @@ Cancel
                 <input
                   style={inputStyle}
                   value={eventModal.data.title}
-                  onChange={e => setEventModal(s => ({ ...s, data: { ...s.data, title: e.target.value, slug: toSlug(e.target.value) } }))}
+                  onChange={e => setEventModal(s => ({ ...s, data: { ...s.data, title: e.target.value, slug: s.id ? s.data.slug : toSlug(e.target.value) } }))}
                 />
               </Field>
               <Field label="Slug (auto-generated)">
@@ -465,7 +478,7 @@ Cancel
                 <input
                   style={inputStyle}
                   value={resourceModal.data.title}
-                  onChange={e => setResourceModal(s => ({ ...s, data: { ...s.data, title: e.target.value, slug: toSlug(e.target.value) } }))}
+                  onChange={e => setResourceModal(s => ({ ...s, data: { ...s.data, title: e.target.value, slug: s.id ? s.data.slug : toSlug(e.target.value) } }))}
                 />
               </Field>
               <Field label="Slug (auto-generated)">

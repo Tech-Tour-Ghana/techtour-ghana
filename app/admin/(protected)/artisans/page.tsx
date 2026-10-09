@@ -172,7 +172,7 @@ export default function AdminArtisansPage() {
   }
 
   async function handleDelete(a: Artisan) {
-    if (!(await confirmAction({ message: `Delete "${a.name}"? This cannot be undone.`, danger: true }))) return;
+    if (!(await confirmAction({ message: `Delete "${a.name}"? You can restore it from Trash.`, danger: true }))) return;
     const supabase = createBrowserClient();
     if (reportError((await supabase.from('artisans').delete().eq('id', a.id)).error)) { return; }
     setLoading(true);

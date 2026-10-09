@@ -10,6 +10,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import AdminLayout from '@/components/AdminLayout';
 import { Button, IconButton, Modal, SearchInput, StatusPill, TableCard, Tabs, Toolbar, confirmAction, reportError, rowClass } from '@/components/admin/ui';
+import { notify } from '@/components/admin/toast';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { createBrowserClient } from '@/lib/supabase/client';
 
@@ -160,10 +161,22 @@ export default function AdminMarketPage() {
   }
 
   async function saveProduct() {
+    const price = Number(productForm.price);
+    const sale = productForm.discount_price == null || (productForm.discount_price as unknown) === '' ? null : Number(productForm.discount_price);
+    const stock = Math.floor(Number(productForm.stock_quantity) || 0);
+    if (!productForm.title.trim()) return notify('Give the product a title.');
+    if (!(price >= 0)) return notify('Enter a price of 0 or more.');
+    if (sale !== null && !(sale >= 0 && sale < price)) return notify('The sale price must be lower than the regular price.');
+    if (stock < 0) return notify('Stock cannot be negative.');
     setSaving(true);
     const payload = {
       ...productForm,
-      description: productForm.description || undefined,
+      price,
+      discount_price: sale,
+      stock_quantity: stock,
+      is_in_stock: stock > 0,
+      sort_order: Math.max(0, Math.floor(Number(productForm.sort_order) || 0)),
+      description: productForm.description ?? '',
       currency: productForm.currency as 'GHS' | 'USD' | 'EUR' | 'GBP',
       category_id: productForm.category_id || null,
       artisan_id: productForm.artisan_id || null,
@@ -192,13 +205,13 @@ export default function AdminMarketPage() {
   }
 
   async function deleteProduct(id: string) {
-    if (!(await confirmAction({ message: 'Delete this product? This cannot be undone.', danger: true }))) return;
+    if (!(await confirmAction({ message: 'Delete this product? You can restore it from Trash.', danger: true }))) return;
     if (reportError((await supabase.from('market_products').delete().eq('id', id)).error)) { return; }
     fetchAll();
   }
 
   async function deleteCategory(id: string) {
-    if (!(await confirmAction({ message: 'Delete this category? This cannot be undone.', danger: true }))) return;
+    if (!(await confirmAction({ message: 'Delete this category? You can restore it from Trash.', danger: true }))) return;
     if (reportError((await supabase.from('market_categories').delete().eq('id', id)).error)) { return; }
     fetchAll();
   }
@@ -318,7 +331,7 @@ Cancel
                       <input
                         type="text"
                         value={productForm.title}
-                        onChange={(e) => setProductForm((f) => ({ ...f, title: e.target.value, slug: toSlug(e.target.value) }))}
+                        onChange={(e) => setProductForm((f) => ({ ...f, title: e.target.value, slug: editingProduct ? f.slug : toSlug(e.target.value) }))}
                         className={inputClass}
                         style={inputStyle}
                       />
@@ -444,7 +457,7 @@ Cancel
                     <input
                       type="text"
                       value={categoryForm.name}
-                      onChange={(e) => setCategoryForm((f) => ({ ...f, name: e.target.value, slug: toSlug(e.target.value) }))}
+                      onChange={(e) => setCategoryForm((f) => ({ ...f, name: e.target.value, slug: editingCategory ? f.slug : toSlug(e.target.value) }))}
                       className={inputClass}
                       style={inputStyle}
                     />

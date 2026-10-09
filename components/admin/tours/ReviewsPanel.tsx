@@ -32,7 +32,7 @@ export default function ReviewsPanel({ reviews, loading, reload }: { reviews: Re
   }
 
   async function remove(r: Review) {
-    if (!(await confirmAction({ message: `Delete the review from ${r.user_name || r.user_email}? This cannot be undone.`, danger: true, confirmLabel: 'Delete' }))) return;
+    if (!(await confirmAction({ message: `Delete the review from ${r.user_name || r.user_email}? You can restore it from Trash.`, danger: true, confirmLabel: 'Delete' }))) return;
     if (reportError((await supabase.from('tour_reviews').delete().eq('id', r.id)).error)) return;
     await reload();
   }

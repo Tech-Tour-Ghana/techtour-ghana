@@ -172,7 +172,7 @@ export default function AdminBlogPage() {
       {toDelete && (
         <Modal title="Delete article?" maxWidth="max-w-sm" onClose={() => setToDelete(null)}
           footer={<><Button variant="secondary" onClick={() => setToDelete(null)}>Cancel</Button><Button variant="danger" onClick={() => remove(toDelete)}>Delete</Button></>}>
-          <p className="text-xs" style={{ color: 'var(--adm-text-2)' }}>“{toDelete.title}” and its SEO settings will be permanently deleted.{toDelete.is_published && ' It is live: its address will stop working unless you add a redirect.'}</p>
+          <p className="text-xs" style={{ color: 'var(--adm-text-2)' }}>“{toDelete.title}” and its SEO settings will be moved to Trash, where you can restore them.{toDelete.is_published && ' It is live: its address will stop working unless you add a redirect.'}</p>
         </Modal>
       )}
     </AdminLayout>
