@@ -792,7 +792,7 @@ function PositionsPageContent({ jobs }: { jobs: Job[] }) {
   const hasActiveFilters =
     searchQuery.trim() !== '' || activeDept !== 'all' || activeType !== 'all';
 
-  const handleJobSelect = useCallback((jobId: number) => {
+  const handleJobSelect = useCallback((jobId: string) => {
     shouldScrollRef.current = true;
     setSelectedJobId(jobId);
   }, []);
