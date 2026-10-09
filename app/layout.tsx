@@ -3,13 +3,28 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/AppShell";
 import JsonLd from "@/components/seo/JsonLd";
+import { createClient as createPublicClient } from "@supabase/supabase-js";
+import type { Database } from "@/types/database";
 import { env } from "@/lib/env";
 import { getSiteSeo } from "@/lib/seo/load.server";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/resolve";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
+export async function generateMetadata(): Promise<Metadata> {
+  // Favicon from admin Settings (site_settings.favicon_url), the bundled logo when unset.
+  const supabase = createPublicClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: false } });
+  const { data } = await supabase.from("site_settings").select("favicon_url").limit(1).maybeSingle();
+  const custom = data?.favicon_url?.trim() || "";
+  return {
+    ...baseMetadata,
+    icons: custom
+      ? { icon: [{ url: custom }], shortcut: [{ url: custom }], apple: custom }
+      : baseMetadata.icons,
+  };
+}
+
+const baseMetadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
   title: { default: "TechTour Ghana", template: "%s | TechTour Ghana" },
   // No canonical here. Metadata set in the root layout is inherited by every

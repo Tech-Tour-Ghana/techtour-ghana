@@ -1,239 +1,223 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCamera, faSpinner, faCheck, faSave, faUserCircle,
-} from '@fortawesome/free-solid-svg-icons';
-import { createBrowserClient } from '@/lib/supabase/client';
-import AdminLayout from '@/components/AdminLayout';
-import { Button, ListSkeleton, reportError } from '@/components/admin/ui';
+// The signed-in admin's own account: name, photo, password, sign out, and the
+// changes they have made recently (from the audit log, migration 0021).
 
-const BRAND = 'var(--adm-primary)';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowRightFromBracket, faCamera, faFloppyDisk, faKey, faSpinner } from '@fortawesome/free-solid-svg-icons';
+
+import { createBrowserClient } from '@/lib/supabase/client';
+import { logoutUser } from '@/lib/api';
+import AdminLayout from '@/components/AdminLayout';
+import { Card, Field, textClass } from '@/components/admin/settings/parts';
+import { notify } from '@/components/admin/toast';
+import { Avatar, Button, ListSkeleton, StatusPill, Surface, fieldStyle, fmtDate, reportError } from '@/components/admin/ui';
 
 interface Profile {
   id: string;
   first_name: string;
   last_name: string;
   email: string;
-  phone_number: string | null;
-  bio: string | null;
-  avatar_url: string | null;
+  is_admin: boolean;
   avatar_path: string | null;
 }
 
+interface Action {
+  id: string;
+  action: 'insert' | 'update' | 'delete';
+  table_name: string;
+  summary: string;
+  created_at: string;
+}
+
+const VERB = { insert: 'Created', update: 'Updated', delete: 'Deleted' } as const;
+const MIN_PASSWORD = 8;
+
 export default function AdminProfilePage() {
-  const supabase = createBrowserClient();
+  const supabase = useMemo(() => createBrowserClient(), []);
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [form, setForm] = useState({ first_name: '', last_name: '', phone_number: '', bio: '' });
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [saved, setSaved] = useState({ first_name: '', last_name: '' });
+  const [form, setForm] = useState({ first_name: '', last_name: '' });
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [actions, setActions] = useState<Action[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState('');
+  const [pw, setPw] = useState({ next: '', confirm: '' });
+  const [pwBusy, setPwBusy] = useState(false);
 
-  const themeStyles = {
-    cardBg: 'var(--adm-card)',
-    textPrimary: 'var(--adm-text)',
-    textSecondary: 'var(--adm-text-2)',
-    textMuted: 'var(--adm-muted)',
-    border: 'var(--adm-border)',
-    inputBg: 'var(--adm-track)',
-    inputBorder: 'var(--adm-border)',
-  };
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '8px 12px',
-    borderRadius: 8,
-    border: `1px solid ${themeStyles.inputBorder}`,
-    background: themeStyles.inputBg,
-    color: themeStyles.textPrimary,
-    fontSize: 13,
-    outline: 'none',
-  };
-
-  const loadProfile = useCallback(async () => {
+  const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); return; }
-
     const { data } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, email, phone_number, bio, avatar_url, avatar_path')
+      .select('id, first_name, last_name, email, is_admin, avatar_path')
       .eq('id', user.id)
       .single();
-
     if (!data) { setLoading(false); return; }
-    const p = data as Profile;
-    setProfile(p);
-    setForm({
-      first_name: p.first_name ?? '',
-      last_name: p.last_name ?? '',
-      phone_number: p.phone_number ?? '',
-      bio: p.bio ?? '',
-    });
-
-    if (p.avatar_path) {
-      const { data: signed } = await supabase.storage
-        .from('avatars')
-        .createSignedUrl(p.avatar_path, 3600);
-      if (signed) setAvatarPreview(signed.signedUrl);
-    }
+    setProfile(data);
+    const names = { first_name: data.first_name ?? '', last_name: data.last_name ?? '' };
+    setForm(names); setSaved(names);
     setLoading(false);
+
+    if (data.avatar_path) {
+      const { data: signed } = await supabase.storage.from('avatars').createSignedUrl(data.avatar_path, 3600);
+      if (signed) setAvatar(signed.signedUrl);
+    }
+    // Admins can read the audit log; if the read is refused the list is simply hidden.
+    const { data: log, error } = await supabase
+      .from('audit_log')
+      .select('id, action, table_name, summary, created_at')
+      .eq('actor_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    setActions(error ? null : ((log as unknown as Action[]) ?? []));
   }, [supabase]);
 
-  useEffect(() => { loadProfile(); }, [loadProfile]);
+  useEffect(() => { load(); }, [load]);
+
+  const dirty = form.first_name !== saved.first_name || form.last_name !== saved.last_name;
 
   async function handleAvatarUpload(file: File) {
     if (!profile) return;
-    if (file.size > 5 * 1024 * 1024) { setError('Photo must be 5 MB or smaller.'); return; }
-    setError('');
+    if (file.size > 5 * 1024 * 1024) { notify('Photo must be 5 MB or smaller.'); return; }
     setUploading(true);
     const ext = file.name.split('.').pop() ?? 'jpg';
     const path = `${profile.id}/${Date.now()}.${ext}`;
-
-    // Delete old avatar from storage if exists
-    if (profile.avatar_path) {
-      await supabase.storage.from('avatars').remove([profile.avatar_path]);
-    }
-
     const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
-    if (upErr) setError('Could not upload the photo. Please try again.');
-    else {
-      if (reportError((await supabase.from('profiles').update({ avatar_path: path, avatar_url: null }).eq('id', profile.id)).error)) { setUploading(false); return; }
-      const { data: signed } = await supabase.storage.from('avatars').createSignedUrl(path, 3600);
-      if (signed) setAvatarPreview(signed.signedUrl);
-      setProfile(prev => prev ? { ...prev, avatar_path: path } : prev);
-    }
+    if (upErr) { notify('Could not upload the photo. Please try again.'); setUploading(false); return; }
+    const res = await supabase.from('profiles').update({ avatar_path: path, avatar_url: null }).eq('id', profile.id);
+    if (reportError(res.error)) { setUploading(false); return; }
+    // Only drop the old file once the profile points at the new one.
+    if (profile.avatar_path) await supabase.storage.from('avatars').remove([profile.avatar_path]);
+    const { data: signed } = await supabase.storage.from('avatars').createSignedUrl(path, 3600);
+    if (signed) setAvatar(signed.signedUrl);
+    setProfile({ ...profile, avatar_path: path });
     setUploading(false);
+    notify('Photo updated.', 'success');
   }
 
-  async function handleSave() {
+  async function saveName() {
     if (!profile) return;
+    const first_name = form.first_name.trim();
+    const last_name = form.last_name.trim();
+    if (!first_name) { notify('First name is required.'); return; }
     setSaving(true);
-    setError('');
-    const { error: saveErr } = await supabase.from('profiles').update({
-      first_name: form.first_name.trim(),
-      last_name: form.last_name.trim(),
-      phone_number: form.phone_number.trim() || null,
-      bio: form.bio.trim() || null,
-      updated_at: new Date().toISOString(),
-    }).eq('id', profile.id);
+    const res = await supabase.from('profiles').update({ first_name, last_name }).eq('id', profile.id);
     setSaving(false);
-    if (saveErr) { setError('Could not save your changes. Please try again.'); return; }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    if (reportError(res.error)) return;
+    setForm({ first_name, last_name });
+    setSaved({ first_name, last_name });
+    notify('Profile saved.', 'success');
   }
+
+  async function changePassword() {
+    if (pw.next.length < MIN_PASSWORD) { notify(`Use at least ${MIN_PASSWORD} characters for the new password.`); return; }
+    if (pw.next !== pw.confirm) { notify('The two passwords do not match.'); return; }
+    setPwBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: pw.next });
+    setPwBusy(false);
+    if (error) { notify(`Could not change the password: ${error.message}`); return; }
+    setPw({ next: '', confirm: '' });
+    notify('Password changed.', 'success');
+  }
+
+  async function signOut() {
+    await logoutUser();
+    router.push('/admin/login');
+  }
+
+  const fullName = `${form.first_name} ${form.last_name}`.trim() || profile?.email || 'Admin';
 
   return (
-    <AdminLayout title="My Profile" subtitle="Edit your account details and photo">
+    <AdminLayout title="My Profile" subtitle="Your account, photo and password">
       {loading ? (
         <ListSkeleton />
+      ) : !profile ? (
+        <Surface className="p-6 text-sm" style={{ color: 'var(--adm-text-2)' }}>Could not load your profile. Try signing in again.</Surface>
       ) : (
-        <div className="max-w-2xl space-y-6">
-
-          {/* Avatar card */}
-          <div className="rounded-[var(--adm-radius-card)] p-6 flex flex-col sm:flex-row sm:items-center gap-6"
-            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
+        <div className="max-w-2xl space-y-5 pb-10">
+          <Surface className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
             <div className="relative flex-shrink-0">
-              <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center"
-                style={{ background: 'var(--adm-elevated)' }}>
-                {avatarPreview ? (
-                  <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <FontAwesomeIcon icon={faUserCircle} className="w-12 h-12" style={{ color: themeStyles.textMuted }} />
-                )}
-              </div>
+              <Avatar name={fullName} src={avatar} size={88} />
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center shadow-lg disabled:opacity-60"
-                style={{ background: BRAND }}
-                title="Upload photo"
+                aria-label="Upload photo"
+                className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full disabled:opacity-60"
+                style={{ background: 'var(--adm-primary)', color: '#FFFFFF', border: '2px solid var(--adm-card)' }}
               >
-                {uploading
-                  ? <FontAwesomeIcon icon={faSpinner} className="w-3 h-3 text-white animate-spin" />
-                  : <FontAwesomeIcon icon={faCamera} className="w-3 h-3 text-white" />}
+                <FontAwesomeIcon icon={uploading ? faSpinner : faCamera} className={`h-3 w-3 ${uploading ? 'animate-spin' : ''}`} />
               </button>
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/gif"
                 className="hidden"
-                onChange={e => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatarUpload(f); e.target.value = ''; }}
               />
             </div>
-            <div>
-              <p className="font-semibold text-sm" style={{ color: themeStyles.textPrimary }}>
-                {form.first_name} {form.last_name}
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: themeStyles.textMuted }}>{profile?.email}</p>
-              <p className="text-xs mt-2" style={{ color: themeStyles.textSecondary }}>
-                JPEG, PNG, WebP or GIF. Max 5 MB.
-              </p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-base font-bold">{fullName}</p>
+              <p className="truncate text-xs" style={{ color: 'var(--adm-muted)' }}>{profile.email}</p>
+              <div className="mt-2"><StatusPill tone={profile.is_admin ? 'info' : 'neutral'}>{profile.is_admin ? 'Administrator' : 'Staff'}</StatusPill></div>
+              <p className="mt-2 text-[11px]" style={{ color: 'var(--adm-muted)' }}>JPEG, PNG, WebP or GIF, up to 5 MB.</p>
             </div>
-          </div>
-
-          {/* Profile fields */}
-          <div className="rounded-[var(--adm-radius-card)] p-6 space-y-4"
-            style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}`, boxShadow: 'var(--adm-shadow)' }}>
-            <h3 className="text-sm font-semibold" style={{ color: themeStyles.textPrimary }}>Profile Details</h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs mb-1.5" htmlFor="pf-first" style={{ color: themeStyles.textSecondary }}>First name</label>
-                <input id="pf-first"
-                  style={inputStyle}
-                  value={form.first_name}
-                  onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))}
-                />
-              </div>
-              <div>
-                <label className="block text-xs mb-1.5" htmlFor="pf-last" style={{ color: themeStyles.textSecondary }}>Last name</label>
-                <input id="pf-last"
-                  style={inputStyle}
-                  value={form.last_name}
-                  onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs mb-1.5" htmlFor="pf-email" style={{ color: themeStyles.textSecondary }}>Email</label>
-              <input id="pf-email" style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} value={profile?.email ?? ''} readOnly />
-            </div>
-
-            <div>
-              <label className="block text-xs mb-1.5" htmlFor="pf-phone" style={{ color: themeStyles.textSecondary }}>Phone number</label>
-              <input id="pf-phone"
-                style={inputStyle}
-                value={form.phone_number}
-                placeholder="+233 xx xxx xxxx"
-                onChange={e => setForm(f => ({ ...f, phone_number: e.target.value }))}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs mb-1.5" htmlFor="pf-bio" style={{ color: themeStyles.textSecondary }}>Bio</label>
-              <textarea id="pf-bio"
-                style={{ ...inputStyle, resize: 'vertical', minHeight: 80 }}
-                value={form.bio}
-                placeholder="Short bio..."
-                onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
-              />
-            </div>
-
-            {error && <p role="alert" className="text-xs" style={{ color: 'var(--adm-error)' }}>{error}</p>}
-            <Button onClick={handleSave} disabled={saving || saved}>
-              <FontAwesomeIcon icon={saved ? faCheck : faSave} className="mr-2 h-3 w-3" />
-              {saving ? 'Saving…' : saved ? 'Saved' : 'Save changes'}
+            <Button variant="secondary" onClick={signOut}>
+              <FontAwesomeIcon icon={faArrowRightFromBracket} className="mr-2 h-3 w-3" />Sign out
             </Button>
-          </div>
+          </Surface>
 
+          <Card title="Your details" description="Your name as shown to other admins. Your email is your sign-in and cannot be changed here.">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field id="pf-first" label="First name"><input id="pf-first" className={textClass} style={fieldStyle} value={form.first_name} onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} /></Field>
+              <Field id="pf-last" label="Last name"><input id="pf-last" className={textClass} style={fieldStyle} value={form.last_name} onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))} /></Field>
+            </div>
+            <Field id="pf-email" label="Email"><input id="pf-email" className={textClass} style={{ ...fieldStyle, opacity: 0.6, cursor: 'not-allowed' }} value={profile.email} readOnly /></Field>
+            <div className="flex items-center gap-3">
+              <Button onClick={saveName} disabled={saving || !dirty}>
+                <FontAwesomeIcon icon={faFloppyDisk} className="mr-2 h-3 w-3" />{saving ? 'Saving…' : 'Save changes'}
+              </Button>
+              {dirty && <span className="text-xs" style={{ color: 'var(--adm-muted)' }}>You have unsaved changes.</span>}
+            </div>
+          </Card>
+
+          <Card title="Change password" description={`At least ${MIN_PASSWORD} characters.`}>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field id="pw-new" label="New password"><input id="pw-new" type="password" autoComplete="new-password" className={textClass} style={fieldStyle} value={pw.next} onChange={(e) => setPw((p) => ({ ...p, next: e.target.value }))} /></Field>
+              <Field id="pw-confirm" label="Confirm new password"><input id="pw-confirm" type="password" autoComplete="new-password" className={textClass} style={fieldStyle} value={pw.confirm} onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))} /></Field>
+            </div>
+            <Button onClick={changePassword} disabled={pwBusy || !pw.next || !pw.confirm}>
+              <FontAwesomeIcon icon={faKey} className="mr-2 h-3 w-3" />{pwBusy ? 'Changing…' : 'Change password'}
+            </Button>
+          </Card>
+
+          {actions && (
+            <Card title="Your recent activity" description="The last changes you made in the admin.">
+              {actions.length === 0 ? (
+                <p className="text-xs" style={{ color: 'var(--adm-muted)' }}>No recorded changes yet.</p>
+              ) : (
+                <ul className="-my-2 divide-y" style={{ borderColor: 'var(--adm-border)' }}>
+                  {actions.map((a) => (
+                    <li key={a.id} className="flex items-baseline justify-between gap-3 py-2 text-xs" style={{ borderColor: 'var(--adm-border)' }}>
+                      <span className="min-w-0 truncate">
+                        <span className="font-semibold">{VERB[a.action]}</span>{' '}
+                        <span style={{ color: 'var(--adm-text-2)' }}>{a.summary || a.table_name}</span>{' '}
+                        <span style={{ color: 'var(--adm-muted)' }}>in {a.table_name.replace(/_/g, ' ')}</span>
+                      </span>
+                      <span className="flex-shrink-0" style={{ color: 'var(--adm-muted)' }}>{fmtDate(a.created_at)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          )}
         </div>
       )}
     </AdminLayout>
