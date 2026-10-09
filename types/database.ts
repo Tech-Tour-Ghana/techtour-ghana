@@ -2652,6 +2652,17 @@ export type Database = {
       }
       study_applications: {
         Row: {
+          admin_notes: string
+          education_level: string
+          email: string
+          field_of_study: string
+          full_name: string
+          intended_level: string
+          message: string
+          nationality: string
+          phone: string
+          destination_id: string | null
+          scholarship_id: string | null
           created_at: string
           duration: string
           id: string
@@ -2664,6 +2675,17 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_notes?: string
+          education_level?: string
+          email?: string
+          field_of_study?: string
+          full_name?: string
+          intended_level?: string
+          message?: string
+          nationality?: string
+          phone?: string
+          destination_id?: string | null
+          scholarship_id?: string | null
           created_at?: string
           duration?: string
           id?: string
@@ -2676,6 +2698,17 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_notes?: string
+          education_level?: string
+          email?: string
+          field_of_study?: string
+          full_name?: string
+          intended_level?: string
+          message?: string
+          nationality?: string
+          phone?: string
+          destination_id?: string | null
+          scholarship_id?: string | null
           created_at?: string
           duration?: string
           id?: string
@@ -2693,6 +2726,20 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_applications_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "study_destinations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_applications_scholarship_id_fkey"
+            columns: ["scholarship_id"]
+            isOneToOne: false
+            referencedRelation: "scholarships"
             referencedColumns: ["id"]
           },
         ]
@@ -3808,6 +3855,10 @@ export type Database = {
     Functions: {
       create_tour_booking: {
         Args: { p_participants: number; p_phone?: string; p_schedule_id: string; p_special_requests?: string }
+        Returns: string
+      }
+      submit_study_application: {
+        Args: { p_destination_id: string; p_scholarship_id: string | null; p_full_name: string; p_email: string; p_phone: string; p_nationality: string; p_education_level: string; p_intended_level: string; p_field_of_study: string; p_start_date: string | null; p_message: string }
         Returns: string
       }
       restore_trash: { Args: { p_id: number }; Returns: number }
