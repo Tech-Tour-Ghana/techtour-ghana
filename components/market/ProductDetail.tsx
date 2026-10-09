@@ -78,7 +78,7 @@ export default function ProductDetail({ product, related }: { product: MarketPro
   const images = useMemo(() => {
     const list = product.gallery_images.filter((g) => g.image_url).map((g) => ({ url: g.image_url, alt: g.alt_text || product.title }));
     if (list.length) return list;
-    return [{ url: product.image_url || '/placeholder-product.jpg', alt: product.title }];
+    return [{ url: product.image_url || '/placeholder-product.svg', alt: product.title }];
   }, [product]);
 
   const money = (n: number) => `${currency.symbol}${(n * currency.rate).toFixed(2)}`;
@@ -353,7 +353,7 @@ export default function ProductDetail({ product, related }: { product: MarketPro
                 <Link key={r.id} href={`/market/${r.slug}`} className="group block overflow-hidden rounded-xl" style={{ border: `1px solid ${c.border}` }}>
                   <div className="aspect-[4/3] overflow-hidden" style={{ background: c.backgroundAlt }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={r.image_url || '/placeholder-product.jpg'} alt={r.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    <img src={r.image_url || '/placeholder-product.svg'} alt={r.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                   </div>
                   <div className="p-3">
                     <p className="line-clamp-1 text-sm font-medium">{r.title}</p>

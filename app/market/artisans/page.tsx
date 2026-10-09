@@ -539,7 +539,7 @@ function ArtisansPage() {
                 >
                   <div className="relative h-56 overflow-hidden">
                     <img
-                      src={artisan.profile_image || artisan.profile_image_url || '/placeholder-artisan.jpg'}
+                      src={artisan.profile_image || artisan.profile_image_url || '/placeholder-artisan.svg'}
                       alt={artisan.name}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
@@ -594,7 +594,7 @@ function ArtisansPage() {
                   {/* Image - Left side on desktop, full width on mobile */}
                   <div className="relative w-full sm:w-48 md:w-56 lg:w-64 h-48 sm:h-auto sm:aspect-square flex-shrink-0 overflow-hidden">
                     <img
-                      src={artisan.profile_image || artisan.profile_image_url || '/placeholder-artisan.jpg'}
+                      src={artisan.profile_image || artisan.profile_image_url || '/placeholder-artisan.svg'}
                       alt={artisan.name}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
@@ -734,7 +734,7 @@ function ArtisanDetailModal({ artisan, onClose, colors, isDimMode, API_URL }: an
 
   // Helper to get product image
   const getProductImage = (product: MarketProduct) => {
-    return product.image_url || product.image || '/placeholder-product.jpg';
+    return product.image_url || product.image || '/placeholder-product.svg';
   };
 
   return (
@@ -761,10 +761,10 @@ function ArtisanDetailModal({ artisan, onClose, colors, isDimMode, API_URL }: an
         {/* Cover Image */}
         <div className="relative h-48 md:h-56 overflow-hidden">
           <img
-            src={artisan.cover_image || artisan.cover_image_url || artisan.profile_image || '/placeholder-artisan-cover.jpg'}
+            src={artisan.cover_image || artisan.cover_image_url || artisan.profile_image || '/placeholder-artisan-cover.svg'}
             alt={artisan.name}
             className="w-full h-full object-cover"
-            onError={(e) => { e.currentTarget.src = '/placeholder-artisan-cover.jpg'; }}
+            onError={(e) => { e.currentTarget.src = '/placeholder-artisan-cover.svg'; }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
@@ -772,10 +772,10 @@ function ArtisanDetailModal({ artisan, onClose, colors, isDimMode, API_URL }: an
           <div className="absolute bottom-0 left-6 transform translate-y-1/2">
             <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-white overflow-hidden shadow-xl">
               <img
-                src={artisan.profile_image || artisan.profile_image_url || '/placeholder-artisan.jpg'}
+                src={artisan.profile_image || artisan.profile_image_url || '/placeholder-artisan.svg'}
                 alt={artisan.name}
                 className="w-full h-full object-cover"
-                onError={(e) => { e.currentTarget.src = '/placeholder-artisan.jpg'; }}
+                onError={(e) => { e.currentTarget.src = '/placeholder-artisan.svg'; }}
               />
             </div>
           </div>
@@ -1025,7 +1025,7 @@ function ArtisanDetailModal({ artisan, onClose, colors, isDimMode, API_URL }: an
                           src={getProductImage(product)}
                           alt={product.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          onError={(e) => { e.currentTarget.src = '/placeholder-product.jpg'; }}
+                          onError={(e) => { e.currentTarget.src = '/placeholder-product.svg'; }}
                         />
                       </div>
                       <div className="p-2.5">

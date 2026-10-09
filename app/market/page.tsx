@@ -288,7 +288,7 @@ const ProductCard = React.memo(({
 
   const isListView = viewMode === 'list';
 
-  const imageUrl = product.image_url || product.image || '/placeholder-product.jpg';
+  const imageUrl = product.image_url || product.image || '/placeholder-product.svg';
   const price = parseFloat(product.price) || 0;
   const discountPrice = product.discount_price ? parseFloat(product.discount_price) : null;
   const hasDiscount = discountPrice !== null && discountPrice < price;
@@ -504,7 +504,7 @@ const ProductCard = React.memo(({
           src={imageUrl}
           alt={product.title}
           className="w-full h-full object-cover"
-          onError={(e) => { e.currentTarget.src = '/placeholder-product.jpg'; }}
+          onError={(e) => { e.currentTarget.src = '/placeholder-product.svg'; }}
         />
         {hasDiscount && (
           <div className="absolute top-1 left-1 z-10">

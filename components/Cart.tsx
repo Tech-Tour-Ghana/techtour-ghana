@@ -419,7 +419,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                   alignItems: 'center',
                 }}>
                   <img
-                    src={item.image_url || '/placeholder-product.jpg'}
+                    src={item.image_url || '/placeholder-product.svg'}
                     alt={item.title}
                     style={{
                       width: '60px',
@@ -429,7 +429,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                       flexShrink: 0,
                     }}
                     onError={(e) => {
-                      e.currentTarget.src = '/placeholder-product.jpg';
+                      e.currentTarget.src = '/placeholder-product.svg';
                     }}
                   />
                   <div style={{ flex: 1, minWidth: 0 }}>
