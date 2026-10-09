@@ -10,7 +10,6 @@ import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 
 import Button from '@/components/ui/Button';
 import { getAuthStatus } from '@/lib/api';
-import { createBrowserClient } from '@/lib/supabase/client';
 
 interface Props {
   destination: { id: string; country_name: string };
@@ -46,21 +45,31 @@ export default function StudyApplicationForm({ destination, scholarships }: Prop
     if (busy) return;
     setError('');
     setBusy(true);
-    const { error: err } = await createBrowserClient().rpc('submit_study_application', {
-      p_destination_id: destination.id,
-      p_scholarship_id: f.scholarship || null,
-      p_full_name: f.full_name,
-      p_email: f.email,
-      p_phone: f.phone,
-      p_nationality: f.nationality,
-      p_education_level: f.education,
-      p_intended_level: f.target,
-      p_field_of_study: f.field,
-      p_start_date: f.start || null,
-      p_message: f.message,
-    });
+    let err = '';
+    try {
+      const res = await fetch('/api/study-apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          destination_id: destination.id,
+          scholarship_id: f.scholarship || null,
+          full_name: f.full_name,
+          email: f.email,
+          phone: f.phone,
+          nationality: f.nationality,
+          education_level: f.education,
+          intended_level: f.target,
+          field_of_study: f.field,
+          start_date: f.start || null,
+          message: f.message,
+        }),
+      });
+      if (!res.ok) err = ((await res.json().catch(() => null)) as { error?: string } | null)?.error || 'We could not send your application. Please try again.';
+    } catch {
+      err = 'We could not reach the server. Check your connection and try again.';
+    }
     setBusy(false);
-    if (err) return setError(err.message || 'We could not send your application. Please try again.');
+    if (err) return setError(err);
     setDone(true);
   }
 

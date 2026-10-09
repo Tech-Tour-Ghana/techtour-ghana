@@ -26,3 +26,17 @@ export const orderConfirmation = (o: { name: string; reference: string; amount: 
     `<h2>Thank you, ${h(o.name)}</h2><p>Your payment was received.</p><p><b>Reference:</b> ${h(o.reference)}<br><b>Total:</b> ${h(o.currency)} ${o.amount.toFixed(2)}</p><p>You can view your orders in your account.</p>`,
   ),
 });
+
+export const studyApplicationAck = (a: { name: string; country: string }) => ({
+  subject: `We received your application for ${a.country}`,
+  html: wrap(
+    `<h2>Hi ${h(a.name)},</h2><p>Thanks for applying to study in ${h(a.country)} with TechTour Ghana. Our study abroad team will review your application and contact you. You can follow its status under Study in your account.</p>`,
+  ),
+});
+
+export const studyApplicationNotify = (a: { name: string; email: string; phone: string; country: string; field: string; level: string; message: string }) => ({
+  subject: `New study application: ${a.name}, ${a.country}`,
+  html: wrap(
+    `<p><b>Applicant:</b> ${h(a.name)} (${h(a.email)}, ${h(a.phone)})</p><p><b>Destination:</b> ${h(a.country)}<br><b>Level:</b> ${h(a.level)}<br><b>Field:</b> ${h(a.field || "-")}</p>${a.message ? `<p style="white-space:pre-wrap">${h(a.message)}</p>` : ""}<p>Review it in the admin under Study Applications.</p>`,
+  ),
+});
