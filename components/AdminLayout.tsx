@@ -160,6 +160,30 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
       // Not persisted, still applies for this visit.
     }
   };
+  // Sidebar groups the admin has folded up. Remembered per browser; the group that
+  // holds the current page is opened again whenever the route changes.
+  const [closedGroups, setClosedGroups] = useState<string[]>([]);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('admin_nav_closed') ?? '[]');
+      if (Array.isArray(saved)) setClosedGroups(saved.filter((g): g is string => typeof g === 'string'));
+    } catch {
+      // Storage blocked or invalid, start with every group open.
+    }
+  }, []);
+  const saveClosed = (next: string[]) => {
+    setClosedGroups(next);
+    try {
+      localStorage.setItem('admin_nav_closed', JSON.stringify(next));
+    } catch {
+      // Not persisted, still applies for this visit.
+    }
+  };
+  const toggleGroup = (name: string) => saveClosed(closedGroups.includes(name) ? closedGroups.filter((g) => g !== name) : [...closedGroups, name]);
+  useEffect(() => {
+    const active = NAV_GROUPS.find((g) => g.items.some((i) => (i.href === '/admin' ? pathname === '/admin' : pathname === i.href || pathname.startsWith(`${i.href}/`))));
+    if (active?.group) setClosedGroups((prev) => (prev.includes(active.group!) ? prev.filter((g) => g !== active.group) : prev));
+  }, [pathname]);
   // Hidden on desktop when collapsed, but always shown in the mobile drawer.
   const hideWhenRail = collapsed ? 'lg:hidden' : '';
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -255,16 +279,28 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
 
         {/* Nav */}
         <nav className={`flex-1 p-3 space-y-1 ${collapsed ? 'lg:px-2' : ''}`}>
-          {NAV_GROUPS.map(({ group, items }) => (
+          {NAV_GROUPS.map(({ group, items }) => {
+            const folded = !!group && closedGroups.includes(group);
+            const groupId = `admin-nav-${(group ?? 'top').toLowerCase().replace(/[^a-z]+/g, '-')}`;
+            return (
             <div key={group ?? '__top'}>
               {group && (
                 <>
-                  <p className={`px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest ${hideWhenRail}`} style={{ color: 'rgba(255,255,255,0.25)' }}>
-                    {group}
-                  </p>
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group)}
+                    aria-expanded={!folded}
+                    aria-controls={groupId}
+                    className={`flex w-full items-center justify-between rounded-md px-3 pt-3 pb-1 text-left text-[10px] font-semibold uppercase tracking-widest transition-colors hover:text-white ${hideWhenRail}`}
+                    style={{ color: 'rgba(255,255,255,0.4)' }}
+                  >
+                    <span>{group}</span>
+                    <FontAwesomeIcon icon={faChevronDown} className={`h-2.5 w-2.5 transition-transform ${folded ? '-rotate-90' : ''}`} />
+                  </button>
                   {collapsed && <div className="hidden lg:block my-2 mx-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }} />}
                 </>
               )}
+              <div id={groupId} className={folded ? (collapsed ? 'hidden lg:block' : 'hidden') : undefined}>
               {items.map((item) => {
                 const isActive = item.href === '/admin' ? pathname === '/admin' : pathname === item.href || pathname.startsWith(`${item.href}/`);
                 return (
@@ -286,8 +322,10 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                   </Link>
                 );
               })}
+              </div>
             </div>
-          ))}
+            );
+          })}
         </nav>
 
         <div className="p-3 border-t text-center" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
