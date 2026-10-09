@@ -50,8 +50,18 @@ function RegisterContent() {
   const [showModal, setShowModal] = useState(false);
   const [modalEmail, setModalEmail] = useState('');
 
-  const headline = 'Explore Ghana, booked in minutes.';
-  const description = 'Tours, artisan goods, study abroad placements and vacation rentals, all in one place.';
+  // Copy and background come from site_settings (admin Settings), the text below is the fallback.
+  const [panel, setPanel] = useState<{ headline: string; description: string; bg: string } | null>(null);
+  useEffect(() => {
+    createBrowserClient()
+      .from('site_settings')
+      .select('register_headline, register_description, register_background_url')
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => setPanel({ headline: data?.register_headline ?? '', description: data?.register_description ?? '', bg: data?.register_background_url ?? '' }));
+  }, []);
+  const headline = panel?.headline || 'Explore Ghana, booked in minutes.';
+  const description = panel?.description || 'Tours, artisan goods, study abroad placements and vacation rentals, all in one place.';
   const features = ['Curated local tours', 'Secure Paystack checkout', 'Support local artisans'];
 
   useEffect(() => {
@@ -215,7 +225,7 @@ function RegisterContent() {
       )}
 
       {/* LEFT SIDE - Branding Section (Desktop only) */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-8 xl:p-12 relative overflow-hidden bg-[#1a1a2e] min-h-screen">
+      <div style={panel?.bg ? { backgroundImage: `url("${encodeURI(panel.bg)}")`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined} className="hidden lg:flex lg:w-1/2 flex-col justify-between p-8 xl:p-12 relative overflow-hidden bg-[#1a1a2e] min-h-screen">
         <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e]/60 via-[#1a1a2e]/40 to-[#1a1a2e]/20 pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col justify-between h-full">
@@ -228,7 +238,7 @@ function RegisterContent() {
             </div>
           </Link>
 
-          <div className="max-w-md">
+          <div className={`max-w-md transition-opacity duration-300 ${panel ? 'opacity-100' : 'opacity-0'}`}>
             <h1 className="text-white text-3xl xl:text-4xl font-bold mb-4 leading-tight">{headline}</h1>
             <p className="text-white/80 text-sm leading-relaxed mb-4">{description}</p>
             <div className="space-y-2 text-white/70 text-sm">
