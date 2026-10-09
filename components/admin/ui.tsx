@@ -326,9 +326,30 @@ export function Modal({
   );
 }
 
+/** Plain-language version of the usual database errors. */
+function friendly(e: { message: string; code?: string }): string {
+  const m = e.message;
+  if (e.code === '23503' || /foreign key/i.test(m)) {
+    if (/bookings/i.test(m)) return 'it has bookings. Deactivate it instead of deleting it.';
+    return 'something else still depends on it. Remove or reassign the linked items first.';
+  }
+  if (e.code === '23505' || /duplicate key|unique constraint/i.test(m)) return 'that value (usually the slug, name or email) is already used. Pick a different one.';
+  if (e.code === '23502' || /null value in column/i.test(m)) {
+    const col = /column "([^"]+)"/.exec(m)?.[1];
+    return col ? `"${col.replace(/_/g, ' ')}" is required.` : 'a required field is empty.';
+  }
+  if (e.code === '23514' || /check constraint/i.test(m)) {
+    const rule = /constraint "([^"]+)"/.exec(m)?.[1];
+    return rule ? `a value is out of range (${rule.replace(/_/g, ' ')}).` : 'a value is out of range.';
+  }
+  if (e.code === '22P02' || /invalid input syntax/i.test(m)) return 'a field has a value in the wrong format (date, number or id).';
+  if (e.code === '42501' || /row-level security|permission denied/i.test(m)) return 'you do not have permission, or the item is hidden from your account.';
+  return m;
+}
+
 /** Tell the admin when a write failed. Returns true on failure so the caller can keep the form open. */
-export function reportError(error: { message: string } | null | undefined): boolean {
-  if (error) notify(`That didn't save: ${error.message}`);
+export function reportError(error: { message: string; code?: string } | null | undefined): boolean {
+  if (error) notify(`That didn't save: ${friendly(error)}`);
   return !!error;
 }
 

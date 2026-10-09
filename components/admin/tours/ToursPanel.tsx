@@ -123,7 +123,7 @@ export default function ToursPanel({ tours, categories, destinations, loading, r
 
   async function remove(list: Tour[]) {
     const names = list.length === 1 ? `"${list[0]!.title}"` : `${list.length} tours`;
-    if (!(await confirmAction({ title: 'Delete tours?', message: `Delete ${names}? Their schedules and bookings links are removed too. This cannot be undone.`, danger: true, confirmLabel: 'Delete' }))) return;
+    if (!(await confirmAction({ title: 'Delete tours?', message: `Delete ${names}? Their departures and reviews are removed too, and you can restore everything from Trash. Tours that have bookings cannot be deleted: deactivate them instead.`, danger: true, confirmLabel: 'Delete' }))) return;
     if (reportError((await supabase.from('tours').delete().in('id', list.map((t) => t.id))).error)) return;
     setSelected(new Set());
     notify(`${list.length === 1 ? 'Tour' : 'Tours'} deleted.`, 'success');

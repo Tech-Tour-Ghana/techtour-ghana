@@ -14,6 +14,9 @@ function toSlug(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
+// The column is NOT NULL, so a scholarship with no deadline stores this far-future date and shows as Open.
+const OPEN_DEADLINE = '2099-12-31';
+
 interface Destination {
   id: string;
   country_name: string;
@@ -156,7 +159,7 @@ function DestinationsTab({ themeStyles, inputClass, inputStyle, labelStyle }: Ta
   }
 
   async function handleDelete(r: Destination) {
-    if (!(await confirmAction({ message: `Delete "${r.country_name}"? This cannot be undone.`, danger: true }))) return;
+    if (!(await confirmAction({ message: `Delete "${r.country_name}"? You can restore it from Trash.`, danger: true }))) return;
     const supabase = createBrowserClient();
     if (reportError((await supabase.from('study_destinations').delete().eq('id', r.id)).error)) { return; }
     setLoading(true);
@@ -297,7 +300,7 @@ function ScholarshipsTab({ themeStyles, inputClass, inputStyle, labelStyle }: Ta
   }
 
   function formatDeadline(d: string) {
-    if (!d) return 'Open';
+    if (!d || d >= OPEN_DEADLINE) return 'Open';
     return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
@@ -311,7 +314,7 @@ function ScholarshipsTab({ themeStyles, inputClass, inputStyle, labelStyle }: Ta
       slug: form.slug.trim() || toSlug(form.title),
       level: form.level,
       description: form.description,
-      deadline: form.deadline || new Date().toISOString().slice(0, 10),
+      deadline: form.deadline || OPEN_DEADLINE,
       amount: form.amount,
       is_featured: form.is_featured,
       is_active: form.is_active,
@@ -328,7 +331,7 @@ function ScholarshipsTab({ themeStyles, inputClass, inputStyle, labelStyle }: Ta
   }
 
   async function handleDelete(r: Scholarship) {
-    if (!(await confirmAction({ message: `Delete "${r.title}"? This cannot be undone.`, danger: true }))) return;
+    if (!(await confirmAction({ message: `Delete "${r.title}"? You can restore it from Trash.`, danger: true }))) return;
     const supabase = createBrowserClient();
     if (reportError((await supabase.from('scholarships').delete().eq('id', r.id)).error)) { return; }
     setLoading(true);
@@ -423,7 +426,7 @@ Cancel
                 </div>
                 <div className="space-y-1">
                   <label style={labelStyle}>Deadline <span style={{ color: 'var(--adm-error)' }}>*</span></label>
-                  <input type="date" className={inputClass} style={inputStyle} value={form.deadline} onChange={(e) => setForm((f) => ({ ...f, deadline: e.target.value }))} />
+                  <input type="date" className={inputClass} style={inputStyle} value={form.deadline >= OPEN_DEADLINE ? '' : form.deadline} onChange={(e) => setForm((f) => ({ ...f, deadline: e.target.value }))} />
                 </div>
               </div>
 

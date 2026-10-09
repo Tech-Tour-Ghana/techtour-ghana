@@ -55,7 +55,7 @@ export default function AdminNewsletterPage() {
   }
 
   async function remove(sub: Subscriber) {
-    if (!(await confirmAction({ message: `Remove ${sub.email} from the newsletter? This cannot be undone.`, danger: true, confirmLabel: 'Remove' }))) return;
+    if (!(await confirmAction({ message: `Remove ${sub.email} from the newsletter? You can restore it from Trash.`, danger: true, confirmLabel: 'Remove' }))) return;
     setBusyId(sub.id);
     const { error: err } = await supabase.from('newsletter_subscribers').delete().eq('id', sub.id);
     setBusyId(null);

@@ -65,7 +65,7 @@ export default function AdminContactsPage() {
   }
 
   async function remove(msg: ContactMessage) {
-    if (!(await confirmAction({ message: `Delete the message from ${msg.name || msg.email}? This cannot be undone.`, danger: true }))) return;
+    if (!(await confirmAction({ message: `Delete the message from ${msg.name || msg.email}? You can restore it from Trash.`, danger: true }))) return;
     const { error: err } = await supabase.from('contact_messages').delete().eq('id', msg.id);
     if (err) return notify('Could not delete the message.');
     setMessages((prev) => prev.filter((m) => m.id !== msg.id));

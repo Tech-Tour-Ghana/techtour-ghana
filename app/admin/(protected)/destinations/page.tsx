@@ -58,7 +58,7 @@ export default function AdminDestinationsPage() {
   }
 
   async function remove(id: string) {
-    if (!(await confirmAction({ message: 'Delete this destination? This cannot be undone.', danger: true }))) return;
+    if (!(await confirmAction({ message: 'Delete this destination? You can restore it from Trash.', danger: true }))) return;
     const { error } = await createBrowserClient().from('destinations').delete().eq('id', id);
     if (error) return notify(`Could not delete: ${error.message}`);
     setRows((prev) => prev.filter((x) => x.id !== id));

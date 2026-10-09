@@ -138,12 +138,12 @@ export default function AdminArtisansPage() {
     if (!form.name.trim()) return;
     setSaving(true);
     const supabase = createBrowserClient();
-    const n = (v: string | null | undefined) => (v ?? '').trim() || undefined;
+    const n = (v: string | null | undefined) => (v ?? '').trim();
     const payload = {
       name: form.name,
       slug: form.slug.trim() || toSlug(form.name),
       years_of_experience: form.years_of_experience ?? 0,
-      sort_order: form.sort_order ?? 0,
+      sort_order: Math.max(0, form.sort_order ?? 0),
       is_active: form.is_active,
       is_featured: form.is_featured,
       title: n(form.title),
@@ -172,7 +172,7 @@ export default function AdminArtisansPage() {
   }
 
   async function handleDelete(a: Artisan) {
-    if (!(await confirmAction({ message: `Delete "${a.name}"? This cannot be undone.`, danger: true }))) return;
+    if (!(await confirmAction({ message: `Delete "${a.name}"? You can restore it from Trash.`, danger: true }))) return;
     const supabase = createBrowserClient();
     if (reportError((await supabase.from('artisans').delete().eq('id', a.id)).error)) { return; }
     setLoading(true);
