@@ -1173,6 +1173,7 @@ function MarketPage() {
             <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }} />
             <input
               type="text"
+              aria-label="Search products"
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => {

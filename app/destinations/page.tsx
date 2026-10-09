@@ -1,3 +1,4 @@
+import Button from '@/components/ui/Button';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -30,7 +31,8 @@ export default async function DestinationsPage() {
       {destinations.length === 0 ? (
         <div className="rounded-2xl p-12 text-center" style={cardStyle}>
           <h2 className="text-xl font-semibold mb-2">Destinations are coming soon</h2>
-          <p style={{ color: 'var(--sp-text-secondary)' }}>Please check back shortly.</p>
+          <p style={{ color: 'var(--sp-text-secondary)' }}>Browse our guided tours in the meantime.</p>
+          <Button href="/tours" className="mt-5">Tours Listings</Button>
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

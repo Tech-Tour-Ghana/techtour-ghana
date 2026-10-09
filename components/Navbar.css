@@ -120,14 +120,12 @@
 .nav-logo:focus,
 .nav-logo:focus-visible,
 .nav-logo:active {
-  outline: none !important;
   box-shadow: none !important;
   border: none !important;
 }
 
 .nav-logo *:focus,
 .nav-logo *:focus-visible {
-  outline: none !important;
   box-shadow: none !important;
   border: none !important;
 }
@@ -385,7 +383,6 @@
   justify-content: center;
   font-size: 14px;
   transition: all 0.3s ease;
-  outline: none !important;
 }
 
 [data-theme="bright"] .nav-icon-btn {
@@ -418,7 +415,6 @@
   transition: all 0.3s ease;
   font-family: inherit;
   flex-shrink: 0;
-  outline: none !important;
 }
 
 [data-theme="bright"] .nav-theme-btn {
@@ -483,7 +479,6 @@
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
-  outline: none !important;
 }
 
 [data-theme="bright"] .nav-user-btn {
@@ -659,7 +654,6 @@
   cursor: pointer;
   padding: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  outline: none !important;
   position: relative;
   flex-shrink: 0;
 }
@@ -830,7 +824,6 @@
   justify-content: center;
   font-size: 16px;
   transition: all 0.3s ease;
-  outline: none !important;
   flex-shrink: 0;
 }
 
@@ -955,7 +948,6 @@
   font-family: inherit;
   transition: all 0.2s ease;
   border-radius: 8px;
-  outline: none !important;
   position: relative;
 }
 
@@ -1100,7 +1092,6 @@
   gap: 10px;
   transition: all 0.3s ease;
   font-family: inherit;
-  outline: none !important;
   margin-bottom: 8px;
 }
 
@@ -1360,7 +1351,6 @@
   padding: 4px;
   font-size: 13px;
   transition: all 0.3s ease;
-  outline: none !important;
 }
 
 [data-theme="bright"] .welcome-close {
@@ -1738,41 +1728,35 @@ footer {
 .navbar button:focus,
 .navbar button:focus-visible,
 .navbar button:active {
-  outline: none !important;
   box-shadow: none !important;
 }
 
 .nav-theme-btn:focus,
 .nav-theme-btn:focus-visible,
 .nav-theme-btn:active {
-  outline: none !important;
   box-shadow: none !important;
 }
 
 .nav-hamburger:focus,
 .nav-hamburger:focus-visible,
 .nav-hamburger:active {
-  outline: none !important;
   box-shadow: none !important;
 }
 
 .nav-user-btn:focus,
 .nav-user-btn:focus-visible,
 .nav-user-btn:active {
-  outline: none !important;
   box-shadow: none !important;
 }
 
 .mobile-logo-link:focus,
 .mobile-logo-link:focus-visible {
-  outline: none !important;
   box-shadow: none !important;
   border: none !important;
 }
 
 .mobile-logo-link *:focus,
 .mobile-logo-link *:focus-visible {
-  outline: none !important;
   box-shadow: none !important;
   border: none !important;
 }
@@ -1780,6 +1764,5 @@ footer {
 .mobile-close-icon-btn:focus,
 .mobile-close-icon-btn:focus-visible,
 .mobile-close-icon-btn:active {
-  outline: none !important;
   box-shadow: none !important;
 }

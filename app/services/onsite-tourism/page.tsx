@@ -142,27 +142,6 @@ export default function OnsiteTourismPage() {
                     accentColor="teal"
                 />
 
-                <section className="intro-stats-section">
-                    <div className="intro-stats-container">
-                        <div className="intro-stat">
-                            <div className="intro-stat-value">50+</div>
-                            <div className="intro-stat-label">Curated Sites</div>
-                        </div>
-                        <div className="intro-stat">
-                            <div className="intro-stat-value">10K+</div>
-                            <div className="intro-stat-label">Happy Travelers</div>
-                        </div>
-                        <div className="intro-stat">
-                            <div className="intro-stat-value">200+</div>
-                            <div className="intro-stat-label">Local Guides</div>
-                        </div>
-                        <div className="intro-stat">
-                            <div className="intro-stat-value">98%</div>
-                            <div className="intro-stat-label">Satisfaction</div>
-                        </div>
-                    </div>
-                </section>
-
                 <section className="sites-section">
                     <div className="sites-container">
                         <div className="sites-header">

@@ -117,9 +117,7 @@ function ConfirmEmailContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] p-4 relative overflow-hidden">
-      <div className="absolute w-[300px] h-[300px] bg-purple-500/30 rounded-full blur-[60px] -top-[100px] -right-[100px] animate-pulse" />
-      <div className="absolute w-[200px] h-[200px] bg-amber-400/20 rounded-full blur-[60px] -bottom-[50px] -left-[50px] animate-pulse delay-1000" />
+    <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e] p-4 relative overflow-hidden">
 
       <div className="relative z-10 w-full max-w-[420px]">
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl hover:border-purple-500/20 transition-all text-center">
