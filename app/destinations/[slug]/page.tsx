@@ -76,7 +76,7 @@ export default async function DestinationPage({ params }: Params) {
             ))}
           </ul>
           <div className="mt-6 flex flex-col gap-2 text-sm font-semibold">
-            <Link href="/services/onsite-tourism" style={{ color: 'var(--sp-primary)' }}>Onsite tourism →</Link>
+            <Link href="/tours" style={{ color: 'var(--sp-primary)' }}>Tours Listings →</Link>
             <Link href="/services/dream-vacations" style={{ color: 'var(--sp-primary)' }}>Dream vacations →</Link>
             <Link href="/destinations" style={{ color: 'var(--sp-primary)' }}>← All destinations</Link>
           </div>

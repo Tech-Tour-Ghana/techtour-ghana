@@ -134,7 +134,7 @@ export default function ToursPage() {
           <FontAwesomeIcon icon={faCalendarCheck} className="text-6xl mb-4" style={{ color: themeStyles.textMuted }} />
           <h3 className="text-xl font-semibold mb-2" style={{ color: themeStyles.textPrimary }}>No tours booked yet</h3>
           <p className="text-sm" style={{ color: themeStyles.textSecondary }}>Explore our destinations and book an unforgettable experience.</p>
-          <Button variant="accent" className="mt-4" href="/services/onsite-tourism">Explore Tours</Button>
+          <Button variant="accent" className="mt-4" href="/tours">Explore Tours</Button>
         </div>
       )}
 
