@@ -13,7 +13,6 @@ export const SITE_LINK_GROUPS: { title: string; links: { label: string; href: st
   {
     title: 'Services',
     links: [
-      { label: 'Onsite Tourism', href: '/services/onsite-tourism' },
       { label: 'Dream Vacations', href: '/services/dream-vacations' },
       { label: 'Study Abroad', href: '/services/study-abroad' },
     ],

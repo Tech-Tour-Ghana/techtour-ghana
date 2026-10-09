@@ -403,7 +403,7 @@ export default function ContactUsPage() {
               Browse our experiences or plan a custom trip with our travel specialists.
             </p>
             <div className="contact-cta-actions">
-              <Button href="/services/onsite-tourism" variant="gold">Browse Experiences</Button>
+              <Button href="/tours" variant="gold">Browse Experiences</Button>
               <Button href="/services/dream-vacations" variant="onDark">View Dream Vacations</Button>
             </div>
           </div>
