@@ -14,9 +14,11 @@ const escapeXml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').
 export async function GET() {
   const base = env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
   const supabase = await createClient();
-  const [destinations, posts, noindex, redirected] = await Promise.all([
+  const [destinations, posts, tours, products, noindex, redirected] = await Promise.all([
     supabase.from('destinations').select('id, slug, updated_at').eq('is_active', true),
     supabase.from('blog_posts').select('id, slug, category, updated_at').eq('is_published', true),
+    supabase.from('tours').select('slug, updated_at').eq('is_active', true),
+    supabase.from('market_products').select('slug, updated_at').eq('is_active', true),
     supabase.from('seo_metadata').select('entity_type, entity_key').eq('robots_index', false),
     supabase.from('redirects').select('source_path').eq('is_active', true),
   ]);
@@ -30,6 +32,8 @@ export async function GET() {
     ...Object.keys(BLOG_CATEGORIES).filter((c) => !hidden.has(`blog_category:${c}`)).map((c) => ({ path: `/blog/${c}` })),
     ...(destinations.data ?? []).filter((d) => !hidden.has(`destination:${d.id}`)).map((d) => ({ path: `/destinations/${d.slug}`, lastmod: d.updated_at })),
     ...(posts.data ?? []).filter((p) => !hidden.has(`blog_post:${p.id}`)).map((p) => ({ path: `/blog/${p.category}/${p.slug}`, lastmod: p.updated_at })),
+    ...(tours.data ?? []).map((t) => ({ path: `/tours/${t.slug}`, lastmod: t.updated_at })),
+    ...(products.data ?? []).map((p) => ({ path: `/market/${p.slug}`, lastmod: p.updated_at })),
   ].filter((e) => !moved.has(e.path));
 
   const body = entries
