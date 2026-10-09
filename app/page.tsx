@@ -517,6 +517,80 @@ const VideoPlayer = ({ video, isDimMode, videoRefs, isVisible, onPlayPause, card
   );
 };
 
+// ===== TESTIMONIALS =====
+interface Testimonial {
+  id: string;
+  author_name: string;
+  author_position: string;
+  author_image_path: string | null;
+  content: string;
+  rating: number;
+}
+
+// Renders nothing until there is at least one active testimonial.
+const TestimonialsSection = ({ colors }: { colors: typeof COLORS.light }) => {
+  const [items, setItems] = useState<Testimonial[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    createBrowserClient()
+      .from('testimonials')
+      .select('id, author_name, author_position, author_image_path, content, rating')
+      .eq('is_active', true)
+      .order('is_featured', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(6)
+      .then(({ data }) => { if (!cancelled) setItems(data ?? []); });
+    return () => { cancelled = true; };
+  }, []);
+
+  if (items.length === 0) return null;
+
+  return (
+    <section aria-labelledby="testimonials-heading" className="py-10 md:py-16 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-7xl mx-auto">
+        <h2 id="testimonials-heading" className="text-2xl md:text-3xl font-bold mb-6 md:mb-8" style={{ color: colors.textPrimary }}>
+          What travellers say
+        </h2>
+        <ul className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((t) => {
+            const initials = t.author_name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w.charAt(0).toUpperCase()).join('');
+            const stars = Math.min(5, Math.max(0, t.rating));
+            return (
+              <li key={t.id}>
+                <figure className="h-full flex flex-col rounded-xl border p-5" style={{ background: colors.backgroundAlt, borderColor: colors.border }}>
+                  {stars > 0 && (
+                    <div className="flex gap-0.5 mb-3" role="img" aria-label={`Rated ${stars} out of 5`}>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <FontAwesomeIcon key={n} icon={faStar} className="w-3.5 h-3.5" style={{ color: n <= stars ? colors.primary : colors.border }} />
+                      ))}
+                    </div>
+                  )}
+                  <blockquote className="flex-1 text-sm md:text-base leading-relaxed" style={{ color: colors.textPrimary }}>
+                    {t.content}
+                  </blockquote>
+                  <figcaption className="flex items-center gap-3 mt-4 pt-4 border-t" style={{ borderColor: colors.border }}>
+                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-bold" style={{ background: colors.primaryLight, color: colors.primary }}>
+                      {t.author_image_path
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img src={t.author_image_path} alt="" className="h-full w-full object-cover" loading="lazy" />
+                        : initials}
+                    </span>
+                    <span className="min-w-0 text-sm">
+                      <span className="block font-semibold truncate" style={{ color: colors.textPrimary }}>{t.author_name}</span>
+                      {t.author_position && <span className="block truncate" style={{ color: colors.textSecondary }}>{t.author_position}</span>}
+                    </span>
+                  </figcaption>
+                </figure>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </section>
+  );
+};
+
 // ===== MAIN HOME PAGE =====
 function HomePage() {
   const router = useRouter();
@@ -1146,6 +1220,8 @@ function HomePage() {
           </div>
         </section>
       )}
+
+      <TestimonialsSection colors={colors} />
 
       {/* ===== BRAND FOOTER ===== */}
       <footer className={`py-6 text-center border-t`} style={{
