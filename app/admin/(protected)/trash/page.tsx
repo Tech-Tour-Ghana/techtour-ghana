@@ -24,7 +24,7 @@ const KINDS: Record<string, string> = {
   artisan_private_contacts: 'Artisan contacts', artisan_products: 'Artisan product', product_gallery: 'Product image', seo_metadata: 'SEO settings',
   main_feature_cards: 'Homepage card', video_sections: 'Video section', homepage_slides: 'Hero slide', small_glass_cards: 'Small card',
   navbar_menus: 'Menu item', navbar_dropdowns: 'Dropdown item', footer_quick_links: 'Footer link', social_links: 'Social link', legal_links: 'Legal link',
-  job_categories: 'Job category', suggestions: 'Suggestion', issue_reports: 'Issue report',
+  job_categories: 'Job category', suggestions: 'Suggestion', issue_reports: 'Issue report', vacation_rentals: 'Vacation rental',
 };
 const kind = (t: string) => KINDS[t] ?? t;
 

@@ -15,9 +15,10 @@ export const dynamic = 'force-dynamic';
 
 export default async function SitemapPage() {
   const supabase = await createClient();
-  const [{ data: destinations }, { data: tours }, { data: products }] = await Promise.all([
+  const [{ data: destinations }, { data: tours }, { data: rentals }, { data: products }] = await Promise.all([
     supabase.from('destinations').select('slug, name').eq('is_active', true).order('sort_order'),
     supabase.from('tours').select('slug, title').eq('is_active', true).order('title'),
+    supabase.from('vacation_rentals').select('slug, title').eq('is_active', true).order('title'),
     supabase.from('market_products').select('slug, title').eq('is_active', true).order('title'),
   ]);
 
@@ -27,6 +28,7 @@ export default async function SitemapPage() {
       ? [{ title: 'Destination pages', links: destinations.map((d) => ({ label: d.name, href: `/destinations/${d.slug}` })) }]
       : []),
     ...(tours?.length ? [{ title: 'Tour pages', links: tours.map((t) => ({ label: t.title, href: `/tours/${t.slug}` })) }] : []),
+    ...(rentals?.length ? [{ title: 'Vacation rentals', links: rentals.map((r) => ({ label: r.title, href: `/services/dream-vacations/${r.slug}` })) }] : []),
     ...(products?.length ? [{ title: 'Market products', links: products.map((p) => ({ label: p.title, href: `/market/${p.slug}` })) }] : []),
   ];
 

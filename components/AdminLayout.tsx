@@ -37,6 +37,7 @@ import {
   faGlobeAfrica,
   faUserCircle,
   faRoute,
+  faHouse,
   faCartShopping,
   faQuoteLeft,
   faCommentDots,
@@ -71,6 +72,7 @@ const NAV_GROUPS = [
     items: [
       { icon: faRoute, label: 'Tours', href: '/admin/tours' },
       { icon: faMapLocationDot, label: 'Destinations', href: '/admin/destinations' },
+      { icon: faHouse, label: 'Vacation Rentals', href: '/admin/rentals' },
       { icon: faGraduationCap, label: 'Study Abroad', href: '/admin/study' },
       { icon: faClipboardList, label: 'Study Applications', href: '/admin/applications' },
     ],
