@@ -412,12 +412,10 @@ function JobGridCard({ job }: { job: Job }) {
           {job.location}
         </span>
         {job.level && (
-          {job.level && (
-            <span>
-              <FontAwesomeIcon icon={faBriefcase} />
-              {job.level}
-            </span>
-          )}
+          <span>
+            <FontAwesomeIcon icon={faBriefcase} />
+            {job.level}
+          </span>
         )}
       </div>
 
@@ -476,10 +474,12 @@ function JobListItem({ job }: { job: Job }) {
             <FontAwesomeIcon icon={faLocationDot} />
             {job.location}
           </span>
-          <span>
-            <FontAwesomeIcon icon={faBriefcase} />
-            {job.level}
-          </span>
+          {job.level && (
+            <span>
+              <FontAwesomeIcon icon={faBriefcase} />
+              {job.level}
+            </span>
+          )}
           <span className="job-list-item__tags-inline">
             {job.tags.slice(0, 3).map((tag, i) => (
               <span key={i} className="job-tag">
