@@ -25,6 +25,7 @@ import {
   faMoon,
   faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
+import AvatarContent from '@/components/AvatarContent';
 import { useTheme } from '@/context/ThemeContext';
 import { useCart } from '@/context/CartContext';
 import { getAuthStatus, getNotifications, logoutUser, type Notification, type User } from '@/lib/api';
@@ -90,12 +91,6 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const getUserInitials = () => {
-    if (!user) return 'U';
-    const name = user.display_name || user.first_name || user.email || 'User';
-    return name.charAt(0).toUpperCase();
-  };
 
   const getFullName = () => {
     if (!user) return 'User';
@@ -250,10 +245,10 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
                 style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6' }}
               >
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                  className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-sm font-bold"
                   style={{ background: BRAND_COLORS.tropicalTeal, color: 'white' }}
                 >
-                  {getUserInitials()}
+                  <AvatarContent src={user?.avatar_url} name={getFullName()} />
                 </div>
                 <span className="hidden max-w-[10rem] truncate text-sm font-medium sm:inline" style={{ color: themeStyles.textPrimary }}>{getFullName()}</span>
                 <FontAwesomeIcon icon={faChevronDown} className={`w-3 h-3 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} style={{ color: themeStyles.textMuted }} />

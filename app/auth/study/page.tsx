@@ -21,7 +21,6 @@ import {
   faMapMarkerAlt,
   faCalendarAlt,
   faBook,
-  faChevronRight,
   faExclamationCircle,
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -131,26 +130,34 @@ export default function StudyPage() {
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center gap-3 mt-2 text-sm" style={{ color: themeStyles.textSecondary }}>
-                    <span>
-                      <FontAwesomeIcon icon={faUniversity} className="w-3 h-3 mr-1" />
-                      {app.university}
-                    </span>
-                    <span>
-                      <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3 mr-1" />
-                      {app.location}
-                    </span>
-                    <span>
-                      <FontAwesomeIcon icon={faCalendarAlt} className="w-3 h-3 mr-1" />
-                      Starts: {new Date(app.start_date).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </span>
-                    <span>
-                      <FontAwesomeIcon icon={faClock} className="w-3 h-3 mr-1" />
-                      {app.duration}
-                    </span>
+                    {app.university && (
+                      <span>
+                        <FontAwesomeIcon icon={faUniversity} className="w-3 h-3 mr-1" />
+                        {app.university}
+                      </span>
+                    )}
+                    {app.location && (
+                      <span>
+                        <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3 mr-1" />
+                        {app.location}
+                      </span>
+                    )}
+                    {app.start_date && !Number.isNaN(new Date(app.start_date).getTime()) && (
+                      <span>
+                        <FontAwesomeIcon icon={faCalendarAlt} className="w-3 h-3 mr-1" />
+                        Starts: {new Date(app.start_date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
+                    )}
+                    {app.duration && (
+                      <span>
+                        <FontAwesomeIcon icon={faClock} className="w-3 h-3 mr-1" />
+                        {app.duration}
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs mt-1" style={{ color: themeStyles.textMuted }}>
                     Applied on {new Date(app.created_at).toLocaleDateString('en-US', {
@@ -160,10 +167,6 @@ export default function StudyPage() {
                     })}
                   </p>
                 </div>
-                <Button variant="secondary" size="sm" arrow={false} style={{ color: themeStyles.textSecondary }}>
-                  View Details
-                  <FontAwesomeIcon icon={faChevronRight} className="w-3 h-3" />
-                </Button>
               </div>
             </div>
           ))}
@@ -173,7 +176,7 @@ export default function StudyPage() {
           <FontAwesomeIcon icon={faGraduationCap} className="text-6xl mb-4" style={{ color: themeStyles.textMuted }} />
           <h3 className="text-xl font-semibold mb-2" style={{ color: themeStyles.textPrimary }}>No applications yet</h3>
           <p className="text-sm" style={{ color: themeStyles.textSecondary }}>Start your study abroad journey today.</p>
-          <Button variant="accent" className="mt-4" href="/study">Explore Programs</Button>
+          <Button variant="accent" className="mt-4" href="/services/study-abroad">Explore Programs</Button>
         </div>
       )}
 

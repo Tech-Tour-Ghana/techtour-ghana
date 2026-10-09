@@ -11,6 +11,7 @@ import {
   faCog, faDashboard, faSearch, faHandPeace, faShieldHalved
 } from '@fortawesome/free-solid-svg-icons';
 import './Navbar.css';
+import AvatarContent from '@/components/AvatarContent';
 import { getAuthStatus, logoutUser, User } from '@/lib/api';
 import { useTheme } from '@/context/ThemeContext';
 import { useCart } from '@/context/CartContext';
@@ -370,12 +371,6 @@ const Navbar = () => {
     return 'User';
   };
 
-  const getUserInitials = () => {
-    const name = getUserDisplayName();
-    if (name && name.length > 0) return name.charAt(0).toUpperCase();
-    return 'U';
-  };
-
   const logoSrc = siteSettings?.logo || '/images/logo-40x40.png';
 
   if (loading) {
@@ -480,14 +475,14 @@ const Navbar = () => {
                       aria-haspopup="true"
                       aria-expanded={isUserDropdownOpen}
                     >
-                      <div className="nav-user-avatar">{getUserInitials()}</div>
+                      <div className="nav-user-avatar" style={{ overflow: 'hidden' }}><AvatarContent src={user?.avatar_url} name={getUserDisplayName()} /></div>
                       <span className="nav-user-name">{getUserDisplayName()}</span>
                       <FontAwesomeIcon icon={faChevronDown} className={`nav-user-arrow ${isUserDropdownOpen ? 'open' : ''}`} />
                     </button>
                     {isUserDropdownOpen && (
                       <div className="nav-user-dropdown">
                         <div className="nav-user-header">
-                          <div className="nav-user-avatar-large">{getUserInitials()}</div>
+                          <div className="nav-user-avatar-large" style={{ overflow: 'hidden' }}><AvatarContent src={user?.avatar_url} name={getUserDisplayName()} /></div>
                           <div>
                             <div className="nav-user-name-large">{getUserDisplayName()}</div>
                             <div className="nav-user-email">{user.email}</div>
@@ -625,7 +620,7 @@ const Navbar = () => {
             {isAuthenticated && user ? (
               <>
                 <div className="mobile-user-info">
-                  <div className="mobile-user-avatar">{getUserInitials()}</div>
+                  <div className="mobile-user-avatar" style={{ overflow: 'hidden' }}><AvatarContent src={user?.avatar_url} name={getUserDisplayName()} /></div>
                   <div>
                     <div className="mobile-user-name">{getUserDisplayName()}</div>
                     <div className="mobile-user-email">{user.email}</div>
