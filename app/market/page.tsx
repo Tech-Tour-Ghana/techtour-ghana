@@ -47,7 +47,6 @@ import {
   faExternalLinkAlt,
   faHome,
   faStore,
-  faLightbulb,
   faGem,
   faCrown,
   faPaintBrush,
@@ -645,7 +644,6 @@ ProductCard.displayName = 'ProductCard';
 // ===== SUB-NAVIGATION LINKS =====
 const SUB_NAV_LINKS = [
   { name: 'Market Center', path: '/market', icon: faStore },
-  { name: 'Tech & Innovation', path: '/market/tech-innovation', icon: faLightbulb },
   { name: 'Artisan Spotlight', path: '/market/artisans', icon: faCrown },
 ];
 

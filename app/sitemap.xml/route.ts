@@ -14,12 +14,13 @@ const escapeXml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').
 export async function GET() {
   const base = env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
   const supabase = await createClient();
-  const [destinations, posts, tours, rentals, products, jobs, noindex, redirected] = await Promise.all([
+  const [destinations, posts, tours, rentals, products, artisans, jobs, noindex, redirected] = await Promise.all([
     supabase.from('destinations').select('id, slug, updated_at').eq('is_active', true),
     supabase.from('blog_posts').select('id, slug, category, updated_at').eq('is_published', true),
     supabase.from('tours').select('slug, updated_at').eq('is_active', true),
     supabase.from('vacation_rentals').select('slug, updated_at').eq('is_active', true),
     supabase.from('market_products').select('slug, updated_at').eq('is_active', true),
+    supabase.from('artisans').select('slug, updated_at').eq('is_active', true),
     supabase.from('job_openings').select('slug, updated_at, closing_date').eq('is_active', true),
     supabase.from('seo_metadata').select('entity_type, entity_key').eq('robots_index', false),
     supabase.from('redirects').select('source_path').eq('is_active', true),
@@ -37,6 +38,7 @@ export async function GET() {
     ...(tours.data ?? []).map((t) => ({ path: `/tours/${t.slug}`, lastmod: t.updated_at })),
     ...(rentals.data ?? []).map((r) => ({ path: `/services/dream-vacations/${r.slug}`, lastmod: r.updated_at })),
     ...(products.data ?? []).map((p) => ({ path: `/market/${p.slug}`, lastmod: p.updated_at })),
+    ...(artisans.data ?? []).map((a) => ({ path: `/market/artisans/${a.slug}`, lastmod: a.updated_at })),
     ...(jobs.data ?? []).filter((j) => !j.closing_date || j.closing_date >= new Date().toISOString().slice(0, 10)).map((j) => ({ path: `/about/careers/${j.slug}`, lastmod: j.updated_at })),
   ].filter((e) => !moved.has(e.path));
 

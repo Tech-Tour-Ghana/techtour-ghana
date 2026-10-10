@@ -296,7 +296,7 @@ export default function ProductDetail({ product, related }: { product: MarketPro
                   <p className="truncate text-sm font-semibold">{product.artisan.name}</p>
                   {product.artisan.location && <p className="truncate text-xs" style={{ color: c.textMuted }}><FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1" />{product.artisan.location}</p>}
                 </div>
-                <Link href="/market/artisans" className="text-xs font-semibold" style={{ color: accent }}>All artisans</Link>
+                <Link href={`/market/artisans/${product.artisan.slug}`} className="text-xs font-semibold" style={{ color: accent }}>View profile</Link>
               </div>
             )}
           </div>
