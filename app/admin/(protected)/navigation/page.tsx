@@ -374,12 +374,12 @@ Cancel
 <div className="space-y-4">
             {/* Menu fields */}
             {(modal.type === 'menu_add' || modal.type === 'menu_edit') && <>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Label</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.label || '')} onChange={(e) => setField('label', e.target.value)} /></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>URL (leave empty for parent)</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.url || '')} onChange={(e) => setField('url', e.target.value)} /></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Sort Order</label>
-                <input type="number" className={inputClass} style={inputStyle} value={Number(modal.data.sort_order ?? 0)} onChange={(e) => setField('sort_order', e.target.value)} /></div>
+              <div><label htmlFor="nav-1" className="block text-xs font-medium mb-1" style={labelStyle}>Label</label>
+                <input id="nav-1" className={inputClass} style={inputStyle} value={String(modal.data.label || '')} onChange={(e) => setField('label', e.target.value)} /></div>
+              <div><label htmlFor="nav-2" className="block text-xs font-medium mb-1" style={labelStyle}>URL (leave empty for parent)</label>
+                <input id="nav-2" className={inputClass} style={inputStyle} value={String(modal.data.url || '')} onChange={(e) => setField('url', e.target.value)} /></div>
+              <div><label htmlFor="nav-3" className="block text-xs font-medium mb-1" style={labelStyle}>Sort Order</label>
+                <input id="nav-3" type="number" className={inputClass} style={inputStyle} value={Number(modal.data.sort_order ?? 0)} onChange={(e) => setField('sort_order', e.target.value)} /></div>
               <label className="flex items-center gap-2 text-xs cursor-pointer" style={labelStyle}>
                 <input type="checkbox" checked={Boolean(modal.data.is_active)} onChange={(e) => setField('is_active', e.target.checked)} />Active
               </label>
@@ -387,12 +387,12 @@ Cancel
 
             {/* Dropdown fields */}
             {(modal.type === 'dropdown_add' || modal.type === 'dropdown_edit') && <>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Label</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.label || '')} onChange={(e) => setField('label', e.target.value)} /></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>URL</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.url || '')} onChange={(e) => setField('url', e.target.value)} /></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Sort Order</label>
-                <input type="number" className={inputClass} style={inputStyle} value={Number(modal.data.sort_order ?? 0)} onChange={(e) => setField('sort_order', e.target.value)} /></div>
+              <div><label htmlFor="nav-4" className="block text-xs font-medium mb-1" style={labelStyle}>Label</label>
+                <input id="nav-4" className={inputClass} style={inputStyle} value={String(modal.data.label || '')} onChange={(e) => setField('label', e.target.value)} /></div>
+              <div><label htmlFor="nav-5" className="block text-xs font-medium mb-1" style={labelStyle}>URL</label>
+                <input id="nav-5" className={inputClass} style={inputStyle} value={String(modal.data.url || '')} onChange={(e) => setField('url', e.target.value)} /></div>
+              <div><label htmlFor="nav-6" className="block text-xs font-medium mb-1" style={labelStyle}>Sort Order</label>
+                <input id="nav-6" type="number" className={inputClass} style={inputStyle} value={Number(modal.data.sort_order ?? 0)} onChange={(e) => setField('sort_order', e.target.value)} /></div>
               <label className="flex items-center gap-2 text-xs cursor-pointer" style={labelStyle}>
                 <input type="checkbox" checked={Boolean(modal.data.is_active)} onChange={(e) => setField('is_active', e.target.checked)} />Active
               </label>
@@ -400,16 +400,16 @@ Cancel
 
             {/* Footer link fields */}
             {(modal.type === 'footer_link_add' || modal.type === 'footer_link_edit') && <>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Label</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.label || '')} onChange={(e) => setField('label', e.target.value)} /></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>URL</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.url || '')} onChange={(e) => setField('url', e.target.value)} /></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Category</label>
-                <select className={inputClass} style={inputStyle} value={String(modal.data.category || 'company')} onChange={(e) => setField('category', e.target.value)}>
+              <div><label htmlFor="nav-7" className="block text-xs font-medium mb-1" style={labelStyle}>Label</label>
+                <input id="nav-7" className={inputClass} style={inputStyle} value={String(modal.data.label || '')} onChange={(e) => setField('label', e.target.value)} /></div>
+              <div><label htmlFor="nav-8" className="block text-xs font-medium mb-1" style={labelStyle}>URL</label>
+                <input id="nav-8" className={inputClass} style={inputStyle} value={String(modal.data.url || '')} onChange={(e) => setField('url', e.target.value)} /></div>
+              <div><label htmlFor="nav-9" className="block text-xs font-medium mb-1" style={labelStyle}>Category</label>
+                <select id="nav-9" className={inputClass} style={inputStyle} value={String(modal.data.category || 'company')} onChange={(e) => setField('category', e.target.value)}>
                   {['destinations', 'services', 'company', 'support'].map((c) => <option key={c} value={c}>{c}</option>)}
                 </select></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Sort Order</label>
-                <input type="number" className={inputClass} style={inputStyle} value={Number(modal.data.sort_order ?? 0)} onChange={(e) => setField('sort_order', e.target.value)} /></div>
+              <div><label htmlFor="nav-10" className="block text-xs font-medium mb-1" style={labelStyle}>Sort Order</label>
+                <input id="nav-10" type="number" className={inputClass} style={inputStyle} value={Number(modal.data.sort_order ?? 0)} onChange={(e) => setField('sort_order', e.target.value)} /></div>
               <label className="flex items-center gap-2 text-xs cursor-pointer" style={labelStyle}>
                 <input type="checkbox" checked={Boolean(modal.data.is_active)} onChange={(e) => setField('is_active', e.target.checked)} />Active
               </label>
@@ -417,14 +417,14 @@ Cancel
 
             {/* Social link fields */}
             {(modal.type === 'social_add' || modal.type === 'social_edit') && <>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Platform</label>
-                <select className={inputClass} style={inputStyle} value={String(modal.data.platform || 'other')} onChange={(e) => setField('platform', e.target.value)}>
+              <div><label htmlFor="nav-11" className="block text-xs font-medium mb-1" style={labelStyle}>Platform</label>
+                <select id="nav-11" className={inputClass} style={inputStyle} value={String(modal.data.platform || 'other')} onChange={(e) => setField('platform', e.target.value)}>
                   {['facebook', 'twitter', 'instagram', 'linkedin', 'youtube', 'tiktok', 'whatsapp', 'other'].map((p) => <option key={p} value={p}>{p}</option>)}
                 </select></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>URL</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.url || '')} onChange={(e) => setField('url', e.target.value)} /></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Sort Order</label>
-                <input type="number" className={inputClass} style={inputStyle} value={Number(modal.data.sort_order ?? 0)} onChange={(e) => setField('sort_order', e.target.value)} /></div>
+              <div><label htmlFor="nav-12" className="block text-xs font-medium mb-1" style={labelStyle}>URL</label>
+                <input id="nav-12" className={inputClass} style={inputStyle} value={String(modal.data.url || '')} onChange={(e) => setField('url', e.target.value)} /></div>
+              <div><label htmlFor="nav-13" className="block text-xs font-medium mb-1" style={labelStyle}>Sort Order</label>
+                <input id="nav-13" type="number" className={inputClass} style={inputStyle} value={Number(modal.data.sort_order ?? 0)} onChange={(e) => setField('sort_order', e.target.value)} /></div>
               <label className="flex items-center gap-2 text-xs cursor-pointer" style={labelStyle}>
                 <input type="checkbox" checked={Boolean(modal.data.is_active)} onChange={(e) => setField('is_active', e.target.checked)} />Active
               </label>
@@ -432,12 +432,12 @@ Cancel
 
             {/* Legal link fields */}
             {(modal.type === 'legal_add' || modal.type === 'legal_edit') && <>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Label</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.label || '')} onChange={(e) => setField('label', e.target.value)} /></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>URL</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.url || '')} onChange={(e) => setField('url', e.target.value)} /></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Sort Order</label>
-                <input type="number" className={inputClass} style={inputStyle} value={Number(modal.data.sort_order ?? 0)} onChange={(e) => setField('sort_order', e.target.value)} /></div>
+              <div><label htmlFor="nav-14" className="block text-xs font-medium mb-1" style={labelStyle}>Label</label>
+                <input id="nav-14" className={inputClass} style={inputStyle} value={String(modal.data.label || '')} onChange={(e) => setField('label', e.target.value)} /></div>
+              <div><label htmlFor="nav-15" className="block text-xs font-medium mb-1" style={labelStyle}>URL</label>
+                <input id="nav-15" className={inputClass} style={inputStyle} value={String(modal.data.url || '')} onChange={(e) => setField('url', e.target.value)} /></div>
+              <div><label htmlFor="nav-16" className="block text-xs font-medium mb-1" style={labelStyle}>Sort Order</label>
+                <input id="nav-16" type="number" className={inputClass} style={inputStyle} value={Number(modal.data.sort_order ?? 0)} onChange={(e) => setField('sort_order', e.target.value)} /></div>
               <label className="flex items-center gap-2 text-xs cursor-pointer" style={labelStyle}>
                 <input type="checkbox" checked={Boolean(modal.data.is_active)} onChange={(e) => setField('is_active', e.target.checked)} />Active
               </label>
@@ -445,22 +445,22 @@ Cancel
 
             {/* Footer settings fields */}
             {modal.type === 'footer_settings' && <>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Company Name</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.company_name || '')} onChange={(e) => setField('company_name', e.target.value)} /></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Tagline</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.tagline || '')} onChange={(e) => setField('tagline', e.target.value)} /></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Copyright Text</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.copyright_text || '')} onChange={(e) => setField('copyright_text', e.target.value)} /></div>
+              <div><label htmlFor="nav-17" className="block text-xs font-medium mb-1" style={labelStyle}>Company Name</label>
+                <input id="nav-17" className={inputClass} style={inputStyle} value={String(modal.data.company_name || '')} onChange={(e) => setField('company_name', e.target.value)} /></div>
+              <div><label htmlFor="nav-18" className="block text-xs font-medium mb-1" style={labelStyle}>Tagline</label>
+                <input id="nav-18" className={inputClass} style={inputStyle} value={String(modal.data.tagline || '')} onChange={(e) => setField('tagline', e.target.value)} /></div>
+              <div><label htmlFor="nav-19" className="block text-xs font-medium mb-1" style={labelStyle}>Copyright Text</label>
+                <input id="nav-19" className={inputClass} style={inputStyle} value={String(modal.data.copyright_text || '')} onChange={(e) => setField('copyright_text', e.target.value)} /></div>
             </>}
 
             {/* Footer contact fields */}
             {(modal.type === 'footer_contact_add' || modal.type === 'footer_contact_edit') && <>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Icon (emoji or icon name)</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.icon || '')} onChange={(e) => setField('icon', e.target.value)} /></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Text</label>
-                <input className={inputClass} style={inputStyle} value={String(modal.data.text || '')} onChange={(e) => setField('text', e.target.value)} /></div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Sort Order</label>
-                <input type="number" className={inputClass} style={inputStyle} value={Number(modal.data.sort_order ?? 0)} onChange={(e) => setField('sort_order', e.target.value)} /></div>
+              <div><label htmlFor="nav-20" className="block text-xs font-medium mb-1" style={labelStyle}>Icon (emoji or icon name)</label>
+                <input id="nav-20" className={inputClass} style={inputStyle} value={String(modal.data.icon || '')} onChange={(e) => setField('icon', e.target.value)} /></div>
+              <div><label htmlFor="nav-21" className="block text-xs font-medium mb-1" style={labelStyle}>Text</label>
+                <input id="nav-21" className={inputClass} style={inputStyle} value={String(modal.data.text || '')} onChange={(e) => setField('text', e.target.value)} /></div>
+              <div><label htmlFor="nav-22" className="block text-xs font-medium mb-1" style={labelStyle}>Sort Order</label>
+                <input id="nav-22" type="number" className={inputClass} style={inputStyle} value={Number(modal.data.sort_order ?? 0)} onChange={(e) => setField('sort_order', e.target.value)} /></div>
               <label className="flex items-center gap-2 text-xs cursor-pointer" style={labelStyle}>
                 <input type="checkbox" checked={Boolean(modal.data.is_active)} onChange={(e) => setField('is_active', e.target.checked)} />Active
               </label>

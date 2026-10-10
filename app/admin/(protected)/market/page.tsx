@@ -327,8 +327,8 @@ Cancel
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-2">
-                      <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Title</label>
-                      <input
+                      <label htmlFor="mkt-1" className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Title</label>
+                      <input id="mkt-1"
                         type="text"
                         value={productForm.title}
                         onChange={(e) => setProductForm((f) => ({ ...f, title: e.target.value, slug: editingProduct ? f.slug : toSlug(e.target.value) }))}
@@ -337,8 +337,8 @@ Cancel
                       />
                     </div>
                     <div className="col-span-2">
-                      <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Slug</label>
-                      <input
+                      <label htmlFor="mkt-2" className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Slug</label>
+                      <input id="mkt-2"
                         type="text"
                         value={productForm.slug}
                         onChange={(e) => setProductForm((f) => ({ ...f, slug: e.target.value }))}
@@ -355,8 +355,8 @@ Cancel
                       )}
                     </div>
                     <div className="col-span-2">
-                      <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Description</label>
-                      <textarea
+                      <label htmlFor="mkt-3" className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Description</label>
+                      <textarea id="mkt-3"
                         value={productForm.description ?? ''}
                         onChange={(e) => setProductForm((f) => ({ ...f, description: e.target.value }))}
                         rows={3}
@@ -365,8 +365,8 @@ Cancel
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Price</label>
-                      <input
+                      <label htmlFor="mkt-4" className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Price</label>
+                      <input id="mkt-4"
                         type="number"
                         min="0"
                         step="0.01"
@@ -377,8 +377,8 @@ Cancel
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Sale price (optional)</label>
-                      <input
+                      <label htmlFor="mkt-5" className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Sale price (optional)</label>
+                      <input id="mkt-5"
                         type="number"
                         min="0"
                         step="0.01"
@@ -389,8 +389,8 @@ Cancel
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Currency</label>
-                      <select
+                      <label htmlFor="mkt-6" className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Currency</label>
+                      <select id="mkt-6"
                         value={productForm.currency}
                         onChange={(e) => setProductForm((f) => ({ ...f, currency: e.target.value }))}
                         className={inputClass}
@@ -402,8 +402,8 @@ Cancel
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Stock Quantity</label>
-                      <input
+                      <label htmlFor="mkt-7" className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Stock Quantity</label>
+                      <input id="mkt-7"
                         type="number"
                         min="0"
                         value={productForm.stock_quantity}
@@ -413,8 +413,8 @@ Cancel
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Category</label>
-                      <select
+                      <label htmlFor="mkt-8" className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Category</label>
+                      <select id="mkt-8"
                         value={productForm.category_id ?? ''}
                         onChange={(e) => setProductForm((f) => ({ ...f, category_id: e.target.value || null }))}
                         className={inputClass}
@@ -453,8 +453,8 @@ Cancel
               ) : (
                 <>
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Name</label>
-                    <input
+                    <label htmlFor="mkt-9" className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Name</label>
+                    <input id="mkt-9"
                       type="text"
                       value={categoryForm.name}
                       onChange={(e) => setCategoryForm((f) => ({ ...f, name: e.target.value, slug: editingCategory ? f.slug : toSlug(e.target.value) }))}
@@ -463,8 +463,8 @@ Cancel
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Slug</label>
-                    <input
+                    <label htmlFor="mkt-10" className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Slug</label>
+                    <input id="mkt-10"
                       type="text"
                       value={categoryForm.slug}
                       onChange={(e) => setCategoryForm((f) => ({ ...f, slug: e.target.value }))}
@@ -473,8 +473,8 @@ Cancel
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Description</label>
-                    <textarea
+                    <label htmlFor="mkt-11" className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Description</label>
+                    <textarea id="mkt-11"
                       value={categoryForm.description ?? ''}
                       onChange={(e) => setCategoryForm((f) => ({ ...f, description: e.target.value }))}
                       rows={3}
@@ -483,8 +483,8 @@ Cancel
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Sort Order</label>
-                    <input
+                    <label htmlFor="mkt-12" className="block text-xs font-medium mb-1" style={{ color: themeStyles.textSecondary }}>Sort Order</label>
+                    <input id="mkt-12"
                       type="number"
                       value={categoryForm.sort_order}
                       onChange={(e) => setCategoryForm((f) => ({ ...f, sort_order: parseInt(e.target.value) || 0 }))}
