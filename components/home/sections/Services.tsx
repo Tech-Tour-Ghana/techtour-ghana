@@ -31,10 +31,10 @@ export default async function Services() {
       <div className="mx-auto w-full max-w-6xl px-4">
         <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sp-primary)' }}>What we do</p>
         <h2 id="home-services" className="mt-2 text-[clamp(1.5rem,1.2rem+1.5vw,2.25rem)] font-bold leading-tight">Four ways to experience Ghana</h2>
-        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {cards.map((c) => (
             <li key={c.href}>
-              <Link href={c.href} className="flex h-full min-h-[44px] flex-col rounded-3xl p-6 transition hover:shadow-lg" style={{ background: 'var(--sp-bg-card)', border: '1px solid var(--sp-border)', boxShadow: 'var(--sp-shadow-sm)' }}>
+              <Link href={c.href} className="flex h-full min-h-[44px] flex-col rounded-3xl p-4 transition hover:shadow-lg sm:p-6" style={{ background: 'var(--sp-bg-card)', border: '1px solid var(--sp-border)', boxShadow: 'var(--sp-shadow-sm)' }}>
                 <span aria-hidden className="flex h-11 w-11 items-center justify-center rounded-full text-white" style={{ background: 'var(--sp-primary)' }}><FontAwesomeIcon icon={c.icon} className="h-5 w-5" /></span>
                 <h3 className="mt-4 text-lg font-bold">{c.title}</h3>
                 <p className="mt-2 flex-1 text-sm leading-relaxed" style={{ color: 'var(--sp-text-secondary)' }}>{c.body}</p>
