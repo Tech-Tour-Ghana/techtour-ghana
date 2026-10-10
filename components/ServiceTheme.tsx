@@ -43,6 +43,7 @@ export const ServiceThemeStyles = () => (
       
       --sp-accent: #E6A64D;
       --sp-accent-text: #8A5200;
+      --sp-on-primary: #FFFFFF;
       --sp-accent-dark: #D4953A;
       --sp-accent-light: rgba(230, 166, 77, 0.15);
       
@@ -85,6 +86,7 @@ export const ServiceThemeStyles = () => (
       
       --sp-accent: #139EA2;
       --sp-accent-text: #E6A64D;
+      --sp-on-primary: #1A1A2E;
       --sp-accent-dark: #0D7A7D;
       --sp-accent-light: rgba(19, 158, 162, 0.15);
       
@@ -96,15 +98,16 @@ export const ServiceThemeStyles = () => (
       );
     }
 
-    /* Gold is the primary colour in dark mode. White text on it is 2.1:1, so
-       anything painted with the primary colour gets dark text instead. */
-    [data-theme="dim"] [style*="background: var(--sp-primary)"],
-    [data-theme="dim"] [style*="background: var(--sp-primary,"],
-    [data-theme="dim"] [style*="background: var(--sp-primary-dark"],
-    [data-theme="dim"] [style*="background:var(--sp-primary)"],
-    [data-theme="dim"] [style*="background:var(--sp-primary,"],
-    [data-theme="dim"] [style*="background:var(--sp-primary-dark"] {
-      color: #1A1A2E !important;
+    /* Text on anything painted with the primary colour uses --sp-on-primary, which
+       is chosen for contrast: white on the light teal, near-black on dark mode gold,
+       and recalculated for any colour set in Admin > Settings > Branding. */
+    [style*="background: var(--sp-primary)"],
+    [style*="background: var(--sp-primary,"],
+    [style*="background: var(--sp-primary-dark"],
+    [style*="background:var(--sp-primary)"],
+    [style*="background:var(--sp-primary,"],
+    [style*="background:var(--sp-primary-dark"] {
+      color: var(--sp-on-primary, #FFFFFF) !important;
     }
 
     /* ============================================================

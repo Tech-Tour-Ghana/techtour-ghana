@@ -12,6 +12,8 @@ import { faArrowRight, faFloppyDisk } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
+import BrandColors from '@/components/admin/settings/BrandColors';
+import { checkPalette, cleanOverrides, isDefaultTheme, paletteFor, type DefaultTheme, type ThemeMode, type ThemeOverrides } from '@/lib/theme/tokens';
 import { Card, Field, textClass } from '@/components/admin/settings/parts';
 import { notify } from '@/components/admin/toast';
 import { Button, ListSkeleton, Surface, Tabs, fieldStyle, reportError } from '@/components/admin/ui';
@@ -53,6 +55,10 @@ export default function SettingsAdminPage() {
   const [footerSaved, setFooterSaved] = useState<FooterForm>(blankFooter);
   const [site, setSite] = useState<SiteForm>(blankSite);
   const [footer, setFooter] = useState<FooterForm>(blankFooter);
+  const [overrides, setOverrides] = useState<ThemeOverrides>({});
+  const [overridesSaved, setOverridesSaved] = useState<ThemeOverrides>({});
+  const [defaultTheme, setDefaultTheme] = useState<DefaultTheme>('system');
+  const [defaultThemeSaved, setDefaultThemeSaved] = useState<DefaultTheme>('system');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -68,6 +74,10 @@ export default function SettingsAdminPage() {
       const sf = blankSite();
       const row = s.data;
       if (row) for (const k of SITE_KEYS) sf[k] = row[k] ?? '';
+      const th = cleanOverrides(row?.theme);
+      const dt = isDefaultTheme(row?.default_theme) ? row.default_theme : 'system';
+      setOverrides(th); setOverridesSaved(th);
+      setDefaultTheme(dt); setDefaultThemeSaved(dt);
       const ff = f.data ? { company_name: f.data.company_name, tagline: f.data.tagline } : blankFooter();
       setSiteId(row?.id ?? null);
       setFooterId(f.data?.id ?? null);
@@ -79,22 +89,37 @@ export default function SettingsAdminPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const siteDirty = SITE_KEYS.some((k) => site[k] !== siteSaved[k]);
+  const themeDirty = JSON.stringify(overrides) !== JSON.stringify(overridesSaved) || defaultTheme !== defaultThemeSaved;
+  const siteDirty = SITE_KEYS.some((k) => site[k] !== siteSaved[k]) || themeDirty;
   const footerDirty = footer.company_name !== footerSaved.company_name || footer.tagline !== footerSaved.tagline;
   const dirty = siteDirty || footerDirty;
   const setS = (k: keyof SiteForm, v: string) => setSite((f) => ({ ...f, [k]: v }));
   const setF = (k: keyof FooterForm, v: string) => setFooter((f) => ({ ...f, [k]: v }));
 
+  // Unreadable colour combinations cannot be saved.
+  const failingThemes = (['light', 'dark'] as ThemeMode[]).filter((m) => checkPalette(paletteFor(m, overrides), m).some((c) => !c.pass));
+
   async function saveSite(): Promise<boolean> {
+    if (failingThemes.length) {
+      notify(`Fix the readability checks in the ${failingThemes.join(' and ')} theme before saving.`, 'error');
+      return false;
+    }
+    const values = { ...site, theme: overrides, default_theme: defaultTheme };
     if (siteId) {
-      if (reportError((await supabase.from('site_settings').update(site).eq('id', siteId)).error)) return false;
+      if (reportError((await supabase.from('site_settings').update(values).eq('id', siteId)).error)) return false;
     } else {
       // A fresh database has no row yet: create it, then keep updating that one.
-      const res = await supabase.from('site_settings').insert(site).select('id').single();
+      const res = await supabase.from('site_settings').insert(values).select('id').single();
       if (reportError(res.error)) return false;
       setSiteId(res.data?.id ?? null);
     }
     setSiteSaved(site);
+    if (themeDirty) {
+      setOverridesSaved(overrides);
+      setDefaultThemeSaved(defaultTheme);
+      // Re-render the public pages with the new colours straight away.
+      await fetch('/api/admin/revalidate-theme', { method: 'POST' }).catch(() => undefined);
+    }
     return true;
   }
 
@@ -120,13 +145,13 @@ export default function SettingsAdminPage() {
   }
 
   return (
-    <AdminLayout title="Settings" subtitle="Site identity, branding and sign-in screens">
+    <AdminLayout title="Settings" subtitle="Site identity, brand colours and sign-in screens">
       {loading ? (
         <ListSkeleton />
       ) : error ? (
         <p role="alert" className="rounded-[var(--adm-radius-control)] p-4 text-sm" style={{ background: 'var(--adm-error-soft)', color: 'var(--adm-error)' }}>{error}</p>
       ) : (
-        <div className="max-w-3xl space-y-5 pb-20">
+        <div className="max-w-4xl space-y-5 pb-20">
           <Tabs tabs={TABS} value={tab} onChange={setTab} />
 
           {tab === 'general' && (
@@ -140,12 +165,16 @@ export default function SettingsAdminPage() {
           )}
 
           {tab === 'branding' && (
-            <Card title="Branding" description="Your logo and the small icon shown in browser tabs. A new favicon can take up to an hour to appear.">
+            <Card title="Logo and icon" description="Your logo and the small icon shown in browser tabs. A new favicon can take up to an hour to appear.">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field id="logo" label="Logo"><UrlWithPicker inputStyle={fieldStyle} value={site.logo_url} onChange={(v) => setS('logo_url', v)} /></Field>
                 <Field id="favicon" label="Favicon" hint="Square PNG or ICO."><UrlWithPicker inputStyle={fieldStyle} value={site.favicon_url} onChange={(v) => setS('favicon_url', v)} /></Field>
               </div>
             </Card>
+          )}
+
+          {tab === 'branding' && (
+            <BrandColors overrides={overrides} defaultTheme={defaultTheme} onOverrides={setOverrides} onDefaultTheme={setDefaultTheme} />
           )}
 
           {tab === 'screens' && (
