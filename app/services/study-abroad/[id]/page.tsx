@@ -42,7 +42,7 @@ export default async function StudyDestinationPage({ params }: Params) {
 
   return (
     <ServiceTheme>
-      <main style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
+      <div style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
         <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12">
           <div className="mb-6"><Breadcrumbs items={[{ label: 'Services' }, { label: 'Study Abroad', href: '/services/study-abroad' }, { label: d.country_name }]} /></div>
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:gap-10">
@@ -101,7 +101,7 @@ export default async function StudyDestinationPage({ params }: Params) {
             </aside>
           </div>
         </div>
-      </main>
+      </div>
     </ServiceTheme>
   );
 }

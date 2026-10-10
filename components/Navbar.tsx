@@ -430,7 +430,8 @@ const Navbar = () => {
       )}
 
       {/* ===== NAVBAR ===== */}
-      <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+      <header>
+      <nav aria-label="Main" className={`navbar ${scrolled ? 'scrolled' : ''}`}>
 
         {/* TOP BAR */}
         <div className="nav-top-bar">
@@ -571,6 +572,7 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
+      </header>
 
       {/* ===== FULL-SCREEN MOBILE MENU ===== */}
       <div className={`mobile-menu ${isMobileMenuOpen ? 'active' : ''}`} ref={mobileMenuRef}>

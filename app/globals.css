@@ -8,6 +8,9 @@
   body {
     @apply bg-white text-gray-900;
   }
+  /* Balanced headings and no one-word last lines in paragraphs. */
+  h1, h2, h3, h4 { text-wrap: balance; }
+  p, li { text-wrap: pretty; }
 }
 
 @layer components {
@@ -689,8 +692,8 @@ body:has(.dashboard-layout-wrapper) {
   overflow-wrap: anywhere;
 }
 .tt-prose > * + * { margin-top: 1.25em; }
-.tt-prose h2 { font-size: 1.6rem; line-height: 1.25; font-weight: 700; margin-top: 2.2em; color: var(--tt-prose-heading, inherit); }
-.tt-prose h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; margin-top: 1.8em; color: var(--tt-prose-heading, inherit); }
+.tt-prose h2 { font-size: clamp(1.35rem, 1.15rem + 0.9vw, 1.6rem); line-height: 1.25; font-weight: 700; margin-top: 2.2em; color: var(--tt-prose-heading, inherit); }
+.tt-prose h3 { font-size: clamp(1.15rem, 1.05rem + 0.5vw, 1.3rem); line-height: 1.3; font-weight: 700; margin-top: 1.8em; color: var(--tt-prose-heading, inherit); }
 .tt-prose h4, .tt-prose h5 { font-size: 1.1rem; font-weight: 700; margin-top: 1.5em; color: var(--tt-prose-heading, inherit); }
 .tt-prose a { color: var(--tt-prose-link, #139EA2); text-decoration: underline; text-underline-offset: 3px; }
 .tt-prose ul, .tt-prose ol { padding-left: 1.5em; }

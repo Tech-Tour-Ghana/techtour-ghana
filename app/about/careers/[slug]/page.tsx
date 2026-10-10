@@ -64,7 +64,7 @@ export default async function JobPage({ params }: Params) {
           jobLocation: { '@type': 'Place', address: { '@type': 'PostalAddress', addressLocality: job.location, addressCountry: 'GH' } },
         }}
       />
-      <main style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
+      <div style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
         <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-12">
           <div className="mb-6"><Breadcrumbs items={[{ label: 'About', href: '/about' }, { label: 'Careers', href: '/about/careers' }, { label: job.title }]} /></div>
 
@@ -102,7 +102,7 @@ export default async function JobPage({ params }: Params) {
             </aside>
           </div>
         </div>
-      </main>
+      </div>
     </ServiceTheme>
   );
 }

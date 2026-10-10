@@ -60,7 +60,7 @@ export default async function ArtisanPage({ params }: Params) {
           address: a.location ? { '@type': 'PostalAddress', addressLocality: a.location, addressCountry: 'GH' } : undefined,
         }}
       />
-      <main style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
+      <div style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
         <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:py-12">
           <div className="mb-6"><Breadcrumbs items={[{ label: 'Market', href: '/market' }, { label: 'Artisan Spotlight', href: '/market/artisans' }, { label: a.name }]} /></div>
 
@@ -125,7 +125,7 @@ export default async function ArtisanPage({ params }: Params) {
             )}
           </section>
         </div>
-      </main>
+      </div>
     </ServiceTheme>
   );
 }

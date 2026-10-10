@@ -22,10 +22,10 @@ export default function ContentShell({
 }) {
   return (
     <ServiceTheme>
-      <main style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
+      <div style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
         <ServiceHero title={title} titleAccent={titleAccent} description={description} accentColor={accent} />
         <div className={`mx-auto w-full px-4 py-12 ${wide ? 'max-w-6xl' : 'max-w-5xl'}`}>{children}</div>
-      </main>
+      </div>
     </ServiceTheme>
   );
 }

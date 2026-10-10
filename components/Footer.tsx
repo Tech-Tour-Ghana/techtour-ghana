@@ -263,7 +263,7 @@ const Footer = () => {
               <div className="footer-feature-wide" key={index}>
                 <div className="feature-emoji-display">{feature.icon}</div>
                 <div className="feature-content-wide">
-                  <h4 className="feature-title-wide">{feature.title}</h4>
+                  <h2 className="feature-title-wide">{feature.title}</h2>
                   <p className="feature-description-wide">{feature.description}</p>
                 </div>
               </div>
@@ -287,7 +287,7 @@ const Footer = () => {
             {hasSocialLinks && (
               <div className="social-section-wide">
                 <div className="social-header">
-                  <h5 className="social-title-wide">Connect With Us</h5>
+                  <h2 className="social-title-wide">Connect With Us</h2>
                   <span className="social-divider"></span>
                 </div>
                 <p className="social-subtitle">Follow us on social media for daily inspiration</p>
@@ -312,14 +312,14 @@ const Footer = () => {
 
           {/* Quick Links Grid - Only show if there's data */}
           {hasQuickLinks && (
-            <div className="footer-links-wide">
+            <nav aria-label="Footer" className="footer-links-wide">
               {quickLinkSections.map((section) => {
                 const links = quickLinks[section.key];
                 if (!links || links.length === 0) return null;
 
                 return (
                   <div className="footer-links-section-wide" key={section.key}>
-                    <h4 className="links-section-title-wide">{section.title}</h4>
+                    <h2 className="links-section-title-wide">{section.title}</h2>
                     <ul className="footer-links-list-wide">
                       {links.map((link, linkIndex) => (
                         <li key={linkIndex}>
@@ -333,17 +333,17 @@ const Footer = () => {
                   </div>
                 );
               })}
-            </div>
+            </nav>
           )}
         </div>
 
         {/* Middle: newsletter */}
         <div className="footer-newsletter-band">
           <div className="footer-newsletter-wide">
-            <h4 className="newsletter-title-wide">
+            <h2 className="newsletter-title-wide">
               <span className="newsletter-title-line"></span>
               Stay Updated
-            </h4>
+            </h2>
             <p className="newsletter-subtitle-wide">
               Subscribe to our newsletter for exclusive offers and travel inspiration
             </p>
