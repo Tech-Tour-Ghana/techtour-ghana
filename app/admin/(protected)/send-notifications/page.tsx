@@ -95,8 +95,8 @@ export default function AdminSendNotificationsPage() {
           <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as NoteType })} className={cls} style={input} aria-label="Type">
             {TYPES.map((x) => <option key={x} value={x}>{x}</option>)}
           </select>
-          <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title" maxLength={120} className={cls} style={input} />
-          <textarea required value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Message" rows={3} maxLength={500} className={`${cls} md:col-span-3`} style={input} />
+          <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title" aria-label="Title" maxLength={120} className={cls} style={input} />
+          <textarea required value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Message" aria-label="Message" rows={3} maxLength={500} className={`${cls} md:col-span-3`} style={input} />
           <div className="md:col-span-3 flex items-center gap-3">
             <button type="submit" disabled={busy} className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-60" style={{ background: BRAND.teal }}>
               {busy ? 'Sending...' : 'Send notification'}

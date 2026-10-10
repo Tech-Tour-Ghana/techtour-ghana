@@ -11,9 +11,12 @@ import './maintenance.css';
 export default function MaintenanceView({ settings, preview = false }: { settings: MaintenanceSettings; preview?: boolean }) {
   const { title, message, eta, contactEmail } = settings;
   const etaInFuture = !!eta && new Date(eta).getTime() > Date.now();
+  // The admin preview sits inside the admin page, so it must not add a second main landmark or h1.
+  const Root = preview ? 'div' : 'main';
+  const Title = preview ? 'h2' : 'h1';
 
   return (
-    <main className={`mm-root${preview ? ' mm-preview' : ''}`}>
+    <Root className={`mm-root${preview ? ' mm-preview' : ''}`}>
       <span className="mm-blob mm-blob-a" aria-hidden />
       <span className="mm-blob mm-blob-b" aria-hidden />
       <span className="mm-blob mm-blob-c" aria-hidden />
@@ -34,7 +37,7 @@ export default function MaintenanceView({ settings, preview = false }: { setting
           <span className="mm-chip"><span className="mm-dot" aria-hidden />Scheduled maintenance</span>
         </div>
 
-        <h1 id="mm-title" className="mm-title">{title}</h1>
+        <Title id="mm-title" className="mm-title">{title}</Title>
         {message && <p className="mm-message">{message}</p>}
 
         {etaInFuture && eta && (
@@ -59,6 +62,6 @@ export default function MaintenanceView({ settings, preview = false }: { setting
 
         <p className="mm-foot">© {new Date().getFullYear()} TechTour Ghana</p>
       </section>
-    </main>
+    </Root>
   );
 }

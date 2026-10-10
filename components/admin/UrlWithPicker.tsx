@@ -23,6 +23,7 @@ export default function UrlWithPicker({ value, onChange, inputStyle, placeholder
           style={{ ...inputStyle, flex: 1 }}
           value={value}
           placeholder={placeholder ?? 'https://...'}
+          aria-label={placeholder ?? 'Image or file URL'}
           onChange={e => onChange(e.target.value)}
         />
         <button
