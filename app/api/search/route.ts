@@ -44,7 +44,7 @@ export async function GET(request: Request) {
     supabase.from('tours').select('title, slug, short_description, location, region, price, featured_image_url').eq('is_active', true).or(match(['title', 'short_description', 'location', 'region'])).limit(LIMIT),
     supabase.from('destinations').select('name, slug, description, image_url').eq('is_active', true).or(match(['name', 'description'])).limit(LIMIT),
     supabase.from('blog_posts').select('title, slug, category, excerpt, image_url').eq('is_published', true).or(match(['title', 'excerpt'])).limit(LIMIT),
-    supabase.from('market_products').select('title, slug, price, discount_price, image_url, artisans(name)').eq('is_active', true).or(match(['title', 'description'])).limit(LIMIT),
+    supabase.from('market_products').select('title, slug, price, discount_price, image_url, artisans(name), product_gallery(image_url, is_primary, is_active, sort_order)').eq('is_active', true).or(match(['title', 'description'])).limit(LIMIT),
     supabase.from('artisans').select('name, slug, craft_type, location, profile_image_url').eq('is_active', true).or(match(['name', 'craft_type', 'location', 'specialties'])).limit(LIMIT),
     supabase.from('vacation_rentals').select('title, slug, location, price_per_night, main_image_url').eq('is_active', true).or(match(['title', 'location', 'region', 'description'])).limit(LIMIT),
   ]);
@@ -70,7 +70,7 @@ export async function GET(request: Request) {
       title: 'Market',
       items: (products.data ?? []).map((r): Item => {
         const price = r.discount_price !== null && r.discount_price < r.price ? r.discount_price : r.price;
-        return { label: r.title, sub: join(r.artisans?.name && `by ${r.artisans.name}`, cedi(price)), image: r.image_url, href: `/market/${r.slug}` };
+        return { label: r.title, sub: join(r.artisans?.name && `by ${r.artisans.name}`, cedi(price)), image: r.image_url || [...r.product_gallery].filter((g) => g.is_active).sort((x, y) => Number(y.is_primary) - Number(x.is_primary) || x.sort_order - y.sort_order)[0]?.image_url || '', href: `/market/${r.slug}` };
       }),
     },
     {
