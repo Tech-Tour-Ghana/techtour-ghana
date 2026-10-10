@@ -236,7 +236,6 @@ const Footer = () => {
     { key: 'services' as const, title: 'Services' },
     { key: 'destinations' as const, title: 'Tours Listings' },
     { key: 'company' as const, title: 'Company' },
-    { key: 'support' as const, title: 'Support' },
   ];
 
   // Check if any quick link section has data
@@ -283,6 +282,32 @@ const Footer = () => {
             <p className="footer-tagline-wide">
               {settings?.tagline || 'Your gateway to authentic Ghanaian experiences.'}
             </p>
+
+            {/* Social links under the description */}
+            {hasSocialLinks && (
+              <div className="social-section-wide">
+                <div className="social-header">
+                  <h5 className="social-title-wide">Connect With Us</h5>
+                  <span className="social-divider"></span>
+                </div>
+                <p className="social-subtitle">Follow us on social media for daily inspiration</p>
+                <div className="social-icons-circle">
+                  {socialLinks.map((social, index) => (
+                    <a
+                      key={index}
+                      href={social.url}
+                      className="social-icon-circle"
+                      style={{ backgroundColor: social.color }}
+                      aria-label={social.platform}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={getSocialIcon(social.platform)} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Quick Links Grid - Only show if there's data */}
@@ -310,8 +335,10 @@ const Footer = () => {
               })}
             </div>
           )}
+        </div>
 
-          {/* Newsletter & Social Section */}
+        {/* Middle: newsletter */}
+        <div className="footer-newsletter-band">
           <div className="footer-newsletter-wide">
             <h4 className="newsletter-title-wide">
               <span className="newsletter-title-line"></span>
@@ -355,32 +382,6 @@ const Footer = () => {
                 {settings?.newsletter_note || 'By subscribing, you agree to our Privacy Policy.'}
               </p>
             </form>
-
-            {/* Social Media Section - Only show if there's data */}
-            {hasSocialLinks && (
-              <div className="social-section-wide">
-                <div className="social-header">
-                  <h5 className="social-title-wide">Connect With Us</h5>
-                  <span className="social-divider"></span>
-                </div>
-                <p className="social-subtitle">Follow us on social media for daily inspiration</p>
-                <div className="social-icons-circle">
-                  {socialLinks.map((social, index) => (
-                    <a
-                      key={index}
-                      href={social.url}
-                      className="social-icon-circle"
-                      style={{ backgroundColor: social.color }}
-                      aria-label={social.platform}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon icon={getSocialIcon(social.platform)} />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
