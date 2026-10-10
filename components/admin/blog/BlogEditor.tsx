@@ -244,7 +244,9 @@ export default function BlogEditor({ postId }: { postId: string | null }) {
       setSnapshot(JSON.stringify({ d: draft, s: seo }));
       setSavedAt(new Date());
       setSaveState('saved');
-      if (!postId && typeof window !== 'undefined') window.history.replaceState(null, '', `/admin/blog/${id}`);
+      // Keep the path as it is: the admin layout re-keys its content by path, so changing it would remount this editor empty.
+      // The query parameter lets a reload find the draft again (see the New article page).
+      if (!postId && typeof window !== 'undefined') window.history.replaceState(null, '', `/admin/blog/new?draft=${id}`);
       if (kind === 'publish') notify('Article published.', 'success');
       if (kind === 'unpublish') notify('Article unpublished. It is now a draft.', 'success');
       if (kind === 'schedule') notify('Article scheduled.', 'success');
