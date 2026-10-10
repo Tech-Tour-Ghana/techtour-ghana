@@ -30,7 +30,8 @@ import AvatarContent from '@/components/AvatarContent';
 import { useSiteLogo } from '@/lib/useSiteLogo';
 import { useTheme } from '@/context/ThemeContext';
 import { useCart } from '@/context/CartContext';
-import { getAuthStatus, getNotifications, logoutUser, type Notification, type User } from '@/lib/api';
+import { getAuthStatus, logoutUser, type User } from '@/lib/api';
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 const BRAND_COLORS = {
   tropicalTeal: 'var(--brand-teal)',
@@ -44,6 +45,7 @@ export const SIDEBAR_ITEMS = [
   { icon: faGraduationCap, label: 'Study', href: '/auth/study' },
   { icon: faCalendarCheck, label: 'Tours', href: '/auth/tours' },
   { icon: faHeart, label: 'Wishlist', href: '/auth/wishlist' },
+  { icon: faBell, label: 'Notifications', href: '/auth/notifications' },
   { icon: faHeadset, label: 'Help', href: '/auth/support' },
 ];
 
@@ -67,14 +69,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
   const { clearCart } = useCart();
   const [user, setUser] = useState<User | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  useEffect(() => {
-    getNotifications().then(setNotifications);
-  }, []);
-  const unreadNotifications = notifications.filter((n) => !n.read).length;
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const notificationRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getAuthStatus().then((status) => {
@@ -87,9 +82,6 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
-      }
-      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
-        setIsNotificationsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -196,49 +188,11 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
               <FontAwesomeIcon icon={isDimMode ? faSun : faMoon} className="w-4 h-4" />
             </button>
 
-            <div className="relative" ref={notificationRef}>
-              <button
-                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                aria-label={unreadNotifications > 0 ? `Notifications, ${unreadNotifications} unread` : 'Notifications'}
-                aria-expanded={isNotificationsOpen}
-                className="relative flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
-                style={{ background: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-subtle)', color: themeStyles.textSecondary }}
-              >
-                <FontAwesomeIcon icon={faBell} className="w-4 h-4" />
-                {unreadNotifications > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] leading-4 text-center">
-                    {unreadNotifications}
-                  </span>
-                )}
-              </button>
-              {isNotificationsOpen && (
-                <div
-                  className="absolute right-0 z-50 mt-2 w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-xl"
-                  style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}
-                >
-                  <div className="p-3 border-b" style={{ borderColor: themeStyles.border }}>
-                    <p className="font-semibold text-sm" style={{ color: themeStyles.textPrimary }}>Notifications</p>
-                  </div>
-                  {notifications.length === 0 ? (
-                    <div className="p-3 text-center">
-                      <p className="text-sm" style={{ color: themeStyles.textMuted }}>No new notifications</p>
-                    </div>
-                  ) : (
-                    <>
-                      {notifications.slice(0, 4).map((n) => (
-                        <div key={n.id} className="p-3 border-b" style={{ borderColor: themeStyles.border }}>
-                          <p className="text-sm font-medium" style={{ color: themeStyles.textPrimary }}>{n.title}</p>
-                          <p className="text-xs" style={{ color: themeStyles.textMuted }}>{n.message}</p>
-                        </div>
-                      ))}
-                      <Link href="/auth/notifications" onClick={() => setIsNotificationsOpen(false)} className="block p-3 text-center text-sm font-medium" style={{ color: BRAND_COLORS.tropicalTeal }}>
-                        View all
-                      </Link>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
+            <NotificationBell
+              tone="site"
+              allHref="/auth/notifications"
+              buttonStyle={{ width: '2.75rem', height: '2.75rem', background: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-subtle)', color: themeStyles.textSecondary }}
+            />
 
             <div className="relative" ref={dropdownRef}>
               <button
