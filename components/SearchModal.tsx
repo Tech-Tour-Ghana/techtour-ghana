@@ -151,8 +151,8 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
 
   // Portal: the navbar has a backdrop-filter, which would pin a fixed child to the navbar box.
   return createPortal(
-    <div role="dialog" aria-modal="true" aria-label="Search" onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,0.55)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '8vh 16px 16px' }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 620, maxHeight: '80vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-solid)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 20, boxShadow: '0 20px 60px rgba(0,0,0,0.3)', overflow: 'hidden', textAlign: 'left' }}>
+    <div role="dialog" aria-modal="true" aria-label="Search" onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(var(--brand-black-rgb), 0.55)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '8vh 16px 16px' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 620, maxHeight: '80vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-solid)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 20, boxShadow: '0 20px 60px rgba(var(--brand-black-rgb), 0.3)', overflow: 'hidden', textAlign: 'left' }}>
         <form
           role="search"
           onSubmit={(e) => {
@@ -185,7 +185,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
 
         <div aria-live="polite" style={{ overflowY: 'auto', padding: '4px 8px 10px' }}>
           {state === 'loading' && groups.length === 0 && <p style={{ padding: '14px 10px', fontSize: 14, ...muted }}>Searching...</p>}
-          {state === 'error' && <p style={{ padding: '14px 10px', fontSize: 14, color: '#B91C1C' }}>Search is not available right now. Please try again.</p>}
+          {state === 'error' && <p style={{ padding: '14px 10px', fontSize: 14, color: 'var(--brand-error-text)' }}>Search is not available right now. Please try again.</p>}
           {state === 'done' && groups.length === 0 && <p style={{ padding: '14px 10px 0', fontSize: 14, ...muted }}>Nothing matched &quot;{term}&quot;. Try one of these instead.</p>}
 
           <ul id="search-list" role="listbox" aria-label="Results">

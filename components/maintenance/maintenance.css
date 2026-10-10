@@ -1,17 +1,17 @@
 /* Maintenance page. Themed by the site's data-theme attribute (bright / dim). */
 
 .mm-root {
-  --mm-bg-1: #eaf7f7;
-  --mm-bg-2: #fdf6ea;
-  --mm-card: rgba(255, 255, 255, 0.78);
-  --mm-card-border: rgba(19, 158, 162, 0.18);
-  --mm-text: #16233a;
-  --mm-text-2: #4a5568;
-  --mm-muted: #6b7280;
-  --mm-primary: #139ea2;
-  --mm-gold: #e6a64d;
-  --mm-chip-bg: rgba(19, 158, 162, 0.12);
-  --mm-shadow: 0 30px 80px -20px rgba(19, 158, 162, 0.35), 0 8px 24px rgba(15, 23, 42, 0.08);
+  --mm-bg-1: color-mix(in srgb, var(--brand-teal) 10%, var(--brand-card));
+  --mm-bg-2: color-mix(in srgb, var(--brand-gold) 10%, var(--brand-card));
+  --mm-card: rgba(var(--brand-white-rgb), 0.78);
+  --mm-card-border: rgba(var(--brand-teal-rgb), 0.18);
+  --mm-text: var(--brand-card);
+  --mm-text-2: var(--brand-text-2);
+  --mm-muted: var(--brand-muted);
+  --mm-primary: var(--brand-teal);
+  --mm-gold: var(--brand-gold);
+  --mm-chip-bg: rgba(var(--brand-teal-rgb), 0.12);
+  --mm-shadow: 0 30px 80px -20px rgba(var(--brand-teal-rgb), 0.35), 0 8px 24px rgba(var(--brand-card-rgb), 0.08);
 
   position: relative;
   isolation: isolate;
@@ -28,15 +28,15 @@
 }
 
 [data-theme="dim"] .mm-root {
-  --mm-bg-1: #08090c;
-  --mm-bg-2: #16120a;
-  --mm-card: rgba(22, 22, 26, 0.78);
-  --mm-card-border: rgba(230, 166, 77, 0.22);
-  --mm-text: #ffffff;
-  --mm-text-2: #c4c7cf;
-  --mm-muted: #8b909c;
-  --mm-chip-bg: rgba(230, 166, 77, 0.14);
-  --mm-shadow: 0 30px 80px -20px rgba(230, 166, 77, 0.25), 0 8px 24px rgba(0, 0, 0, 0.5);
+  --mm-bg-1: var(--brand-bg);
+  --mm-bg-2: var(--brand-bg);
+  --mm-card: rgba(var(--brand-card-rgb), 0.78);
+  --mm-card-border: rgba(var(--brand-gold-rgb), 0.22);
+  --mm-text: var(--brand-white);
+  --mm-text-2: var(--brand-text-2);
+  --mm-muted: var(--brand-muted);
+  --mm-chip-bg: rgba(var(--brand-gold-rgb), 0.14);
+  --mm-shadow: 0 30px 80px -20px rgba(var(--brand-gold-rgb), 0.25), 0 8px 24px rgba(var(--brand-black-rgb), 0.5);
 }
 
 /* Visitor version: covers the whole viewport. Middleware serves this page at the

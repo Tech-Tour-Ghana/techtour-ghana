@@ -118,7 +118,7 @@ export default async function TourPage({ params }: Params) {
             {tour.destinations && <Link href={`/tours?destination=${tour.destinations.slug}`} className="mb-2 inline-block rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'var(--sp-bg-card)', border: '1px solid var(--sp-border)', color: 'var(--sp-primary)' }}>{tour.destinations.name}</Link>}
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">{tour.title}</h1>
             <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm" style={muted}>
-              {showRating ? <span className="inline-flex items-center gap-1 font-semibold" style={{ color: 'var(--sp-text-primary)' }}><FontAwesomeIcon icon={faStar} className="h-3.5 w-3.5" style={{ color: '#F59E0B' }} />{Number(tour.rating).toFixed(1)} <span className="font-normal" style={muted}>({tour.review_count} reviews)</span></span> : <span>New tour</span>}
+              {showRating ? <span className="inline-flex items-center gap-1 font-semibold" style={{ color: 'var(--sp-text-primary)' }}><FontAwesomeIcon icon={faStar} className="h-3.5 w-3.5" style={{ color: 'var(--brand-warning)' }} />{Number(tour.rating).toFixed(1)} <span className="font-normal" style={muted}>({tour.review_count} reviews)</span></span> : <span>New tour</span>}
               {place && <span className="inline-flex items-center gap-1"><FontAwesomeIcon icon={faLocationDot} className="h-3 w-3" />{place}</span>}
             </p>
           </header>
@@ -140,15 +140,15 @@ export default async function TourPage({ params }: Params) {
                 {tour.short_description && <p className="pt-4 text-base leading-relaxed" style={{ color: 'var(--sp-text-secondary)' }}>{tour.short_description}</p>}
                 {highlights.length > 0 && (
                   <Block title="Highlights">
-                    <ul className="space-y-2 text-sm">{highlights.map((h) => <li key={h} className="flex gap-3"><FontAwesomeIcon icon={faStar} className="mt-1 h-3 w-3 flex-shrink-0" style={{ color: '#F59E0B' }} /><span style={{ color: 'var(--sp-text-secondary)' }}>{h}</span></li>)}</ul>
+                    <ul className="space-y-2 text-sm">{highlights.map((h) => <li key={h} className="flex gap-3"><FontAwesomeIcon icon={faStar} className="mt-1 h-3 w-3 flex-shrink-0" style={{ color: 'var(--brand-warning)' }} /><span style={{ color: 'var(--sp-text-secondary)' }}>{h}</span></li>)}</ul>
                   </Block>
                 )}
                 {tour.description && <Block title="About this tour"><p className="whitespace-pre-line text-sm leading-relaxed" style={{ color: 'var(--sp-text-secondary)' }}>{tour.description}</p></Block>}
                 {(includes.length > 0 || excludes.length > 0) && (
                   <Block title="What is included">
                     <div className="grid gap-6 sm:grid-cols-2">
-                      {includes.length > 0 && <ul className="space-y-2 text-sm">{includes.map((i) => <li key={i} className="flex gap-3"><FontAwesomeIcon icon={faCheck} className="mt-1 h-3 w-3 flex-shrink-0" style={{ color: '#10B981' }} /><span style={{ color: 'var(--sp-text-secondary)' }}>{i}</span></li>)}</ul>}
-                      {excludes.length > 0 && <ul className="space-y-2 text-sm">{excludes.map((i) => <li key={i} className="flex gap-3"><FontAwesomeIcon icon={faXmark} className="mt-1 h-3 w-3 flex-shrink-0" style={{ color: '#EF4444' }} /><span style={{ color: 'var(--sp-text-secondary)' }}>{i}</span></li>)}</ul>}
+                      {includes.length > 0 && <ul className="space-y-2 text-sm">{includes.map((i) => <li key={i} className="flex gap-3"><FontAwesomeIcon icon={faCheck} className="mt-1 h-3 w-3 flex-shrink-0" style={{ color: 'var(--brand-success)' }} /><span style={{ color: 'var(--sp-text-secondary)' }}>{i}</span></li>)}</ul>}
+                      {excludes.length > 0 && <ul className="space-y-2 text-sm">{excludes.map((i) => <li key={i} className="flex gap-3"><FontAwesomeIcon icon={faXmark} className="mt-1 h-3 w-3 flex-shrink-0" style={{ color: 'var(--brand-error)' }} /><span style={{ color: 'var(--sp-text-secondary)' }}>{i}</span></li>)}</ul>}
                     </div>
                   </Block>
                 )}
@@ -178,7 +178,7 @@ export default async function TourPage({ params }: Params) {
                         <div className="flex items-center gap-3">
                           <span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: 'var(--sp-primary)' }}>{initials(r.user_name || 'Guest')}</span>
                           <div className="min-w-0 text-sm"><p className="font-semibold">{r.user_name || 'Guest'}</p><p className="text-xs" style={muted}>{formatPostDate(r.created_at)}</p></div>
-                          <span className="ml-auto inline-flex gap-0.5" aria-label={`${r.rating} out of 5`}>{[1, 2, 3, 4, 5].map((n) => <FontAwesomeIcon key={n} icon={faStar} className="h-3 w-3" style={{ color: n <= r.rating ? '#F59E0B' : 'var(--sp-border)' }} />)}</span>
+                          <span className="ml-auto inline-flex gap-0.5" aria-label={`${r.rating} out of 5`}>{[1, 2, 3, 4, 5].map((n) => <FontAwesomeIcon key={n} icon={faStar} className="h-3 w-3" style={{ color: n <= r.rating ? 'var(--brand-warning)' : 'var(--sp-border)' }} />)}</span>
                         </div>
                         {r.comment && <p className="mt-3 whitespace-pre-line text-sm leading-relaxed" style={{ color: 'var(--sp-text-secondary)' }}>{r.comment}</p>}
                       </li>

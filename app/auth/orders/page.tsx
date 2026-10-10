@@ -49,13 +49,13 @@ export default function OrdersPage() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      pending: '#F59E0B',
-      processing: '#3B82F6',
-      shipped: '#8B5CF6',
-      delivered: '#10B981',
-      cancelled: '#EF4444',
+      pending: 'var(--brand-warning)',
+      processing: 'var(--brand-info)',
+      shipped: 'var(--brand-purple)',
+      delivered: 'var(--brand-success)',
+      cancelled: 'var(--brand-error)',
     };
-    return colors[status] || '#6B7280';
+    return colors[status] || 'var(--brand-muted)';
   };
 
   const getStatusIcon = (status: string): IconDefinition => {
@@ -74,16 +74,16 @@ export default function OrdersPage() {
   const filteredOrders = filter === 'all' ? orders : orders.filter((o) => o.status === filter);
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#000000',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4A4A4A',
-    textMuted: isDimMode ? '#9CA3AF' : '#6B7280',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
+    cardBg: 'var(--brand-card)',
+    textPrimary: 'var(--brand-text)',
+    textSecondary: 'var(--brand-text-2)',
+    textMuted: 'var(--brand-muted)',
+    border: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)',
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: isDimMode ? '#0A0A0A' : '#F9F9F9' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--brand-bg)' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }}></div>
           <p className="mt-4 text-sm" style={{ color: themeStyles.textSecondary }}>Loading orders...</p>

@@ -40,12 +40,12 @@ export default function PaymentsPage() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      success: '#10B981',
-      pending: '#F59E0B',
-      failed: '#EF4444',
-      abandoned: '#6B7280',
+      success: 'var(--brand-success)',
+      pending: 'var(--brand-warning)',
+      failed: 'var(--brand-error)',
+      abandoned: 'var(--brand-muted)',
     };
-    return colors[status] || '#6B7280';
+    return colors[status] || 'var(--brand-muted)';
   };
 
   const getStatusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1);
@@ -53,16 +53,16 @@ export default function PaymentsPage() {
   const totalSpent = payments.filter((p) => p.status === 'success').reduce((sum, p) => sum + p.amount, 0);
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#000000',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4A4A4A',
-    textMuted: isDimMode ? '#9CA3AF' : '#6B7280',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
+    cardBg: 'var(--brand-card)',
+    textPrimary: 'var(--brand-text)',
+    textSecondary: 'var(--brand-text-2)',
+    textMuted: 'var(--brand-muted)',
+    border: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)',
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: isDimMode ? '#0A0A0A' : '#F9F9F9' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--brand-bg)' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }}></div>
           <p className="mt-4 text-sm" style={{ color: themeStyles.textSecondary }}>Loading payments...</p>
@@ -95,7 +95,7 @@ export default function PaymentsPage() {
         </div>
         <div className="rounded-2xl p-4" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
           <p className="text-sm" style={{ color: themeStyles.textSecondary }}>Pending</p>
-          <p className="text-2xl font-bold" style={{ color: '#F59E0B' }}>{payments.filter((p) => p.status === 'pending').length}</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--brand-warning)' }}>{payments.filter((p) => p.status === 'pending').length}</p>
         </div>
       </div>
 

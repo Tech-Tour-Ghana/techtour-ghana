@@ -64,7 +64,7 @@ export default function SiteBreadcrumbs() {
   });
 
   return (
-    <div className="border-b" style={{ borderColor: 'rgba(128,128,128,0.18)' }}>
+    <div className="border-b" style={{ borderColor: 'rgba(var(--brand-muted-rgb), 0.18)' }}>
       <div className="mx-auto w-full max-w-7xl px-4 py-2.5"><Breadcrumbs items={items} /></div>
     </div>
   );

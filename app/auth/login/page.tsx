@@ -144,7 +144,7 @@ export default function LoginClient() {
 
   if (!mounted || !isThemeLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--brand-bg)]">
         <div className="text-white text-center">
           <div className="inline-block w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-4"></div>
           <p className="text-white/60">Loading...</p>
@@ -160,8 +160,8 @@ export default function LoginClient() {
       )}
 
       {/* LEFT SIDE - Branding Section (Desktop only) */}
-      <div style={panel?.bg ? { backgroundImage: `url("${encodeURI(panel.bg)}")`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined} className="hidden lg:flex lg:w-1/2 flex-col justify-between p-8 xl:p-12 relative overflow-hidden bg-[#1a1a2e] min-h-screen">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e]/60 via-[#1a1a2e]/40 to-[#1a1a2e]/20 pointer-events-none"></div>
+      <div style={panel?.bg ? { backgroundImage: `url("${encodeURI(panel.bg)}")`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined} className="hidden lg:flex lg:w-1/2 flex-col justify-between p-8 xl:p-12 relative overflow-hidden bg-[var(--brand-ink)] min-h-screen">
+        <div className="absolute inset-0 bg-gradient-to-br from-[rgba(var(--brand-ink-rgb),0.6)] via-[rgba(var(--brand-ink-rgb),0.4)] to-[rgba(var(--brand-ink-rgb),0.2)] pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col justify-between h-full">
           <Link href="/">
@@ -191,7 +191,7 @@ export default function LoginClient() {
       </div>
 
       {/* RIGHT SIDE - Login Form */}
-      <div className={`w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 ${isDarkMode ? 'bg-[#0a0a0f]' : 'bg-white'} min-h-screen relative`}>
+      <div className={`w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 ${isDarkMode ? 'bg-[var(--brand-bg)]' : 'bg-white'} min-h-screen relative`}>
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20">
           <Link href="/" className={`text-sm transition-colors ${isDarkMode ? 'text-white/40 hover:text-white/70' : 'text-gray-400 hover:text-gray-700'}`}>
             Back to Home
@@ -242,7 +242,7 @@ export default function LoginClient() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[#F59E0B]'}`}
+                className={`w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[var(--brand-ink)] border border-white/10 text-white placeholder:text-white/50 focus:border-[var(--brand-warning)]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[var(--brand-warning)]'}`}
                 placeholder="johndoe@gmail.com"
                 required
               />
@@ -256,7 +256,7 @@ export default function LoginClient() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full px-4 py-2.5 pr-10 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[#F59E0B]'}`}
+                  className={`w-full px-4 py-2.5 pr-10 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[var(--brand-ink)] border border-white/10 text-white placeholder:text-white/50 focus:border-[var(--brand-warning)]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[var(--brand-warning)]'}`}
                   placeholder="Enter your password"
                   required
                 />
@@ -278,7 +278,7 @@ export default function LoginClient() {
                 </button>
               </div>
               <div className="flex justify-end mt-1.5">
-                <Link href="/auth/password-reset" className={`text-xs ${isDarkMode ? 'text-white/50 hover:text-[#F59E0B]' : 'text-gray-500 hover:text-[#F59E0B]'}`}>
+                <Link href="/auth/password-reset" className={`text-xs ${isDarkMode ? 'text-white/50 hover:text-[var(--brand-warning)]' : 'text-gray-500 hover:text-[var(--brand-warning)]'}`}>
                   Forgot password?
                 </Link>
               </div>
@@ -296,7 +296,7 @@ export default function LoginClient() {
           <div className="space-y-3">
             <button
               onClick={handleGoogleLogin}
-              className={`w-full flex items-center justify-center gap-3 py-2.5 px-4 border rounded-lg text-sm font-medium transition-all ${isDarkMode ? 'border-white/10 text-white/80 hover:bg-white/5 hover:border-[#F59E0B]/30' : 'border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-[#F59E0B]'}`}
+              className={`w-full flex items-center justify-center gap-3 py-2.5 px-4 border rounded-lg text-sm font-medium transition-all ${isDarkMode ? 'border-white/10 text-white/80 hover:bg-white/5 hover:border-[rgba(var(--brand-warning-rgb),0.3)]' : 'border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-[var(--brand-warning)]'}`}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#ea4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -310,7 +310,7 @@ export default function LoginClient() {
 
           <div className={`text-center mt-6 text-sm ${isDarkMode ? 'text-white/40' : 'text-gray-500'}`}>
             No account?{' '}
-            <Link href="/auth/register" className="text-[#F59E0B] hover:text-[#D97706] font-medium">
+            <Link href="/auth/register" className="text-[var(--brand-warning)] hover:text-[var(--brand-warning)] font-medium">
               Create one
             </Link>
           </div>

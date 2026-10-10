@@ -11,9 +11,9 @@ export default function CategoryNav({ active, counts }: { active?: BlogCategory;
     <li key={href}>
       <Link href={href} aria-current={isActive ? 'page' : undefined}
         className="flex items-center justify-between gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition hover:opacity-90"
-        style={{ background: isActive ? 'var(--sp-primary)' : 'transparent', color: isActive ? '#FFFFFF' : 'var(--sp-text-secondary)' }}>
+        style={{ background: isActive ? 'var(--sp-primary)' : 'transparent', color: isActive ? 'var(--brand-white)' : 'var(--sp-text-secondary)' }}>
         <span>{label}</span>
-        <span className="rounded-full px-2 py-0.5 text-xs" style={{ background: isActive ? 'rgba(255,255,255,0.22)' : 'rgba(128,128,128,0.15)' }}>{count}</span>
+        <span className="rounded-full px-2 py-0.5 text-xs" style={{ background: isActive ? 'rgba(var(--brand-white-rgb), 0.22)' : 'rgba(var(--brand-muted-rgb), 0.15)' }}>{count}</span>
       </Link>
     </li>
   );

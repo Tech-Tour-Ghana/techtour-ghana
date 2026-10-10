@@ -164,7 +164,7 @@ export default function StudyApplicationForm({ destination, scholarships }: Prop
         </div>
       </div>
 
-      {error && <p role="alert" className="mt-4 rounded-xl p-3 text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#B91C1C' }}>{error}</p>}
+      {error && <p role="alert" className="mt-4 rounded-xl p-3 text-sm" style={{ background: 'rgba(var(--brand-error-rgb), 0.1)', color: 'var(--brand-error-text)' }}>{error}</p>}
 
       <div className="mt-6 flex flex-wrap items-center gap-4">
         <Button type="submit" loading={busy} disabled={signedIn === null}>{busy ? 'Sending...' : 'Submit application'}</Button>

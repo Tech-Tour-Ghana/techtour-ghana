@@ -43,7 +43,7 @@ export default async function CareersPage({ searchParams }: { searchParams: Sear
   };
   const chip = (active: boolean) => ({
     background: active ? 'var(--sp-primary)' : 'var(--sp-bg-card)',
-    color: active ? '#FFFFFF' : 'var(--sp-text-secondary)',
+    color: active ? 'var(--brand-white)' : 'var(--sp-text-secondary)',
     border: '1px solid var(--sp-border)',
   });
   const chipClass = 'block whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium';

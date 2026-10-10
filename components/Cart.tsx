@@ -194,10 +194,10 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
           height: '60px',
           borderRadius: '50%',
           background: 'var(--brand-primary)',
-          color: isDimMode ? '#0A0A0A' : 'white',
+          color: isDimMode ? 'var(--brand-ink)' : 'white',
           border: 'none',
           cursor: 'pointer',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
+          boxShadow: '0 4px 20px rgba(var(--brand-black-rgb), 0.25)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -211,7 +211,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
             position: 'absolute',
             top: '-6px',
             right: '-6px',
-            background: '#EF4444',
+            background: 'var(--brand-error)',
             color: 'white',
             fontSize: '12px',
             fontWeight: 'bold',
@@ -222,7 +222,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
             alignItems: 'center',
             justifyContent: 'center',
             padding: '0 4px',
-            boxShadow: '0 2px 8px rgba(239,68,68,0.4)',
+            boxShadow: '0 2px 8px rgba(var(--brand-error-rgb), 0.4)',
           }}>
             {itemCount}
           </span>
@@ -236,23 +236,23 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
           bottom: '160px',
           right: '30px',
           zIndex: 1000,
-          background: isDimMode ? '#1A1A1A' : '#FFFFFF',
-          border: `1px solid ${isDimMode ? 'rgba(230,166,77,0.2)' : 'rgba(19,158,162,0.1)'}`,
+          background: 'var(--brand-card)',
+          border: `1px solid ${isDimMode ? 'rgba(var(--brand-gold-rgb), 0.2)' : 'rgba(var(--brand-teal-rgb), 0.1)'}`,
           borderRadius: '12px',
           padding: '12px 20px',
-          boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
+          boxShadow: '0 8px 30px rgba(var(--brand-black-rgb), 0.2)',
           animation: 'slideUp 0.3s ease-out',
           maxWidth: '300px',
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
         }}>
-          <FontAwesomeIcon icon={faCheckCircle} style={{ fontSize: '20px', color: '#10B981' }} />
+          <FontAwesomeIcon icon={faCheckCircle} style={{ fontSize: '20px', color: 'var(--brand-success)' }} />
           <div>
-            <div style={{ fontWeight: '600', fontSize: '14px', color: isDimMode ? '#FFFFFF' : '#000000' }}>
+            <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--brand-text)' }}>
               Added to cart!
             </div>
-            <div style={{ fontSize: '13px', color: isDimMode ? '#B0B0B0' : '#4A4A4A' }}>
+            <div style={{ fontSize: '13px', color: 'var(--brand-text-2)' }}>
               {lastAddedItem}
             </div>
           </div>
@@ -269,19 +269,19 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
           width: cartWidth,
           maxWidth: '100%',
           height: '100vh',
-          background: isDimMode ? '#1A1A1A' : '#FFFFFF',
+          background: 'var(--brand-card)',
           zIndex: 1001,
           transition: 'right 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          boxShadow: '-4px 0 30px rgba(0,0,0,0.15)',
+          boxShadow: '-4px 0 30px rgba(var(--brand-black-rgb), 0.15)',
           display: 'flex',
           flexDirection: 'column',
-          borderLeft: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
+          borderLeft: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)'}`,
         }}
       >
         {/* Header */}
         <div style={{
           padding: '20px 24px',
-          borderBottom: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
+          borderBottom: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)'}`,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -293,7 +293,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
             margin: 0, 
             fontSize: '18px', 
             fontWeight: '600',
-            color: isDimMode ? '#FFFFFF' : '#000000',
+            color: 'var(--brand-text)',
           }}>
             Shopping Cart ({itemCount} {itemCount === 1 ? 'item' : 'items'})
           </h3>
@@ -307,9 +307,9 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                 style={{
                   padding: '4px 10px',
                   borderRadius: '6px',
-                  background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
-                  border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
-                  color: isDimMode ? '#B0B0B0' : '#4A4A4A',
+                  background: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-bg)',
+                  border: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.1)' : 'var(--brand-line)'}`,
+                  color: 'var(--brand-text-2)',
                   cursor: 'pointer',
                   fontSize: '12px',
                   display: 'flex',
@@ -326,10 +326,10 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                   right: 0,
                   top: '100%',
                   marginTop: '4px',
-                  background: isDimMode ? '#1A1A1A' : '#FFFFFF',
-                  border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
+                  background: 'var(--brand-card)',
+                  border: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.1)' : 'var(--brand-line)'}`,
                   borderRadius: '8px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
+                  boxShadow: '0 8px 30px rgba(var(--brand-black-rgb), 0.2)',
                   zIndex: 10,
                   minWidth: '120px',
                   overflow: 'hidden',
@@ -344,9 +344,9 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                         padding: '8px 12px',
                         textAlign: 'left',
                         background: selectedCurrency.code === currency.code 
-                          ? (isDimMode ? 'rgba(230,166,77,0.1)' : 'rgba(19,158,162,0.05)')
+                          ? (isDimMode ? 'rgba(var(--brand-gold-rgb), 0.1)' : 'rgba(var(--brand-teal-rgb), 0.05)')
                           : 'transparent',
-                        color: isDimMode ? '#FFFFFF' : '#000000',
+                        color: 'var(--brand-text)',
                         border: 'none',
                         cursor: 'pointer',
                         fontSize: '13px',
@@ -361,7 +361,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                     href="https://www.exchangerate-api.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ display: 'block', padding: '6px 12px', fontSize: '10px', color: isDimMode ? '#9CA3AF' : '#6B7280', borderTop: '1px solid rgba(128,128,128,0.2)' }}
+                    style={{ display: 'block', padding: '6px 12px', fontSize: '10px', color: 'var(--brand-muted)', borderTop: '1px solid rgba(var(--brand-muted-rgb), 0.2)' }}
                   >
                     {rateInfo.live ? 'Live rates' : 'Approximate rates'} · Rates By Exchange Rate API
                   </a>
@@ -376,7 +376,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                 border: 'none',
                 cursor: 'pointer',
                 fontSize: '20px',
-                color: isDimMode ? '#B0B0B0' : '#4A4A4A',
+                color: 'var(--brand-text-2)',
                 padding: '10px 12px',
               }}
             >
@@ -395,12 +395,12 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
             <div style={{
               textAlign: 'center',
               padding: '60px 20px',
-              color: isDimMode ? '#9CA3AF' : '#6B7280',
+              color: 'var(--brand-muted)',
             }}>
               <p style={{ fontSize: '48px', marginBottom: '16px' }}><FontAwesomeIcon icon={faShoppingCart} /></p>
               <p style={{ fontSize: '16px', fontWeight: '500' }}>Your cart is empty</p>
               <p style={{ fontSize: '14px', marginTop: '4px' }}>Start shopping to add items</p>
-              <Button onClick={closeCart} variant="accent" arrow={false} className="mt-5" style={{ background: 'var(--brand-primary)', color: isDimMode ? '#0A0A0A' : 'white' }}>
+              <Button onClick={closeCart} variant="accent" arrow={false} className="mt-5" style={{ background: 'var(--brand-primary)', color: isDimMode ? 'var(--brand-ink)' : 'white' }}>
                 Continue Shopping
               </Button>
             </div>
@@ -415,7 +415,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                   display: 'flex',
                   gap: '14px',
                   padding: '12px 0',
-                  borderBottom: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6'}`,
+                  borderBottom: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-subtle)'}`,
                   alignItems: 'center',
                 }}>
                   <img
@@ -436,7 +436,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                     <div style={{ 
                       fontWeight: '500', 
                       fontSize: '14px',
-                      color: isDimMode ? '#FFFFFF' : '#000000',
+                      color: 'var(--brand-text)',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
@@ -445,7 +445,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                     </div>
                     <div style={{ 
                       fontSize: '12px', 
-                      color: isDimMode ? '#9CA3AF' : '#6B7280',
+                      color: 'var(--brand-muted)',
                       marginTop: '2px',
                     }}>
                       {item.selectedColor && `Color: ${item.selectedColor}`}
@@ -466,11 +466,11 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                       aria-label={`Decrease quantity of ${item.title}`}
                       style={{
                         padding: '4px 8px',
-                        background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
-                        border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
+                        background: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-bg)',
+                        border: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.1)' : 'var(--brand-line)'}`,
                         borderRadius: '4px',
                         cursor: 'pointer',
-                        color: isDimMode ? '#B0B0B0' : '#4A4A4A',
+                        color: 'var(--brand-text-2)',
                         transition: 'background 0.2s',
                       }}
                     >
@@ -479,7 +479,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                     <span style={{ 
                       minWidth: '24px', 
                       textAlign: 'center',
-                      color: isDimMode ? '#FFFFFF' : '#000000',
+                      color: 'var(--brand-text)',
                       fontWeight: '500',
                       fontSize: '14px',
                     }}>
@@ -490,11 +490,11 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                       aria-label={`Increase quantity of ${item.title}`}
                       style={{
                         padding: '4px 8px',
-                        background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
-                        border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
+                        background: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-bg)',
+                        border: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.1)' : 'var(--brand-line)'}`,
                         borderRadius: '4px',
                         cursor: 'pointer',
-                        color: isDimMode ? '#B0B0B0' : '#4A4A4A',
+                        color: 'var(--brand-text-2)',
                         transition: 'background 0.2s',
                       }}
                     >
@@ -508,7 +508,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                         background: 'transparent',
                         border: 'none',
                         cursor: 'pointer',
-                        color: '#EF4444',
+                        color: 'var(--brand-error)',
                         marginLeft: '4px',
                         transition: 'transform 0.2s',
                       }}
@@ -526,11 +526,11 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
         {cartItems.length > 0 && (
           <div style={{
             padding: '20px 24px',
-            borderTop: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
+            borderTop: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)'}`,
             flexShrink: 0,
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <span style={{ color: isDimMode ? '#B0B0B0' : '#4A4A4A' }}>Subtotal</span>
+              <span style={{ color: 'var(--brand-text-2)' }}>Subtotal</span>
               <span style={{ 
                 fontWeight: 'bold', 
                 fontSize: '20px',
@@ -539,8 +539,8 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                 {selectedCurrency.symbol}{convertPrice(total).toFixed(2)}
               </span>
             </div>
-            <Button onClick={handleCheckout} variant="accent" full icon={faLock} style={{ background: 'var(--brand-primary)', color: isDimMode ? '#0A0A0A' : 'white' }}>Proceed to Checkout</Button>
-            <Button onClick={clearCart} variant="secondary" size="sm" arrow={false} full className="mt-2" style={{ color: '#DC2626' }}>
+            <Button onClick={handleCheckout} variant="accent" full icon={faLock} style={{ background: 'var(--brand-primary)', color: isDimMode ? 'var(--brand-ink)' : 'white' }}>Proceed to Checkout</Button>
+            <Button onClick={clearCart} variant="secondary" size="sm" arrow={false} full className="mt-2" style={{ color: 'var(--brand-error)' }}>
               Clear Cart
             </Button>
           </div>
@@ -557,7 +557,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0,0,0,0.5)',
+            background: 'rgba(var(--brand-black-rgb), 0.5)',
             zIndex: 1000,
             backdropFilter: 'blur(4px)',
             animation: 'fadeIn 0.3s ease-out',

@@ -43,21 +43,21 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: isDimMode ? '#0A0A0A' : '#F9F9F9' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--brand-bg)' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }}></div>
-          <p className="mt-4 text-sm" style={{ color: isDimMode ? '#B0B0B0' : '#4A4A4A' }}>Loading dashboard...</p>
+          <p className="mt-4 text-sm" style={{ color: 'var(--brand-text-2)' }}>Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#000000',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4A4A4A',
-    textMuted: isDimMode ? '#9CA3AF' : '#6B7280',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
+    cardBg: 'var(--brand-card)',
+    textPrimary: 'var(--brand-text)',
+    textSecondary: 'var(--brand-text-2)',
+    textMuted: 'var(--brand-muted)',
+    border: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)',
   };
 
   const StatCard = ({ icon, label, value, color }: { icon: typeof faCalendarCheck; label: string; value: number; color: string }) => (
@@ -88,7 +88,7 @@ export default function DashboardPage() {
               <span>Profile {stats?.profile_complete || 0}% complete</span>
               {(stats?.profile_complete || 0) < 100 && <Link href="/auth/profile" className="font-semibold underline" style={{ color: BRAND_COLORS.tropicalTeal }}>Finish your profile</Link>}
             </div>
-            <div className="h-2 overflow-hidden rounded-full" style={{ background: isDimMode ? 'rgba(255,255,255,0.08)' : '#E5E7EB' }}>
+            <div className="h-2 overflow-hidden rounded-full" style={{ background: isDimMode ? 'rgba(var(--brand-white-rgb), 0.08)' : 'var(--brand-line)' }}>
               <div className="h-full rounded-full" style={{ width: `${stats?.profile_complete || 0}%`, background: BRAND_COLORS.tropicalTeal }} />
             </div>
           </div>
@@ -98,8 +98,8 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={faCalendarCheck} label="Tours Booked" value={stats?.tours_booked || 0} color={BRAND_COLORS.tropicalTeal} />
         <StatCard icon={faShoppingBag} label="Purchases" value={stats?.orders_placed || 0} color={BRAND_COLORS.sandyOrange} />
-        <StatCard icon={faGraduationCap} label="Study Apps" value={stats?.study_applications || 0} color="#8B5CF6" />
-        <StatCard icon={faHeart} label="Wishlist" value={stats?.wishlist_count || 0} color="#EF4444" />
+        <StatCard icon={faGraduationCap} label="Study Apps" value={stats?.study_applications || 0} color="var(--brand-purple)" />
+        <StatCard icon={faHeart} label="Wishlist" value={stats?.wishlist_count || 0} color="var(--brand-error)" />
       </div>
 
       {stats && stats.recent_orders.length > 0 && (

@@ -159,10 +159,10 @@ export function themeVars(mode: ThemeMode, p: ThemePalette): Record<string, stri
   const goldDark = dark ? p.primaryDark : mix(p.accent, '#000000', 0.08);
   const channels: Record<string, string> = {
     text: p.text, 'text-2': p.textSecondary, muted: p.muted, line, subtle, bg: p.background, card: p.card,
-    teal, gold, white: '#FFFFFF', black: '#000000', ...SEMANTIC,
+    teal, gold, white: '#FFFFFF', black: '#000000', ink: '#1A1A2E', ...SEMANTIC,
   };
   const extra: Record<string, string> = {
-    '--brand-line': line, '--brand-subtle': subtle, '--brand-white': '#FFFFFF', '--brand-black': '#000000',
+    '--brand-line': line, '--brand-subtle': subtle, '--brand-white': '#FFFFFF', '--brand-black': '#000000', '--brand-ink': '#1A1A2E',
     '--brand-teal-dark': tealDark, '--brand-gold-dark': goldDark,
   };
   for (const [name, hex] of Object.entries(channels)) extra[`--brand-${name}-rgb`] = rgbTriplet(hex);

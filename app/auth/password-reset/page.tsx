@@ -63,7 +63,7 @@ function PasswordResetContent() {
 
   if (!isThemeLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--brand-bg)]">
         <div className="text-white text-center">
           <div className="inline-block w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-4"></div>
           <p className="text-white/60">Loading...</p>
@@ -74,7 +74,7 @@ function PasswordResetContent() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className={`bg-[#1a1a2e] border border-white/10 rounded-2xl max-w-md w-full p-6 md:p-8 shadow-2xl relative ${isDarkMode ? 'bg-[#1a1a2e]' : 'bg-white'}`}>
+      <div className={`bg-[var(--brand-ink)] border border-white/10 rounded-2xl max-w-md w-full p-6 md:p-8 shadow-2xl relative ${isDarkMode ? 'bg-[var(--brand-ink)]' : 'bg-white'}`}>
         <button onClick={closeModal} className={`absolute top-4 right-4 transition-colors ${isDarkMode ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-600'}`}>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -133,7 +133,7 @@ function PasswordResetContent() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 transition-all ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-amber-400' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-amber-400'}`}
+              className={`w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 transition-all ${isDarkMode ? 'bg-[var(--brand-ink)] border border-white/10 text-white placeholder:text-white/50 focus:border-amber-400' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-amber-400'}`}
               placeholder="you@business.com"
               required
               autoFocus
@@ -161,7 +161,7 @@ export default function PasswordResetPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--brand-bg)]">
           <div className="text-white text-center">
             <div className="inline-block w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-4"></div>
             <p className="text-white/60">Loading...</p>

@@ -14,17 +14,17 @@ import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 export type ButtonVariant = 'primary' | 'accent' | 'gold' | 'secondary' | 'onDark' | 'light' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
-const TEAL = 'var(--sp-primary, #139EA2)';
+const TEAL = 'var(--sp-primary, var(--brand-teal))';
 
 // bg/fg style the pill, dot/dotFg style the arrow circle.
 const VARIANTS: Record<ButtonVariant, { pill: CSSProperties; dot: string; dotFg: string }> = {
-  primary: { pill: { background: 'linear-gradient(180deg, #2b2b2b 0%, #0b0b0b 100%)', color: '#fff' }, dot: '#fff', dotFg: '#000' },
-  accent: { pill: { background: TEAL, color: '#fff' }, dot: '#fff', dotFg: '#0b0b0b' },
-  gold: { pill: { background: '#E6A64D', color: '#1A1A2E' }, dot: '#1A1A2E', dotFg: '#fff' },
-  onDark: { pill: { background: 'rgba(255,255,255,0.1)', color: '#fff', boxShadow: 'inset 0 0 0 1.5px rgba(255,255,255,0.4)' }, dot: '#fff', dotFg: '#0b0b0b' },
-  secondary: { pill: { background: 'transparent', color: 'inherit', boxShadow: 'inset 0 0 0 1.5px currentColor' }, dot: '#0b0b0b', dotFg: '#fff' },
-  light: { pill: { background: '#fff', color: '#0b0b0b' }, dot: '#0b0b0b', dotFg: '#fff' },
-  danger: { pill: { background: '#DC2626', color: '#fff' }, dot: '#fff', dotFg: '#DC2626' },
+  primary: { pill: { background: 'linear-gradient(180deg, color-mix(in srgb, var(--brand-white) 17%, var(--brand-black)) 0%, var(--brand-black) 100%)', color: 'var(--brand-white)' }, dot: 'var(--brand-white)', dotFg: 'var(--brand-black)' },
+  accent: { pill: { background: TEAL, color: 'var(--brand-white)' }, dot: 'var(--brand-white)', dotFg: 'var(--brand-ink)' },
+  gold: { pill: { background: 'var(--brand-gold)', color: 'var(--brand-ink)' }, dot: 'var(--brand-ink)', dotFg: 'var(--brand-white)' },
+  onDark: { pill: { background: 'rgba(var(--brand-white-rgb), 0.1)', color: 'var(--brand-white)', boxShadow: 'inset 0 0 0 1.5px rgba(var(--brand-white-rgb), 0.4)' }, dot: 'var(--brand-white)', dotFg: 'var(--brand-ink)' },
+  secondary: { pill: { background: 'transparent', color: 'inherit', boxShadow: 'inset 0 0 0 1.5px currentColor' }, dot: 'var(--brand-ink)', dotFg: 'var(--brand-white)' },
+  light: { pill: { background: 'var(--brand-white)', color: 'var(--brand-ink)' }, dot: 'var(--brand-ink)', dotFg: 'var(--brand-white)' },
+  danger: { pill: { background: 'var(--brand-error)', color: 'var(--brand-white)' }, dot: 'var(--brand-white)', dotFg: 'var(--brand-error)' },
 };
 
 const SIZES: Record<ButtonSize, { pill: string; dot: string; icon: string }> = {

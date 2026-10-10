@@ -44,7 +44,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Search
 
   const chip = (active: boolean) => ({
     background: active ? 'var(--sp-primary)' : 'var(--sp-bg-card)',
-    color: active ? '#FFFFFF' : 'var(--sp-text-secondary)',
+    color: active ? 'var(--brand-white)' : 'var(--sp-text-secondary)',
     border: '1px solid var(--sp-border)',
   });
   const field = { background: 'var(--sp-bg-card)', border: '1px solid var(--sp-border)', color: 'var(--sp-text-primary)' };

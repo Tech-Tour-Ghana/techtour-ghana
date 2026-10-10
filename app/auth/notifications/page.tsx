@@ -71,28 +71,28 @@ export default function NotificationsPage() {
   const getTypeColor = (type: string) => {
     const colors: Record<string, string> = {
       order: BRAND_COLORS.tropicalTeal,
-      tour: '#8B5CF6',
+      tour: 'var(--brand-purple)',
       promotion: BRAND_COLORS.sandyOrange,
-      wishlist: '#EF4444',
-      general: '#3B82F6',
+      wishlist: 'var(--brand-error)',
+      general: 'var(--brand-info)',
     };
-    return colors[type] || '#6B7280';
+    return colors[type] || 'var(--brand-muted)';
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#000000',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4A4A4A',
-    textMuted: isDimMode ? '#9CA3AF' : '#6B7280',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    hoverBg: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
+    cardBg: 'var(--brand-card)',
+    textPrimary: 'var(--brand-text)',
+    textSecondary: 'var(--brand-text-2)',
+    textMuted: 'var(--brand-muted)',
+    border: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)',
+    hoverBg: isDimMode ? 'rgba(var(--brand-white-rgb), 0.03)' : 'var(--brand-bg)',
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: isDimMode ? '#0A0A0A' : '#F9F9F9' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--brand-bg)' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }}></div>
           <p className="mt-4 text-sm" style={{ color: themeStyles.textSecondary }}>Loading notifications...</p>
@@ -121,7 +121,7 @@ export default function NotificationsPage() {
             {notifications.length} total notifications
           </span>
           {unreadCount > 0 && (
-            <span className="px-2.5 py-0.5 text-xs font-medium rounded-full" style={{ background: '#EF444420', color: '#EF4444' }}>
+            <span className="px-2.5 py-0.5 text-xs font-medium rounded-full" style={{ background: 'color-mix(in srgb, var(--brand-error) 13%, transparent)', color: 'var(--brand-error)' }}>
               {unreadCount} unread
             </span>
           )}

@@ -37,12 +37,12 @@ const BackToTop: React.FC<BackToTopProps> = ({
     });
   };
 
-  const colorFrom = accentColor === 'orange' ? '#E6A64D' : '#139EA2';
-  const colorTo = accentColor === 'orange' ? '#D4953A' : '#0D7A7D';
+  const colorFrom = accentColor === 'orange' ? 'var(--brand-gold)' : 'var(--brand-teal)';
+  const colorTo = accentColor === 'orange' ? 'var(--brand-gold-dark)' : 'var(--brand-teal)';
   const shadowColor =
     accentColor === 'orange'
-      ? 'rgba(230, 166, 77, 0.4)'
-      : 'rgba(19, 158, 162, 0.4)';
+      ? 'rgba(var(--brand-gold-rgb), 0.4)'
+      : 'rgba(var(--brand-teal-rgb), 0.4)';
 
   return (
     <button
@@ -66,7 +66,7 @@ const BackToTop: React.FC<BackToTopProps> = ({
           height: 48px;
           border-radius: 50%;
           border: none;
-          color: #FFFFFF;
+          color: var(--brand-white);
           font-size: 16px;
           cursor: pointer;
           display: flex;
@@ -95,7 +95,7 @@ const BackToTop: React.FC<BackToTopProps> = ({
 
         .back-to-top:hover {
           transform: translateY(-4px) scale(1.08);
-          box-shadow: 0 12px 32px rgba(19, 158, 162, 0.5) !important;
+          box-shadow: 0 12px 32px rgba(var(--brand-teal-rgb), 0.5) !important;
         }
 
         .back-to-top:active {
@@ -105,7 +105,7 @@ const BackToTop: React.FC<BackToTopProps> = ({
         .back-to-top:focus,
         .back-to-top:focus-visible {
           outline: none;
-          box-shadow: 0 8px 24px rgba(19, 158, 162, 0.4);
+          box-shadow: 0 8px 24px rgba(var(--brand-teal-rgb), 0.4);
         }
 
         /* Tooltip */
@@ -114,8 +114,8 @@ const BackToTop: React.FC<BackToTopProps> = ({
           bottom: 100%;
           right: 0;
           margin-bottom: 12px;
-          background: #1A1A2E;
-          color: #FFFFFF;
+          background: var(--brand-ink);
+          color: var(--brand-white);
           font-size: 11px;
           font-weight: 600;
           padding: 6px 12px;
@@ -138,7 +138,7 @@ const BackToTop: React.FC<BackToTopProps> = ({
           height: 0;
           border-left: 5px solid transparent;
           border-right: 5px solid transparent;
-          border-top: 5px solid #1A1A2E;
+          border-top: 5px solid var(--brand-text);
         }
 
         .back-to-top:hover .back-to-top-tooltip {

@@ -117,7 +117,7 @@ function ConfirmEmailContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e] p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--brand-ink)] p-4 relative overflow-hidden">
 
       <div className="relative z-10 w-full max-w-[420px]">
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl hover:border-purple-500/20 transition-all text-center">
@@ -142,7 +142,7 @@ export default function ConfirmEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e]">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[var(--brand-bg)] via-[var(--brand-ink)] to-[var(--brand-card)]">
           <div className="inline-block w-10 h-10 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"></div>
         </div>
       }

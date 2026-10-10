@@ -24,26 +24,26 @@ import { useCart } from '@/context/CartContext';
 // ===== THEME COLORS =====
 const THEME_COLORS = {
   light: {
-    background: '#FFFFFF',
-    cardBackground: '#FFFFFF',
-    textPrimary: '#000000',
-    textSecondary: '#4A4A4A',
-    textMuted: '#6B7280',
-    border: '#E5E7EB',
-    borderLight: '#F3F4F6',
-    shadow: 'rgba(0,0,0,0.08)',
-    cardBorder: 'rgba(19,158,162,0.1)',
+    background: 'var(--brand-white)',
+    cardBackground: 'var(--brand-white)',
+    textPrimary: 'var(--brand-black)',
+    textSecondary: 'var(--brand-text-2)',
+    textMuted: 'var(--brand-muted)',
+    border: 'var(--brand-line)',
+    borderLight: 'var(--brand-subtle)',
+    shadow: 'rgba(var(--brand-black-rgb), 0.08)',
+    cardBorder: 'rgba(var(--brand-teal-rgb), 0.1)',
   },
   dark: {
-    background: '#0A0A0A',
-    cardBackground: '#1A1A1A',
-    textPrimary: '#FFFFFF',
-    textSecondary: '#B0B0B0',
-    textMuted: '#9CA3AF',
-    border: '#2A2A2A',
-    borderLight: '#222222',
-    shadow: 'rgba(0,0,0,0.3)',
-    cardBorder: 'rgba(230,166,77,0.2)',
+    background: 'var(--brand-bg)',
+    cardBackground: 'var(--brand-card)',
+    textPrimary: 'var(--brand-white)',
+    textSecondary: 'var(--brand-text-2)',
+    textMuted: 'var(--brand-muted)',
+    border: 'var(--brand-line)',
+    borderLight: 'var(--brand-subtle)',
+    shadow: 'rgba(var(--brand-black-rgb), 0.3)',
+    cardBorder: 'rgba(var(--brand-gold-rgb), 0.2)',
   }
 };
 
@@ -141,8 +141,8 @@ function PaymentVerifyPageContent() {
         className="w-full max-w-md rounded-2xl shadow-2xl p-6 md:p-8"
         style={{
           background: theme.cardBackground,
-          border: `1px solid ${isDimMode ? 'rgba(230,166,77,0.2)' : 'rgba(19,158,162,0.1)'}`,
-          boxShadow: isDimMode ? '0 20px 60px rgba(0,0,0,0.5)' : '0 20px 60px rgba(19,158,162,0.08)',
+          border: `1px solid ${isDimMode ? 'rgba(var(--brand-gold-rgb), 0.2)' : 'rgba(var(--brand-teal-rgb), 0.1)'}`,
+          boxShadow: isDimMode ? '0 20px 60px rgba(var(--brand-black-rgb), 0.5)' : '0 20px 60px rgba(var(--brand-teal-rgb), 0.08)',
         }}
       >
         {/* TechTour Logo */}
@@ -156,16 +156,16 @@ function PaymentVerifyPageContent() {
         <div className="text-center">
           {status === 'success' ? (
             <>
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(16,185,129,0.2)' }}>
-                <FontAwesomeIcon icon={faCheckCircle} className="text-5xl" style={{ color: '#10B981' }} />
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(var(--brand-success-rgb), 0.2)' }}>
+                <FontAwesomeIcon icon={faCheckCircle} className="text-5xl" style={{ color: 'var(--brand-success)' }} />
               </div>
               <h2 className="text-2xl font-bold mb-2" style={{ color: theme.textPrimary }}>Payment Successful</h2>
               <p className="text-sm mb-4" style={{ color: theme.textSecondary }}>{message}</p>
               <div
                 className="p-3 rounded-lg mb-4 text-left"
                 style={{ 
-                  background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
-                  border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
+                  background: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-bg)',
+                  border: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.1)' : 'var(--brand-line)'}`,
                 }}
               >
                 <p className="text-xs" style={{ color: theme.textMuted }}>Transaction Reference</p>
@@ -174,8 +174,8 @@ function PaymentVerifyPageContent() {
             </>
           ) : (
             <>
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(239,68,68,0.2)' }}>
-                <FontAwesomeIcon icon={faTimesCircle} className="text-5xl" style={{ color: '#EF4444' }} />
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(var(--brand-error-rgb), 0.2)' }}>
+                <FontAwesomeIcon icon={faTimesCircle} className="text-5xl" style={{ color: 'var(--brand-error)' }} />
               </div>
               <h2 className="text-2xl font-bold mb-2" style={{ color: theme.textPrimary }}>Payment Failed</h2>
               <p className="text-sm mb-4" style={{ color: theme.textSecondary }}>{message}</p>
@@ -183,8 +183,8 @@ function PaymentVerifyPageContent() {
                 <div
                   className="p-3 rounded-lg mb-4 text-left"
                   style={{ 
-                    background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
-                    border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
+                    background: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-bg)',
+                    border: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.1)' : 'var(--brand-line)'}`,
                   }}
                 >
                   <p className="text-xs" style={{ color: theme.textMuted }}>Transaction Reference</p>
@@ -195,7 +195,7 @@ function PaymentVerifyPageContent() {
           )}
 
           <div className="flex flex-col gap-2 mt-4">
-            <Button href="/market" variant="accent" arrow={false} full icon={faShoppingCart} style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${isDimMode ? '#D4953A' : 'var(--brand-primary)'} 100%)`, color: isDimMode ? '#0A0A0A' : 'white' }}>
+            <Button href="/market" variant="accent" arrow={false} full icon={faShoppingCart} style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${isDimMode ? 'var(--brand-gold-dark)' : 'var(--brand-primary)'} 100%)`, color: isDimMode ? 'var(--brand-ink)' : 'white' }}>
               Continue Shopping
             </Button>
             <Button href="/" variant="secondary" arrow={false} full icon={faHome} style={{ color: primaryColor }}>
@@ -205,7 +205,7 @@ function PaymentVerifyPageContent() {
 
           {/* Footer */}
           <div className="mt-6 pt-4 border-t text-center" style={{ 
-            borderColor: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
+            borderColor: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)',
           }}>
             <p className="text-[10px]" style={{ color: theme.textMuted }}>
               <FontAwesomeIcon icon={faGlobeAfrica} className="mr-1" />

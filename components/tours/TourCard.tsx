@@ -42,7 +42,7 @@ export default function TourCard({ tour, headingLevel: Heading = 'h2' }: { tour:
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs" style={{ color: 'var(--sp-text-secondary)' }}>
           {tour.review_count > 0 ? (
             <span className="inline-flex items-center gap-1 font-semibold" style={{ color: 'var(--sp-text-primary)' }}>
-              <FontAwesomeIcon icon={faStar} className="h-3 w-3" style={{ color: '#F59E0B' }} />{tour.rating.toFixed(1)}
+              <FontAwesomeIcon icon={faStar} className="h-3 w-3" style={{ color: 'var(--brand-warning)' }} />{tour.rating.toFixed(1)}
               <span className="font-normal" style={{ color: 'var(--sp-text-muted)' }}>({tour.review_count})</span>
             </span>
           ) : <span style={{ color: 'var(--sp-text-muted)' }}>New</span>}
@@ -53,7 +53,7 @@ export default function TourCard({ tour, headingLevel: Heading = 'h2' }: { tour:
         <div className="mt-2 flex items-start justify-between gap-3">
           <Heading className="line-clamp-2 text-lg font-bold leading-snug"><Link href={href}>{tour.title}</Link></Heading>
           <p className="flex-shrink-0 text-right leading-tight">
-            <span className="text-lg font-bold" style={{ color: onSale ? 'var(--sp-accent-text, #8A5200)' : 'var(--sp-primary)' }}>{tourMoney(onSale ? tour.discount_price! : tour.price, tour.currency)}</span>
+            <span className="text-lg font-bold" style={{ color: onSale ? 'var(--sp-accent-text, var(--brand-accent-text))' : 'var(--sp-primary)' }}>{tourMoney(onSale ? tour.discount_price! : tour.price, tour.currency)}</span>
             <span className="block text-[11px]" style={{ color: 'var(--sp-text-muted)' }}>{onSale && <s className="mr-1">{tourMoney(tour.price, tour.currency)}</s>}per person</span>
           </p>
         </div>
@@ -61,7 +61,7 @@ export default function TourCard({ tour, headingLevel: Heading = 'h2' }: { tour:
         {tour.short_description && <p className="mt-2 line-clamp-3 text-sm leading-relaxed" style={{ color: 'var(--sp-text-secondary)' }}>{tour.short_description}</p>}
 
         <div className="mt-auto pt-4">
-          {tour.spots_left !== null && tour.spots_left <= 5 && <p className="mb-2 text-xs font-semibold" style={{ color: '#C2410C' }}>Only {tour.spots_left} spot{tour.spots_left === 1 ? '' : 's'} left</p>}
+          {tour.spots_left !== null && tour.spots_left <= 5 && <p className="mb-2 text-xs font-semibold" style={{ color: 'var(--brand-warning-text)' }}>Only {tour.spots_left} spot{tour.spots_left === 1 ? '' : 's'} left</p>}
           <Button href={href} full>{tour.next_departure ? 'Reserve your booking' : 'View tour'}</Button>
         </div>
       </div>

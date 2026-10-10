@@ -111,13 +111,13 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
   };
 
   const themeStyles = {
-    background: isDimMode ? '#0A0A0A' : '#F9F9F9',
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#000000',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4A4A4A',
-    textMuted: isDimMode ? '#9CA3AF' : '#6B7280',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    topBarBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
+    background: 'var(--brand-bg)',
+    cardBg: 'var(--brand-card)',
+    textPrimary: 'var(--brand-text)',
+    textSecondary: 'var(--brand-text-2)',
+    textMuted: 'var(--brand-muted)',
+    border: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)',
+    topBarBg: 'var(--brand-card)',
   };
 
   return (
@@ -125,9 +125,9 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
       {/* ===== SIDEBAR (large screens) ===== */}
       <aside
         className="hidden h-full w-64 flex-shrink-0 flex-col overflow-y-auto lg:flex"
-        style={{ background: '#111111', borderRight: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.1)'}` }}
+        style={{ background: 'var(--brand-ink)', borderRight: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'rgba(var(--brand-white-rgb), 0.1)'}` }}
       >
-        <div className="border-b px-5 py-4" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        <div className="border-b px-5 py-4" style={{ borderColor: 'rgba(var(--brand-white-rgb), 0.08)' }}>
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-base font-extrabold text-white" style={{ background: BRAND_COLORS.tropicalTeal }} aria-hidden>T</div>
             <div>
@@ -135,7 +135,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
               <span className="text-xs" style={{ color: BRAND_COLORS.sandyOrange }}>GHANA</span>
             </div>
           </div>
-          <Link href="/" className="mt-3 flex items-center gap-2 text-xs transition-colors hover:text-white" style={{ color: 'rgba(255,255,255,0.55)' }}>
+          <Link href="/" className="mt-3 flex items-center gap-2 text-xs transition-colors hover:text-white" style={{ color: 'rgba(var(--brand-white-rgb), 0.55)' }}>
             <FontAwesomeIcon icon={faArrowLeft} className="h-3 w-3" />
             Back to site
           </Link>
@@ -152,7 +152,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
                 className="mb-1 flex min-h-[2.75rem] items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors hover:bg-white/5"
                 style={{
                   background: isActive ? `color-mix(in srgb, ${BRAND_COLORS.tropicalTeal} 20%, transparent)` : 'transparent',
-                  color: isActive ? '#5FD3D6' : 'rgba(255,255,255,0.72)',
+                  color: isActive ? 'color-mix(in srgb, var(--brand-teal) 60%, var(--brand-white))' : 'rgba(var(--brand-white-rgb), 0.72)',
                 }}
               >
                 <FontAwesomeIcon icon={item.icon} className="h-4 w-4" />
@@ -186,7 +186,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
               onClick={toggleTheme}
               aria-label={isDimMode ? 'Switch to light theme' : 'Switch to dark theme'}
               className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
-              style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textSecondary }}
+              style={{ background: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-subtle)', color: themeStyles.textSecondary }}
             >
               <FontAwesomeIcon icon={isDimMode ? faSun : faMoon} className="w-4 h-4" />
             </button>
@@ -197,7 +197,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
                 aria-label={unreadNotifications > 0 ? `Notifications, ${unreadNotifications} unread` : 'Notifications'}
                 aria-expanded={isNotificationsOpen}
                 className="relative flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
-                style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6', color: themeStyles.textSecondary }}
+                style={{ background: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-subtle)', color: themeStyles.textSecondary }}
               >
                 <FontAwesomeIcon icon={faBell} className="w-4 h-4" />
                 {unreadNotifications > 0 && (
@@ -242,7 +242,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
                 aria-expanded={isDropdownOpen}
                 aria-haspopup="menu"
                 className="flex min-h-[2.75rem] items-center gap-2 rounded-lg px-2 sm:px-3"
-                style={{ background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6' }}
+                style={{ background: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-subtle)' }}
               >
                 <div
                   className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-sm font-bold"
@@ -282,7 +282,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
                   <button
                     onClick={handleLogout}
                     className="flex min-h-[2.75rem] w-full items-center gap-3 px-3 text-left text-sm hover:bg-red-500/10"
-                    style={{ color: '#EF4444' }}
+                    style={{ color: 'var(--brand-error)' }}
                   >
                     <FontAwesomeIcon icon={faSignOutAlt} className="w-4 h-4" />
                     Logout
@@ -303,7 +303,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
                     href={item.href}
                     aria-current={isActive ? 'page' : undefined}
                     className="flex min-h-[2.5rem] items-center gap-2 whitespace-nowrap rounded-full px-4 text-sm font-medium"
-                    style={{ background: isActive ? BRAND_COLORS.tropicalTeal : 'transparent', color: isActive ? '#FFFFFF' : themeStyles.textSecondary, border: `1px solid ${isActive ? BRAND_COLORS.tropicalTeal : themeStyles.border}` }}
+                    style={{ background: isActive ? BRAND_COLORS.tropicalTeal : 'transparent', color: isActive ? 'var(--brand-white)' : themeStyles.textSecondary, border: `1px solid ${isActive ? BRAND_COLORS.tropicalTeal : themeStyles.border}` }}
                   >
                     <FontAwesomeIcon icon={item.icon} className="h-3.5 w-3.5" />
                     {item.label}
