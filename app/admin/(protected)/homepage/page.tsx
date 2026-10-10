@@ -209,20 +209,20 @@ export default function HomepagePage() {
               )}
             </div>
             <div>
-              <label className={labelClass} style={labelStyle}>Place name</label>
-              <input className={inputClass} style={inputStyle} placeholder="Kakum National Park" value={slideModal.title ?? ''} onChange={(e) => { setSlideError(''); setSlideField('title', e.target.value); }} />
+              <label htmlFor="hp-1" className={labelClass} style={labelStyle}>Place name</label>
+              <input id="hp-1" className={inputClass} style={inputStyle} placeholder="Kakum National Park" value={slideModal.title ?? ''} onChange={(e) => { setSlideError(''); setSlideField('title', e.target.value); }} />
             </div>
             <div>
-              <label className={labelClass} style={labelStyle}>Region</label>
-              <input className={inputClass} style={inputStyle} placeholder="Central Region" value={slideModal.subtitle ?? ''} onChange={(e) => setSlideField('subtitle', e.target.value)} />
+              <label htmlFor="hp-2" className={labelClass} style={labelStyle}>Region</label>
+              <input id="hp-2" className={inputClass} style={inputStyle} placeholder="Central Region" value={slideModal.subtitle ?? ''} onChange={(e) => setSlideField('subtitle', e.target.value)} />
             </div>
             <div>
-              <label className={labelClass} style={labelStyle}>Caption link (optional)</label>
-              <input className={inputClass} style={inputStyle} placeholder="/tours" value={slideModal.button_link ?? ''} onChange={(e) => setSlideField('button_link', e.target.value)} />
+              <label htmlFor="hp-3" className={labelClass} style={labelStyle}>Caption link (optional)</label>
+              <input id="hp-3" className={inputClass} style={inputStyle} placeholder="/tours" value={slideModal.button_link ?? ''} onChange={(e) => setSlideField('button_link', e.target.value)} />
             </div>
             <div>
-              <label className={labelClass} style={labelStyle}>Sort Order</label>
-              <input type="number" className={inputClass} style={inputStyle} value={Number(slideModal.sort_order) || 0} onChange={(e) => setSlideField('sort_order', e.target.value)} />
+              <label htmlFor="hp-4" className={labelClass} style={labelStyle}>Sort Order</label>
+              <input id="hp-4" type="number" className={inputClass} style={inputStyle} value={Number(slideModal.sort_order) || 0} onChange={(e) => setSlideField('sort_order', e.target.value)} />
             </div>
             <label className="flex items-center gap-2 text-xs cursor-pointer" style={labelStyle}>
               <input type="checkbox" checked={slideModal.is_active ?? true} onChange={(e) => setSlideField('is_active', e.target.checked)} />Active
@@ -245,21 +245,21 @@ export default function HomepagePage() {
         >
           <div className="space-y-4">
             <div>
-              <label className={labelClass} style={labelStyle}>Title</label>
-              <input className={inputClass} style={inputStyle} value={modal.title ?? ''} onChange={(e) => setField('title', e.target.value)} />
+              <label htmlFor="hp-5" className={labelClass} style={labelStyle}>Title</label>
+              <input id="hp-5" className={inputClass} style={inputStyle} value={modal.title ?? ''} onChange={(e) => setField('title', e.target.value)} />
             </div>
             <div>
-              <label className={labelClass} style={labelStyle}>Description</label>
-              <textarea className={inputClass} style={inputStyle} rows={3} value={modal.description ?? ''} onChange={(e) => setField('description', e.target.value)} />
+              <label htmlFor="hp-6" className={labelClass} style={labelStyle}>Description</label>
+              <textarea id="hp-6" className={inputClass} style={inputStyle} rows={3} value={modal.description ?? ''} onChange={(e) => setField('description', e.target.value)} />
             </div>
             <div>
-              <label className={labelClass} style={labelStyle}>Category</label>
-              <input className={inputClass} style={inputStyle} list="video-categories" value={modal.category ?? ''} onChange={(e) => setField('category', e.target.value)} />
+              <label htmlFor="hp-7" className={labelClass} style={labelStyle}>Category</label>
+              <input id="hp-7" className={inputClass} style={inputStyle} list="video-categories" value={modal.category ?? ''} onChange={(e) => setField('category', e.target.value)} />
               <datalist id="video-categories"><option value="Destinations" /><option value="Interviews" /><option value="Experiences" /><option value="Student stories" /></datalist>
             </div>
             <div>
-              <label className={labelClass} style={labelStyle}>YouTube link</label>
-              <input className={inputClass} style={inputStyle} readOnly={legacyUrl} placeholder="https://www.youtube.com/watch?v=..." value={modal.video_url ?? ''} onChange={(e) => { setYtError(''); setField('video_url', e.target.value); }} />
+              <label htmlFor="hp-8" className={labelClass} style={labelStyle}>YouTube link</label>
+              <input id="hp-8" className={inputClass} style={inputStyle} readOnly={legacyUrl} placeholder="https://www.youtube.com/watch?v=..." value={modal.video_url ?? ''} onChange={(e) => { setYtError(''); setField('video_url', e.target.value); }} />
               {legacyUrl && <p className="mt-1 text-xs" style={{ color: 'var(--adm-muted)' }}>Not a YouTube link, it will not appear in the carousel.</p>}
               {ytError && <p className="mt-1 text-xs" style={{ color: 'var(--adm-error)' }}>{ytError}</p>}
               {(() => { const yt = parseYouTubeId(modal.video_url ?? ''); return yt ? (
@@ -272,8 +272,8 @@ export default function HomepagePage() {
               <UrlWithPicker inputStyle={inputStyle} value={modal.image_url ?? ''} onChange={(v) => setField('image_url', v)} />
             </div>
             <div>
-              <label className={labelClass} style={labelStyle}>Sort Order</label>
-              <input type="number" className={inputClass} style={inputStyle} value={Number(modal.sort_order) || 0} onChange={(e) => setField('sort_order', e.target.value)} />
+              <label htmlFor="hp-9" className={labelClass} style={labelStyle}>Sort Order</label>
+              <input id="hp-9" type="number" className={inputClass} style={inputStyle} value={Number(modal.sort_order) || 0} onChange={(e) => setField('sort_order', e.target.value)} />
             </div>
             <label className="flex items-center gap-2 text-xs cursor-pointer" style={labelStyle}>
               <input type="checkbox" checked={modal.is_active ?? true} onChange={(e) => setField('is_active', e.target.checked)} />Active

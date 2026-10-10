@@ -267,8 +267,8 @@ Cancel
                   />
                 </div>
                 <div className="space-y-1">
-                  <label style={labelStyle}>Slug</label>
-                  <input
+                  <label htmlFor="art-1" style={labelStyle}>Slug</label>
+                  <input id="art-1"
                     className={inputClass}
                     style={inputStyle}
                     value={form.slug}
@@ -281,25 +281,25 @@ Cancel
               {/* Title + Craft Type */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label style={labelStyle}>Title</label>
-                  <input className={inputClass} style={inputStyle} value={form.title ?? ''} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="e.g. Master Weaver" />
+                  <label htmlFor="art-2" style={labelStyle}>Title</label>
+                  <input id="art-2" className={inputClass} style={inputStyle} value={form.title ?? ''} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="e.g. Master Weaver" />
                 </div>
                 <div className="space-y-1">
-                  <label style={labelStyle}>Craft Type</label>
-                  <input className={inputClass} style={inputStyle} value={form.craft_type ?? ''} onChange={(e) => setForm((f) => ({ ...f, craft_type: e.target.value }))} placeholder="e.g. Kente Weaving" />
+                  <label htmlFor="art-3" style={labelStyle}>Craft Type</label>
+                  <input id="art-3" className={inputClass} style={inputStyle} value={form.craft_type ?? ''} onChange={(e) => setForm((f) => ({ ...f, craft_type: e.target.value }))} placeholder="e.g. Kente Weaving" />
                 </div>
               </div>
 
               {/* Specialties */}
               <div className="space-y-1">
-                <label style={labelStyle}>Specialties</label>
-                <input className={inputClass} style={inputStyle} value={form.specialties ?? ''} onChange={(e) => setForm((f) => ({ ...f, specialties: e.target.value }))} placeholder="e.g. Traditional patterns, Custom orders" />
+                <label htmlFor="art-4" style={labelStyle}>Specialties</label>
+                <input id="art-4" className={inputClass} style={inputStyle} value={form.specialties ?? ''} onChange={(e) => setForm((f) => ({ ...f, specialties: e.target.value }))} placeholder="e.g. Traditional patterns, Custom orders" />
               </div>
 
               {/* Bio */}
               <div className="space-y-1">
-                <label style={labelStyle}>Bio</label>
-                <textarea
+                <label htmlFor="art-5" style={labelStyle}>Bio</label>
+                <textarea id="art-5"
                   className={inputClass}
                   style={{ ...inputStyle, resize: 'vertical' }}
                   rows={4}
@@ -312,12 +312,12 @@ Cancel
               {/* Location + Years */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label style={labelStyle}>Location</label>
-                  <input className={inputClass} style={inputStyle} value={form.location ?? ''} onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} placeholder="e.g. Kumasi, Ghana" />
+                  <label htmlFor="art-6" style={labelStyle}>Location</label>
+                  <input id="art-6" className={inputClass} style={inputStyle} value={form.location ?? ''} onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} placeholder="e.g. Kumasi, Ghana" />
                 </div>
                 <div className="space-y-1">
-                  <label style={labelStyle}>Years of Experience</label>
-                  <input
+                  <label htmlFor="art-7" style={labelStyle}>Years of Experience</label>
+                  <input id="art-7"
                     type="number"
                     min={0}
                     className={inputClass}
@@ -333,24 +333,24 @@ Cancel
               <p className="text-xs" style={{ color: themeStyles.textMuted }}>Contact details are private. Only admins can see them, they are never shown on the public site.</p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label style={labelStyle}>Email</label>
-                  <input type="email" className={inputClass} style={inputStyle} value={form.email ?? ''} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} placeholder="artisan@example.com" />
+                  <label htmlFor="art-8" style={labelStyle}>Email</label>
+                  <input id="art-8" type="email" className={inputClass} style={inputStyle} value={form.email ?? ''} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} placeholder="artisan@example.com" />
                 </div>
                 <div className="space-y-1">
-                  <label style={labelStyle}>Phone</label>
-                  <input className={inputClass} style={inputStyle} value={form.phone ?? ''} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="+233 ..." />
+                  <label htmlFor="art-9" style={labelStyle}>Phone</label>
+                  <input id="art-9" className={inputClass} style={inputStyle} value={form.phone ?? ''} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="+233 ..." />
                 </div>
               </div>
 
               {/* Web + Instagram */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label style={labelStyle}>Website</label>
-                  <input className={inputClass} style={inputStyle} value={form.website ?? ''} onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))} placeholder="https://..." />
+                  <label htmlFor="art-10" style={labelStyle}>Website</label>
+                  <input id="art-10" className={inputClass} style={inputStyle} value={form.website ?? ''} onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))} placeholder="https://..." />
                 </div>
                 <div className="space-y-1">
-                  <label style={labelStyle}>Instagram</label>
-                  <input className={inputClass} style={inputStyle} value={form.instagram ?? ''} onChange={(e) => setForm((f) => ({ ...f, instagram: e.target.value }))} placeholder="@handle" />
+                  <label htmlFor="art-11" style={labelStyle}>Instagram</label>
+                  <input id="art-11" className={inputClass} style={inputStyle} value={form.instagram ?? ''} onChange={(e) => setForm((f) => ({ ...f, instagram: e.target.value }))} placeholder="@handle" />
                 </div>
               </div>
 
@@ -362,8 +362,8 @@ Cancel
 
               {/* Sort order */}
               <div className="space-y-1">
-                <label style={labelStyle}>Sort Order</label>
-                <input
+                <label htmlFor="art-12" style={labelStyle}>Sort Order</label>
+                <input id="art-12"
                   type="number"
                   min={0}
                   className={inputClass}

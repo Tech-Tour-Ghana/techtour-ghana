@@ -61,7 +61,18 @@ export function cleanOverrides(raw: unknown): ThemeOverrides {
   return out;
 }
 
-export const paletteFor = (mode: ThemeMode, overrides: ThemeOverrides): ThemePalette => ({ ...THEME_DEFAULTS[mode], ...(overrides[mode] ?? {}) });
+/** The dark shade that goes with a brand colour: the default pair at the default colour, otherwise the colour mixed with black. */
+export function deriveDark(mode: ThemeMode, primary: string): string {
+  return normaliseHex(primary) === THEME_DEFAULTS[mode].primary ? THEME_DEFAULTS[mode].primaryDark : mix(primary, '#000000', mode === 'light' ? 0.22 : 0.08);
+}
+
+/** Saved overrides on top of the defaults. A changed brand colour brings its own dark shade unless one was set on purpose. */
+export function paletteFor(mode: ThemeMode, overrides: ThemeOverrides): ThemePalette {
+  const own = overrides[mode] ?? {};
+  const merged = { ...THEME_DEFAULTS[mode], ...own };
+  if (own.primary && !own.primaryDark) merged.primaryDark = deriveDark(mode, own.primary);
+  return merged;
+}
 
 /** Store only what differs from the defaults. */
 export function diffFromDefaults(mode: ThemeMode, palette: ThemePalette): Partial<ThemePalette> {

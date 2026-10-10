@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { Card, Field } from '@/components/admin/settings/parts';
 import { Button, fieldStyle } from '@/components/admin/ui';
 import {
-  THEME_DEFAULTS, THEME_KEYS, THEME_LABELS, checkPalette, diffFromDefaults, isHex, normaliseHex, onColor, paletteFor, themeVars,
+  THEME_DEFAULTS, THEME_KEYS, deriveDark, THEME_LABELS, checkPalette, diffFromDefaults, isHex, normaliseHex, onColor, paletteFor, themeVars,
   type DefaultTheme, type ThemeKey, type ThemeMode, type ThemeOverrides, type ThemePalette,
 } from '@/lib/theme/tokens';
 
@@ -102,6 +102,8 @@ export default function BrandColors({ overrides, defaultTheme, onOverrides, onDe
 
   const setColor = (k: ThemeKey, hex: string) => {
     const next: ThemePalette = { ...palette, [k]: hex };
+    // The dark shade follows the brand colour until someone sets it by hand.
+    if (k === 'primary' && palette.primaryDark === deriveDark(mode, palette.primary)) next.primaryDark = deriveDark(mode, hex);
     const diff = diffFromDefaults(mode, next);
     const merged = { ...overrides };
     if (Object.keys(diff).length) merged[mode] = diff; else delete merged[mode];

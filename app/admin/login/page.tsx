@@ -132,8 +132,8 @@ function AdminLoginForm() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: '#9CA3AF' }}>Email</label>
-            <input
+            <label htmlFor="login-1" className="block text-xs font-medium mb-1.5" style={{ color: '#9CA3AF' }}>Email</label>
+            <input id="login-1"
               type="email"
               required
               autoComplete="username"

@@ -2,13 +2,13 @@
 
 import { useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faChevronRight, faImage } from '@fortawesome/free-solid-svg-icons';
 
 /** Swipeable photo strip with a counter and thumbnails. Scroll-snap, so touch works natively. */
 export default function TourGallery({ images, title }: { images: string[]; title: string }) {
   const track = useRef<HTMLUListElement>(null);
   const [index, setIndex] = useState(0);
-  const list = images.length ? images : [''];
+  const list = images;
 
   function go(i: number) {
     const el = track.current;
@@ -16,6 +16,16 @@ export default function TourGallery({ images, title }: { images: string[]; title
     const next = (i + list.length) % list.length;
     el.scrollTo({ left: next * el.clientWidth, behavior: 'smooth' });
     setIndex(next);
+  }
+
+  // No photos yet: a short branded banner instead of an empty grey block.
+  if (list.length === 0) {
+    return (
+      <div className="flex aspect-[16/6] items-center justify-center gap-3 rounded-3xl text-sm font-medium" style={{ background: 'linear-gradient(135deg, var(--sp-hero-from, var(--brand-primary)), var(--sp-hero-to, var(--brand-primary-dark)))', color: 'var(--brand-white)' }}>
+        <FontAwesomeIcon icon={faImage} className="h-5 w-5" aria-hidden="true" />
+        Photos coming soon
+      </div>
+    );
   }
 
   return (
