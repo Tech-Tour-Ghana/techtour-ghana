@@ -139,7 +139,7 @@ export default function CareersView({ openPositions }: { openPositions: Job[] })
                 <FontAwesomeIcon icon={faArrowRight} />
               </a>
               <Link
-                href="/about/our-team"
+                href="/about#team"
                 className="careers-hero-btn careers-hero-btn--secondary"
               >
                 <FontAwesomeIcon icon={faUsers} />
