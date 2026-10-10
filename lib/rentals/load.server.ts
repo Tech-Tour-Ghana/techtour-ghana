@@ -40,7 +40,7 @@ export const getRental = cache(async (slug: string) => {
 });
 
 /** One page of active rentals, optionally for one property type and/or city and/or matching a search. */
-export async function getRentalListing(opts: { type?: string; city?: string; q?: string; page?: string }) {
+export async function getRentalListing(opts: { type?: string; city?: string; q?: string; page?: string; guests?: string; beds?: string; max?: string }) {
   const supabase = await createClient();
   const { data: facets } = await supabase.from('vacation_rentals').select('city, property_type').eq('is_active', true);
   const all = facets ?? [];
@@ -48,12 +48,19 @@ export async function getRentalListing(opts: { type?: string; city?: string; q?:
   const types = PROPERTY_TYPES.filter((p) => all.some((r) => r.property_type === p.value));
   const type = types.find((p) => p.value === opts.type)?.value;
   const city = cities.find((c) => c === opts.city);
+  const num = (v?: string) => { const n = Number.parseInt(v ?? '', 10); return Number.isFinite(n) && n > 0 ? n : undefined; };
+  const guests = num(opts.guests);
+  const beds = num(opts.beds);
+  const max = num(opts.max);
   const term = (opts.q ?? '').replace(/[,()%*\\]/g, ' ').trim().slice(0, 60);
 
   const build = () => {
     let query = supabase.from('vacation_rentals').select(CARD_SELECT, { count: 'exact' }).eq('is_active', true);
     if (type) query = query.eq('property_type', type);
     if (city) query = query.eq('city', city);
+    if (guests) query = query.gte('max_guests', guests);
+    if (beds) query = query.gte('bedrooms', beds);
+    if (max) query = query.lte('price_per_night', max);
     if (term) query = query.or(`title.ilike.%${term}%,location.ilike.%${term}%,city.ilike.%${term}%,region.ilike.%${term}%,description.ilike.%${term}%`);
     return query.order('is_featured', { ascending: false }).order('sort_order', { ascending: true }).order('title', { ascending: true });
   };
@@ -64,5 +71,5 @@ export async function getRentalListing(opts: { type?: string; city?: string; q?:
   const page = Math.min(pages, Math.max(1, Number.parseInt(opts.page ?? '1', 10) || 1));
   const rows = page === 1 ? first.data : (await build().range((page - 1) * RENTALS_PER_PAGE, page * RENTALS_PER_PAGE - 1)).data;
 
-  return { rentals: (rows ?? []) as RentalCard[], total, page, pages, types, cities, allCount: all.length, type, city, q: term };
+  return { rentals: (rows ?? []) as RentalCard[], total, page, pages, types, cities, allCount: all.length, type, city, q: term, guests: guests ? String(guests) : '', beds: beds ? String(beds) : '', max: max ? String(max) : '' };
 }

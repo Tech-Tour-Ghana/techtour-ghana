@@ -11,6 +11,7 @@ import { ServiceTheme } from '@/components/ServiceTheme';
 import TourGallery from '@/components/tours/TourGallery';
 import { tourMoney } from '@/components/tours/TourCard';
 import Button from '@/components/ui/Button';
+import RentalBooking from '@/components/rentals/RentalBooking';
 import { amenityList, getRental, rentalImages, typeLabel } from '@/lib/rentals/load.server';
 import { getSiteSeo, toMetadata } from '@/lib/seo/load.server';
 import { breadcrumbJsonLd, resolveSeo } from '@/lib/seo/resolve';
@@ -59,7 +60,7 @@ export default async function RentalPage({ params }: Params) {
 
   return (
     <ServiceTheme>
-      <div style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
+      <div className="pb-28 lg:pb-0" style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
         <JsonLd
           data={[
             {
@@ -120,20 +121,18 @@ export default async function RentalPage({ params }: Params) {
               )}
             </div>
 
-            <aside>
-              <div className="rounded-3xl p-5 lg:sticky lg:top-24" style={cardStyle}>
-                <p className="leading-tight"><span className="text-2xl font-bold" style={{ color: 'var(--sp-primary)' }}>{tourMoney(price, rental.currency)}</span> <span className="text-sm" style={muted}>per night</span></p>
-                {(cleaning > 0 || deposit > 0) && (
-                  <dl className="mt-3 space-y-1 text-sm" style={{ color: 'var(--sp-text-secondary)' }}>
-                    {cleaning > 0 && <div className="flex justify-between gap-3"><dt>Cleaning fee</dt><dd className="font-semibold">{tourMoney(cleaning, rental.currency)}</dd></div>}
-                    {deposit > 0 && <div className="flex justify-between gap-3"><dt>Security deposit</dt><dd className="font-semibold">{tourMoney(deposit, rental.currency)}</dd></div>}
-                  </dl>
-                )}
-                {!rental.is_available && <p className="mt-3 text-sm font-semibold" style={{ color: 'var(--brand-warning-text)' }}>Currently unavailable. Ask us about other dates.</p>}
-                <div className="mt-5"><Button href="/about/contact-us" full>Enquire about this rental</Button></div>
-                <p className="mt-3 text-xs" style={muted}>Send us your dates and number of guests and we will confirm availability and arrange your stay.</p>
+            <aside id="reserve" className="scroll-mt-28">
+              <div className="lg:sticky lg:top-24">
+                <RentalBooking rental={{ id: rental.id, price_per_night: price, cleaning_fee: cleaning, security_deposit: deposit, currency: rental.currency, max_guests: rental.max_guests, is_available: rental.is_available }} />
               </div>
             </aside>
+          </div>
+        </div>
+
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t px-4 py-3 lg:hidden" style={{ background: 'var(--sp-bg-card)', borderColor: 'var(--sp-border)' }}>
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+            <p className="leading-tight"><span className="text-lg font-bold" style={{ color: 'var(--sp-primary)' }}>{tourMoney(price, rental.currency)}</span> <span className="text-xs" style={muted}>per night</span></p>
+            <Button href="#reserve">Check dates</Button>
           </div>
         </div>
       </div>
