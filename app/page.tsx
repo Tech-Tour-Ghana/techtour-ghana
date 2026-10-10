@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 
-import BackToTop from '@/components/BackToTop';
 import Hero from '@/components/home/sections/Hero';
 import FeaturedTours from '@/components/home/sections/FeaturedTours';
 import LatestPosts from '@/components/home/sections/LatestPosts';
@@ -38,7 +37,6 @@ export default async function HomePage() {
         <WhyUs />
         <Testimonials items={testimonials} />
         <LatestPosts />
-        <BackToTop accentColor="teal" />
       </div>
     </ServiceTheme>
   );

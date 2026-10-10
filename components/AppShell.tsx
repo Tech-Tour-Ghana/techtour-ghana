@@ -9,6 +9,7 @@ import AnalyticsTracker from "@/components/AnalyticsTracker";
 import SiteBreadcrumbs, { CrumbProvider } from "@/components/SiteBreadcrumbs";
 import { Suspense, useState, useEffect } from "react";
 import { usePathname } from 'next/navigation';
+import BackToTop from '@/components/BackToTop';
 
 const Cart = dynamic(
   () => import('@/components/Cart'),
@@ -44,6 +45,7 @@ export default function AppShell({
 
   // ===== PAGES THAT SHOULD NOT HAVE NAVBAR & FOOTER =====
   const isAuthPage = pathname?.startsWith('/auth/');
+  const showBackToTop = !(pathname?.startsWith('/admin') || pathname === '/maintenance' || pathname?.startsWith('/market/payment/verify'));
   const isFullPageOnly = pathname?.startsWith('/market/payment/verify') ||
                          pathname?.startsWith('/market/checkout') ||
                          pathname?.startsWith('/auth/') ||
@@ -68,6 +70,7 @@ export default function AppShell({
         </main>
         {!isFullPageOnly && <CartWrapper />}
         {!isFullPageOnly && <Footer />}
+        {showBackToTop && <BackToTop />}
        </CrumbProvider>
       </CartProvider>
     </ThemeProvider>
