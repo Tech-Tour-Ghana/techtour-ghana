@@ -1,9 +1,6 @@
-import { getJobs } from '@/lib/careers/load.server';
+import { redirect } from 'next/navigation';
 
-import PositionsView from './PositionsView';
-
-export const revalidate = 60;
-
-export default async function PositionsPage() {
-  return <PositionsView jobs={await getJobs()} />;
+// Open positions now live on the Careers page.
+export default function Positions() {
+  redirect('/about/careers#roles');
 }
