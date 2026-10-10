@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faPen, faTrash, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
+import { parseYouTubeId, youTubeThumb } from '@/lib/video/youtube';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { Button, IconButton, ListSkeleton, Modal, StatusPill, TableCard, Tabs, Toolbar, confirmAction, reportError, rowClass } from '@/components/admin/ui';
 
@@ -26,6 +27,8 @@ export default function HomepagePage() {
   const [videoSections, setVideoSections] = useState<VideoSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [ytError, setYtError] = useState('');
+  const [legacyUrl, setLegacyUrl] = useState(false);
   const [modal, setModal] = useState<{ type: Tab; data: Partial<MainFeatureCard & VideoSection> } | null>(null);
 
   const fetchAll = useCallback(async () => {
@@ -60,12 +63,17 @@ export default function HomepagePage() {
     setSaving(true);
     const supabase = createBrowserClient();
     const { type, data } = modal;
+    if (type === 'video_sections' && !legacyUrl && !parseYouTubeId(data.video_url ?? '')) {
+      setYtError('Paste a YouTube link, for example https://www.youtube.com/watch?v=...');
+      setSaving(false);
+      return;
+    }
     if (type === 'feature_cards') {
       const row = { title: data.title ?? '', subtitle: data.subtitle ?? '', description: data.description ?? '', button_text: data.button_text ?? '', button_link: data.button_link ?? '', is_active: data.is_active ?? true, sort_order: Number(data.sort_order) || 0 };
       if (data.id) { if (reportError((await supabase.from('main_feature_cards').update(row).eq('id', data.id)).error)) { setSaving(false); return; } }
       else { if (reportError((await supabase.from('main_feature_cards').insert(row)).error)) { setSaving(false); return; } }
     } else {
-      const row = { title: data.title ?? '', description: data.description ?? '', category: data.category ?? '', card_type: (data.card_type ?? 'wide') as 'wide' | 'short', media_type: (data.media_type ?? 'none') as 'video' | 'image' | 'none', video_url: data.video_url ?? '', image_url: data.image_url ?? '', is_active: data.is_active ?? true, sort_order: Number(data.sort_order) || 0 };
+      const row = { title: data.title ?? '', description: data.description ?? '', category: data.category ?? '', card_type: (data.card_type ?? 'wide') as 'wide' | 'short', media_type: (legacyUrl ? (data.media_type ?? 'none') : 'video') as 'video' | 'image' | 'none', video_url: data.video_url ?? '', image_url: data.image_url ?? '', is_active: data.is_active ?? true, sort_order: Number(data.sort_order) || 0 };
       if (data.id) { if (reportError((await supabase.from('video_sections').update(row).eq('id', data.id)).error)) { setSaving(false); return; } }
       else { if (reportError((await supabase.from('video_sections').insert(row)).error)) { setSaving(false); return; } }
     }
@@ -101,7 +109,7 @@ export default function HomepagePage() {
               <FontAwesomeIcon icon={faPlus} className="mr-2 h-3 w-3" />Add card
             </Button>
           ) : (
-            <Button onClick={() => setModal({ type: 'video_sections', data: { title: '', description: '', category: '', card_type: 'wide', media_type: 'none', video_url: '', image_url: '', is_active: true, sort_order: 0 } })}>
+            <Button onClick={() => { setYtError(''); setLegacyUrl(false); setModal({ type: 'video_sections', data: { title: '', description: '', category: '', card_type: 'wide', media_type: 'video', video_url: '', image_url: '', is_active: true, sort_order: 0 } }); }}>
               <FontAwesomeIcon icon={faPlus} className="mr-2 h-3 w-3" />Add section
             </Button>
           )
@@ -133,17 +141,24 @@ export default function HomepagePage() {
       )}
 
       {tab === 'video_sections' && (
-        <TableCard loading={false} empty={videoSections.length === 0} emptyTitle="No video sections yet" emptyBody="Video sections appear on the home page." headers={['Section', 'Layout', 'Media', 'Order', 'Status', '']}>
+        <TableCard loading={false} empty={videoSections.length === 0} emptyTitle="No video sections yet" emptyBody="Video sections appear on the home page." headers={['Video', 'Category', 'Order', 'Status', '']}>
           {videoSections.map((v) => (
             <tr key={v.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
-              <td className="px-4 py-3 font-medium" style={{ color: 'var(--adm-text)' }}>{v.title}</td>
-              <td className="px-4 py-3"><StatusPill tone="info"><span className="capitalize">{v.card_type}</span></StatusPill></td>
-              <td className="px-4 py-3"><StatusPill tone="warning"><span className="capitalize">{v.media_type}</span></StatusPill></td>
+              <td className="px-4 py-3 font-medium" style={{ color: 'var(--adm-text)' }}>
+                <div className="flex items-center gap-3">
+                  {(() => { const yt = parseYouTubeId(v.video_url); const src = v.image_url || (yt ? youTubeThumb(yt) : ''); return src ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={src} alt="" className="h-10 w-16 flex-none rounded object-cover" />
+                  ) : null; })()}
+                  <span>{v.title}</span>
+                </div>
+              </td>
+              <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{v.category}</td>
               <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{v.sort_order}</td>
               <td className="px-4 py-3"><StatusPill tone={v.is_active ? 'success' : 'neutral'}>{v.is_active ? 'Active' : 'Inactive'}</StatusPill></td>
               <td className="px-4 py-3">
                 <div className="flex gap-2">
-                  <IconButton title="Edit" onClick={() => setModal({ type: 'video_sections', data: { ...v } })}><FontAwesomeIcon icon={faPen} className="h-3 w-3" /></IconButton>
+                  <IconButton title="Edit" onClick={() => { setYtError(''); setLegacyUrl(!!v.video_url && !parseYouTubeId(v.video_url)); setModal({ type: 'video_sections', data: { ...v } }); }}><FontAwesomeIcon icon={faPen} className="h-3 w-3" /></IconButton>
                   <IconButton title="Delete" color="var(--adm-error)" onClick={() => del('video_sections', v.id)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
                 </div>
               </td>
@@ -170,26 +185,23 @@ Cancel
 <div className="space-y-4">
             <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Title</label>
               <input className={inputClass} style={inputStyle} value={modal.data.title ?? ''} onChange={(e) => setField('title', e.target.value)} /></div>
-            <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Subtitle</label>
-              <input className={inputClass} style={inputStyle} value={modal.data.subtitle ?? ''} onChange={(e) => setField('subtitle', e.target.value)} /></div>
+            {modal.type === 'feature_cards' && <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Subtitle</label>
+              <input className={inputClass} style={inputStyle} value={modal.data.subtitle ?? ''} onChange={(e) => setField('subtitle', e.target.value)} /></div>}
             <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Description</label>
               <textarea className={inputClass} style={inputStyle} rows={3} value={modal.data.description ?? ''} onChange={(e) => setField('description', e.target.value)} /></div>
 
             {modal.type === 'video_sections' && <>
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Category</label>
-                <input className={inputClass} style={inputStyle} value={modal.data.category ?? ''} onChange={(e) => setField('category', e.target.value)} /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Card Type</label>
-                  <select className={inputClass} style={inputStyle} value={modal.data.card_type ?? 'wide'} onChange={(e) => setField('card_type', e.target.value)}>
-                    <option value="wide">Wide</option><option value="short">Short</option>
-                  </select></div>
-                <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Media Type</label>
-                  <select className={inputClass} style={inputStyle} value={modal.data.media_type ?? 'none'} onChange={(e) => setField('media_type', e.target.value)}>
-                    <option value="none">None</option><option value="video">Video</option><option value="image">Image</option>
-                  </select></div>
-              </div>
-              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Video URL</label>
-                <input className={inputClass} style={inputStyle} value={modal.data.video_url ?? ''} onChange={(e) => setField('video_url', e.target.value)} /></div>
+                <input className={inputClass} style={inputStyle} list="video-categories" value={modal.data.category ?? ''} onChange={(e) => setField('category', e.target.value)} />
+                <datalist id="video-categories"><option value="Destinations" /><option value="Interviews" /><option value="Experiences" /><option value="Student stories" /></datalist></div>
+              <div><label className="block text-xs font-medium mb-1" style={labelStyle}>YouTube link</label>
+                <input className={inputClass} style={inputStyle} readOnly={legacyUrl} placeholder="https://www.youtube.com/watch?v=..." value={modal.data.video_url ?? ''} onChange={(e) => { setYtError(''); setField('video_url', e.target.value); }} />
+                {legacyUrl && <p className="mt-1 text-xs" style={{ color: 'var(--adm-muted)' }}>Not a YouTube link, it will not appear in the carousel.</p>}
+                {ytError && <p className="mt-1 text-xs" style={{ color: 'var(--adm-error)' }}>{ytError}</p>}
+                {(() => { const yt = parseYouTubeId(modal.data.video_url ?? ''); return yt ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={youTubeThumb(yt)} alt="Video thumbnail preview" className="mt-2 aspect-video w-full rounded-lg object-cover" />
+                ) : null; })()}</div>
               <div><label className="block text-xs font-medium mb-1" style={labelStyle}>Image URL</label>
                 <UrlWithPicker inputStyle={inputStyle} value={modal.data.image_url ?? ''} onChange={(v) => setField('image_url', v)} /></div>
             </>}
