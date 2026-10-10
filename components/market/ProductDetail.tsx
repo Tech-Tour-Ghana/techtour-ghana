@@ -41,7 +41,7 @@ export default function ProductDetail({ product, related }: { product: MarketPro
   const [notice, setNotice] = useState<{ text: string; login?: boolean } | null>(null);
 
   const c = dim ? MARKET_COLORS.dark : MARKET_COLORS.light;
-  const accent = dim ? c.primary : '#139EA2';
+  const accent = dim ? c.primary : '#0D7A7D';
 
   useEffect(() => {
     const read = () => { const t = document.documentElement.getAttribute('data-theme'); setDim(t === 'dim' || t === 'dark'); };

@@ -23,7 +23,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 const BRAND_COLORS = {
-  tropicalTeal: '#139EA2',
+  tropicalTeal: '#0D7A7D',
   sandyOrange: '#E6A64D',
 };
 
