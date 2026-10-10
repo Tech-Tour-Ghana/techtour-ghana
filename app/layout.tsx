@@ -62,8 +62,9 @@ export default async function RootLayout({
   const [site, theme] = await Promise.all([getSiteSeo(), getSiteTheme()]);
   return (
     <html lang="en" data-default-theme={theme.defaultTheme} suppressHydrationWarning>
-      <head>{theme.css && <style id="brand-theme" dangerouslySetInnerHTML={{ __html: theme.css }} />}</head>
       <body className={inter.className}>
+        {/* Brand colour overrides from Admin > Settings > Branding. Rendered in the body: an explicit <head> here stops Next from injecting the stylesheets. */}
+        {theme.css && <style id="brand-theme" dangerouslySetInnerHTML={{ __html: theme.css }} />}
         <JsonLd data={[organizationJsonLd(site), websiteJsonLd(site)]} />
         <AppShell>{children}</AppShell>
       </body>
