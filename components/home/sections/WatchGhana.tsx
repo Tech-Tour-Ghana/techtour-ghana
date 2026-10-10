@@ -27,6 +27,8 @@ export default function WatchGhana({ videos }: { videos: WatchVideo[] }) {
   const [cat, setCat] = useState('All');
   const [playing, setPlaying] = useState<string | null>(null);
   const [active, setActive] = useState(0);
+  // Dots follow the real scroll stops, which depend on how many cards fit.
+  const [stops, setStops] = useState(1);
   const track = useRef<HTMLDivElement>(null);
 
   const shown = cat === 'All' ? items : items.filter((v) => v.category.trim() === cat);
@@ -51,6 +53,16 @@ export default function WatchGhana({ videos }: { videos: WatchVideo[] }) {
     else if (dir === -1 && el.scrollLeft <= 4) el.scrollTo({ left: el.scrollWidth, behavior: 'smooth' });
     else el.scrollBy({ left: dir * step(), behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    const measure = () => {
+      const el = track.current, s = step();
+      if (el && s) setStops(Math.max(1, Math.ceil((el.scrollWidth - el.clientWidth - 4) / s) + 1));
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [shown.length, step]);
 
   useEffect(() => {
     track.current?.scrollTo({ left: 0 });
@@ -160,13 +172,13 @@ export default function WatchGhana({ videos }: { videos: WatchVideo[] }) {
           ))}
         </div>
 
-        {shown.length > 1 && (
+        {stops > 1 && (
           <div className="mt-4 flex justify-center">
-            {shown.map((v, i) => (
+            {Array.from({ length: stops }, (_, i) => (
               <button
-                key={v.id}
+                key={i}
                 type="button"
-                aria-label={`Go to video ${i + 1}`}
+                aria-label={`Go to slide ${i + 1}`}
                 aria-current={i === active}
                 onClick={() => goTo(i)}
                 className="flex h-11 w-6 items-center justify-center"
