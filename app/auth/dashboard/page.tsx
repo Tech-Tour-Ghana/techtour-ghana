@@ -13,6 +13,7 @@ import { faCalendarCheck, faShoppingBag, faGraduationCap, faHeart, faClock } fro
 import { getAuthStatus, getDashboardStats, type User, type DashboardStats } from '@/lib/api';
 import { useTheme } from '@/context/ThemeContext';
 import DashboardLayout from '@/components/DashboardLayout';
+import NoticeBoard from '@/components/notices/NoticeBoard';
 
 const BRAND_COLORS = {
   tropicalTeal: 'var(--brand-teal)',
@@ -94,6 +95,8 @@ export default function DashboardPage() {
           </div>
         </div>
       </section>
+
+      <NoticeBoard />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={faCalendarCheck} label="Tours Booked" value={stats?.tours_booked || 0} color={BRAND_COLORS.tropicalTeal} />
