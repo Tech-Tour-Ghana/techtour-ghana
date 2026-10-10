@@ -39,7 +39,7 @@ const THEME_COLORS = {
     cardBackground: '#1A1A1A',
     textPrimary: '#FFFFFF',
     textSecondary: '#B0B0B0',
-    textMuted: '#6B7280',
+    textMuted: '#9CA3AF',
     border: '#2A2A2A',
     borderLight: '#222222',
     shadow: 'rgba(0,0,0,0.3)',

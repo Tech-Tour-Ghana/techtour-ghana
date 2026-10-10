@@ -31,7 +31,7 @@ export const MARKET_COLORS = {
     secondaryLight: '#1A2A2B',
     textPrimary: '#FFFFFF',
     textSecondary: '#B0B0B0',
-    textMuted: '#6B7280',
+    textMuted: '#9CA3AF',
     background: '#0A0A0A',
     backgroundAlt: '#1A1A1A',
     backgroundCard: '#1A1A1A',

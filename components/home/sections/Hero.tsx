@@ -141,15 +141,15 @@ export default function Hero({ slides, destinations = [] }: { slides: Slide[]; d
       </div>
 
       <div className="relative z-30 mx-auto -mt-12 max-w-5xl px-4 sm:px-6">
-        <form action="/tours" method="get" role="search" className="grid gap-3 rounded-2xl bg-white p-4 text-neutral-900 shadow-xl ring-1 ring-black/5 sm:p-5 md:grid-cols-[1fr_auto_auto] md:items-end">
+        <form action="/tours" method="get" role="search" className="grid gap-3 rounded-2xl p-4 shadow-xl ring-1 ring-black/5 sm:p-5 md:grid-cols-[1fr_auto_auto] md:items-end" style={{ background: 'var(--sp-bg-card)', color: 'var(--sp-text-primary)' }}>
           <label className="block">
-            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-600">Where do you want to go?</span>
-            <input type="search" name="q" placeholder="Try Kakum or Cape Coast" className="min-h-[2.75rem] w-full rounded-lg border border-neutral-300 px-3 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1" style={{ outlineColor: 'var(--sp-primary, #000)' }} />
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sp-text-secondary)' }}>Where do you want to go?</span>
+            <input type="search" name="q" placeholder="Try Kakum or Cape Coast" className="min-h-[2.75rem] w-full rounded-lg border px-3 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1" style={{ outlineColor: 'var(--sp-primary, #000)', background: 'var(--sp-bg-input)', color: 'var(--sp-text-primary)', borderColor: 'var(--sp-border-strong)' }} />
           </label>
           {destinations.length > 0 && (
             <label className="block md:w-56">
-              <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-600">Destination</span>
-              <select name="destination" defaultValue="" className="min-h-[2.75rem] w-full rounded-lg border border-neutral-300 bg-white px-3 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1" style={{ outlineColor: 'var(--sp-primary, #000)' }}>
+              <span className="mb-1 block text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sp-text-secondary)' }}>Destination</span>
+              <select name="destination" defaultValue="" className="min-h-[2.75rem] w-full rounded-lg border px-3 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1" style={{ outlineColor: 'var(--sp-primary, #000)', background: 'var(--sp-bg-input)', color: 'var(--sp-text-primary)', borderColor: 'var(--sp-border-strong)' }}>
                 <option value="">All destinations</option>
                 {destinations.map((d) => <option key={d.slug} value={d.slug}>{d.name}</option>)}
               </select>
