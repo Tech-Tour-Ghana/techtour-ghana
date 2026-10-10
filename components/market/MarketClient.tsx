@@ -185,7 +185,7 @@ const LoginToast = ({ message, onClose, isDimMode, colors }: any) => {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <FontAwesomeIcon icon={faLock} style={{ fontSize: '24px', color: isDimMode ? '#E6A64D' : '#139EA2' }} />
+        <FontAwesomeIcon icon={faLock} style={{ fontSize: '24px', color: isDimMode ? '#E6A64D' : '#0D7A7D' }} />
         <div>
           <div style={{ fontWeight: '600', fontSize: '15px', color: isDimMode ? '#FFFFFF' : '#000000' }}>
             Login Required
@@ -215,7 +215,7 @@ const LoginToast = ({ message, onClose, isDimMode, colors }: any) => {
           style={{
             flex: 1,
             padding: '8px 16px',
-            background: isDimMode ? '#E6A64D' : '#139EA2',
+            background: isDimMode ? '#E6A64D' : '#0D7A7D',
             color: isDimMode ? '#0A0A0A' : 'white',
             border: 'none',
             borderRadius: '6px',
@@ -234,8 +234,8 @@ const LoginToast = ({ message, onClose, isDimMode, colors }: any) => {
             flex: 1,
             padding: '8px 16px',
             background: 'transparent',
-            color: isDimMode ? '#E6A64D' : '#139EA2',
-            border: `1px solid ${isDimMode ? '#E6A64D' : '#139EA2'}`,
+            color: isDimMode ? '#E6A64D' : '#0D7A7D',
+            border: `1px solid ${isDimMode ? '#E6A64D' : '#0D7A7D'}`,
             borderRadius: '6px',
             cursor: 'pointer',
             fontWeight: '600',
