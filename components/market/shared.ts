@@ -189,3 +189,43 @@ export function toMarketProduct(p: any): MarketProduct {
     is_active: p.is_active,
   };
 }
+
+export interface MarketStats {
+  total_products: number;
+  active_products: number;
+  featured_products: number;
+  categories_count: number;
+  artisans_count: number;
+}
+
+export interface MarketCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  product_count?: number;
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/** Category list and counters derived from the products, the same on server and client. */
+export function buildMarketState(products: any[], categoryRows: any[]): { categories: MarketCategory[]; stats: MarketStats } {
+  const categories = categoryRows.map((cat) => ({
+    id: cat.id,
+    name: cat.name,
+    slug: cat.slug,
+    description: cat.description,
+    icon: cat.icon,
+    product_count: products.filter((p) => p.category_id === cat.id).length,
+  }));
+  return {
+    categories,
+    stats: {
+      total_products: products.length,
+      active_products: products.filter((p) => p.is_in_stock).length,
+      featured_products: products.filter((p) => p.is_featured).length,
+      categories_count: categories.length,
+      artisans_count: new Set(products.filter((p) => p.artisan).map((p) => p.artisan.id)).size,
+    },
+  };
+}
