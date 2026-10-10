@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <LegalPage
+      path="/terms"
       title="Terms of"
       titleAccent="Service"
       description="The terms that apply when you use TechTour Ghana."

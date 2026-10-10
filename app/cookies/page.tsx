@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export default function CookiesPage() {
   return (
     <LegalPage
+      path="/cookies"
       title="Cookie"
       titleAccent="Policy"
       description="What we store in your browser and why."

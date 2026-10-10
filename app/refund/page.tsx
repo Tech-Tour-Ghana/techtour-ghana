@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export default function RefundPage() {
   return (
     <LegalPage
+      path="/refund"
       title="Refund"
       titleAccent="Policy"
       description="How refunds and cancellations work."
