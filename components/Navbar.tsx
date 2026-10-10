@@ -12,6 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import './Navbar.css';
 import AvatarContent from '@/components/AvatarContent';
+import SearchModal from '@/components/SearchModal';
 import { getAuthStatus, logoutUser, User } from '@/lib/api';
 import { useTheme } from '@/context/ThemeContext';
 import { useCart } from '@/context/CartContext';
@@ -39,6 +40,7 @@ const Navbar = () => {
 
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeSubmenu, setActiveSubmenu] = useState<NavbarItem | null>(null);
   const [mobileDropdown, setMobileDropdown] = useState<string | null>(null);
@@ -457,9 +459,10 @@ const Navbar = () => {
 
             {/* Right Actions */}
             <div className="nav-right">
-              <button className="nav-icon-btn desktop-only" aria-label="Search">
+              <button className="nav-icon-btn" aria-label="Search" onClick={() => setSearchOpen(true)}>
                 <FontAwesomeIcon icon={faSearch} />
               </button>
+              <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
 
               <button className="nav-theme-btn desktop-only" onClick={toggleTheme} aria-label={isDimMode ? 'Switch to light theme' : 'Switch to dark theme'}>
                 <FontAwesomeIcon icon={isDimMode ? faSun : faMoon} />
