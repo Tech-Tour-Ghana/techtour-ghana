@@ -4,46 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Brand colour variables. Defaults match lib/theme/tokens.ts. Admin > Settings >
-   Branding injects overrides with higher specificity, see lib/theme/tokens.ts. */
-:root,
-[data-theme="bright"] {
-  --brand-primary: #0D7A7D;
-  --brand-primary-dark: #0A5F62;
-  --brand-accent: #E6A64D;
-  --brand-accent-text: #8A5200;
-  --brand-bg: #F9F9F9;
-  --brand-bg-alt: #FFFFFF;
-  --brand-card: #FFFFFF;
-  --brand-text: #1A1A2E;
-  --brand-text-2: #4A4A4A;
-  --brand-muted: #6B7280;
-  --brand-on-primary: #FFFFFF;
-  --brand-primary-rgb: 13, 122, 125;
-  --brand-accent-rgb: 230, 166, 77;
-  --brand-teal: #0D7A7D;
-  --brand-gold: #E6A64D;
-}
-
-[data-theme="dim"],
-[data-theme="dark"] {
-  --brand-primary: #E6A64D;
-  --brand-primary-dark: #D4953A;
-  --brand-accent: #139EA2;
-  --brand-accent-text: #E6A64D;
-  --brand-bg: #0A0A0A;
-  --brand-bg-alt: #0F0F0F;
-  --brand-card: #1A1A1A;
-  --brand-text: #FFFFFF;
-  --brand-text-2: #B0B0B0;
-  --brand-muted: #9CA3AF;
-  --brand-on-primary: #1A1A2E;
-  --brand-primary-rgb: 230, 166, 77;
-  --brand-accent-rgb: 19, 158, 162;
-  --brand-teal: #139EA2;
-  --brand-gold: #E6A64D;
-}
-
 @layer base {
   body {
     @apply bg-white text-gray-900;
@@ -158,77 +118,9 @@
   background: rgba(255, 255, 255, 0.5);
 }
 
-/* Dark mode global styles */
-[data-theme="dark"] body {
-  background-color: #0d0d0d;
-  color: #e8e8e8;
-}
-
-[data-theme="dark"] .bg-white {
-  background-color: #1a1a1a !important;
-}
-
-[data-theme="dark"] .text-gray-900 {
-  color: #e8e8e8 !important;
-}
-
-[data-theme="dark"] .text-gray-600 {
-  color: #a0a0b0 !important;
-}
-
-[data-theme="dark"] .text-gray-700 {
-  color: #c0c0c0 !important;
-}
-
-[data-theme="dark"] .bg-gray-50 {
-  background-color: #1a1a1a !important;
-}
-
-[data-theme="dark"] .border-gray-100 {
-  border-color: #333333 !important;
-}
-
-[data-theme="dark"] .shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important;
-}
-
-[data-theme="dark"] .shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Dim mode global styles */
-[data-theme="dim"] body {
-  background-color: #121212;
-  color: #e0e0e0;
-}
-
-[data-theme="dim"] .bg-white {
-  background-color: #1e1e1e !important;
-}
-
-[data-theme="dim"] .text-gray-900 {
-  color: #e0e0e0 !important;
-}
-
-[data-theme="dim"] .text-gray-600 {
-  color: #909090 !important;
-}
-
-[data-theme="dim"] .text-gray-700 {
-  color: #b0b0b0 !important;
-}
-
-[data-theme="dim"] .bg-gray-50 {
-  background-color: #1a1a1a !important;
-}
-
-[data-theme="dim"] .border-gray-100 {
-  border-color: #2a2a2a !important;
-}
-
-[data-theme="dim"] .shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4) !important;
-}
+/* Theme colours, including Tailwind's gray, white, red and so on, come from the
+   brand variables (lib/theme/tokens.ts and tailwind.config.ts), so there are no
+   per-theme overrides to maintain here. */
 
 /* Force small cards to be visible */
 .mfc-1 .small-wrap,
