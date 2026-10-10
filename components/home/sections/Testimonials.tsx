@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight, faStar } from '@fortawesome/free-solid-svg-icons';
 
@@ -10,6 +10,14 @@ import type { Testimonial } from '@/lib/home/map';
 export default function Testimonials({ items }: { items: Testimonial[] }) {
   const track = useRef<HTMLUListElement>(null);
   const [active, setActive] = useState(0);
+  // Controls only matter when the cards do not all fit on screen.
+  const [overflowing, setOverflowing] = useState(false);
+  useEffect(() => {
+    const check = () => setOverflowing((track.current?.scrollWidth ?? 0) > (track.current?.clientWidth ?? 0) + 4);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, [items.length]);
 
   // Width of one card plus the gap, read from the DOM so it follows the breakpoint.
   const step = () => {
@@ -35,7 +43,7 @@ export default function Testimonials({ items }: { items: Testimonial[] }) {
           <h2 id="testimonials-heading" className="font-bold"  style={{ color: 'var(--sp-text-primary)', fontSize: 'clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem)' }}>
             What travellers say
           </h2>
-          {items.length > 1 && (
+          {items.length > 1 && overflowing && (
             <div className="hidden md:flex gap-2">
               <button type="button" onClick={prev} aria-label="Previous testimonial" className="flex h-10 w-10 items-center justify-center rounded-full border" style={{ borderColor: 'var(--sp-border)', color: 'var(--sp-text-primary)' }}>
                 <FontAwesomeIcon icon={faChevronLeft} />
@@ -80,7 +88,7 @@ export default function Testimonials({ items }: { items: Testimonial[] }) {
             );
           })}
         </ul>
-        {items.length > 1 && (
+        {items.length > 1 && overflowing && (
           <div className="mt-4 flex justify-center gap-2">
             {items.map((t, i) => (
               <button key={t.id} type="button" onClick={() => goTo(i)} aria-label={`Show testimonial ${i + 1}`} aria-current={i === active} className="h-2 rounded-full transition-all" style={{ width: i === active ? 24 : 8, background: i === active ? 'var(--sp-primary)' : 'var(--sp-border)' }} />
