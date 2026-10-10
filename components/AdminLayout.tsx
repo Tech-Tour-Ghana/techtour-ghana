@@ -32,7 +32,6 @@ import {
   faMoon,
   faChevronDown,
   faSignOutAlt,
-  faShieldHalved,
   faChevronRight,
   faGlobeAfrica,
   faUserCircle,
@@ -55,6 +54,7 @@ import {
 import { useTheme } from '@/context/ThemeContext';
 import AvatarContent from '@/components/AvatarContent';
 import { getAuthStatus, logoutUser, type User } from '@/lib/api';
+import { useSiteLogo } from '@/lib/useSiteLogo';
 
 const BRAND_COLORS = {
   tropicalTeal: '#139EA2',
@@ -142,6 +142,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
   const router = useRouter();
   const reduceMotion = useReducedMotion();
   const { isDimMode, toggleTheme } = useTheme();
+  const siteLogo = useSiteLogo();
   const [user, setUser] = useState<User | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
@@ -262,9 +263,8 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
         {/* Brand */}
         <div className={`px-4 py-4 border-b ${collapsed ? 'lg:px-0 lg:flex lg:flex-col lg:items-center' : ''}`} style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: BRAND_COLORS.tropicalTeal }}>
-              <FontAwesomeIcon icon={faShieldHalved} className="text-white text-xs" />
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={siteLogo} alt="TechTour Ghana" className="h-8 w-8 flex-shrink-0 rounded-lg object-contain" />
             <div className={hideWhenRail}>
               <span className="text-white font-bold text-sm block leading-tight">ADMIN</span>
               <span className="text-xs" style={{ color: BRAND_COLORS.sandyOrange }}>TechTour Ghana</span>

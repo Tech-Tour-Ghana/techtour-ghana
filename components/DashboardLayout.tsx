@@ -27,6 +27,7 @@ import {
   faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
 import AvatarContent from '@/components/AvatarContent';
+import { useSiteLogo } from '@/lib/useSiteLogo';
 import { useTheme } from '@/context/ThemeContext';
 import { useCart } from '@/context/CartContext';
 import { getAuthStatus, getNotifications, logoutUser, type Notification, type User } from '@/lib/api';
@@ -62,6 +63,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
   const pathname = usePathname();
   const router = useRouter();
   const { isDimMode, toggleTheme } = useTheme();
+  const siteLogo = useSiteLogo();
   const { clearCart } = useCart();
   const [user, setUser] = useState<User | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -131,7 +133,8 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
       >
         <div className="border-b px-5 py-4" style={{ borderColor: 'rgba(var(--brand-white-rgb), 0.08)' }}>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-base font-extrabold text-white" style={{ background: BRAND_COLORS.tropicalTeal }} aria-hidden>T</div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={siteLogo} alt="TechTour Ghana" className="h-10 w-10 flex-shrink-0 rounded-lg object-contain" />
             <div>
               <span className="block text-sm font-bold leading-tight text-white">TECHTOUR</span>
               <span className="text-xs" style={{ color: BRAND_COLORS.sandyOrange }}>GHANA</span>
