@@ -4,6 +4,9 @@ import { createClient } from '@/lib/supabase/server';
 
 export interface Job {
   id: string;
+  slug: string;
+  postedAt: string;
+  closingDate: string | null;
   title: string;
   department: string;
   location: string;
@@ -68,6 +71,9 @@ export const getJobs = cache(async (): Promise<Job[]> => {
     .filter((j) => !j.closing_date || j.closing_date >= today)
     .map((j) => ({
       id: j.id,
+      slug: j.slug,
+      postedAt: j.created_at,
+      closingDate: j.closing_date,
       title: j.title,
       department: j.job_categories?.name ?? 'General',
       location: j.location,
@@ -81,4 +87,9 @@ export const getJobs = cache(async (): Promise<Job[]> => {
       benefits: lines(j.benefits),
       tags: j.tags ?? [],
     }));
+});
+
+export const getJobBySlug = cache(async (slug: string): Promise<Job | null> => {
+  const jobs = await getJobs();
+  return jobs.find((j) => j.slug === slug) ?? null;
 });
