@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
 
+import ReadingProgress from '@/components/content/ReadingProgress';
+import Button from '@/components/ui/Button';
 import ArticleFaq from '@/components/content/ArticleFaq';
 import { cardStyle } from '@/components/content/ContentShell';
 import { PostCard, type PostSummary } from '@/components/content/PostList';
@@ -21,6 +23,14 @@ import { createClient } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ category: string; slug: string }> };
+
+// Where each kind of article naturally leads next.
+const NEXT_STEP: Record<string, { heading: string; body: string; label: string; href: string }> = {
+  culture: { heading: 'Meet the people behind the craft', body: 'Browse work from Ghanaian artisans in the TechTour Market.', label: 'Visit the market', href: '/market/artisans' },
+  destinations: { heading: 'Ready to go?', body: 'See guided tours with set dates and reserve your place online.', label: 'Browse tours', href: '/tours' },
+  'student-stories': { heading: 'Thinking about studying abroad?', body: 'Compare destinations, costs and scholarships, then apply online.', label: 'Explore study abroad', href: '/services/study-abroad' },
+  'travel-tips': { heading: 'Plan your trip', body: 'Pick a tour or a place to stay and we will confirm by email.', label: 'See our services', href: '/services' },
+};
 
 const getPost = cache(async (category: string, slug: string) => {
   const supabase = await createClient();
@@ -73,7 +83,19 @@ export default async function BlogPostPage({ params }: Params) {
     .neq('id', post.id)
     .order('published_at', { ascending: false })
     .limit(3);
-  const related = (relatedRows ?? []) as PostSummary[];
+  let related = (relatedRows ?? []) as PostSummary[];
+  if (related.length < 3) {
+    const { data: more } = await supabase
+      .from('blog_posts')
+      .select('slug, category, title, excerpt, image_url, author, published_at')
+      .eq('is_published', true)
+      .neq('id', post.id)
+      .order('published_at', { ascending: false })
+      .limit(6);
+    const seen = new Set(related.map((r) => r.slug));
+    related = [...related, ...((more ?? []) as PostSummary[]).filter((r) => !seen.has(r.slug))].slice(0, 3);
+  }
+  const cta = NEXT_STEP[category];
 
   const muted = { color: 'var(--sp-text-muted)' };
 
@@ -88,6 +110,7 @@ export default async function BlogPostPage({ params }: Params) {
           ]}
         />
 
+        <ReadingProgress targetId="article-body" />
         <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-8">
           <CrumbLabel label={post.title} />
 
@@ -142,6 +165,7 @@ export default async function BlogPostPage({ params }: Params) {
             </aside>
 
             <article
+              id="article-body"
               style={{
                 ['--tt-prose-text' as string]: 'var(--sp-text-secondary)',
                 ['--tt-prose-heading' as string]: 'var(--sp-text-primary)',
@@ -152,16 +176,23 @@ export default async function BlogPostPage({ params }: Params) {
             >
               <div className="tt-prose" style={{ marginInline: 0, maxWidth: '46rem' }} dangerouslySetInnerHTML={{ __html: html }} />
               <div style={{ maxWidth: '46rem' }}><ArticleFaq items={faqs} /></div>
+              {cta && (
+                <aside className="mt-10 rounded-3xl p-6 md:p-8" style={{ ...cardStyle, maxWidth: '46rem' }} aria-label="Next step">
+                  <h2 className="text-xl font-bold">{cta.heading}</h2>
+                  <p className="mt-2" style={{ color: 'var(--sp-text-secondary)' }}>{cta.body}</p>
+                  <div className="mt-4"><Button href={cta.href}>{cta.label}</Button></div>
+                </aside>
+              )}
             </article>
           </div>
 
           {related.length > 0 && (
             <section className="mt-16" aria-labelledby="more">
               <div className="mb-5 flex items-end justify-between">
-                <h2 id="more" className="text-2xl font-bold">More in {label}</h2>
-                <Link href={`/blog/${category}`} className="text-sm font-semibold" style={{ color: 'var(--sp-primary)' }}>View all</Link>
+                <h2 id="more" className="text-2xl font-bold">Keep reading</h2>
+                <Link href="/blog" className="text-sm font-semibold" style={{ color: 'var(--sp-primary)' }}>All articles</Link>
               </div>
-              <div className="flex flex-col gap-5">{related.map((r) => <PostCard key={r.slug} post={r} />)}</div>
+              <ul className="grid gap-5 md:grid-cols-3">{related.map((r) => <li key={r.slug}><PostCard post={r} stacked /></li>)}</ul>
             </section>
           )}
         </div>

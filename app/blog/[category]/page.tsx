@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
+import BlogSearch from '@/components/content/BlogSearch';
 import CategoryNav from '@/components/content/CategoryNav';
 import ContentShell from '@/components/content/ContentShell';
 import PostList, { Pagination } from '@/components/content/PostList';
@@ -22,11 +23,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return toMetadata(resolved, { type: 'website', siteName: site.siteName });
 }
 
-export default async function BlogCategoryPage({ params, searchParams }: Params & { searchParams: Promise<{ page?: string }> }) {
+export default async function BlogCategoryPage({ params, searchParams }: Params & { searchParams: Promise<{ page?: string; q?: string }> }) {
   const { category } = await params;
   if (!isBlogCategory(category)) notFound();
 
-  const { posts, counts, page, pages } = await getBlogListing(category, (await searchParams).page);
+  const sp = await searchParams;
+  const { posts, counts, page, pages, q } = await getBlogListing(category, sp.page, sp.q);
 
   const { label, blurb } = BLOG_CATEGORIES[category];
   return (
@@ -34,8 +36,9 @@ export default async function BlogCategoryPage({ params, searchParams }: Params 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
         <CategoryNav active={category} counts={counts} />
         <div className="min-w-0">
-          <PostList posts={posts} />
-          <Pagination page={page} pages={pages} basePath={`/blog/${category}`} />
+          <BlogSearch action={`/blog/${category}`} q={q} />
+          <PostList posts={posts} featureFirst={page === 1 && !q} query={q} />
+          <Pagination page={page} pages={pages} basePath={`/blog/${category}`} q={q} />
         </div>
       </div>
     </ContentShell>
