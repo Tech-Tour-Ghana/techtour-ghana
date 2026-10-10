@@ -441,16 +441,24 @@ export interface Notification {
   message: string;
   date: string;
   read: boolean;
-  type: 'order' | 'tour' | 'promotion' | 'wishlist' | 'general';
+  type: 'order' | 'tour' | 'promotion' | 'wishlist' | 'general' | 'support';
+  link: string | null;
 }
 
-// RLS (0017) scopes notifications to the signed in user.
+// Admins can also read every customer's notifications (0021), so the list is
+// always filtered to the signed in user instead of leaning on RLS alone.
 // strict: throw on failure so a page can show an error instead of an empty list.
-export async function getNotifications(strict = false): Promise<Notification[]> {
-  const { data, error } = await createBrowserClient()
+export async function getNotifications(strict = false, limit = 200): Promise<Notification[]> {
+  const supabase = createBrowserClient();
+  const { data: auth } = await supabase.auth.getSession();
+  const uid = auth.session?.user.id;
+  if (!uid) return [];
+  const { data, error } = await supabase
     .from('notifications')
-    .select('id, title, message, created_at, is_read, type')
-    .order('created_at', { ascending: false });
+    .select('id, title, message, created_at, is_read, type, link')
+    .eq('user_id', uid)
+    .order('created_at', { ascending: false })
+    .limit(limit);
 
   if (error || !data) {
     if (strict) throw new Error(error?.message ?? 'Request failed');
@@ -463,13 +471,18 @@ export async function getNotifications(strict = false): Promise<Notification[]> 
     date: row.created_at,
     read: row.is_read,
     type: row.type as Notification['type'],
+    link: row.link,
   }));
 }
 
-/** Marks one notification read, or every unread one when no id is given. */
-export async function markNotificationsRead(id?: string): Promise<boolean> {
-  let query = createBrowserClient().from('notifications').update({ is_read: true });
-  query = id ? query.eq('id', id) : query.eq('is_read', false);
+/** Marks one notification read or unread, or every unread one read when no id is given. */
+export async function markNotificationsRead(id?: string, read = true): Promise<boolean> {
+  const supabase = createBrowserClient();
+  const { data: auth } = await supabase.auth.getSession();
+  const uid = auth.session?.user.id;
+  if (!uid) return false;
+  let query = supabase.from('notifications').update({ is_read: read }).eq('user_id', uid);
+  query = id ? query.eq('id', id) : query.eq('is_read', !read);
   const { error } = await query;
   return !error;
 }

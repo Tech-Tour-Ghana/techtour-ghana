@@ -55,6 +55,7 @@ import { useTheme } from '@/context/ThemeContext';
 import AvatarContent from '@/components/AvatarContent';
 import { getAuthStatus, logoutUser, type User } from '@/lib/api';
 import { useSiteLogo } from '@/lib/useSiteLogo';
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 const BRAND_COLORS = {
   tropicalTeal: '#139EA2',
@@ -67,6 +68,7 @@ const NAV_GROUPS = [
     group: 'Overview',
     items: [
       { icon: faDashboard, label: 'Dashboard', href: '/admin' },
+      { icon: faBell, label: 'Notifications', href: '/admin/notifications' },
       { icon: faChartLine, label: 'Analytics', href: '/admin/analytics' },
     ],
   },
@@ -378,6 +380,12 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
             >
               <FontAwesomeIcon icon={isDimMode ? faSun : faMoon} className="w-3.5 h-3.5" />
             </button>
+
+            <NotificationBell
+              tone="admin"
+              allHref="/admin/notifications"
+              buttonStyle={{ width: '2rem', height: '2rem', background: 'var(--adm-track)', color: themeStyles.textSecondary }}
+            />
 
             <div className="relative" ref={dropdownRef}>
               <button

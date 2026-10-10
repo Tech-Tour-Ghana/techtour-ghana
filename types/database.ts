@@ -1875,6 +1875,7 @@ export type Database = {
           created_at: string
           id: string
           is_read: boolean
+          link: string | null
           message: string
           title: string
           type: string
@@ -1884,6 +1885,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_read?: boolean
+          link?: string | null
           message: string
           title: string
           type?: string
@@ -1893,6 +1895,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_read?: boolean
+          link?: string | null
           message?: string
           title?: string
           type?: string
