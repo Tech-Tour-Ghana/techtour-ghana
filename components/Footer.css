@@ -952,3 +952,8 @@
 @media (max-width: 767px) {
   .footer-main-wide { gap: 1.75rem 1.25rem; padding: 2rem 0; }
 }
+
+/* Brand column is one of four, so the logo must fit it or wrap instead of running into the next column. */
+.footer-logo-wide { flex-wrap: wrap; gap: 0 8px; }
+.footer-brand-wide .logo-main-wide { font-size: clamp(1.6rem, 2vw, 2rem); }
+.footer-brand-wide .logo-sub-wide { font-size: clamp(1.45rem, 1.8vw, 1.8rem); }
