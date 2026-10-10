@@ -914,26 +914,40 @@
 
 
 /* ============================================================
-   Layout: a four column grid.
-   Row 1: brand (two columns) and newsletter (two columns).
-   Row 2: the four link columns.
-   Under 1024px it is two columns, and brand and newsletter go full width.
+   Layout
+   Top:    brand (with description and social links) + three link columns.
+   Middle: newsletter band.
+   Bottom: copyright and legal links.
+   Under 1024px the top is two columns and the brand spans the full width.
    ============================================================ */
 .footer-main-wide {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 2.5rem 2rem;
-  padding: 3.5rem 0;
+  padding: 3.5rem 0 3rem;
   border-bottom: 1px solid var(--footer-border);
 }
 .footer-links-wide { display: contents; }
-.footer-brand-wide { grid-column: span 2; order: 1; max-width: none; }
-.footer-newsletter-wide { grid-column: span 2; order: 2; max-width: none; margin-left: 0; }
-.footer-links-section-wide { order: 3; }
+.footer-brand-wide { max-width: none; }
+.footer-newsletter-band {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.5rem 3rem;
+  align-items: center;
+  padding: 2.5rem 0;
+  border-bottom: 1px solid var(--footer-border);
+}
+.footer-newsletter-band .footer-newsletter-wide { display: contents; }
+.footer-newsletter-band .newsletter-title-wide,
+.footer-newsletter-band .newsletter-subtitle-wide { grid-column: 1; margin: 0; }
+.footer-newsletter-band .newsletter-form-wide { grid-column: 2; grid-row: 1 / span 2; }
+.footer-brand-wide .social-section-wide { margin-top: 1.5rem; padding-top: 0; border-top: 0; }
 
 @media (max-width: 1023px) {
   .footer-main-wide { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 2.5rem 0; }
-  .footer-brand-wide, .footer-newsletter-wide { grid-column: 1 / -1; }
+  .footer-brand-wide { grid-column: 1 / -1; }
+  .footer-newsletter-band { grid-template-columns: minmax(0, 1fr); padding: 2rem 0; }
+  .footer-newsletter-band .newsletter-form-wide { grid-column: 1; grid-row: auto; }
 }
 @media (max-width: 767px) {
   .footer-main-wide { gap: 1.75rem 1.25rem; padding: 2rem 0; }
