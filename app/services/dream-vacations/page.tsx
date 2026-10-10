@@ -8,7 +8,7 @@ import { getRentalListing } from '@/lib/rentals/load.server';
 
 export const dynamic = 'force-dynamic';
 
-type SearchParams = Promise<{ type?: string; city?: string; q?: string; page?: string }>;
+type SearchParams = Promise<{ type?: string; city?: string; q?: string; page?: string; guests?: string; beds?: string; max?: string }>;
 
 const description = 'Vacation rentals across Ghana: apartments, houses and villas for short stays. Browse, then enquire and we will arrange your stay.';
 
@@ -28,7 +28,7 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
 
 export default async function DreamVacationsPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
-  const { rentals, total, page, pages, types, cities, allCount, type, city, q } = await getRentalListing(sp);
+  const { rentals, total, page, pages, types, cities, allCount, type, city, q, guests, beds, max } = await getRentalListing(sp);
 
   const href = (over: { type?: string | null; page?: number }) => {
     const params = new URLSearchParams();
@@ -36,6 +36,9 @@ export default async function DreamVacationsPage({ searchParams }: { searchParam
     if (t) params.set('type', t);
     if (city) params.set('city', city);
     if (q) params.set('q', q);
+    if (guests) params.set('guests', guests);
+    if (beds) params.set('beds', beds);
+    if (max) params.set('max', max);
     if (over.page && over.page > 1) params.set('page', String(over.page));
     const qs = params.toString();
     return qs ? `/services/dream-vacations?${qs}` : '/services/dream-vacations';
@@ -47,7 +50,7 @@ export default async function DreamVacationsPage({ searchParams }: { searchParam
     border: '1px solid var(--sp-border)',
   });
   const field = { background: 'var(--sp-bg-card)', border: '1px solid var(--sp-border)', color: 'var(--sp-text-primary)' };
-  const filtered = Boolean(type || city || q);
+  const filtered = Boolean(type || city || q || guests || beds || max);
 
   return (
     <ContentShell wide title="Dream" titleAccent="Vacations" description="Rentals across Ghana for short stays. Choose a place, then send us an enquiry and we will arrange the rest.">
@@ -71,14 +74,21 @@ export default async function DreamVacationsPage({ searchParams }: { searchParam
             </ul>
           </nav>
 
-          <form method="get" action="/services/dream-vacations" className="mb-6 grid gap-3 sm:grid-cols-[minmax(0,1fr)_14rem_auto]">
+          <form method="get" action="/services/dream-vacations" className="mb-6 space-y-3">
             {type && <input type="hidden" name="type" value={type} />}
-            <input type="search" name="q" defaultValue={q} placeholder="Search rentals or places" aria-label="Search rentals" className="min-h-[2.75rem] w-full rounded-full px-5 text-sm" style={field} />
-            <select name="city" defaultValue={city ?? ''} aria-label="City" className="min-h-[2.75rem] w-full rounded-full px-4 text-sm" style={field}>
-              <option value="">All cities</option>
-              {cities.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <Button type="submit" variant="accent">Search</Button>
+            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_14rem_auto]">
+              <input type="search" name="q" defaultValue={q} placeholder="Search rentals or places" aria-label="Search rentals" className="min-h-[2.75rem] w-full rounded-full px-5 text-sm" style={field} />
+              <select name="city" defaultValue={city ?? ''} aria-label="City" className="min-h-[2.75rem] w-full rounded-full px-4 text-sm" style={field}>
+                <option value="">All cities</option>
+                {cities.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <Button type="submit" variant="accent">Search</Button>
+            </div>
+            <div className="grid grid-cols-3 gap-3 sm:max-w-xl">
+              <input type="number" name="guests" min={1} inputMode="numeric" defaultValue={guests} placeholder="Guests" aria-label="Number of guests" className="min-h-[2.75rem] w-full rounded-full px-4 text-sm" style={field} />
+              <input type="number" name="beds" min={1} inputMode="numeric" defaultValue={beds} placeholder="Bedrooms" aria-label="Minimum bedrooms" className="min-h-[2.75rem] w-full rounded-full px-4 text-sm" style={field} />
+              <input type="number" name="max" min={1} step={10} inputMode="numeric" defaultValue={max} placeholder="Max / night" aria-label="Maximum price per night in cedis" className="min-h-[2.75rem] w-full rounded-full px-4 text-sm" style={field} />
+            </div>
           </form>
 
           <p className="mb-4 text-sm" style={{ color: 'var(--sp-text-muted)' }} aria-live="polite">

@@ -3996,6 +3996,14 @@ export type Database = {
         Args: { p_participants: number; p_phone?: string; p_schedule_id: string; p_special_requests?: string }
         Returns: string
       }
+      create_rental_booking: {
+        Args: { p_rental_id: string; p_check_in: string; p_check_out: string; p_guests: number; p_guest_name?: string; p_phone?: string; p_special_requests?: string }
+        Returns: string
+      }
+      rental_booked_ranges: {
+        Args: { p_rental_id: string }
+        Returns: { check_in: string; check_out: string }[]
+      }
       submit_study_application: {
         Args: { p_destination_id: string; p_scholarship_id: string | null; p_full_name: string; p_email: string; p_phone: string; p_nationality: string; p_education_level: string; p_intended_level: string; p_field_of_study: string; p_start_date: string | null; p_message: string }
         Returns: string
