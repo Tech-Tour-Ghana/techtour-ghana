@@ -714,24 +714,29 @@ function HomePage({ initial }: { initial: HomeData }) {
       <section className="relative h-[70vh] min-h-[400px] md:h-[85vh] overflow-hidden">
         <div className="relative h-full">
           <div className={`flex h-full ${animate ? 'transition-transform duration-700 ease-out' : ''}`} style={{ transform: `translateX(-${pos * 100}%)` }} onTransitionEnd={(e) => { if (e.target === e.currentTarget) settleLoop(); }}>
-            {heroTrack.map((slide, idx) => (
-              <div key={`${slide.id}-${idx}`} className="w-full flex-shrink-0 relative">
+            {heroTrack.map((slide, idx) => {
+              // One h1 per page: the first real slide. The others, and the loop clones, are h2.
+              const Title = idx === (slides.length > 1 ? 1 : 0) ? 'h1' : 'h2';
+              const isClone = slides.length > 1 && (idx === 0 || idx === heroTrack.length - 1);
+              return (
+              <div key={`${slide.id}-${idx}`} aria-hidden={isClone || undefined} className="w-full flex-shrink-0 relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30 z-10"></div>
                 <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: `url(${slide.image})` }}></div>
                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-white text-center px-4">
                   <p className="text-xs md:text-sm lg:text-base tracking-[0.2em] mb-3 opacity-90 font-semibold uppercase" style={{ color: isDimMode ? colors.primary : '#139EA2' }}>
                     {slide.subtitle || ''}
                   </p>
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 max-w-4xl leading-tight drop-shadow-lg">
+                  <Title className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 max-w-4xl leading-tight drop-shadow-lg">
                     {slide.title}
-                  </h1>
+                  </Title>
                   <p className="text-sm sm:text-base md:text-lg max-w-2xl mb-6 opacity-95 font-medium leading-relaxed drop-shadow-md line-clamp-2">
                     {slide.description}
                   </p>
                   <Button href={slide.button_link} variant="accent" size="lg" style={{ background: isDimMode ? colors.primary : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>{slide.button_text}</Button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {slides.length > 1 && (
