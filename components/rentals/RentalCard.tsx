@@ -41,7 +41,7 @@ export default function RentalCard({ rental }: { rental: Card }) {
         {place && <p className="mt-2 inline-flex min-w-0 items-center gap-1 text-sm" style={{ color: 'var(--sp-text-secondary)' }}><FontAwesomeIcon icon={faLocationDot} className="h-3 w-3 flex-shrink-0" /><span className="truncate">{place}</span></p>}
 
         <div className="mt-auto pt-4">
-          {!rental.is_available && <p className="mb-2 text-xs font-semibold" style={{ color: '#C2410C' }}>Currently unavailable</p>}
+          {!rental.is_available && <p className="mb-2 text-xs font-semibold" style={{ color: 'var(--brand-warning-text)' }}>Currently unavailable</p>}
           <Button href={href} full>View rental</Button>
         </div>
       </div>

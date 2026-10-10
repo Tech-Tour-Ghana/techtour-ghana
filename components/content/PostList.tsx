@@ -58,7 +58,7 @@ export function PostCard({ post }: { post: PostSummary }) {
 export function Pagination({ page, pages, basePath }: { page: number; pages: number; basePath: string }) {
   if (pages <= 1) return null;
   const href = (n: number) => (n === 1 ? basePath : `${basePath}?page=${n}`);
-  const box = (active: boolean) => ({ background: active ? 'var(--sp-primary)' : 'var(--sp-bg-card)', color: active ? '#fff' : 'var(--sp-text-secondary)', border: '1px solid var(--sp-border)' });
+  const box = (active: boolean) => ({ background: active ? 'var(--sp-primary)' : 'var(--sp-bg-card)', color: active ? 'var(--brand-white)' : 'var(--sp-text-secondary)', border: '1px solid var(--sp-border)' });
   return (
     <nav aria-label="Pages" className="mt-8 flex flex-wrap items-center justify-center gap-2">
       {page > 1 && <Link href={href(page - 1)} rel="prev" className="rounded-full px-4 py-2 text-sm font-medium" style={box(false)}>Previous</Link>}

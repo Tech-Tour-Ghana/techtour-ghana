@@ -34,7 +34,7 @@ export default function TeamProfileCard({ member, contactHref = '/about/contact-
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-[1.75rem] p-2" style={{ background: 'var(--sp-bg-card)', border: '1px solid var(--sp-border)', boxShadow: 'var(--sp-shadow-sm)' }}>
-      <div className="h-28 rounded-[1.25rem] sm:h-32" style={{ background: 'radial-gradient(120% 140% at 15% 0%, #E6A64D 0%, rgba(230,166,77,0) 55%), radial-gradient(110% 130% at 100% 100%, #0D7A7D 0%, rgba(13,122,125,0) 60%), linear-gradient(135deg, #139EA2 0%, #1A1A2E 100%)' }} />
+      <div className="h-28 rounded-[1.25rem] sm:h-32" style={{ background: 'radial-gradient(120% 140% at 15% 0%, var(--brand-gold) 0%, rgba(var(--brand-gold-rgb), 0) 55%), radial-gradient(110% 130% at 100% 100%, var(--brand-teal) 0%, rgba(var(--brand-teal-rgb), 0) 60%), linear-gradient(135deg, var(--brand-teal) 0%, var(--brand-ink) 100%)' }} />
 
       <div className="-mt-12 flex items-end justify-between px-4">
         <div className="relative">

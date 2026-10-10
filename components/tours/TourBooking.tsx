@@ -55,7 +55,7 @@ export default function TourBooking({ tour, departures }: {
   if (reference) {
     return (
       <div className="rounded-3xl p-5 text-center" style={panel}>
-        <FontAwesomeIcon icon={faCheckCircle} className="h-10 w-10" style={{ color: '#10B981' }} />
+        <FontAwesomeIcon icon={faCheckCircle} className="h-10 w-10" style={{ color: 'var(--brand-success)' }} />
         <h2 className="mt-3 text-xl font-bold">Your place is reserved</h2>
         <p className="mt-2 text-sm" style={{ color: 'var(--sp-text-secondary)' }}>Booking reference</p>
         <p className="text-2xl font-bold tracking-wide" style={{ color: 'var(--sp-primary)' }}>{reference}</p>
@@ -86,7 +86,7 @@ export default function TourBooking({ tour, departures }: {
                     <input type="radio" name={group} value={d.id} checked={departureId === d.id} onChange={() => setDepartureId(d.id)} style={{ accentColor: 'var(--sp-primary)' }} />
                     <span className="font-medium">{fmt(d.start_date)}{d.end_date !== d.start_date && <span className="block text-xs font-normal" style={{ color: 'var(--sp-text-muted)' }}>to {fmt(d.end_date)}</span>}</span>
                   </span>
-                  <span className="text-xs font-semibold" style={{ color: d.spots_left <= 5 ? '#C2410C' : 'var(--sp-text-muted)' }}>{d.spots_left} left</span>
+                  <span className="text-xs font-semibold" style={{ color: d.spots_left <= 5 ? 'var(--brand-warning-text)' : 'var(--sp-text-muted)' }}>{d.spots_left} left</span>
                 </label>
               ))}
             </div>
@@ -114,7 +114,7 @@ export default function TourBooking({ tour, departures }: {
             <span className="text-xl font-bold">{tourMoney(unit * count, tour.currency)}</span>
           </div>
 
-          {error && <p role="alert" className="mt-3 rounded-xl p-3 text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#B91C1C' }}>{error}</p>}
+          {error && <p role="alert" className="mt-3 rounded-xl p-3 text-sm" style={{ background: 'rgba(var(--brand-error-rgb), 0.1)', color: 'var(--brand-error-text)' }}>{error}</p>}
 
           {signedIn === false ? (
             <Button href="/auth/login" full className="mt-4">Sign in to reserve</Button>

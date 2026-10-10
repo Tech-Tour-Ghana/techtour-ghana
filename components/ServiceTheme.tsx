@@ -20,7 +20,7 @@ export const ServiceThemeStyles = () => (
     [style*="background:var(--sp-primary)"],
     [style*="background:var(--sp-primary,"],
     [style*="background:var(--sp-primary-dark"] {
-      color: var(--sp-on-primary, #FFFFFF) !important;
+      color: var(--sp-on-primary, var(--brand-white)) !important;
     }
 
     /* ============================================================

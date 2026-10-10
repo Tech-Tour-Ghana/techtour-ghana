@@ -119,7 +119,7 @@ export default function ProfilePage() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={avatarSrc} alt={`${displayName} profile photo`} className="w-20 h-20 rounded-full object-cover flex-shrink-0" />
               ) : (
-                <div aria-hidden className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-semibold flex-shrink-0" style={{ background: 'rgba(19,158,162,0.15)', color: '#0E7C80' }}>
+                <div aria-hidden className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-semibold flex-shrink-0" style={{ background: 'rgba(var(--brand-teal-rgb), 0.15)', color: 'var(--brand-teal)' }}>
                   {displayName.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -157,7 +157,7 @@ export default function ProfilePage() {
                 <input id="profile-email" type="email" value={profile.email} readOnly aria-describedby="profile-email-help" className={inputClass} style={fieldStyle} />
                 <p id="profile-email-help" className="text-xs mt-1.5" style={{ color: t.textMuted }}>
                   This is your sign-in email and cannot be edited here. Manage how you sign in under{' '}
-                  <Link href="/auth/security" className="underline" style={{ color: '#0E7C80' }}>Security</Link>.
+                  <Link href="/auth/security" className="underline" style={{ color: 'var(--brand-teal)' }}>Security</Link>.
                 </p>
               </div>
               <div>

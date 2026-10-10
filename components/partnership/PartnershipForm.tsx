@@ -95,7 +95,7 @@ export default function PartnershipForm({ defaultType = '' }: { defaultType?: st
           <textarea id={id('msg')} required rows={5} minLength={10} value={f.message} onChange={set('message')} className="w-full rounded-xl px-4 py-3 text-sm" style={field} />
         </div>
       </div>
-      {error && <p role="alert" className="mt-4 rounded-xl p-3 text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#B91C1C' }}>{error}</p>}
+      {error && <p role="alert" className="mt-4 rounded-xl p-3 text-sm" style={{ background: 'rgba(var(--brand-error-rgb), 0.1)', color: 'var(--brand-error-text)' }}>{error}</p>}
       <div className="mt-6"><Button type="submit" loading={busy}>{busy ? 'Sending...' : 'Send enquiry'}</Button></div>
     </form>
   );

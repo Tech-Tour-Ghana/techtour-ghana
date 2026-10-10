@@ -14,13 +14,13 @@ export const MARKET_COLORS = {
     background: 'var(--brand-bg-alt)',
     backgroundAlt: 'var(--brand-bg)',
     backgroundCard: 'var(--brand-card)',
-    border: '#E5E7EB',
-    borderLight: '#F3F4F6',
-    success: '#10B981',
-    warning: '#F59E0B',
-    error: '#EF4444',
-    shadow: 'rgba(0,0,0,0.08)',
-    shadowHover: 'rgba(0,0,0,0.15)',
+    border: 'var(--brand-line)',
+    borderLight: 'var(--brand-subtle)',
+    success: 'var(--brand-success)',
+    warning: 'var(--brand-warning)',
+    error: 'var(--brand-error)',
+    shadow: 'rgba(var(--brand-black-rgb), 0.08)',
+    shadowHover: 'rgba(var(--brand-black-rgb), 0.15)',
   },
   dark: {
     primary: 'var(--brand-primary)',
@@ -35,31 +35,31 @@ export const MARKET_COLORS = {
     background: 'var(--brand-bg)',
     backgroundAlt: 'var(--brand-card)',
     backgroundCard: 'var(--brand-card)',
-    border: '#2A2A2A',
-    borderLight: '#222222',
-    success: '#10B981',
-    warning: '#F59E0B',
-    error: '#EF4444',
-    shadow: 'rgba(0,0,0,0.3)',
-    shadowHover: 'rgba(0,0,0,0.5)',
+    border: 'var(--brand-line)',
+    borderLight: 'var(--brand-subtle)',
+    success: 'var(--brand-success)',
+    warning: 'var(--brand-warning)',
+    error: 'var(--brand-error)',
+    shadow: 'rgba(var(--brand-black-rgb), 0.3)',
+    shadowHover: 'rgba(var(--brand-black-rgb), 0.5)',
   },
 } as const;
 
 export function getColorSwatch(color: string): string {
   const c = color.toLowerCase();
-  if (c.includes('black')) return '#1a1a1a';
-  if (c.includes('white')) return '#f5f5f5';
-  if (c.includes('red')) return '#ef4444';
-  if (c.includes('blue')) return '#3b82f6';
-  if (c.includes('green')) return '#22c55e';
-  if (c.includes('yellow')) return '#eab308';
-  if (c.includes('gold')) return '#f59e0b';
-  if (c.includes('silver')) return '#9ca3af';
-  if (c.includes('brown')) return '#92400e';
-  if (c.includes('purple')) return '#8b5cf6';
-  if (c.includes('pink')) return '#ec4899';
-  if (c.includes('orange')) return '#f97316';
-  if (c.includes('gray') || c.includes('grey')) return '#6b7280';
+  if (c.includes('black')) return 'var(--brand-ink)';
+  if (c.includes('white')) return 'var(--brand-subtle)';
+  if (c.includes('red')) return 'var(--brand-error)';
+  if (c.includes('blue')) return 'var(--brand-info)';
+  if (c.includes('green')) return 'var(--brand-success)';
+  if (c.includes('yellow')) return 'var(--brand-warning)';
+  if (c.includes('gold')) return 'var(--brand-warning)';
+  if (c.includes('silver')) return 'var(--brand-muted)';
+  if (c.includes('brown')) return 'var(--brand-warning-text)';
+  if (c.includes('purple')) return 'var(--brand-purple)';
+  if (c.includes('pink')) return 'var(--brand-purple)';
+  if (c.includes('orange')) return 'var(--brand-warning)';
+  if (c.includes('gray') || c.includes('grey')) return 'var(--brand-muted)';
   return c;
 }
 

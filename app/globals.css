@@ -84,7 +84,7 @@
 
 /* Keyboard focus ring. Shown for keyboard users and for text fields, not on mouse clicks. */
 :focus-visible {
-  outline: 2px solid var(--sp-primary, #139EA2);
+  outline: 2px solid var(--sp-primary, var(--brand-teal));
   outline-offset: 2px;
 }
 
@@ -105,17 +105,17 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--brand-white-rgb), 0.1);
   border-radius: 10px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(var(--brand-white-rgb), 0.3);
   border-radius: 10px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(var(--brand-white-rgb), 0.5);
 }
 
 /* Theme colours, including Tailwind's gray, white, red and so on, come from the
@@ -141,10 +141,10 @@
   max-width: 200px !important;
   min-height: 100px !important;
   padding: 14px 16px !important;
-  background: rgba(255,255,255,0.15) !important;
+  background: rgba(var(--brand-white-rgb), 0.15) !important;
   backdrop-filter: blur(10px) !important;
   border-radius: 12px !important;
-  border: 1px solid rgba(255,255,255,0.15) !important;
+  border: 1px solid rgba(var(--brand-white-rgb), 0.15) !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
@@ -155,17 +155,17 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--brand-white-rgb), 0.05);
   border-radius: 10px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(var(--brand-white-rgb), 0.2);
   border-radius: 10px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(var(--brand-white-rgb), 0.3);
 }
 
 /* Ensure small cards are visible */
@@ -285,13 +285,13 @@
 }
 
 .cart-items::-webkit-scrollbar-thumb {
-  background: var(--accent, #139EA2);
+  background: var(--accent, var(--brand-teal));
   border-radius: 10px;
 }
 
 .cart-items {
   scrollbar-width: thin;
-  scrollbar-color: var(--accent, #139EA2) transparent;
+  scrollbar-color: var(--accent, var(--brand-teal)) transparent;
 }
 
 /* Cart overlay */
@@ -373,8 +373,8 @@
 
 /* Loading spinner */
 .spinner {
-  border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top: 3px solid var(--accent, #139EA2);
+  border: 3px solid rgba(var(--brand-white-rgb), 0.1);
+  border-top: 3px solid var(--accent, var(--brand-teal));
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -392,7 +392,7 @@
 
 /* Image loading shimmer */
 .shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, var(--brand-subtle) 25%, var(--brand-line) 50%, var(--brand-subtle) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -408,7 +408,7 @@
 
 /* ===== LOGIN TOAST SPECIFIC STYLES ===== */
 .login-toast {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 30px rgba(var(--brand-black-rgb), 0.25);
   animation: slideUp 0.3s ease-out;
 }
 
@@ -492,20 +492,20 @@
 }
 
 .modal-scroll::-webkit-scrollbar-thumb {
-  background: rgba(19, 158, 162, 0.3);
+  background: rgba(var(--brand-teal-rgb), 0.3);
   border-radius: 10px;
 }
 
 .modal-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(19, 158, 162, 0.5);
+  background: rgba(var(--brand-teal-rgb), 0.5);
 }
 
 [data-theme="dim"] .modal-scroll::-webkit-scrollbar-thumb {
-  background: rgba(230, 166, 77, 0.3);
+  background: rgba(var(--brand-gold-rgb), 0.3);
 }
 
 [data-theme="dim"] .modal-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(230, 166, 77, 0.5);
+  background: rgba(var(--brand-gold-rgb), 0.5);
 }
 
 
@@ -556,7 +556,7 @@ body:has(.dashboard-layout-wrapper) {
    One place for the admin and dashboard values that used to be repeated as
    inline hex in every page. Scoped by the --adm- prefix so nothing on the
    public site is affected. The dim values match what AdminLayout already used
-   (#0A0A0A page, #1A1A1A cards). Brand teal and orange are unchanged. */
+   (var(--brand-ink) page, var(--brand-ink) cards). Brand teal and orange are unchanged. */
 :root {
   --adm-bg: #F0F4F8;
   --adm-card: #FFFFFF;
@@ -627,21 +627,21 @@ body:has(.dashboard-layout-wrapper) {
 .tt-prose h2 { font-size: clamp(1.35rem, 1.15rem + 0.9vw, 1.6rem); line-height: 1.25; font-weight: 700; margin-top: 2.2em; color: var(--tt-prose-heading, inherit); }
 .tt-prose h3 { font-size: clamp(1.15rem, 1.05rem + 0.5vw, 1.3rem); line-height: 1.3; font-weight: 700; margin-top: 1.8em; color: var(--tt-prose-heading, inherit); }
 .tt-prose h4, .tt-prose h5 { font-size: 1.1rem; font-weight: 700; margin-top: 1.5em; color: var(--tt-prose-heading, inherit); }
-.tt-prose a { color: var(--tt-prose-link, #139EA2); text-decoration: underline; text-underline-offset: 3px; }
+.tt-prose a { color: var(--tt-prose-link, var(--brand-teal)); text-decoration: underline; text-underline-offset: 3px; }
 .tt-prose ul, .tt-prose ol { padding-left: 1.5em; }
 .tt-prose ul { list-style: disc; }
 .tt-prose ol { list-style: decimal; }
 .tt-prose li + li { margin-top: 0.4em; }
-.tt-prose blockquote { border-left: 4px solid var(--tt-prose-link, #139EA2); padding: 0.25em 0 0.25em 1.1em; font-style: italic; color: var(--tt-prose-muted, inherit); }
-.tt-prose hr { border: 0; border-top: 1px solid var(--tt-prose-border, rgba(127,127,127,0.35)); margin-block: 2em; }
+.tt-prose blockquote { border-left: 4px solid var(--tt-prose-link, var(--brand-teal)); padding: 0.25em 0 0.25em 1.1em; font-style: italic; color: var(--tt-prose-muted, inherit); }
+.tt-prose hr { border: 0; border-top: 1px solid var(--tt-prose-border, rgba(var(--brand-muted-rgb), 0.35)); margin-block: 2em; }
 .tt-prose img { max-width: 100%; height: auto; border-radius: 0.75rem; }
 .tt-prose figure { margin-inline: 0; }
 .tt-prose figure img { display: block; margin-inline: auto; }
 .tt-prose figcaption { margin-top: 0.5em; text-align: center; font-size: 0.875rem; color: var(--tt-prose-muted, inherit); }
 .tt-prose table { width: 100%; border-collapse: collapse; font-size: 0.95rem; display: block; overflow-x: auto; }
-.tt-prose th, .tt-prose td { border: 1px solid var(--tt-prose-border, rgba(127,127,127,0.35)); padding: 0.55em 0.8em; text-align: left; }
-.tt-prose th { font-weight: 700; background: rgba(127,127,127,0.12); }
-.tt-prose pre { overflow-x: auto; padding: 1em; border-radius: 0.5rem; background: rgba(127,127,127,0.14); font-size: 0.9rem; }
+.tt-prose th, .tt-prose td { border: 1px solid var(--tt-prose-border, rgba(var(--brand-muted-rgb), 0.35)); padding: 0.55em 0.8em; text-align: left; }
+.tt-prose th { font-weight: 700; background: rgba(var(--brand-muted-rgb), 0.12); }
+.tt-prose pre { overflow-x: auto; padding: 1em; border-radius: 0.5rem; background: rgba(var(--brand-muted-rgb), 0.14); font-size: 0.9rem; }
 .tt-prose code { font-size: 0.9em; }
 .tt-prose .align-center, .tt-prose [style*="text-align: center"] { text-align: center; }
 .tt-prose .align-right { text-align: right; }

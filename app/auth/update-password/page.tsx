@@ -48,7 +48,7 @@ export default function UpdatePasswordPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl max-w-md w-full p-6 md:p-8 shadow-2xl relative">
+      <div className="bg-[var(--brand-ink)] border border-white/10 rounded-2xl max-w-md w-full p-6 md:p-8 shadow-2xl relative">
         <h2 className="text-xl font-bold text-center text-white">Choose a new password</h2>
         <p className="text-sm text-center leading-relaxed mt-2 text-white/60">
           Enter and confirm a new password for your account.
@@ -68,7 +68,7 @@ export default function UpdatePasswordPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-amber-400"
+              className="w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 bg-[var(--brand-ink)] border border-white/10 text-white placeholder:text-white/50 focus:border-amber-400"
               placeholder="At least 8 characters"
               required
               autoFocus
@@ -81,7 +81,7 @@ export default function UpdatePasswordPage() {
               type="password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-amber-400"
+              className="w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 bg-[var(--brand-ink)] border border-white/10 text-white placeholder:text-white/50 focus:border-amber-400"
               placeholder="Repeat your password"
               required
             />

@@ -108,7 +108,7 @@ export default function Hero({ slides, destinations = [] }: { slides: Slide[]; d
           <ul className="mt-6 grid gap-2 text-sm text-white/90 sm:grid-cols-3 sm:gap-6">
             {TRUST.map((t) => (
               <li key={t.text} className="flex items-center gap-2">
-                <FontAwesomeIcon icon={t.icon} className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--sp-accent, #fff)' }} />
+                <FontAwesomeIcon icon={t.icon} className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--sp-accent, var(--brand-white))' }} />
                 {t.text}
               </li>
             ))}
@@ -126,7 +126,7 @@ export default function Hero({ slides, destinations = [] }: { slides: Slide[]; d
             <div className="absolute bottom-14 left-1/2 z-20 flex -translate-x-1/2 items-center sm:left-6 sm:translate-x-0 lg:left-8">
               {slides.map((s, i) => (
                 <button key={s.id} type="button" aria-label={`Go to slide ${i + 1}`} aria-current={current === i} onClick={() => goTo(i)} className="group flex h-11 w-5 items-center justify-center">
-                  <span className={`block h-1.5 rounded-full transition-all duration-300 ${current === i ? 'w-6' : 'w-2 bg-white/60 group-hover:bg-white/80'}`} style={current === i ? { background: 'var(--sp-accent, #fff)' } : undefined} />
+                  <span className={`block h-1.5 rounded-full transition-all duration-300 ${current === i ? 'w-6' : 'w-2 bg-white/60 group-hover:bg-white/80'}`} style={current === i ? { background: 'var(--sp-accent, var(--brand-white))' } : undefined} />
                 </button>
               ))}
             </div>
@@ -144,12 +144,12 @@ export default function Hero({ slides, destinations = [] }: { slides: Slide[]; d
         <form action="/tours" method="get" role="search" className="grid gap-3 rounded-2xl p-4 shadow-xl ring-1 ring-black/5 sm:p-5 md:grid-cols-[1fr_auto_auto] md:items-end" style={{ background: 'var(--sp-bg-card)', color: 'var(--sp-text-primary)' }}>
           <label className="block">
             <span className="mb-1 block text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sp-text-secondary)' }}>Where do you want to go?</span>
-            <input type="search" name="q" placeholder="Try Kakum or Cape Coast" className="min-h-[2.75rem] w-full rounded-lg border px-3 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1" style={{ outlineColor: 'var(--sp-primary, #000)', background: 'var(--sp-bg-input)', color: 'var(--sp-text-primary)', borderColor: 'var(--sp-border-strong)' }} />
+            <input type="search" name="q" placeholder="Try Kakum or Cape Coast" className="min-h-[2.75rem] w-full rounded-lg border px-3 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1" style={{ outlineColor: 'var(--sp-primary, var(--brand-black))', background: 'var(--sp-bg-input)', color: 'var(--sp-text-primary)', borderColor: 'var(--sp-border-strong)' }} />
           </label>
           {destinations.length > 0 && (
             <label className="block md:w-56">
               <span className="mb-1 block text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sp-text-secondary)' }}>Destination</span>
-              <select name="destination" defaultValue="" className="min-h-[2.75rem] w-full rounded-lg border px-3 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1" style={{ outlineColor: 'var(--sp-primary, #000)', background: 'var(--sp-bg-input)', color: 'var(--sp-text-primary)', borderColor: 'var(--sp-border-strong)' }}>
+              <select name="destination" defaultValue="" className="min-h-[2.75rem] w-full rounded-lg border px-3 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1" style={{ outlineColor: 'var(--sp-primary, var(--brand-black))', background: 'var(--sp-bg-input)', color: 'var(--sp-text-primary)', borderColor: 'var(--sp-border-strong)' }}>
                 <option value="">All destinations</option>
                 {destinations.map((d) => <option key={d.slug} value={d.slug}>{d.name}</option>)}
               </select>

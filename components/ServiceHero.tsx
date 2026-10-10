@@ -15,9 +15,9 @@ const ServiceHero: React.FC<ServiceHeroProps> = ({
   description,
   accentColor = 'teal',
 }) => {
-  const gradientFrom = accentColor === 'orange' ? '#E6A64D' : 'var(--sp-hero-from, #0D7A7D)';
-  const gradientTo = accentColor === 'orange' ? '#D4953A' : 'var(--sp-hero-to, #0A5F62)';
-  const accentTextColor = accentColor === 'orange' ? '#1A1A2E' : 'var(--sp-hero-accent, #F5C875)';
+  const gradientFrom = accentColor === 'orange' ? 'var(--brand-gold)' : 'var(--sp-hero-from, var(--brand-teal))';
+  const gradientTo = accentColor === 'orange' ? 'var(--brand-gold-dark)' : 'var(--sp-hero-to, var(--brand-teal-dark))';
+  const accentTextColor = accentColor === 'orange' ? 'var(--brand-ink)' : 'var(--sp-hero-accent)';
 
   return (
     <section className={`service-hero${accentColor === 'orange' ? ' service-hero-orange' : ''}`}>
@@ -47,7 +47,7 @@ const ServiceHero: React.FC<ServiceHeroProps> = ({
         <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
           <path
             d="M0,30 C240,60 480,0 720,30 C960,60 1200,0 1440,30 L1440,60 L0,60 Z"
-            fill="var(--sp-bg-primary, #F9F9F9)"
+            fill="var(--sp-bg-primary, var(--brand-bg))"
           />
         </svg>
       </div>
@@ -79,7 +79,7 @@ const ServiceHero: React.FC<ServiceHeroProps> = ({
         .service-hero-orb-1 {
           width: 400px;
           height: 400px;
-          background: #E6A64D;
+          background: var(--brand-gold);
           top: -100px;
           right: -100px;
         }
@@ -87,7 +87,7 @@ const ServiceHero: React.FC<ServiceHeroProps> = ({
         .service-hero-orb-2 {
           width: 300px;
           height: 300px;
-          background: #FFFFFF;
+          background: var(--brand-white);
           bottom: -50px;
           left: -50px;
         }
@@ -107,12 +107,12 @@ const ServiceHero: React.FC<ServiceHeroProps> = ({
         .service-title {
           font-size: clamp(2rem, 1.4rem + 3.2vw, 4rem);
           font-weight: 800;
-          color: #FFFFFF;
+          color: var(--brand-white);
           margin: 0 0 20px 0;
           line-height: 1.1;
           letter-spacing: -0.02em;
           max-width: 900px;
-          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          text-shadow: 0 2px 8px rgba(var(--brand-black-rgb), 0.1);
         }
 
         .service-title-accent {
@@ -121,17 +121,17 @@ const ServiceHero: React.FC<ServiceHeroProps> = ({
 
         .service-description {
           font-size: clamp(0.95rem, 0.9rem + 0.35vw, 1.2rem);
-          color: rgba(255, 255, 255, 0.95);
+          color: rgba(var(--brand-white-rgb), 0.95);
           max-width: 720px;
           line-height: 1.7;
           margin: 0;
           font-weight: 400;
-          text-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+          text-shadow: 0 1px 4px rgba(var(--brand-black-rgb), 0.08);
         }
 
         .service-hero-orange .service-title,
         .service-hero-orange .service-description {
-          color: #1A1A2E;
+          color: var(--brand-ink);
           text-shadow: none;
         }
 

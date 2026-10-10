@@ -50,12 +50,12 @@ export default function StudyPage() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      pending: '#F59E0B',
-      approved: '#10B981',
-      rejected: '#EF4444',
-      completed: '#3B82F6',
+      pending: 'var(--brand-warning)',
+      approved: 'var(--brand-success)',
+      rejected: 'var(--brand-error)',
+      completed: 'var(--brand-info)',
     };
-    return colors[status] || '#6B7280';
+    return colors[status] || 'var(--brand-muted)';
   };
 
   const getStatusLabel = (status: string) => {
@@ -63,17 +63,17 @@ export default function StudyPage() {
   };
 
   const themeStyles = {
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    textPrimary: isDimMode ? '#FFFFFF' : '#000000',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4A4A4A',
-    textMuted: isDimMode ? '#9CA3AF' : '#6B7280',
-    border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
-    hoverBg: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
+    cardBg: 'var(--brand-card)',
+    textPrimary: 'var(--brand-text)',
+    textSecondary: 'var(--brand-text-2)',
+    textMuted: 'var(--brand-muted)',
+    border: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)',
+    hoverBg: isDimMode ? 'rgba(var(--brand-white-rgb), 0.03)' : 'var(--brand-bg)',
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: isDimMode ? '#0A0A0A' : '#F9F9F9' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--brand-bg)' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: BRAND_COLORS.tropicalTeal, borderTopColor: 'transparent' }}></div>
           <p className="mt-4 text-sm" style={{ color: themeStyles.textSecondary }}>Loading applications...</p>

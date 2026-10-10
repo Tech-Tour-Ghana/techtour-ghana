@@ -21,13 +21,13 @@ export function useAccountTheme() {
   const { isDimMode } = useTheme();
   return {
     isDimMode,
-    cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
-    text: isDimMode ? '#FFFFFF' : '#111111',
-    textSecondary: isDimMode ? '#B0B0B0' : '#4A4A4A',
-    textMuted: isDimMode ? '#9CA3AF' : '#6B7280',
-    border: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
-    inputBg: isDimMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-    inputBorder: isDimMode ? 'rgba(255,255,255,0.2)' : '#D1D5DB',
+    cardBg: 'var(--brand-card)',
+    text: isDimMode ? 'var(--brand-white)' : 'var(--brand-text)',
+    textSecondary: 'var(--brand-text-2)',
+    textMuted: 'var(--brand-muted)',
+    border: isDimMode ? 'rgba(var(--brand-white-rgb), 0.1)' : 'var(--brand-line)',
+    inputBg: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-white)',
+    inputBorder: isDimMode ? 'rgba(var(--brand-white-rgb), 0.2)' : 'var(--brand-line)',
   };
 }
 
@@ -79,7 +79,7 @@ export default function AccountShell({ title, subtitle, children }: { title: str
                     href={s.href}
                     aria-current={active ? 'page' : undefined}
                     className="block px-3 py-2 text-sm font-medium rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-600"
-                    style={{ color: active ? '#0E7C80' : t.textSecondary, background: active ? 'rgba(19,158,162,0.12)' : 'transparent' }}
+                    style={{ color: active ? 'var(--brand-teal)' : t.textSecondary, background: active ? 'rgba(var(--brand-teal-rgb), 0.12)' : 'transparent' }}
                   >
                     {s.label}
                   </Link>

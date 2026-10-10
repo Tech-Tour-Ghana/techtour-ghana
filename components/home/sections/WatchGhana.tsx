@@ -108,7 +108,7 @@ export default function WatchGhana({ videos }: { videos: WatchVideo[] }) {
                   className="min-h-[2.75rem] rounded-full border px-4 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                   style={{
                     background: on ? 'var(--sp-primary)' : 'var(--sp-bg-card)',
-                    color: on ? '#fff' : 'var(--sp-text-primary)',
+                    color: on ? 'var(--brand-white)' : 'var(--sp-text-primary)',
                     borderColor: on ? 'var(--sp-primary)' : 'var(--sp-border)',
                   }}
                 >
@@ -159,7 +159,7 @@ export default function WatchGhana({ videos }: { videos: WatchVideo[] }) {
               </div>
               <div className="p-4">
                 {v.category && (
-                  <span className="inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold" style={{ background: 'var(--sp-primary)', color: '#fff' }}>
+                  <span className="inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold" style={{ background: 'var(--sp-primary)', color: 'var(--brand-white)' }}>
                     {v.category}
                   </span>
                 )}

@@ -384,7 +384,7 @@ export default function ContactUsPage() {
                     </div>
 
                     {error && (
-                      <div role="alert" style={{ color: '#B91C1C', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 8, padding: '10px 14px', fontSize: 14, marginBottom: 12 }}>{error}</div>
+                      <div role="alert" style={{ color: 'var(--brand-error-text)', background: 'color-mix(in srgb, var(--brand-error) 8%, var(--brand-card))', border: '1px solid var(--brand-error)', borderRadius: 8, padding: '10px 14px', fontSize: 14, marginBottom: 12 }}>{error}</div>
                     )}
                     <Button type="submit" variant="accent" full icon={faPaperPlane} loading={sending}>Send Message</Button>
                   </form>
@@ -424,7 +424,7 @@ export default function ContactUsPage() {
             position: relative;
             overflow: hidden;
             padding: 64px 32px 56px;
-            background: linear-gradient(135deg, #139EA2 0%, #0D7A7D 100%);
+            background: linear-gradient(135deg, var(--brand-teal) 0%, var(--brand-teal) 100%);
           }
 
           .contact-hero-bg {
@@ -432,12 +432,12 @@ export default function ContactUsPage() {
             inset: 0;
             background: radial-gradient(
                 circle at 15% 30%,
-                rgba(230, 166, 77, 0.25) 0%,
+                rgba(var(--brand-gold-rgb), 0.25) 0%,
                 transparent 45%
               ),
               radial-gradient(
                 circle at 85% 70%,
-                rgba(255, 255, 255, 0.15) 0%,
+                rgba(var(--brand-white-rgb), 0.15) 0%,
                 transparent 45%
               );
           }
@@ -453,11 +453,11 @@ export default function ContactUsPage() {
           .contact-hero-label {
             display: inline-block;
             padding: 7px 18px;
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(var(--brand-white-rgb), 0.15);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(var(--brand-white-rgb), 0.25);
             border-radius: 30px;
-            color: #FFFFFF;
+            color: var(--brand-white);
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 2px;
@@ -468,19 +468,19 @@ export default function ContactUsPage() {
           .contact-hero-title {
             font-size: clamp(1.6rem, 1.2rem + 2vw, 2.8rem);
             font-weight: 800;
-            color: #FFFFFF;
+            color: var(--brand-white);
             margin: 0 0 14px 0;
             line-height: 1.15;
             letter-spacing: -0.02em;
           }
 
           .contact-hero-accent {
-            color: #E6A64D;
+            color: var(--brand-gold);
           }
 
           .contact-hero-subtitle {
             font-size: clamp(0.85rem, 0.8rem + 0.35vw, 1.05rem);
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(var(--brand-white-rgb), 0.9);
             line-height: 1.6;
             margin: 0 auto;
             max-width: 620px;
@@ -524,15 +524,15 @@ export default function ContactUsPage() {
           .contact-method-card:hover {
             transform: translateY(-4px);
             box-shadow: var(--sp-shadow-lg);
-            border-color: rgba(19, 158, 162, 0.4);
+            border-color: rgba(var(--brand-teal-rgb), 0.4);
           }
 
           .contact-method-icon {
             width: 44px;
             height: 44px;
             border-radius: 12px;
-            background: rgba(19, 158, 162, 0.12);
-            color: #139EA2;
+            background: rgba(var(--brand-teal-rgb), 0.12);
+            color: var(--brand-teal);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -542,8 +542,8 @@ export default function ContactUsPage() {
           }
 
           .contact-method-card:hover .contact-method-icon {
-            background: #139EA2;
-            color: #FFFFFF;
+            background: var(--brand-teal);
+            color: var(--brand-white);
             transform: scale(1.08) rotate(5deg);
           }
 
@@ -564,7 +564,7 @@ export default function ContactUsPage() {
           .contact-method-value {
             font-size: 0.78rem;
             font-weight: 700;
-            color: #139EA2;
+            color: var(--brand-teal);
             word-break: break-word;
             line-height: 1.3;
           }
@@ -588,7 +588,7 @@ export default function ContactUsPage() {
 
           .section-label {
             display: inline-block;
-            color: #139EA2;
+            color: var(--brand-teal);
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 2px;
@@ -606,7 +606,7 @@ export default function ContactUsPage() {
           }
 
           .section-title-accent {
-            color: #139EA2;
+            color: var(--brand-teal);
           }
 
           .contact-info-text {
@@ -633,8 +633,8 @@ export default function ContactUsPage() {
             width: 40px;
             height: 40px;
             border-radius: 11px;
-            background: rgba(19, 158, 162, 0.12);
-            color: #139EA2;
+            background: rgba(var(--brand-teal-rgb), 0.12);
+            color: var(--brand-teal);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -686,15 +686,15 @@ export default function ContactUsPage() {
           }
 
           .contact-department:hover {
-            background: rgba(19, 158, 162, 0.06);
+            background: rgba(var(--brand-teal-rgb), 0.06);
           }
 
           .contact-department-icon {
             width: 32px;
             height: 32px;
             border-radius: 9px;
-            background: rgba(230, 166, 77, 0.12);
-            color: #E6A64D;
+            background: rgba(var(--brand-gold-rgb), 0.12);
+            color: var(--brand-gold);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -713,7 +713,7 @@ export default function ContactUsPage() {
           .contact-department-email {
             display: block;
             font-size: 0.75rem;
-            color: #139EA2;
+            color: var(--brand-teal);
             font-weight: 600;
           }
 
@@ -754,9 +754,9 @@ export default function ContactUsPage() {
           }
 
           .contact-social-btn:hover {
-            background: #139EA2;
-            border-color: #139EA2;
-            color: #FFFFFF;
+            background: var(--brand-teal);
+            border-color: var(--brand-teal);
+            color: var(--brand-white);
             transform: translateY(-2px);
           }
 
@@ -815,8 +815,8 @@ export default function ContactUsPage() {
           .contact-form-field select:focus,
           .contact-form-field textarea:focus {
             outline: none;
-            border-color: #139EA2;
-            box-shadow: 0 0 0 3px rgba(19, 158, 162, 0.15);
+            border-color: var(--brand-teal);
+            box-shadow: 0 0 0 3px rgba(var(--brand-teal-rgb), 0.15);
           }
 
           .contact-form-submit {
@@ -824,8 +824,8 @@ export default function ContactUsPage() {
             padding: 14px;
             border: none;
             border-radius: 12px;
-            background: #139EA2;
-            color: #FFFFFF;
+            background: var(--brand-teal);
+            color: var(--brand-white);
             font-size: 0.9rem;
             font-weight: 700;
             cursor: pointer;
@@ -839,9 +839,9 @@ export default function ContactUsPage() {
           }
 
           .contact-form-submit:hover {
-            background: #0D7A7D;
+            background: var(--brand-teal);
             transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(19, 158, 162, 0.3);
+            box-shadow: 0 12px 24px rgba(var(--brand-teal-rgb), 0.3);
           }
 
           .contact-form-success {
@@ -851,7 +851,7 @@ export default function ContactUsPage() {
 
           .contact-form-success :global(svg) {
             font-size: 48px;
-            color: #10B981;
+            color: var(--brand-success);
             margin-bottom: 16px;
           }
 
@@ -878,7 +878,7 @@ export default function ContactUsPage() {
           .contact-cta-bg {
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, #139EA2 0%, #0D7A7D 100%);
+            background: linear-gradient(135deg, var(--brand-teal) 0%, var(--brand-teal) 100%);
           }
 
           .contact-cta-container {
@@ -892,7 +892,7 @@ export default function ContactUsPage() {
           .contact-cta-title {
             font-size: clamp(1.4rem, 3vw, 2rem);
             font-weight: 800;
-            color: #FFFFFF;
+            color: var(--brand-white);
             margin: 0 0 10px 0;
             line-height: 1.2;
             letter-spacing: -0.02em;
@@ -900,7 +900,7 @@ export default function ContactUsPage() {
 
           .contact-cta-text {
             font-size: 0.95rem;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(var(--brand-white-rgb), 0.9);
             line-height: 1.6;
             margin: 0 0 26px 0;
           }
@@ -925,27 +925,27 @@ export default function ContactUsPage() {
           }
 
           .contact-cta-btn.primary {
-            background: #E6A64D;
-            color: #1A1A2E;
-            box-shadow: 0 8px 24px rgba(230, 166, 77, 0.3);
+            background: var(--brand-gold);
+            color: var(--brand-text);
+            box-shadow: 0 8px 24px rgba(var(--brand-gold-rgb), 0.3);
           }
 
           .contact-cta-btn.primary:hover {
-            background: #D4953A;
+            background: var(--brand-gold-dark);
             transform: translateY(-3px);
-            box-shadow: 0 12px 32px rgba(230, 166, 77, 0.4);
+            box-shadow: 0 12px 32px rgba(var(--brand-gold-rgb), 0.4);
           }
 
           .contact-cta-btn.secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: #FFFFFF;
-            border: 1.5px solid rgba(255, 255, 255, 0.4);
+            background: rgba(var(--brand-white-rgb), 0.1);
+            color: var(--brand-white);
+            border: 1.5px solid rgba(var(--brand-white-rgb), 0.4);
             backdrop-filter: blur(10px);
           }
 
           .contact-cta-btn.secondary:hover {
-            background: #FFFFFF;
-            color: #139EA2;
+            background: var(--brand-white);
+            color: var(--brand-teal);
             transform: translateY(-3px);
           }
 

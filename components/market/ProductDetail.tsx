@@ -124,12 +124,12 @@ export default function ProductDetail({ product, related }: { product: MarketPro
   const card: React.CSSProperties = { background: c.backgroundCard, border: `1px solid ${c.border}`, borderRadius: 16 };
   const chip = (active: boolean): React.CSSProperties => ({
     border: `1px solid ${active ? accent : c.border}`,
-    background: active ? (dim ? 'rgba(230,166,77,0.15)' : c.primaryLight) : 'transparent',
+    background: active ? (dim ? 'rgba(var(--brand-gold-rgb), 0.15)' : c.primaryLight) : 'transparent',
     color: c.textPrimary,
   });
 
   const stars = (value: number) => [...Array(5)].map((_, i) => (
-    <FontAwesomeIcon key={i} icon={i < Math.floor(value) ? faStar : i < value ? faStarHalfAlt : faStar} className="h-3.5 w-3.5" style={{ color: i < Math.ceil(value) ? '#F59E0B' : c.border }} />
+    <FontAwesomeIcon key={i} icon={i < Math.floor(value) ? faStar : i < value ? faStarHalfAlt : faStar} className="h-3.5 w-3.5" style={{ color: i < Math.ceil(value) ? 'var(--brand-warning)' : c.border }} />
   ));
 
   const facts = [
@@ -214,11 +214,11 @@ export default function ProductDetail({ product, related }: { product: MarketPro
                 <Button variant="secondary" disabled={!product.is_in_stock} onClick={() => add(false)} icon={faShoppingCart} className="min-w-[8rem] flex-1" style={{ color: accent }}>
                   {product.is_in_stock ? (inCart ? 'Add another' : 'Add to cart') : 'Out of stock'}
                 </Button>
-                <Button disabled={!product.is_in_stock} onClick={() => add(true)} className="min-w-[8rem] flex-1" style={{ background: accent, color: dim ? '#0A0A0A' : '#fff' }}>
+                <Button disabled={!product.is_in_stock} onClick={() => add(true)} className="min-w-[8rem] flex-1" style={{ background: accent, color: 'var(--brand-bg)' }}>
                   Buy it now
                 </Button>
                 <button type="button" onClick={toggleWishlist} aria-pressed={wishlisted} aria-label={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
-                  className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ border: `1px solid ${c.border}`, color: wishlisted ? '#EF4444' : c.textMuted }}>
+                  className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ border: `1px solid ${c.border}`, color: wishlisted ? 'var(--brand-error)' : c.textMuted }}>
                   <FontAwesomeIcon icon={faHeart} />
                 </button>
               </div>
@@ -261,7 +261,7 @@ export default function ProductDetail({ product, related }: { product: MarketPro
                   <button type="button" aria-label="Increase quantity" className="h-9 w-9" onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}><FontAwesomeIcon icon={faPlus} className="h-3 w-3" /></button>
                 </div>
                 <span className="flex items-center gap-1.5 text-xs" style={{ color: c.textSecondary }}>
-                  <span className="h-2 w-2 rounded-full" style={{ background: product.is_in_stock ? '#22c55e' : '#ef4444' }} />
+                  <span className="h-2 w-2 rounded-full" style={{ background: product.is_in_stock ? 'var(--brand-success)' : 'var(--brand-error)' }} />
                   {product.is_in_stock ? (product.stock_quantity > 0 && product.stock_quantity <= 10 ? `Only ${product.stock_quantity} left` : 'In stock') : 'Out of stock'}
                 </span>
               </div>

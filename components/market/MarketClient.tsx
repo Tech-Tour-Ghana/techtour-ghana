@@ -172,11 +172,11 @@ const LoginToast = ({ message, onClose, isDimMode, colors }: any) => {
         bottom: '100px',
         right: '30px',
         zIndex: 1000,
-        background: isDimMode ? '#1A1A1A' : '#FFFFFF',
-        border: `1px solid ${isDimMode ? 'rgba(230,166,77,0.2)' : 'rgba(19,158,162,0.1)'}`,
+        background: 'var(--brand-card)',
+        border: `1px solid ${isDimMode ? 'rgba(var(--brand-gold-rgb), 0.2)' : 'rgba(var(--brand-teal-rgb), 0.1)'}`,
         borderRadius: '12px',
         padding: '16px 20px',
-        boxShadow: '0 8px 30px rgba(0,0,0,0.25)',
+        boxShadow: '0 8px 30px rgba(var(--brand-black-rgb), 0.25)',
         animation: 'slideUp 0.3s ease-out',
         maxWidth: '320px',
         display: 'flex',
@@ -187,10 +187,10 @@ const LoginToast = ({ message, onClose, isDimMode, colors }: any) => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <FontAwesomeIcon icon={faLock} style={{ fontSize: '24px', color: 'var(--brand-primary)' }} />
         <div>
-          <div style={{ fontWeight: '600', fontSize: '15px', color: isDimMode ? '#FFFFFF' : '#000000' }}>
+          <div style={{ fontWeight: '600', fontSize: '15px', color: 'var(--brand-text)' }}>
             Login Required
           </div>
-          <div style={{ fontSize: '13px', color: isDimMode ? '#B0B0B0' : '#4A4A4A' }}>
+          <div style={{ fontSize: '13px', color: 'var(--brand-text-2)' }}>
             {message || 'Please log in to add items to your cart.'}
           </div>
         </div>
@@ -202,7 +202,7 @@ const LoginToast = ({ message, onClose, isDimMode, colors }: any) => {
             border: 'none',
             cursor: 'pointer',
             fontSize: '16px',
-            color: isDimMode ? '#B0B0B0' : '#6B7280',
+            color: 'var(--brand-text-2)',
             padding: '10px',
           }}
         >
@@ -216,7 +216,7 @@ const LoginToast = ({ message, onClose, isDimMode, colors }: any) => {
             flex: 1,
             padding: '8px 16px',
             background: 'var(--brand-primary)',
-            color: isDimMode ? '#0A0A0A' : 'white',
+            color: isDimMode ? 'var(--brand-ink)' : 'white',
             border: 'none',
             borderRadius: '6px',
             cursor: 'pointer',
@@ -244,7 +244,7 @@ const LoginToast = ({ message, onClose, isDimMode, colors }: any) => {
             textDecoration: 'none',
             transition: 'background 0.2s',
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = isDimMode ? 'rgba(230,166,77,0.1)' : 'rgba(19,158,162,0.05)'}
+          onMouseEnter={(e) => e.currentTarget.style.background = isDimMode ? 'rgba(var(--brand-gold-rgb), 0.1)' : 'rgba(var(--brand-teal-rgb), 0.05)'}
           onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
         >
           Register
@@ -315,27 +315,27 @@ const ProductCard = React.memo(({
 
   const getColorSwatch = (color: string) => {
     const colorValue = color.toLowerCase();
-    if (colorValue.includes('black')) return '#1a1a1a';
-    if (colorValue.includes('white')) return '#f5f5f5';
-    if (colorValue.includes('red')) return '#ef4444';
-    if (colorValue.includes('blue')) return '#3b82f6';
-    if (colorValue.includes('green')) return '#22c55e';
-    if (colorValue.includes('yellow')) return '#eab308';
-    if (colorValue.includes('gold')) return '#f59e0b';
-    if (colorValue.includes('silver')) return '#9ca3af';
-    if (colorValue.includes('brown')) return '#92400e';
-    if (colorValue.includes('purple')) return '#8b5cf6';
-    if (colorValue.includes('pink')) return '#ec4899';
-    if (colorValue.includes('orange')) return '#f97316';
-    if (colorValue.includes('gray') || colorValue.includes('grey')) return '#6b7280';
+    if (colorValue.includes('black')) return 'var(--brand-ink)';
+    if (colorValue.includes('white')) return 'var(--brand-subtle)';
+    if (colorValue.includes('red')) return 'var(--brand-error)';
+    if (colorValue.includes('blue')) return 'var(--brand-info)';
+    if (colorValue.includes('green')) return 'var(--brand-success)';
+    if (colorValue.includes('yellow')) return 'var(--brand-warning)';
+    if (colorValue.includes('gold')) return 'var(--brand-warning)';
+    if (colorValue.includes('silver')) return 'var(--brand-muted)';
+    if (colorValue.includes('brown')) return 'var(--brand-warning-text)';
+    if (colorValue.includes('purple')) return 'var(--brand-purple)';
+    if (colorValue.includes('pink')) return 'var(--brand-purple)';
+    if (colorValue.includes('orange')) return 'var(--brand-warning)';
+    if (colorValue.includes('gray') || colorValue.includes('grey')) return 'var(--brand-muted)';
     return colorValue;
   };
 
   const getButtonStyles = () => {
     if (isDisabled) {
       return {
-        background: isDimMode ? '#2A2A2A' : '#E5E7EB',
-        color: isDimMode ? '#9CA3AF' : '#6B7280',
+        background: 'var(--brand-line)',
+        color: 'var(--brand-muted)',
         border: 'none',
       };
     }
@@ -348,14 +348,14 @@ const ProductCard = React.memo(({
     }
     if (buttonVariant === 'success') {
       return {
-        background: '#10B981',
+        background: 'var(--brand-success)',
         color: 'white',
         border: 'none',
       };
     }
     return {
       background: isDimMode ? colors.primary : 'var(--brand-primary)',
-      color: isDimMode ? '#0A0A0A' : 'white',
+      color: isDimMode ? 'var(--brand-ink)' : 'white',
       border: 'none',
     };
   };
@@ -367,16 +367,16 @@ const ProductCard = React.memo(({
       <div
         className="group relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300"
         style={{
-          background: isDimMode ? colors.backgroundCard : '#FFFFFF',
-          border: `1px solid ${isDimMode ? colors.border : '#E5E7EB'}`,
+          background: isDimMode ? colors.backgroundCard : 'var(--brand-white)',
+          border: `1px solid ${isDimMode ? colors.border : 'var(--brand-line)'}`,
           boxShadow: isHovered
-            ? (isDimMode ? '0 16px 40px rgba(0,0,0,0.5)' : '0 16px 40px rgba(0,0,0,0.10)')
-            : '0 1px 3px rgba(0,0,0,0.04)',
+            ? (isDimMode ? '0 16px 40px rgba(var(--brand-black-rgb), 0.5)' : '0 16px 40px rgba(var(--brand-black-rgb), 0.10)')
+            : '0 1px 3px rgba(var(--brand-black-rgb), 0.04)',
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <Link href={href} aria-label={product.title} className="relative block aspect-[4/3] overflow-hidden" style={{ background: isDimMode ? '#1A1A1A' : '#F5F5F5' }}>
+        <Link href={href} aria-label={product.title} className="relative block aspect-[4/3] overflow-hidden" style={{ background: isDimMode ? 'var(--brand-card)' : 'var(--brand-subtle)' }}>
           <img
             src={imageUrl}
             alt={product.title}
@@ -400,7 +400,7 @@ const ProductCard = React.memo(({
 
         <div className="flex flex-1 flex-col p-4">
           {product.category_name && (
-            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
+            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide" style={{ color: isDimMode ? colors.textMuted : 'var(--brand-muted)' }}>
               {product.category_name}
             </p>
           )}
@@ -408,16 +408,16 @@ const ProductCard = React.memo(({
             <Link href={href}>{product.title}</Link>
           </h3>
           {product.description && (
-            <p className="mt-1 text-sm line-clamp-2" style={{ color: isDimMode ? colors.textSecondary : '#6B7280' }}>
+            <p className="mt-1 text-sm line-clamp-2" style={{ color: isDimMode ? colors.textSecondary : 'var(--brand-muted)' }}>
               {product.description}
             </p>
           )}
 
           {product.rating > 0 && (
             <div className="mt-2 flex items-center gap-1">
-              <FontAwesomeIcon icon={faStar} className="w-3 h-3" style={{ color: '#F59E0B' }} />
+              <FontAwesomeIcon icon={faStar} className="w-3 h-3" style={{ color: 'var(--brand-warning)' }} />
               <span className="text-xs font-medium" style={{ color: colors.textSecondary }}>
-                {Number(product.rating).toFixed(1)} <span style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>({product.review_count || 0})</span>
+                {Number(product.rating).toFixed(1)} <span style={{ color: isDimMode ? colors.textMuted : 'var(--brand-muted)' }}>({product.review_count || 0})</span>
               </span>
             </div>
           )}
@@ -428,7 +428,7 @@ const ProductCard = React.memo(({
                 {currency.symbol}{(hasDiscount ? displayDiscountPrice : displayPrice).toFixed(2)}
               </span>
               {hasDiscount && (
-                <span className="mt-1 text-xs line-through" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
+                <span className="mt-1 text-xs line-through" style={{ color: isDimMode ? colors.textMuted : 'var(--brand-muted)' }}>
                   {currency.symbol}{displayPrice.toFixed(2)}
                 </span>
               )}
@@ -439,12 +439,12 @@ const ProductCard = React.memo(({
                   <span
                     key={color}
                     className="w-4 h-4 rounded-full flex-shrink-0"
-                    style={{ background: getColorSwatch(color), border: `1px solid ${isDimMode ? '#3A3A3A' : '#D1D5DB'}` }}
+                    style={{ background: getColorSwatch(color), border: `1px solid ${isDimMode ? 'var(--brand-line)' : 'var(--brand-line)'}` }}
                     title={color}
                   />
                 ))}
                 {product.colors.length > 4 && (
-                  <span className="text-[11px]" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>+{product.colors.length - 4}</span>
+                  <span className="text-[11px]" style={{ color: isDimMode ? colors.textMuted : 'var(--brand-muted)' }}>+{product.colors.length - 4}</span>
                 )}
               </div>
             )}
@@ -457,7 +457,7 @@ const ProductCard = React.memo(({
               aria-pressed={isWishlisted}
               aria-label={`Wishlist ${product.title}`}
               className="flex items-center justify-center gap-2 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-colors hover:bg-black/[0.03]"
-              style={{ border: `1px solid ${isDimMode ? colors.border : '#E5E7EB'}`, color: isWishlisted ? '#EF4444' : colors.textSecondary, background: 'transparent' }}
+              style={{ border: `1px solid ${isDimMode ? colors.border : 'var(--brand-line)'}`, color: isWishlisted ? 'var(--brand-error)' : colors.textSecondary, background: 'transparent' }}
             >
               <FontAwesomeIcon icon={faHeart} className="text-sm" />
               <span className="hidden sm:inline">{isWishlisted ? 'Saved' : 'Wishlist'}</span>
@@ -476,11 +476,11 @@ const ProductCard = React.memo(({
     <div
       className="group relative rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl flex flex-col sm:flex-row"
       style={{
-        background: isDimMode ? colors.backgroundCard : '#FFFFFF',
-        border: `1px solid ${isDimMode ? 'rgba(230,166,77,0.1)' : 'rgba(19,158,162,0.1)'}`,
+        background: isDimMode ? colors.backgroundCard : 'var(--brand-white)',
+        border: `1px solid ${isDimMode ? 'rgba(var(--brand-gold-rgb), 0.1)' : 'rgba(var(--brand-teal-rgb), 0.1)'}`,
         boxShadow: isHovered
-          ? (isDimMode ? '0 20px 60px rgba(0,0,0,0.5)' : '0 20px 60px rgba(19,158,162,0.12)')
-          : '0 4px 12px rgba(0,0,0,0.04)',
+          ? (isDimMode ? '0 20px 60px rgba(var(--brand-black-rgb), 0.5)' : '0 20px 60px rgba(var(--brand-teal-rgb), 0.12)')
+          : '0 4px 12px rgba(var(--brand-black-rgb), 0.04)',
         transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
       }}
       onMouseEnter={() => setIsHovered(true)}
@@ -515,7 +515,7 @@ const ProductCard = React.memo(({
             <h3 className="font-bold text-base md:text-lg line-clamp-1" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
               {product.title}
             </h3>
-            <p className="text-[9px] md:text-[11px]" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
+            <p className="text-[9px] md:text-[11px]" style={{ color: isDimMode ? colors.textMuted : 'var(--brand-muted)' }}>
               SKU: {product.sku || 'N/A'}
             </p>
           </div>
@@ -525,7 +525,7 @@ const ProductCard = React.memo(({
                 <span className="font-bold text-base md:text-lg" style={{ color: colors.secondary }}>
                   {currency.symbol}{displayDiscountPrice.toFixed(2)}
                 </span>
-                <span className="text-[10px] line-through" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
+                <span className="text-[10px] line-through" style={{ color: isDimMode ? colors.textMuted : 'var(--brand-muted)' }}>
                   {currency.symbol}{displayPrice.toFixed(2)}
                 </span>
               </>
@@ -545,11 +545,11 @@ const ProductCard = React.memo(({
                   key={i}
                   icon={i < Math.floor(product.rating) ? faStar : (i < product.rating ? faStarHalfAlt : faStar)}
                   className="w-3 h-3 md:w-3.5 md:h-3.5"
-                  style={{ color: '#F59E0B' }}
+                  style={{ color: 'var(--brand-warning)' }}
                 />
               ))}
             </div>
-            <span className="text-[9px] md:text-[11px]" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
+            <span className="text-[9px] md:text-[11px]" style={{ color: isDimMode ? colors.textMuted : 'var(--brand-muted)' }}>
               ({product.review_count || 0})
             </span>
           </div>
@@ -567,13 +567,13 @@ const ProductCard = React.memo(({
                   className="w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border border-gray-300 flex-shrink-0"
                   style={{
                     background: getColorSwatch(color),
-                    border: color.toLowerCase() === 'white' ? '1px solid #d1d5db' : 'none'
+                    border: color.toLowerCase() === 'white' ? '1px solid var(--brand-line)' : 'none'
                   }}
                   title={color}
                 />
               ))}
               {product.colors.length > 6 && (
-                <span className="text-[8px] md:text-[10px] font-medium flex items-center" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
+                <span className="text-[8px] md:text-[10px] font-medium flex items-center" style={{ color: isDimMode ? colors.textMuted : 'var(--brand-muted)' }}>
                   +{product.colors.length - 6}
                 </span>
               )}
@@ -581,7 +581,7 @@ const ProductCard = React.memo(({
           </div>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-2 mt-2 pt-2 border-t" style={{ borderColor: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB' }}>
+        <div className="flex flex-wrap items-center justify-between gap-2 mt-2 pt-2 border-t" style={{ borderColor: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)' }}>
           <div className="flex items-center gap-1.5">
             {product.is_in_stock ? (
               <>
@@ -590,7 +590,7 @@ const ProductCard = React.memo(({
                   In Stock
                 </span>
                 {product.stock_quantity > 0 && (
-                  <span className="text-[8px] md:text-[10px]" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
+                  <span className="text-[8px] md:text-[10px]" style={{ color: isDimMode ? colors.textMuted : 'var(--brand-muted)' }}>
                     ({product.stock_quantity} available)
                   </span>
                 )}
@@ -610,7 +610,7 @@ const ProductCard = React.memo(({
               href={`/market/${product.slug}`}
               className="px-2.5 py-1.5 md:px-3.5 md:py-2 text-[10px] md:text-xs font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5"
               style={{
-                background: isDimMode ? 'rgba(230,166,77,0.15)' : 'rgba(19,158,162,0.1)',
+                background: isDimMode ? 'rgba(var(--brand-gold-rgb), 0.15)' : 'rgba(var(--brand-teal-rgb), 0.1)',
                 color: isDimMode ? colors.primary : 'var(--brand-primary)',
               }}
             >
@@ -1051,13 +1051,13 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
 
   const getOrderStatusColor = useCallback((status: string) => {
     const colors: Record<string, string> = {
-      pending: '#F59E0B',
-      processing: '#3B82F6',
-      shipped: '#8B5CF6',
-      delivered: '#10B981',
-      cancelled: '#EF4444',
+      pending: 'var(--brand-warning)',
+      processing: 'var(--brand-info)',
+      shipped: 'var(--brand-purple)',
+      delivered: 'var(--brand-success)',
+      cancelled: 'var(--brand-error)',
     };
-    return colors[status] || '#6B7280';
+    return colors[status] || 'var(--brand-muted)';
   }, []);
 
   const getOrderStatusLabel = useCallback((status: string) => {
@@ -1079,8 +1079,8 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
       )}
 
       <div className="sticky top-0 z-40 border-b" style={{
-        background: isDimMode ? colors.backgroundAlt : '#FFFFFF',
-        borderColor: isDimMode ? 'rgba(230,166,77,0.1)' : 'rgba(19,158,162,0.1)',
+        background: isDimMode ? colors.backgroundAlt : 'var(--brand-white)',
+        borderColor: isDimMode ? 'rgba(var(--brand-gold-rgb), 0.1)' : 'rgba(var(--brand-teal-rgb), 0.1)',
       }}>
         <div className="max-w-7xl mx-auto px-4">
           <nav className="flex items-center gap-1 overflow-x-auto py-3">
@@ -1092,7 +1092,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                   href={link.path}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 ${isActive ? 'bg-opacity-10' : 'hover:bg-opacity-5'}`}
                   style={{
-                    background: isActive ? (isDimMode ? 'rgba(230,166,77,0.15)' : 'rgba(19,158,162,0.1)') : 'transparent',
+                    background: isActive ? (isDimMode ? 'rgba(var(--brand-gold-rgb), 0.15)' : 'rgba(var(--brand-teal-rgb), 0.1)') : 'transparent',
                     color: isActive ? (isDimMode ? colors.primary : 'var(--brand-primary)') : (isDimMode ? colors.textSecondary : colors.textSecondary),
                   }}
                 >
@@ -1111,15 +1111,15 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
       <section className="relative overflow-hidden py-8 md:py-10">
         <div className="absolute inset-0" style={{
           background: isDimMode
-            ? 'linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%)'
-            : 'linear-gradient(135deg, var(--sp-hero-from, #0D7A7D) 0%, var(--sp-hero-to, #0A5F62) 100%)',
+            ? 'linear-gradient(135deg, var(--brand-bg) 0%, var(--brand-card) 100%)'
+            : 'linear-gradient(135deg, var(--sp-hero-from, var(--brand-teal)) 0%, var(--sp-hero-to, var(--brand-teal-dark)) 100%)',
         }} />
         <div className="relative max-w-7xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-3 mb-1">
                 <span className="px-3 py-1 text-xs font-semibold rounded-full" style={{
-                  background: isDimMode ? 'rgba(230,166,77,0.2)' : 'rgba(255,255,255,0.2)',
+                  background: isDimMode ? 'rgba(var(--brand-gold-rgb), 0.2)' : 'rgba(var(--brand-white-rgb), 0.2)',
                   color: isDimMode ? colors.primary : 'white',
                 }}>
                   <FontAwesomeIcon icon={faStore} className="mr-1" />
@@ -1132,7 +1132,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                 )}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold text-white">
-                TechTour <span style={{ color: isDimMode ? colors.primary : 'var(--sp-hero-accent, #F5C875)' }}>Market</span>
+                TechTour <span style={{ color: isDimMode ? colors.primary : 'var(--sp-hero-accent)' }}>Market</span>
               </h1>
               <p className="text-white text-sm md:text-base mt-1 max-w-lg">
                 Discover authentic Ghanaian artisan products, from Kente cloth to handcrafted jewelry,
@@ -1146,7 +1146,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
           <div className="relative w-full md:w-72">
-            <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }} />
+            <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: isDimMode ? colors.textMuted : 'var(--brand-muted)' }} />
             <input
               type="text"
               aria-label="Search products"
@@ -1161,8 +1161,8 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
               onBlur={() => setTimeout(() => setShowSearchSuggestions(false), 200)}
               className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
               style={{
-                background: isDimMode ? colors.backgroundCard : '#FFFFFF',
-                border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
+                background: isDimMode ? colors.backgroundCard : 'var(--brand-white)',
+                border: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.1)' : 'var(--brand-line)'}`,
                 color: isDimMode ? colors.textPrimary : colors.textPrimary,
               }}
             />
@@ -1175,8 +1175,8 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
               onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
               className="px-3 py-2.5 rounded-lg text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
               style={{
-                background: isDimMode ? colors.backgroundCard : '#FFFFFF',
-                border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
+                background: isDimMode ? colors.backgroundCard : 'var(--brand-white)',
+                border: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.1)' : 'var(--brand-line)'}`,
                 color: isDimMode ? colors.textPrimary : colors.textPrimary,
               }}
             >
@@ -1192,8 +1192,8 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
               onChange={(e) => { setSortBy(e.target.value as any); setCurrentPage(1); }}
               className="px-3 py-2.5 rounded-lg text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
               style={{
-                background: isDimMode ? colors.backgroundCard : '#FFFFFF',
-                border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
+                background: isDimMode ? colors.backgroundCard : 'var(--brand-white)',
+                border: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.1)' : 'var(--brand-line)'}`,
                 color: isDimMode ? colors.textPrimary : colors.textPrimary,
               }}
             >
@@ -1210,13 +1210,13 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                 aria-expanded={showCurrencyDropdown}
                 className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-sm transition-all duration-200"
                 style={{
-                  background: isDimMode ? colors.backgroundCard : '#FFFFFF',
-                  border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
+                  background: isDimMode ? colors.backgroundCard : 'var(--brand-white)',
+                  border: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.1)' : 'var(--brand-line)'}`,
                   color: isDimMode ? colors.textPrimary : colors.textPrimary,
                 }}
               >
                 <span>{selectedCurrency.symbol}</span>
-                <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
+                <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : 'var(--brand-muted)' }}>
                   {selectedCurrency.code}
                 </span>
                 <FontAwesomeIcon icon={faChevronDown} className="w-3 h-3" />
@@ -1225,8 +1225,8 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                 <div
                   className="absolute right-0 mt-1 w-48 rounded-lg shadow-lg overflow-hidden z-20"
                   style={{
-                    background: isDimMode ? colors.backgroundCard : '#FFFFFF',
-                    border: `1px solid ${isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
+                    background: isDimMode ? colors.backgroundCard : 'var(--brand-white)',
+                    border: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.1)' : 'var(--brand-line)'}`,
                   }}
                 >
                   {liveCurrencies.map((currency) => (
@@ -1246,13 +1246,13 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                         }`}
                       style={{
                         background: selectedCurrency.code === currency.code
-                          ? (isDimMode ? 'rgba(230,166,77,0.1)' : 'rgba(19,158,162,0.05)')
+                          ? (isDimMode ? 'rgba(var(--brand-gold-rgb), 0.1)' : 'rgba(var(--brand-teal-rgb), 0.05)')
                           : 'transparent',
                         color: isDimMode ? colors.textPrimary : colors.textPrimary,
                       }}
                     >
                       <span>{currency.symbol} {currency.code}</span>
-                      <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
+                      <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : 'var(--brand-muted)' }}>
                         {currency.name}
                       </span>
                     </button>
@@ -1262,7 +1262,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block px-4 py-2 text-[10px]"
-                    style={{ color: isDimMode ? '#9CA3AF' : '#6B7280', borderTop: '1px solid rgba(128,128,128,0.2)' }}
+                    style={{ color: 'var(--brand-muted)', borderTop: '1px solid rgba(var(--brand-muted-rgb), 0.2)' }}
                   >
                     {rateInfo.live ? 'Live rates' : 'Approximate rates'} · Rates By Exchange Rate API
                   </a>
@@ -1270,7 +1270,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
               )}
             </div>
 
-            <div className="flex rounded-lg overflow-hidden border" style={{ borderColor: isDimMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB' }}>
+            <div className="flex rounded-lg overflow-hidden border" style={{ borderColor: isDimMode ? 'rgba(var(--brand-white-rgb), 0.1)' : 'var(--brand-line)' }}>
               <button
                 onClick={() => setViewMode('grid')}
                 aria-label="Grid view"
@@ -1278,7 +1278,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                 className={`px-3 py-2.5 transition-all duration-200 ${viewMode === 'grid' ? 'text-white' : ''}`}
                 style={{
                   background: viewMode === 'grid' ? (isDimMode ? colors.primary : 'var(--brand-primary)') : 'transparent',
-                  color: viewMode === 'grid' ? (isDimMode ? '#0A0A0A' : 'white') : (isDimMode ? colors.textSecondary : colors.textSecondary),
+                  color: viewMode === 'grid' ? (isDimMode ? 'var(--brand-ink)' : 'white') : (isDimMode ? colors.textSecondary : colors.textSecondary),
                 }}
               >
                 <FontAwesomeIcon icon={faThLarge} />
@@ -1290,7 +1290,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                 className={`px-3 py-2.5 transition-all duration-200 ${viewMode === 'list' ? 'text-white' : ''}`}
                 style={{
                   background: viewMode === 'list' ? (isDimMode ? colors.primary : 'var(--brand-primary)') : 'transparent',
-                  color: viewMode === 'list' ? (isDimMode ? '#0A0A0A' : 'white') : (isDimMode ? colors.textSecondary : colors.textSecondary),
+                  color: viewMode === 'list' ? (isDimMode ? 'var(--brand-ink)' : 'white') : (isDimMode ? colors.textSecondary : colors.textSecondary),
                 }}
               >
                 <FontAwesomeIcon icon={faList} />
@@ -1302,7 +1302,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
         <div className="products-section">
           <div style={{
             fontSize: '14px',
-            color: isDimMode ? colors.textMuted : '#6B7280',
+            color: isDimMode ? colors.textMuted : 'var(--brand-muted)',
             marginBottom: '16px',
           }}>
             Showing {filteredProductsList.length > 0 ? ((currentPage - 1) * itemsPerPage) + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredProductsList.length)} of {filteredProductsList.length} products
@@ -1336,7 +1336,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="text-6xl mb-4" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}><FontAwesomeIcon icon={faSearch} /></div>
+              <div className="text-6xl mb-4" style={{ color: isDimMode ? colors.textMuted : 'var(--brand-muted)' }}><FontAwesomeIcon icon={faSearch} /></div>
               <h3 className="text-xl font-semibold mb-2" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
                 No products found
               </h3>
@@ -1362,8 +1362,8 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                 style={{
                   padding: '8px 16px',
                   borderRadius: '6px',
-                  background: currentPage === 1 ? (isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6') : (isDimMode ? 'rgba(230,166,77,0.15)' : 'rgba(19,158,162,0.1)'),
-                  color: currentPage === 1 ? (isDimMode ? '#9CA3AF' : '#6B7280') : (isDimMode ? colors.primary : 'var(--brand-primary)'),
+                  background: currentPage === 1 ? (isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-subtle)') : (isDimMode ? 'rgba(var(--brand-gold-rgb), 0.15)' : 'rgba(var(--brand-teal-rgb), 0.1)'),
+                  color: currentPage === 1 ? ('var(--brand-muted)') : (isDimMode ? colors.primary : 'var(--brand-primary)'),
                   border: 'none',
                   cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
                   fontWeight: '500',
@@ -1387,9 +1387,9 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                     style={{
                       padding: '8px 14px',
                       borderRadius: '6px',
-                      background: currentPage === pageNum ? (isDimMode ? colors.primary : 'var(--brand-primary)') : (isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9'),
-                      color: currentPage === pageNum ? (isDimMode ? '#0A0A0A' : 'white') : (isDimMode ? colors.textSecondary : colors.textSecondary),
-                      border: `1px solid ${currentPage === pageNum ? (isDimMode ? colors.primary : 'var(--brand-primary)') : (isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB')}`,
+                      background: currentPage === pageNum ? (isDimMode ? colors.primary : 'var(--brand-primary)') : (isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-bg)'),
+                      color: currentPage === pageNum ? (isDimMode ? 'var(--brand-ink)' : 'white') : (isDimMode ? colors.textSecondary : colors.textSecondary),
+                      border: `1px solid ${currentPage === pageNum ? (isDimMode ? colors.primary : 'var(--brand-primary)') : (isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)')}`,
                       cursor: 'pointer',
                       fontWeight: currentPage === pageNum ? '600' : '400',
                       fontSize: '14px',
@@ -1406,8 +1406,8 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                 style={{
                   padding: '8px 16px',
                   borderRadius: '6px',
-                  background: currentPage === totalPages ? (isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6') : (isDimMode ? 'rgba(230,166,77,0.15)' : 'rgba(19,158,162,0.1)'),
-                  color: currentPage === totalPages ? (isDimMode ? '#9CA3AF' : '#6B7280') : (isDimMode ? colors.primary : 'var(--brand-primary)'),
+                  background: currentPage === totalPages ? (isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-subtle)') : (isDimMode ? 'rgba(var(--brand-gold-rgb), 0.15)' : 'rgba(var(--brand-teal-rgb), 0.1)'),
+                  color: currentPage === totalPages ? ('var(--brand-muted)') : (isDimMode ? colors.primary : 'var(--brand-primary)'),
                   border: 'none',
                   cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
                   fontWeight: '500',
@@ -1423,7 +1423,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
 
       {orders.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 py-6 border-t" style={{
-          borderColor: isDimMode ? 'rgba(230,166,77,0.1)' : 'rgba(19,158,162,0.1)',
+          borderColor: isDimMode ? 'rgba(var(--brand-gold-rgb), 0.1)' : 'rgba(var(--brand-teal-rgb), 0.1)',
         }}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
@@ -1437,9 +1437,9 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                   onClick={() => handleOrderStatusFilter(status)}
                   className={`px-2.5 py-1 text-xs rounded-full transition-all duration-200 whitespace-nowrap ${orderStatusFilter === status ? 'font-semibold' : ''}`}
                   style={{
-                    background: orderStatusFilter === status ? (isDimMode ? 'rgba(230,166,77,0.15)' : 'rgba(19,158,162,0.1)') : 'transparent',
+                    background: orderStatusFilter === status ? (isDimMode ? 'rgba(var(--brand-gold-rgb), 0.15)' : 'rgba(var(--brand-teal-rgb), 0.1)') : 'transparent',
                     color: orderStatusFilter === status ? (isDimMode ? colors.primary : 'var(--brand-primary)') : (isDimMode ? colors.textSecondary : colors.textSecondary),
-                    border: orderStatusFilter === status ? `1px solid ${isDimMode ? colors.primary : 'var(--brand-primary)'}` : `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}`,
+                    border: orderStatusFilter === status ? `1px solid ${isDimMode ? colors.primary : 'var(--brand-primary)'}` : `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)'}`,
                   }}
                 >
                   {status === 'all' ? 'All' : getOrderStatusLabel(status)}
@@ -1450,7 +1450,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ borderBottom: `1px solid ${isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB'}` }}>
+                <tr style={{ borderBottom: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)'}` }}>
                   <th className="py-2 text-left font-medium text-xs" style={{ color: isDimMode ? colors.textSecondary : colors.textSecondary }}>Order #</th>
                   <th className="py-2 text-left font-medium text-xs" style={{ color: isDimMode ? colors.textSecondary : colors.textSecondary }}>Product</th>
                   <th className="py-2 text-left font-medium text-xs" style={{ color: isDimMode ? colors.textSecondary : colors.textSecondary }}>Total</th>
@@ -1463,7 +1463,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                   .filter(order => orderStatusFilter === 'all' || order.order_status === orderStatusFilter)
                   .slice(0, 5)
                   .map((order) => (
-                    <tr key={order.id} style={{ borderBottom: `1px solid ${isDimMode ? 'rgba(255,255,255,0.03)' : '#F3F4F6'}` }}>
+                    <tr key={order.id} style={{ borderBottom: `1px solid ${isDimMode ? 'rgba(var(--brand-white-rgb), 0.03)' : 'var(--brand-subtle)'}` }}>
                       <td className="py-2 font-mono text-xs" style={{ color: isDimMode ? colors.textSecondary : colors.textSecondary }}>
                         #{order.order_number}
                       </td>
@@ -1520,14 +1520,14 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
       {selectedOrder && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+          style={{ background: 'rgba(var(--brand-black-rgb), 0.7)', backdropFilter: 'blur(8px)' }}
           onClick={() => setSelectedOrder(null)}
         >
           <div
             className="relative w-full max-w-md rounded-2xl shadow-2xl p-6"
             style={{
-              background: isDimMode ? colors.background : '#FFFFFF',
-              border: `1px solid ${isDimMode ? 'rgba(230,166,77,0.2)' : 'rgba(19,158,162,0.1)'}`,
+              background: isDimMode ? colors.background : 'var(--brand-white)',
+              border: `1px solid ${isDimMode ? 'rgba(var(--brand-gold-rgb), 0.2)' : 'rgba(var(--brand-teal-rgb), 0.1)'}`,
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -1536,7 +1536,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
               aria-label="Close order details"
               className="absolute top-3 right-3 w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-teal-600"
               style={{
-                background: isDimMode ? 'rgba(255,255,255,0.05)' : '#F9F9F9',
+                background: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-bg)',
                 color: isDimMode ? colors.textSecondary : colors.textSecondary,
               }}
             >
@@ -1568,7 +1568,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                   {selectedCurrency.symbol}{convertPrice(selectedOrder.unit_price).toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between font-bold text-lg pt-2 border-t" style={{ borderColor: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB' }}>
+              <div className="flex justify-between font-bold text-lg pt-2 border-t" style={{ borderColor: isDimMode ? 'rgba(var(--brand-white-rgb), 0.05)' : 'var(--brand-line)' }}>
                 <span style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>Total</span>
                 <span style={{ color: isDimMode ? colors.primary : 'var(--brand-primary)' }}>
                   {selectedCurrency.symbol}{convertPrice(selectedOrder.total_price).toFixed(2)}
@@ -1586,7 +1586,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
           className="fixed bottom-6 right-6 w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-opacity duration-300 z-30 hover:opacity-90"
           style={{
             background: isDimMode ? colors.primary : 'var(--brand-primary)',
-            color: isDimMode ? '#0A0A0A' : 'white',
+            color: isDimMode ? 'var(--brand-ink)' : 'white',
           }}
         >
           <FontAwesomeIcon icon={faArrowUp} />

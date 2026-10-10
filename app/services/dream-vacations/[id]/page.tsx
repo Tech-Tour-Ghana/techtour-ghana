@@ -77,7 +77,7 @@ export default async function RentalPage({ params }: Params) {
           ]}
         />
 
-        <div className="border-b" style={{ borderColor: 'rgba(128,128,128,0.18)' }}>
+        <div className="border-b" style={{ borderColor: 'rgba(var(--brand-muted-rgb), 0.18)' }}>
           <div className="mx-auto w-full max-w-7xl px-4 py-2.5">
             <Breadcrumbs items={[{ label: 'Services' }, { label: 'Dream Vacations', href: '/services/dream-vacations' }, { label: rental.title }]} />
           </div>
@@ -114,7 +114,7 @@ export default async function RentalPage({ params }: Params) {
                 <section className="py-6">
                   <h2 className="mb-3 text-lg font-bold">Amenities</h2>
                   <ul className="grid gap-2 text-sm sm:grid-cols-2">
-                    {amenities.map((a) => <li key={a} className="flex gap-3"><FontAwesomeIcon icon={faCheck} className="mt-1 h-3 w-3 flex-shrink-0" style={{ color: '#10B981' }} /><span style={{ color: 'var(--sp-text-secondary)' }}>{a}</span></li>)}
+                    {amenities.map((a) => <li key={a} className="flex gap-3"><FontAwesomeIcon icon={faCheck} className="mt-1 h-3 w-3 flex-shrink-0" style={{ color: 'var(--brand-success)' }} /><span style={{ color: 'var(--sp-text-secondary)' }}>{a}</span></li>)}
                   </ul>
                 </section>
               )}
@@ -129,7 +129,7 @@ export default async function RentalPage({ params }: Params) {
                     {deposit > 0 && <div className="flex justify-between gap-3"><dt>Security deposit</dt><dd className="font-semibold">{tourMoney(deposit, rental.currency)}</dd></div>}
                   </dl>
                 )}
-                {!rental.is_available && <p className="mt-3 text-sm font-semibold" style={{ color: '#C2410C' }}>Currently unavailable. Ask us about other dates.</p>}
+                {!rental.is_available && <p className="mt-3 text-sm font-semibold" style={{ color: 'var(--brand-warning-text)' }}>Currently unavailable. Ask us about other dates.</p>}
                 <div className="mt-5"><Button href="/about/contact-us" full>Enquire about this rental</Button></div>
                 <p className="mt-3 text-xs" style={muted}>Send us your dates and number of guests and we will confirm availability and arrange your stay.</p>
               </div>

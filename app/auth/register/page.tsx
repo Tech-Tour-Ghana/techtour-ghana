@@ -182,7 +182,7 @@ function RegisterContent() {
 
   if (!isThemeLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--brand-bg)]">
         <div className="text-white text-center">
           <div className="inline-block w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-4"></div>
           <p className="text-white/60">Loading...</p>
@@ -195,7 +195,7 @@ function RegisterContent() {
     <div className="min-h-screen flex flex-col lg:flex-row relative">
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl max-w-md w-full p-6 md:p-8 shadow-2xl relative">
+          <div className="bg-[var(--brand-ink)] border border-white/10 rounded-2xl max-w-md w-full p-6 md:p-8 shadow-2xl relative">
             <button onClick={closeModal} className="absolute top-4 right-4 text-white/30 hover:text-white/60 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -225,8 +225,8 @@ function RegisterContent() {
       )}
 
       {/* LEFT SIDE - Branding Section (Desktop only) */}
-      <div style={panel?.bg ? { backgroundImage: `url("${encodeURI(panel.bg)}")`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined} className="hidden lg:flex lg:w-1/2 flex-col justify-between p-8 xl:p-12 relative overflow-hidden bg-[#1a1a2e] min-h-screen">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e]/60 via-[#1a1a2e]/40 to-[#1a1a2e]/20 pointer-events-none"></div>
+      <div style={panel?.bg ? { backgroundImage: `url("${encodeURI(panel.bg)}")`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined} className="hidden lg:flex lg:w-1/2 flex-col justify-between p-8 xl:p-12 relative overflow-hidden bg-[var(--brand-ink)] min-h-screen">
+        <div className="absolute inset-0 bg-gradient-to-br from-[rgba(var(--brand-ink-rgb),0.6)] via-[rgba(var(--brand-ink-rgb),0.4)] to-[rgba(var(--brand-ink-rgb),0.2)] pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col justify-between h-full">
           <Link href="/">
@@ -256,7 +256,7 @@ function RegisterContent() {
       </div>
 
       {/* RIGHT SIDE - Registration Form */}
-      <div className={`w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 ${isDarkMode ? 'bg-[#0a0a0f]' : 'bg-white'} min-h-screen relative`}>
+      <div className={`w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 ${isDarkMode ? 'bg-[var(--brand-bg)]' : 'bg-white'} min-h-screen relative`}>
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20">
           <Link href="/" className={`text-sm transition-colors ${isDarkMode ? 'text-white/40 hover:text-white/70' : 'text-gray-400 hover:text-gray-700'}`}>
             Back to Home
@@ -308,7 +308,7 @@ function RegisterContent() {
                   id="register-first_name" name="first_name"
                   value={formData.first_name}
                   onChange={handleInputChange}
-                  className={`w-1/2 px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[#F59E0B]'}`}
+                  className={`w-1/2 px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[var(--brand-ink)] border border-white/10 text-white placeholder:text-white/50 focus:border-[var(--brand-warning)]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[var(--brand-warning)]'}`}
                   placeholder="First"
                   required
                 />
@@ -317,7 +317,7 @@ function RegisterContent() {
                   aria-label="Last name" name="last_name"
                   value={formData.last_name}
                   onChange={handleInputChange}
-                  className={`w-1/2 px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[#F59E0B]'}`}
+                  className={`w-1/2 px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[var(--brand-ink)] border border-white/10 text-white placeholder:text-white/50 focus:border-[var(--brand-warning)]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[var(--brand-warning)]'}`}
                   placeholder="Last"
                   required
                 />
@@ -331,7 +331,7 @@ function RegisterContent() {
                 id="register-email" name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[#F59E0B]'}`}
+                className={`w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[var(--brand-ink)] border border-white/10 text-white placeholder:text-white/50 focus:border-[var(--brand-warning)]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[var(--brand-warning)]'}`}
                 placeholder="johndoe@gmail.com"
                 required
               />
@@ -345,7 +345,7 @@ function RegisterContent() {
                   id="register-password1" name="password1"
                   value={formData.password1}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-2.5 pr-10 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[#F59E0B]'}`}
+                  className={`w-full px-4 py-2.5 pr-10 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[var(--brand-ink)] border border-white/10 text-white placeholder:text-white/50 focus:border-[var(--brand-warning)]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[var(--brand-warning)]'}`}
                   placeholder="Create a strong password"
                   required
                 />
@@ -366,14 +366,14 @@ function RegisterContent() {
                 <div className={`mt-1.5 text-xs space-y-0.5 ${isDarkMode ? 'text-white/60' : 'text-gray-600'}`}>
                   {!Object.values(requirements).every(Boolean) ? (
                     <>
-                      <div className={`flex items-center gap-1.5 ${requirements.length ? 'text-[#F59E0B]' : isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>{requirements.length ? '✓' : '○'} At least 8 characters</div>
-                      <div className={`flex items-center gap-1.5 ${requirements.number ? 'text-[#F59E0B]' : isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>{requirements.number ? '✓' : '○'} Add a number</div>
-                      <div className={`flex items-center gap-1.5 ${requirements.upper ? 'text-[#F59E0B]' : isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>{requirements.upper ? '✓' : '○'} Add uppercase letter</div>
-                      <div className={`flex items-center gap-1.5 ${requirements.lower ? 'text-[#F59E0B]' : isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>{requirements.lower ? '✓' : '○'} Add lowercase letter</div>
-                      <div className={`flex items-center gap-1.5 ${requirements.special ? 'text-[#F59E0B]' : isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>{requirements.special ? '✓' : '○'} Add special character (!@#_-)</div>
+                      <div className={`flex items-center gap-1.5 ${requirements.length ? 'text-[var(--brand-warning)]' : isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>{requirements.length ? '✓' : '○'} At least 8 characters</div>
+                      <div className={`flex items-center gap-1.5 ${requirements.number ? 'text-[var(--brand-warning)]' : isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>{requirements.number ? '✓' : '○'} Add a number</div>
+                      <div className={`flex items-center gap-1.5 ${requirements.upper ? 'text-[var(--brand-warning)]' : isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>{requirements.upper ? '✓' : '○'} Add uppercase letter</div>
+                      <div className={`flex items-center gap-1.5 ${requirements.lower ? 'text-[var(--brand-warning)]' : isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>{requirements.lower ? '✓' : '○'} Add lowercase letter</div>
+                      <div className={`flex items-center gap-1.5 ${requirements.special ? 'text-[var(--brand-warning)]' : isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>{requirements.special ? '✓' : '○'} Add special character (!@#_-)</div>
                     </>
                   ) : (
-                    <div className="flex items-center gap-1.5 text-[#F59E0B]">✓ All password requirements met!</div>
+                    <div className="flex items-center gap-1.5 text-[var(--brand-warning)]">✓ All password requirements met!</div>
                   )}
                 </div>
               )}
@@ -387,7 +387,7 @@ function RegisterContent() {
                   id="register-password2" name="password2"
                   value={formData.password2}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-2.5 pr-10 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10 text-white placeholder:text-white/50 focus:border-[#F59E0B]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[#F59E0B]'}`}
+                  className={`w-full px-4 py-2.5 pr-10 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${isDarkMode ? 'bg-[var(--brand-ink)] border border-white/10 text-white placeholder:text-white/50 focus:border-[var(--brand-warning)]' : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-[var(--brand-warning)]'}`}
                   placeholder="Confirm your password"
                   required
                 />
@@ -405,7 +405,7 @@ function RegisterContent() {
                 </button>
               </div>
               {formData.password2 && (
-                <div className={`mt-1 text-xs ${passwordsMatch ? 'text-[#F59E0B]' : 'text-red-400'}`}>
+                <div className={`mt-1 text-xs ${passwordsMatch ? 'text-[var(--brand-warning)]' : 'text-red-400'}`}>
                   {passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
                 </div>
               )}
@@ -423,7 +423,7 @@ function RegisterContent() {
           <div className="space-y-3">
             <button
               onClick={handleGoogleSignup}
-              className={`w-full flex items-center justify-center gap-3 py-2.5 px-4 border rounded-lg text-sm font-medium transition-all ${isDarkMode ? 'border-white/10 text-white/80 hover:bg-white/5 hover:border-[#F59E0B]/30' : 'border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-[#F59E0B]'}`}
+              className={`w-full flex items-center justify-center gap-3 py-2.5 px-4 border rounded-lg text-sm font-medium transition-all ${isDarkMode ? 'border-white/10 text-white/80 hover:bg-white/5 hover:border-[rgba(var(--brand-warning-rgb),0.3)]' : 'border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-[var(--brand-warning)]'}`}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#ea4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -437,7 +437,7 @@ function RegisterContent() {
 
           <div className={`text-center mt-6 text-sm ${isDarkMode ? 'text-white/40' : 'text-gray-500'}`}>
             Already have an account?{' '}
-            <Link href="/auth/login" className="text-[#F59E0B] hover:text-[#D97706] font-medium">
+            <Link href="/auth/login" className="text-[var(--brand-warning)] hover:text-[var(--brand-warning)] font-medium">
               Sign in
             </Link>
           </div>
@@ -451,7 +451,7 @@ export default function RegisterPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--brand-bg)]">
           <div className="text-white text-center">
             <div className="inline-block w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-4"></div>
             <p className="text-white/60">Loading...</p>

@@ -70,7 +70,7 @@
 [data-theme="dim"] .newsletter-input-wide:-webkit-autofill:hover,
 [data-theme="dim"] .newsletter-input-wide:-webkit-autofill:focus,
 [data-theme="dim"] .newsletter-input-wide:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #1A1A1A inset !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--brand-ink) inset !important;
   -webkit-text-fill-color: var(--brand-text) !important;
   caret-color: var(--brand-text) !important;
   border-color: rgba(var(--brand-primary-rgb), 0.2) !important;
@@ -83,7 +83,7 @@
 }
 
 [data-theme="dim"] .newsletter-input-wide:-moz-autofill {
-  box-shadow: 0 0 0 1000px #1A1A1A inset !important;
+  box-shadow: 0 0 0 1000px var(--brand-ink) inset !important;
   color: var(--brand-text) !important;
 }
 
@@ -94,7 +94,7 @@
 }
 
 [data-theme="dim"] .newsletter-input-wide:focus:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px #1A1A1A inset, 0 0 0 3px var(--footer-gold-light) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--brand-ink) inset, 0 0 0 3px var(--footer-gold-light) !important;
   border-color: var(--footer-gold) !important;
 }
 
@@ -556,7 +556,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--brand-white-rgb), 0.1), transparent);
   transition: var(--transition);
 }
 
@@ -588,15 +588,15 @@
   display: inline-block;
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+  border: 2px solid rgba(var(--brand-white-rgb), 0.3);
+  border-top-color: var(--brand-white);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 
 [data-theme="dim"] .spinner-ring {
-  border: 2px solid rgba(0, 0, 0, 0.3);
-  border-top-color: #000;
+  border: 2px solid rgba(var(--brand-black-rgb), 0.3);
+  border-top-color: var(--brand-black);
 }
 
 @keyframes spin {
@@ -627,13 +627,13 @@
 }
 
 .newsletter-error-wide {
-  background: rgba(231, 76, 60, 0.1);
-  color: #E74C3C;
+  background: rgba(var(--brand-error-rgb), 0.1);
+  color: var(--brand-error);
 }
 
 .newsletter-success-wide {
-  background: rgba(46, 204, 113, 0.1);
-  color: #2ECC71;
+  background: rgba(var(--brand-success-rgb), 0.1);
+  color: var(--brand-success);
 }
 
 .error-icon,
@@ -711,7 +711,7 @@
 
 .social-icon-circle:hover {
   transform: translateY(-4px) scale(1.05);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 25px rgba(var(--brand-black-rgb), 0.3);
 }
 
 .social-icon-circle:hover svg {
