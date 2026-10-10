@@ -63,7 +63,7 @@ export const ServiceThemeStyles = () => (
       
       --sp-text-primary: #FFFFFF;
       --sp-text-secondary: #B0B0B0;
-      --sp-text-muted: #6B7280;
+      --sp-text-muted: #9CA3AF;
       --sp-text-subtle: #9CA3AF;
       
       --sp-border: rgba(230, 166, 77, 0.1);
@@ -92,6 +92,13 @@ export const ServiceThemeStyles = () => (
         rgba(0, 0, 0, 0.2) 40%,
         rgba(0, 0, 0, 0.7) 100%
       );
+    }
+
+    /* Gold is the primary colour in dark mode. White text on it is 2.1:1, so
+       anything painted with the primary colour gets dark text instead. */
+    [data-theme="dim"] [style*="background: var(--sp-primary"],
+    [data-theme="dim"] [style*="background:var(--sp-primary"] {
+      color: #1A1A2E !important;
     }
 
     /* ============================================================

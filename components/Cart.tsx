@@ -395,7 +395,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
             <div style={{
               textAlign: 'center',
               padding: '60px 20px',
-              color: isDimMode ? '#6B7280' : '#9CA3AF',
+              color: isDimMode ? '#9CA3AF' : '#6B7280',
             }}>
               <p style={{ fontSize: '48px', marginBottom: '16px' }}><FontAwesomeIcon icon={faShoppingCart} /></p>
               <p style={{ fontSize: '16px', fontWeight: '500' }}>Your cart is empty</p>
@@ -445,7 +445,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                     </div>
                     <div style={{ 
                       fontSize: '12px', 
-                      color: isDimMode ? '#6B7280' : '#9CA3AF',
+                      color: isDimMode ? '#9CA3AF' : '#6B7280',
                       marginTop: '2px',
                     }}>
                       {item.selectedColor && `Color: ${item.selectedColor}`}

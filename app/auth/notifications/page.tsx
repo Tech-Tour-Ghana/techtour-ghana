@@ -85,7 +85,7 @@ export default function NotificationsPage() {
     cardBg: isDimMode ? '#1A1A1A' : '#FFFFFF',
     textPrimary: isDimMode ? '#FFFFFF' : '#000000',
     textSecondary: isDimMode ? '#B0B0B0' : '#4A4A4A',
-    textMuted: isDimMode ? '#6B7280' : '#9CA3AF',
+    textMuted: isDimMode ? '#9CA3AF' : '#6B7280',
     border: isDimMode ? 'rgba(255,255,255,0.05)' : '#E5E7EB',
     hoverBg: isDimMode ? 'rgba(255,255,255,0.03)' : '#F9F9F9',
   };

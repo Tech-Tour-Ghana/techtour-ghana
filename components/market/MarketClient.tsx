@@ -335,7 +335,7 @@ const ProductCard = React.memo(({
     if (isDisabled) {
       return {
         background: isDimMode ? '#2A2A2A' : '#E5E7EB',
-        color: isDimMode ? '#6B7280' : '#9CA3AF',
+        color: isDimMode ? '#9CA3AF' : '#6B7280',
         border: 'none',
       };
     }
@@ -1363,7 +1363,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                   padding: '8px 16px',
                   borderRadius: '6px',
                   background: currentPage === 1 ? (isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6') : (isDimMode ? 'rgba(230,166,77,0.15)' : 'rgba(19,158,162,0.1)'),
-                  color: currentPage === 1 ? (isDimMode ? '#6B7280' : '#9CA3AF') : (isDimMode ? colors.primary : '#139EA2'),
+                  color: currentPage === 1 ? (isDimMode ? '#9CA3AF' : '#6B7280') : (isDimMode ? colors.primary : '#139EA2'),
                   border: 'none',
                   cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
                   fontWeight: '500',
@@ -1407,7 +1407,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                   padding: '8px 16px',
                   borderRadius: '6px',
                   background: currentPage === totalPages ? (isDimMode ? 'rgba(255,255,255,0.05)' : '#F3F4F6') : (isDimMode ? 'rgba(230,166,77,0.15)' : 'rgba(19,158,162,0.1)'),
-                  color: currentPage === totalPages ? (isDimMode ? '#6B7280' : '#9CA3AF') : (isDimMode ? colors.primary : '#139EA2'),
+                  color: currentPage === totalPages ? (isDimMode ? '#9CA3AF' : '#6B7280') : (isDimMode ? colors.primary : '#139EA2'),
                   border: 'none',
                   cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
                   fontWeight: '500',
