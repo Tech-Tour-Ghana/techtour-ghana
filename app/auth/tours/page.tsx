@@ -17,8 +17,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarCheck, faGlobeAfrica, faClock, faMapMarkerAlt, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 
 const BRAND_COLORS = {
-  tropicalTeal: '#0D7A7D',
-  sandyOrange: '#E6A64D',
+  tropicalTeal: 'var(--brand-teal)',
+  sandyOrange: 'var(--brand-gold)',
 };
 
 export default function ToursPage() {

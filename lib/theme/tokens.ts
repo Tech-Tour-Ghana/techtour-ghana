@@ -146,6 +146,7 @@ export function themeVars(mode: ThemeMode, p: ThemePalette): Record<string, stri
     '--brand-bg': p.background, '--brand-bg-alt': p.backgroundAlt, '--brand-card': p.card,
     '--brand-text': p.text, '--brand-text-2': p.textSecondary, '--brand-muted': p.muted,
     '--brand-on-primary': onColor(p.primary),
+    '--brand-teal': dark ? p.accent : p.primary, '--brand-gold': dark ? p.primary : p.accent,
     '--brand-primary-rgb': rgb, '--brand-accent-rgb': accentRgb,
     '--sp-bg-primary': p.background, '--sp-bg-secondary': p.backgroundAlt, '--sp-bg-card': p.card, '--sp-bg-card-hover': p.card, '--sp-bg-input': p.card, '--sp-bg-elevated': p.card,
     '--sp-text-primary': p.text, '--sp-text-secondary': p.textSecondary, '--sp-text-muted': p.muted, '--sp-text-subtle': p.muted,
@@ -169,7 +170,16 @@ const block = (selector: string, vars: Record<string, string>) => `${selector}{$
  */
 export function buildThemeCss(overrides: ThemeOverrides): string {
   const parts: string[] = [];
-  if (overrides.light && Object.keys(overrides.light).length) parts.push(block('html:not([data-theme]),html[data-theme="bright"]', themeVars('light', paletteFor('light', overrides))));
-  if (overrides.dark && Object.keys(overrides.dark).length) parts.push(block('html[data-theme="dim"],html[data-theme="dark"]', themeVars('dark', paletteFor('dark', overrides))));
+  if (overrides.light && Object.keys(overrides.light).length) {
+    const p = paletteFor('light', overrides);
+    parts.push(block('html:not([data-theme]),html[data-theme="bright"]', themeVars('light', p)));
+    parts.push(`html:not([data-theme]) body,html[data-theme="bright"] body{background-color:${p.background};color:${p.text}}`);
+  }
+  if (overrides.dark && Object.keys(overrides.dark).length) {
+    const p = paletteFor('dark', overrides);
+    parts.push(block('html[data-theme="dim"],html[data-theme="dark"]', themeVars('dark', p)));
+    parts.push(`html[data-theme="dim"] body,html[data-theme="dark"] body{background-color:${p.background};color:${p.text}}`);
+    parts.push(`html[data-theme="dim"] .bg-white,html[data-theme="dark"] .bg-white{background-color:${p.card} !important}`);
+  }
   return parts.join('\n');
 }

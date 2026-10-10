@@ -195,7 +195,7 @@ function PaymentVerifyPageContent() {
           )}
 
           <div className="flex flex-col gap-2 mt-4">
-            <Button href="/market" variant="accent" arrow={false} full icon={faShoppingCart} style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${isDimMode ? '#D4953A' : '#0D7A7D'} 100%)`, color: isDimMode ? '#0A0A0A' : 'white' }}>
+            <Button href="/market" variant="accent" arrow={false} full icon={faShoppingCart} style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${isDimMode ? '#D4953A' : 'var(--brand-primary)'} 100%)`, color: isDimMode ? '#0A0A0A' : 'white' }}>
               Continue Shopping
             </Button>
             <Button href="/" variant="secondary" arrow={false} full icon={faHome} style={{ color: primaryColor }}>

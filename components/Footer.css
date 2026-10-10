@@ -1,45 +1,42 @@
 /* components/Footer.css */
 
 :root {
-  /* Brand Colors - Matching Navbar */
-  --footer-primary: #0D7A7D;
-  --footer-primary-dark: #0D7A7D;
-  --footer-primary-light: rgba(19,158,162,0.1);
-  --footer-gold: #E6A64D;
-  --footer-gold-dark: #D4953A;
-  --footer-gold-light: rgba(230,166,77,0.1);
-  
+  /* Brand colours come from the --brand-* variables (app/globals.css), which
+     Admin > Settings > Branding can override. */
+  --footer-primary: var(--brand-primary);
+  --footer-primary-dark: var(--brand-primary-dark);
+  --footer-primary-light: rgba(var(--brand-primary-rgb), 0.1);
+  --footer-gold: var(--brand-accent);
+  --footer-gold-dark: var(--brand-accent);
+  --footer-gold-light: rgba(var(--brand-accent-rgb), 0.1);
+
   /* Light Mode */
-  --footer-bg: #F8FAFA;
-  --footer-text: #1A1A2E;
-  --footer-text-secondary: #4A4A4A;
-  --footer-text-muted: #6B7280;
-  --footer-border: rgba(19,158,162,0.12);
-  --footer-card-bg: rgba(19,158,162,0.04);
-  --footer-card-hover: rgba(19,158,162,0.08);
-  --footer-glow: rgba(19,158,162,0.08);
-  --footer-gradient-start: #F8FAFA;
-  --footer-gradient-end: #F0F2F2;
-  --footer-input-bg: #FFFFFF;
-  --footer-input-text: #1A1A2E;
-  
+  --footer-bg: var(--brand-bg);
+  --footer-text: var(--brand-text);
+  --footer-text-secondary: var(--brand-text-2);
+  --footer-text-muted: var(--brand-muted);
+  --footer-border: rgba(var(--brand-primary-rgb), 0.12);
+  --footer-card-bg: rgba(var(--brand-primary-rgb), 0.04);
+  --footer-card-hover: rgba(var(--brand-primary-rgb), 0.08);
+  --footer-glow: rgba(var(--brand-primary-rgb), 0.08);
+  --footer-gradient-start: var(--brand-bg);
+  --footer-gradient-end: var(--brand-bg-alt);
+  --footer-input-bg: var(--brand-card);
+  --footer-input-text: var(--brand-text);
+
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 [data-theme="dim"] {
-  /* Dark Mode */
-  --footer-bg: #0A0A0A;
-  --footer-text: #FFFFFF;
-  --footer-text-secondary: #B0B0B0;
-  --footer-text-muted: #9CA3AF;
-  --footer-border: rgba(230,166,77,0.12);
-  --footer-card-bg: rgba(230,166,77,0.04);
-  --footer-card-hover: rgba(230,166,77,0.08);
-  --footer-glow: rgba(230,166,77,0.08);
-  --footer-gradient-start: #0A0A0A;
-  --footer-gradient-end: #0F0F0F;
-  --footer-input-bg: #1A1A1A;
-  --footer-input-text: #FFFFFF;
+  /* Dark Mode: gold is the brand colour here, so the accent highlight is the primary. */
+  --footer-gold: var(--brand-primary);
+  --footer-gold-dark: var(--brand-primary-dark);
+  --footer-gold-light: rgba(var(--brand-primary-rgb), 0.1);
+  --footer-border: rgba(var(--brand-primary-rgb), 0.12);
+  --footer-card-bg: rgba(var(--brand-primary-rgb), 0.04);
+  --footer-card-hover: rgba(var(--brand-primary-rgb), 0.08);
+  --footer-glow: rgba(var(--brand-primary-rgb), 0.08);
+  --footer-gradient-end: var(--brand-bg-alt);
 }
 
 .footer {
@@ -74,9 +71,9 @@
 [data-theme="dim"] .newsletter-input-wide:-webkit-autofill:focus,
 [data-theme="dim"] .newsletter-input-wide:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px #1A1A1A inset !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-  caret-color: #FFFFFF !important;
-  border-color: rgba(230,166,77,0.2) !important;
+  -webkit-text-fill-color: var(--brand-text) !important;
+  caret-color: var(--brand-text) !important;
+  border-color: rgba(var(--brand-primary-rgb), 0.2) !important;
 }
 
 /* Firefox autofill */
@@ -87,7 +84,7 @@
 
 [data-theme="dim"] .newsletter-input-wide:-moz-autofill {
   box-shadow: 0 0 0 1000px #1A1A1A inset !important;
-  color: #FFFFFF !important;
+  color: var(--brand-text) !important;
 }
 
 /* When autofill is selected and focused */
@@ -569,7 +566,7 @@
 
 [data-theme="dim"] .newsletter-btn-wide {
   background: var(--footer-gold);
-  color: #0A0A0A;
+  color: var(--brand-on-primary);
 }
 
 [data-theme="dim"] .newsletter-btn-wide:hover {
@@ -631,12 +628,12 @@
 
 .newsletter-error-wide {
   background: rgba(231, 76, 60, 0.1);
-  color: #e74c3c;
+  color: #E74C3C;
 }
 
 .newsletter-success-wide {
   background: rgba(46, 204, 113, 0.1);
-  color: #2ecc71;
+  color: #2ECC71;
 }
 
 .error-icon,
