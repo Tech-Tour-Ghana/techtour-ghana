@@ -10,6 +10,7 @@ import SiteBreadcrumbs, { CrumbProvider } from "@/components/SiteBreadcrumbs";
 import { Suspense, useState, useEffect } from "react";
 import { usePathname } from 'next/navigation';
 import BackToTop from '@/components/BackToTop';
+import NoticeBanner from '@/components/notices/NoticeBanner';
 
 const Cart = dynamic(
   () => import('@/components/Cart'),
@@ -65,6 +66,7 @@ export default function AppShell({
         {!isFullPageOnly && <Navbar />}
         {/* Add auth-page class to main for auth pages */}
         <main id="main-content" tabIndex={-1} className={isFullPageOnly ? "min-h-screen" : isAuthPage ? "auth-page page-main" : "page-main"}>
+          {!isFullPageOnly && <NoticeBanner />}
           {!isFullPageOnly && <SiteBreadcrumbs />}
           {children}
         </main>
