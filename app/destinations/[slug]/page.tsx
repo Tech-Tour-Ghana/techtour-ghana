@@ -81,15 +81,6 @@ export default async function DestinationPage({ params }: Params) {
             <div className="absolute inset-0 -z-10" style={{ background: 'linear-gradient(180deg, rgba(var(--brand-ink-rgb), 0.5) 0%, rgba(var(--brand-ink-rgb), 0.8) 100%)' }} />
           )}
           <div className="mx-auto flex min-h-[22rem] max-w-6xl flex-col justify-end px-4 pb-10 pt-16 md:min-h-[26rem] md:pb-14" style={{ color: 'var(--brand-white)' }}>
-            <nav aria-label="Breadcrumb" className="mb-4 text-sm" style={{ color: 'rgba(var(--brand-white-rgb), 0.85)' }}>
-              <ol className="flex flex-wrap items-center gap-2">
-                <li><Link href="/" className="hover:underline">Home</Link></li>
-                <li aria-hidden="true">/</li>
-                <li><Link href="/tours" className="hover:underline">Tours Listings</Link></li>
-                <li aria-hidden="true">/</li>
-                <li aria-current="page">{destination.name}</li>
-              </ol>
-            </nav>
             <h1 className="max-w-3xl text-4xl font-bold md:text-5xl">{destination.name}</h1>
             <p className="mt-3 max-w-2xl text-lg" style={{ color: 'rgba(var(--brand-white-rgb), 0.92)' }}>{destination.tagline}</p>
             <ul className="mt-5 flex flex-wrap gap-2 text-sm">
