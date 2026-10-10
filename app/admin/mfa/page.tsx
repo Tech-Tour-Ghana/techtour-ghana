@@ -21,10 +21,14 @@ export default function AdminMfaPage() {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { window.location.replace('/admin/login'); return; }
-      const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (data?.currentLevel === 'aal2' || data?.nextLevel !== 'aal2') { window.location.replace('/admin'); return; }
-      const { data: factors } = await supabase.auth.mfa.listFactors();
-      setFactorId(factors?.totp[0]?.id ?? null);
+      const [{ data: aal }, { data: factors }] = await Promise.all([
+        supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+        supabase.auth.mfa.listFactors(),
+      ]);
+      const id = factors?.totp[0]?.id ?? null;
+      // Nothing to verify, or already verified: go on to the admin.
+      if (!id || aal?.currentLevel === 'aal2') { window.location.replace('/admin'); return; }
+      setFactorId(id);
       setReady(true);
     })();
   }, []);
