@@ -167,7 +167,7 @@ export default function NavigationPage() {
               <div key={menu.id}>
                 <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: themeStyles.border }}>
                   <div className="flex items-center gap-3">
-                    <button onClick={() => setExpandedMenu(expandedMenu === menu.id ? null : menu.id)} style={{ color: themeStyles.textMuted }}>
+                    <button onClick={() => setExpandedMenu(expandedMenu === menu.id ? null : menu.id)} aria-label={`${expandedMenu === menu.id ? 'Collapse' : 'Expand'} ${menu.label}`} aria-expanded={expandedMenu === menu.id} style={{ color: themeStyles.textMuted }}>
                       <FontAwesomeIcon icon={expandedMenu === menu.id ? faChevronDown : faChevronRight} className="w-3 h-3" />
                     </button>
                     <div>
