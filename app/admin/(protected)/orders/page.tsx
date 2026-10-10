@@ -13,7 +13,7 @@ import AdminLayout from '@/components/AdminLayout';
 import { notify } from '@/components/admin/toast';
 import {
   Button, IconButton, Modal, SearchInput, StatTile, StatusPill, StatusSelect, TableCard, Tabs, Toolbar,
-  downloadCsv, fieldStyle, fmtDate, rowClass, type Tone,
+  confirmAction, downloadCsv, fieldStyle, fmtDate, rowClass, type Tone,
 } from '@/components/admin/ui';
 import type { Database } from '@/types/database';
 
@@ -63,8 +63,13 @@ export default function AdminOrdersPage() {
   useEffect(() => { load(); }, [load]);
 
   async function update(id: string, patch: { order_status?: OrderStatus; tracking_number?: string }) {
+    const target = orders.find((o) => o.id === id);
+    if (target && (patch.order_status === 'shipped' || patch.order_status === 'delivered') && target.payment_status !== 'success') {
+      if (!(await confirmAction({ title: 'Order not paid', message: `Order ${target.order_number} has not been paid. Mark it as ${patch.order_status} anyway?`, confirmLabel: `Mark ${patch.order_status}` }))) { await load(); return; }
+    }
     const { error: err } = await supabase.from('orders').update(patch).eq('id', id);
     if (err) return notify('Could not update the order. Please try again.');
+    notify(patch.order_status ? 'Status updated. The customer was notified.' : 'Order updated.', 'success');
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, ...patch } : o)));
     setOpen((o) => (o?.id === id ? { ...o, ...patch } : o));
   }

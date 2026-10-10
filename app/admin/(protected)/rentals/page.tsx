@@ -11,7 +11,8 @@ import { faCopy, faHouse, faPencil, faPlus, faStar, faTrash } from '@fortawesome
 import AdminLayout from '@/components/AdminLayout';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import { notify } from '@/components/admin/toast';
-import { Button, IconButton, Modal, SearchInput, StatTile, TableCard, Toggle, Toolbar, confirmAction, fieldStyle, reportError, rowClass } from '@/components/admin/ui';
+import RentalBookingsPanel from '@/components/admin/rentals/RentalBookingsPanel';
+import { Button, IconButton, Modal, SearchInput, StatTile, TableCard, Tabs, Toggle, Toolbar, confirmAction, fieldStyle, reportError, rowClass } from '@/components/admin/ui';
 import { CURRENCY_CODES, Field, Section, inputCls, money, slugify, type CurrencyCode } from '@/components/admin/tours/shared';
 import { createBrowserClient } from '@/lib/supabase/client';
 import type { Database } from '@/types/database';
@@ -79,6 +80,8 @@ function build(f: Form): { error: string } | { row: RentalInsert } {
 }
 
 export default function AdminRentalsPage() {
+  const [tab, setTab] = useState<'rentals' | 'bookings'>('rentals');
+  const [pendingStays, setPendingStays] = useState(0);
   const supabase = useMemo(() => createBrowserClient(), []);
   const [rentals, setRentals] = useState<Rental[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,6 +102,9 @@ export default function AdminRentalsPage() {
   }, [supabase]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    supabase.from('vacation_bookings').select('id', { count: 'exact', head: true }).eq('status', 'pending').then(({ count }) => setPendingStays(count ?? 0));
+  }, [supabase]);
 
   const q = search.trim().toLowerCase();
   const shown = rentals.filter((r) => {
@@ -158,6 +164,10 @@ export default function AdminRentalsPage() {
 
   return (
     <AdminLayout title="Vacation Rentals" subtitle="Rentals shown on the Dream Vacations page">
+      <div className="mb-4">
+        <Tabs value={tab} onChange={setTab} tabs={[{ key: 'rentals' as const, label: 'Rentals', count: rentals.length }, { key: 'bookings' as const, label: 'Stay requests', count: pendingStays }]} />
+      </div>
+      {tab === 'bookings' ? <RentalBookingsPanel onCount={setPendingStays} /> : (<>
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatTile icon={faHouse} label="Active rentals" value={rentals.filter((r) => r.is_active).length} tone="info" />
         <StatTile icon={faHouse} label="Available now" value={rentals.filter((r) => r.is_active && r.is_available).length} tone="success" />
@@ -285,6 +295,7 @@ export default function AdminRentalsPage() {
           </Section>
         </Modal>
       )}
+      </>)}
     </AdminLayout>
   );
 }
