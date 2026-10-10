@@ -15,8 +15,8 @@ import { useTheme } from '@/context/ThemeContext';
 import DashboardLayout from '@/components/DashboardLayout';
 
 const BRAND_COLORS = {
-  tropicalTeal: '#0D7A7D',
-  sandyOrange: '#E6A64D',
+  tropicalTeal: 'var(--brand-teal)',
+  sandyOrange: 'var(--brand-gold)',
 };
 
 export default function DashboardPage() {
@@ -67,7 +67,7 @@ export default function DashboardPage() {
           <p className="text-sm font-medium" style={{ color: themeStyles.textSecondary }}>{label}</p>
           <p className="text-2xl font-bold mt-1" style={{ color: themeStyles.textPrimary }}>{value}</p>
         </div>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}20` }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `color-mix(in srgb, ${color} 12%, transparent)` }}>
           <FontAwesomeIcon icon={icon} style={{ color }} />
         </div>
       </div>

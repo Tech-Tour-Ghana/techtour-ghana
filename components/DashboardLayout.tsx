@@ -31,8 +31,8 @@ import { useCart } from '@/context/CartContext';
 import { getAuthStatus, getNotifications, logoutUser, type Notification, type User } from '@/lib/api';
 
 const BRAND_COLORS = {
-  tropicalTeal: '#0D7A7D',
-  sandyOrange: '#E6A64D',
+  tropicalTeal: 'var(--brand-teal)',
+  sandyOrange: 'var(--brand-gold)',
 };
 
 export const SIDEBAR_ITEMS = [
@@ -151,7 +151,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
                 aria-current={isActive ? 'page' : undefined}
                 className="mb-1 flex min-h-[2.75rem] items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors hover:bg-white/5"
                 style={{
-                  background: isActive ? `${BRAND_COLORS.tropicalTeal}33` : 'transparent',
+                  background: isActive ? `color-mix(in srgb, ${BRAND_COLORS.tropicalTeal} 20%, transparent)` : 'transparent',
                   color: isActive ? '#5FD3D6' : 'rgba(255,255,255,0.72)',
                 }}
               >

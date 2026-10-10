@@ -16,8 +16,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCreditCard, faGlobeAfrica, faCheckCircle, faClock, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 
 const BRAND_COLORS = {
-  tropicalTeal: '#0D7A7D',
-  sandyOrange: '#E6A64D',
+  tropicalTeal: 'var(--brand-teal)',
+  sandyOrange: 'var(--brand-gold)',
 };
 
 export default function PaymentsPage() {
