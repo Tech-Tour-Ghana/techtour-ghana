@@ -99,7 +99,9 @@ export const ServiceThemeStyles = () => (
     [data-theme="dim"] [style*="background: var(--sp-primary)"],
     [data-theme="dim"] [style*="background: var(--sp-primary,"],
     [data-theme="dim"] [style*="background: var(--sp-primary-dark"],
-    [data-theme="dim"] [style*="background:var(--sp-primary)"] {
+    [data-theme="dim"] [style*="background:var(--sp-primary)"],
+    [data-theme="dim"] [style*="background:var(--sp-primary,"],
+    [data-theme="dim"] [style*="background:var(--sp-primary-dark"] {
       color: #1A1A2E !important;
     }
 
