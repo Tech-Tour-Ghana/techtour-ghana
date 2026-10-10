@@ -14,7 +14,7 @@ export default async function FeaturedTours() {
         <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sp-primary)' }}>Guided trips</p>
         <h2 id="home-tours" className="mt-2 text-[clamp(1.5rem,1.2rem+1.5vw,2.25rem)] font-bold leading-tight">Featured tours</h2>
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {data.map((row) => <TourCard key={row.id} tour={toCard(row)} />)}
+          {data.map((row) => <TourCard key={row.id} tour={toCard(row)} headingLevel="h3" />)}
         </div>
         <div className="mt-8"><Button href="/tours">View all tours</Button></div>
       </div>
