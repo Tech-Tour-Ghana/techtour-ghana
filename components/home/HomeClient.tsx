@@ -118,6 +118,8 @@ const ImageDisplay = ({ media, isDimMode, cardType, colors }: any) => {
           src={imageUrl}
           alt={media.title}
           className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+          // Server-rendered images can finish before hydration, so onLoad never fires.
+          ref={(el) => { if (el?.complete) setIsLoaded(true); }}
           onLoad={() => setIsLoaded(true)}
           onError={() => setIsLoaded(true)}
         />

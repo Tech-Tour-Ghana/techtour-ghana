@@ -381,6 +381,8 @@ const ProductCard = React.memo(({
             src={imageUrl}
             alt={product.title}
             className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            // Server-rendered images can finish before hydration, so onLoad never fires.
+            ref={(el) => { if (el?.complete) setImageLoaded(true); }}
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageLoaded(true)}
           />
