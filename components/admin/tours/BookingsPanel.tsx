@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleInfo, faDownload } from '@fortawesome/free-solid-svg-icons';
 
+import { notify } from '@/components/admin/toast';
 import { Button, IconButton, Modal, SearchInput, StatusPill, StatusSelect, TableCard, Tabs, Toolbar, downloadCsv, fmtDate, reportError, rowClass, type Tone } from '@/components/admin/ui';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { BOOKING_STATUSES, cap, money, type Booking, type BookingStatus, type PaymentStatus } from './shared';
@@ -22,7 +23,15 @@ export default function BookingsPanel({ bookings, loading, reload }: { bookings:
 
   async function setStatus(b: Booking, status: BookingStatus) {
     if (reportError((await supabase.from('bookings').update({ status }).eq('id', b.id)).error)) return;
+    notify('Status updated. The guest was notified.', 'success');
     setOpen((o) => (o?.id === b.id ? { ...o, status } : o));
+    await reload();
+  }
+
+  async function setPayment(b: Booking, payment_status: PaymentStatus) {
+    if (reportError((await supabase.from('bookings').update({ payment_status }).eq('id', b.id)).error)) return;
+    notify('Payment updated.', 'success');
+    setOpen((o) => (o?.id === b.id ? { ...o, payment_status } : o));
     await reload();
   }
 
@@ -83,7 +92,10 @@ export default function BookingsPanel({ bookings, loading, reload }: { bookings:
             ))}
           </dl>
           {open.special_requests && <p className="mt-4 whitespace-pre-wrap rounded-[var(--adm-radius-control)] p-3 text-sm" style={{ background: 'var(--adm-bg)', border: '1px solid var(--adm-border)', color: 'var(--adm-text)' }}><strong className="block text-xs" style={{ color: 'var(--adm-muted)' }}>Special requests</strong>{open.special_requests}</p>}
-          <div className="mt-4"><p className="mb-1 text-xs font-semibold" style={{ color: 'var(--adm-text-2)' }}>Change status</p><StatusSelect value={open.status} options={BOOKING_STATUSES} onChange={(s) => setStatus(open, s)} /></div>
+          <div className="mt-4 flex flex-wrap items-end gap-4">
+            <div><p className="mb-1 text-xs font-semibold" style={{ color: 'var(--adm-text-2)' }}>Change status</p><StatusSelect value={open.status} options={BOOKING_STATUSES} onChange={(s) => setStatus(open, s)} /></div>
+            <Button variant="secondary" onClick={() => setPayment(open, open.payment_status === 'success' ? 'pending' : 'success')}>{open.payment_status === 'success' ? 'Mark as unpaid' : 'Mark as paid'}</Button>
+          </div>
         </Modal>
       )}
     </>
