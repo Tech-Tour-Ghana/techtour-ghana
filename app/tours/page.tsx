@@ -4,11 +4,11 @@ import Link from 'next/link';
 import ContentShell, { cardStyle } from '@/components/content/ContentShell';
 import Button from '@/components/ui/Button';
 import TourCard from '@/components/tours/TourCard';
-import { SORTS, getTourListing, type TourSort } from '@/lib/tours/load.server';
+import { DURATIONS, SORTS, getTourListing, type TourSort } from '@/lib/tours/load.server';
 
 export const dynamic = 'force-dynamic';
 
-type SearchParams = Promise<{ destination?: string; q?: string; sort?: string; page?: string }>;
+type SearchParams = Promise<{ destination?: string; q?: string; sort?: string; page?: string; min?: string; max?: string; days?: string }>;
 
 const description = 'Guided tours across Ghana: Accra, Kumasi, Cape Coast, the Volta Region and the Northern Region. Pick a date and reserve your place.';
 
@@ -29,7 +29,7 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
 export default async function ToursPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const sort = (SORTS.some((s) => s.value === sp.sort) ? sp.sort : 'recommended') as TourSort;
-  const { tours, total, page, pages, destinations, allCount, activeDestination, q } = await getTourListing({ destination: sp.destination, q: sp.q, sort, page: sp.page });
+  const { tours, total, page, pages, destinations, allCount, activeDestination, q, min, max, days } = await getTourListing({ destination: sp.destination, q: sp.q, sort, page: sp.page, min: sp.min, max: sp.max, days: sp.days });
 
   const href = (over: { destination?: string | null; page?: number }) => {
     const params = new URLSearchParams();
@@ -37,6 +37,9 @@ export default async function ToursPage({ searchParams }: { searchParams: Search
     if (dest) params.set('destination', dest);
     if (q) params.set('q', q);
     if (sort !== 'recommended') params.set('sort', sort);
+    if (min) params.set('min', min);
+    if (max) params.set('max', max);
+    if (days) params.set('days', days);
     if (over.page && over.page > 1) params.set('page', String(over.page));
     const qs = params.toString();
     return qs ? `/tours?${qs}` : '/tours';
@@ -64,18 +67,28 @@ export default async function ToursPage({ searchParams }: { searchParams: Search
         </ul>
       </nav>
 
-      <form method="get" action="/tours" className="mb-6 grid gap-3 sm:grid-cols-[minmax(0,1fr)_14rem_auto]">
+      <form method="get" action="/tours" className="mb-6 space-y-3">
         {activeDestination && <input type="hidden" name="destination" value={activeDestination} />}
-        <input type="search" name="q" defaultValue={q} placeholder="Search tours, places or activities" aria-label="Search tours" className="min-h-[2.75rem] w-full rounded-full px-5 text-sm" style={field} />
-        <select name="sort" defaultValue={sort} aria-label="Sort tours" className="min-h-[2.75rem] w-full rounded-full px-4 text-sm" style={field}>
-          {SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-        </select>
-        <Button type="submit" variant="accent">Search</Button>
+        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_14rem_auto]">
+          <input type="search" name="q" defaultValue={q} placeholder="Search tours, places or activities" aria-label="Search tours" className="min-h-[2.75rem] w-full rounded-full px-5 text-sm" style={field} />
+          <select name="sort" defaultValue={sort} aria-label="Sort tours" className="min-h-[2.75rem] w-full rounded-full px-4 text-sm" style={field}>
+            {SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
+          <Button type="submit" variant="accent">Search</Button>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-[8rem_8rem_14rem]">
+          <input type="number" name="min" min={0} step={10} inputMode="numeric" defaultValue={min} placeholder="Min price" aria-label="Minimum price in cedis" className="min-h-[2.75rem] w-full rounded-full px-4 text-sm" style={field} />
+          <input type="number" name="max" min={0} step={10} inputMode="numeric" defaultValue={max} placeholder="Max price" aria-label="Maximum price in cedis" className="min-h-[2.75rem] w-full rounded-full px-4 text-sm" style={field} />
+          <select name="days" defaultValue={days} aria-label="Duration" className="col-span-2 min-h-[2.75rem] w-full rounded-full px-4 text-sm sm:col-span-1" style={field}>
+            <option value="">Any duration</option>
+            {DURATIONS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+          </select>
+        </div>
       </form>
 
       <p className="mb-4 text-sm" style={{ color: 'var(--sp-text-muted)' }} aria-live="polite">
         {total === 0 ? 'No tours found' : `${total} tour${total === 1 ? '' : 's'}`}{activeDestination ? ` in ${destinations.find((d) => d.slug === activeDestination)?.name}` : ''}{q ? ` for "${q}"` : ''}
-        {(q || activeDestination) && <> · <Link href="/tours" className="font-semibold underline">Clear filters</Link></>}
+        {(q || activeDestination || min || max || days) && <> · <Link href="/tours" className="font-semibold underline">Clear filters</Link></>}
       </p>
 
       {tours.length === 0 ? (

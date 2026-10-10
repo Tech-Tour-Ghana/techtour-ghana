@@ -8,6 +8,12 @@ export const TOURS_PER_PAGE = 12;
 export const DESTINATION_ORDER = ['accra', 'kumasi', 'cape-coast', 'volta', 'northern'];
 
 export type TourSort = 'recommended' | 'price-asc' | 'price-desc' | 'rating' | 'duration';
+export const DURATIONS = [
+  { value: '1', label: '1 day', min: 1, max: 1 },
+  { value: '2-3', label: '2 to 3 days', min: 2, max: 3 },
+  { value: '4+', label: '4 days or more', min: 4, max: null },
+] as const;
+
 export const SORTS: { value: TourSort; label: string }[] = [
   { value: 'recommended', label: 'Recommended' },
   { value: 'price-asc', label: 'Price: low to high' },
@@ -64,7 +70,7 @@ export function toCard(row: any): TourCardData {
 export const CARD_SELECT = 'id, slug, title, short_description, featured_image_url, location, region, price, discount_price, currency, duration_days, rating, review_count, is_featured, destinations(name, slug), tour_schedules(start_date, is_cancelled, available_spots, booked_spots)';
 
 /** One page of active tours, optionally for one destination and/or matching a search. */
-export async function getTourListing(opts: { destination?: string; q?: string; sort?: TourSort; page?: string }) {
+export async function getTourListing(opts: { destination?: string; q?: string; sort?: TourSort; page?: string; min?: string; max?: string; days?: string }) {
   const supabase = await createClient();
   const destinations = await getDestinations();
   const dest = destinations.find((d) => d.slug === opts.destination);
@@ -75,10 +81,20 @@ export async function getTourListing(opts: { destination?: string; q?: string; s
 
   const term = (opts.q ?? '').replace(/[,()%*\\]/g, ' ').trim().slice(0, 60);
   const sort = opts.sort ?? 'recommended';
+  const num = (v?: string) => { const n = Number.parseFloat(v ?? ''); return Number.isFinite(n) && n >= 0 ? n : undefined; };
+  const min = num(opts.min);
+  const max = num(opts.max);
+  const duration = DURATIONS.find((d) => d.value === opts.days);
 
   const build = () => {
     let query = supabase.from('tours').select(CARD_SELECT, { count: 'exact' }).eq('is_active', true);
     if (dest) query = query.eq('destination_id', dest.id);
+    if (min !== undefined) query = query.gte('price', min);
+    if (max !== undefined) query = query.lte('price', max);
+    if (duration) {
+      query = query.gte('duration_days', duration.min);
+      if (duration.max !== null) query = query.lte('duration_days', duration.max);
+    }
     if (term) query = query.or(`title.ilike.%${term}%,location.ilike.%${term}%,region.ilike.%${term}%,short_description.ilike.%${term}%`);
     if (sort === 'price-asc') query = query.order('price', { ascending: true });
     else if (sort === 'price-desc') query = query.order('price', { ascending: false });
@@ -102,5 +118,8 @@ export async function getTourListing(opts: { destination?: string; q?: string; s
     activeDestination: dest?.slug,
     q: term,
     sort,
+    min: min === undefined ? '' : String(min),
+    max: max === undefined ? '' : String(max),
+    days: duration?.value ?? '',
   };
 }

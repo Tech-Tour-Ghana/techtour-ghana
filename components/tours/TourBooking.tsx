@@ -4,10 +4,10 @@
 // server inside create_tour_booking(), so nothing here can be used to change
 // what a booking costs.
 
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckCircle, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faCheckCircle, faChevronLeft, faChevronRight, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 import { getAuthStatus } from '@/lib/api';
 import { createBrowserClient } from '@/lib/supabase/client';
@@ -18,11 +18,65 @@ export interface Departure { id: string; start_date: string; end_date: string; s
 
 const fmt = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 
+const MONTH = (y: number, m: number) => new Date(Date.UTC(y, m, 1)).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+// Month grid where only departure dates can be picked. Starts on the month of the
+// chosen (first) departure; arrows are limited to months that have departures.
+function DatePicker({ departures, value, onChange }: { departures: Departure[]; value: string; onChange: (id: string) => void }) {
+  const byDate = useMemo(() => new Map(departures.map((d) => [d.start_date, d])), [departures]);
+  const months = useMemo(() => [...new Set(departures.map((d) => d.start_date.slice(0, 7)))].sort(), [departures]);
+  const chosen = departures.find((d) => d.id === value);
+  const [ym, setYm] = useState(chosen?.start_date.slice(0, 7) ?? months[0] ?? '');
+  const [y, m] = ym.split('-').map(Number) as [number, number];
+  const idx = months.indexOf(ym);
+  const lead = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7;
+  const days = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const cells = [...Array<null>(lead).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
+  const nav = { border: '1px solid var(--sp-border)' };
+
+  return (
+    <div className="mt-4" role="group" aria-label="Choose a date">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-sm font-semibold" aria-live="polite">{MONTH(y, m - 1)}</p>
+        <div className="flex gap-1">
+          <button type="button" aria-label="Previous month with dates" disabled={idx <= 0} onClick={() => setYm(months[idx - 1]!)} className="flex h-9 w-9 items-center justify-center rounded-full disabled:opacity-40" style={nav}><FontAwesomeIcon icon={faChevronLeft} className="h-3 w-3" /></button>
+          <button type="button" aria-label="Next month with dates" disabled={idx === -1 || idx >= months.length - 1} onClick={() => setYm(months[idx + 1]!)} className="flex h-9 w-9 items-center justify-center rounded-full disabled:opacity-40" style={nav}><FontAwesomeIcon icon={faChevronRight} className="h-3 w-3" /></button>
+        </div>
+      </div>
+      <div className="grid grid-cols-7 gap-1 text-center text-[11px]" style={{ color: 'var(--sp-text-muted)' }}>
+        {WEEKDAYS.map((w) => <span key={w} aria-hidden="true">{w}</span>)}
+      </div>
+      <div className="mt-1 grid grid-cols-7 gap-1">
+        {cells.map((day, i) => {
+          if (day === null) return <span key={`b${i}`} />;
+          const iso = `${ym}-${String(day).padStart(2, '0')}`;
+          const dep = byDate.get(iso);
+          const selected = dep?.id === value;
+          if (!dep) return <span key={iso} className="flex h-10 items-center justify-center rounded-full text-sm" style={{ color: 'var(--sp-text-muted)', opacity: 0.55 }}>{day}</span>;
+          return (
+            <button
+              key={iso}
+              type="button"
+              aria-pressed={selected}
+              aria-label={`${fmt(iso)}, ${dep.spots_left} spots left`}
+              onClick={() => onChange(dep.id)}
+              className="flex h-10 items-center justify-center rounded-full text-sm font-semibold"
+              style={selected ? { background: 'var(--sp-primary)', color: 'var(--sp-on-primary, var(--brand-on-primary))' } : { border: '1.5px solid var(--sp-primary)', color: 'var(--sp-primary)' }}
+            >
+              {day}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function TourBooking({ tour, departures }: {
   tour: { slug: string; title: string; price: number; discount_price: number | null; currency: string; min_group_size: number; max_group_size: number };
   departures: Departure[];
 }) {
-  const group = useId();
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [departureId, setDepartureId] = useState(departures[0]?.id ?? '');
   const [people, setPeople] = useState(Math.max(1, tour.min_group_size));
@@ -77,20 +131,14 @@ export default function TourBooking({ tour, departures }: {
         <p className="mt-4 rounded-xl p-4 text-sm" style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-secondary)' }}>No dates are open right now. <Link href="/about/contact-us" className="font-semibold underline">Contact us</Link> to ask about a private date.</p>
       ) : (
         <>
-          <fieldset className="mt-4">
-            <legend className="mb-2 text-sm font-semibold">Choose a date</legend>
-            <div className="space-y-2">
-              {departures.map((d) => (
-                <label key={d.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm" style={{ border: `1.5px solid ${departureId === d.id ? 'var(--sp-primary)' : 'var(--sp-border)'}`, background: departureId === d.id ? 'var(--sp-bg-primary)' : 'transparent' }}>
-                  <span className="flex items-center gap-3">
-                    <input type="radio" name={group} value={d.id} checked={departureId === d.id} onChange={() => setDepartureId(d.id)} style={{ accentColor: 'var(--sp-primary)' }} />
-                    <span className="font-medium">{fmt(d.start_date)}{d.end_date !== d.start_date && <span className="block text-xs font-normal" style={{ color: 'var(--sp-text-muted)' }}>to {fmt(d.end_date)}</span>}</span>
-                  </span>
-                  <span className="text-xs font-semibold" style={{ color: d.spots_left <= 5 ? 'var(--brand-warning-text)' : 'var(--sp-text-muted)' }}>{d.spots_left} left</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          <DatePicker departures={departures} value={departureId} onChange={setDepartureId} />
+          {chosen && (
+            <p className="mt-3 text-sm" aria-live="polite">
+              <span className="font-semibold">{fmt(chosen.start_date)}</span>
+              {chosen.end_date !== chosen.start_date && <span style={{ color: 'var(--sp-text-muted)' }}> to {fmt(chosen.end_date)}</span>}
+              <span className="ml-2 text-xs font-semibold" style={{ color: chosen.spots_left <= 5 ? 'var(--brand-warning-text)' : 'var(--sp-text-muted)' }}>{chosen.spots_left} left</span>
+            </p>
+          )}
 
           <div className="mt-4 flex items-center justify-between">
             <span className="text-sm font-semibold">People</span>

@@ -61,9 +61,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return toMetadata(found.resolved, { type: 'website', siteName: found.site.siteName });
 }
 
-function Block({ title, children }: { title: string; children: React.ReactNode }) {
+function Block({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
-    <section className="py-6 border-b last:border-b-0" style={{ borderColor: 'var(--sp-border)' }}>
+    <section id={id} className="scroll-mt-32 py-6 border-b last:border-b-0" style={{ borderColor: 'var(--sp-border)' }}>
       <h2 className="mb-3 text-lg font-bold">{title}</h2>
       {children}
     </section>
@@ -85,6 +85,14 @@ export default async function TourPage({ params }: Params) {
   const price = tour.discount_price !== null && Number(tour.discount_price) < Number(tour.price) ? Number(tour.discount_price) : Number(tour.price);
   const showRating = reviews.length > 0 && tour.review_count > 0;
   const muted = { color: 'var(--sp-text-muted)' };
+
+  const sections = [
+    highlights.length > 0 && { id: 'highlights', label: 'Highlights' },
+    tour.description && { id: 'about', label: 'About' },
+    itinerary.length > 0 && { id: 'itinerary', label: 'Itinerary' },
+    (includes.length > 0 || excludes.length > 0) && { id: 'included', label: 'Included' },
+    reviews.length > 0 && { id: 'reviews', label: 'Reviews' },
+  ].filter((x): x is { id: string; label: string } => Boolean(x));
 
   const facts = [
     { icon: faClock, label: 'Duration', value: `${tour.duration_days} ${tour.duration_days === 1 ? 'day' : 'days'}` },
@@ -136,16 +144,26 @@ export default async function TourPage({ params }: Params) {
                 ))}
               </ul>
 
+              {sections.length > 1 && (
+                <nav aria-label="On this page" className="sticky top-[var(--nav-height,68px)] z-20 -mx-4 mt-4 overflow-x-auto border-b px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0" style={{ background: 'var(--sp-bg-primary)', borderColor: 'var(--sp-border)' }}>
+                  <ul className="flex w-max gap-1">
+                    {sections.map((x) => (
+                      <li key={x.id}><a href={`#${x.id}`} className="block whitespace-nowrap px-3 py-3 text-sm font-medium" style={{ color: 'var(--sp-text-secondary)' }}>{x.label}</a></li>
+                    ))}
+                  </ul>
+                </nav>
+              )}
+
               <div className="mt-2">
                 {tour.short_description && <p className="pt-4 text-base leading-relaxed" style={{ color: 'var(--sp-text-secondary)' }}>{tour.short_description}</p>}
                 {highlights.length > 0 && (
-                  <Block title="Highlights">
+                  <Block id="highlights" title="Highlights">
                     <ul className="space-y-2 text-sm">{highlights.map((h) => <li key={h} className="flex gap-3"><FontAwesomeIcon icon={faStar} className="mt-1 h-3 w-3 flex-shrink-0" style={{ color: 'var(--brand-warning)' }} /><span style={{ color: 'var(--sp-text-secondary)' }}>{h}</span></li>)}</ul>
                   </Block>
                 )}
-                {tour.description && <Block title="About this tour"><p className="whitespace-pre-line text-sm leading-relaxed" style={{ color: 'var(--sp-text-secondary)' }}>{tour.description}</p></Block>}
+                {tour.description && <Block id="about" title="About this tour"><p className="whitespace-pre-line text-sm leading-relaxed" style={{ color: 'var(--sp-text-secondary)' }}>{tour.description}</p></Block>}
                 {(includes.length > 0 || excludes.length > 0) && (
-                  <Block title="What is included">
+                  <Block id="included" title="What is included">
                     <div className="grid gap-6 sm:grid-cols-2">
                       {includes.length > 0 && <ul className="space-y-2 text-sm">{includes.map((i) => <li key={i} className="flex gap-3"><FontAwesomeIcon icon={faCheck} className="mt-1 h-3 w-3 flex-shrink-0" style={{ color: 'var(--brand-success)' }} /><span style={{ color: 'var(--sp-text-secondary)' }}>{i}</span></li>)}</ul>}
                       {excludes.length > 0 && <ul className="space-y-2 text-sm">{excludes.map((i) => <li key={i} className="flex gap-3"><FontAwesomeIcon icon={faXmark} className="mt-1 h-3 w-3 flex-shrink-0" style={{ color: 'var(--brand-error)' }} /><span style={{ color: 'var(--sp-text-secondary)' }}>{i}</span></li>)}</ul>}
@@ -153,7 +171,7 @@ export default async function TourPage({ params }: Params) {
                   </Block>
                 )}
                 {itinerary.length > 0 && (
-                  <Block title="Itinerary">
+                  <Block id="itinerary" title="Itinerary">
                     <ol className="relative space-y-4 border-l pl-6" style={{ borderColor: 'var(--sp-border)' }}>
                       {itinerary.map((step, i) => (
                         <li key={i} className="relative text-sm" style={{ color: 'var(--sp-text-secondary)' }}>
@@ -171,7 +189,7 @@ export default async function TourPage({ params }: Params) {
               </section>
 
               {reviews.length > 0 && (
-                <Block title="Traveller reviews">
+                <Block id="reviews" title="Traveller reviews">
                   <ul className="space-y-4">
                     {reviews.map((r) => (
                       <li key={r.id} className="rounded-2xl p-4" style={cardStyle}>
