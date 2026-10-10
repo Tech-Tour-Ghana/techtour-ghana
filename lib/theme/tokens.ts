@@ -102,6 +102,15 @@ export function ensureContrast(fg: string, bg: string, min = 4.5): string {
   return toHex(towards);
 }
 
+/** Blend `a` towards `b` by t (0 to 1). */
+export function mix(a: string, b: string, t: number): string {
+  const x = toRgb(a), y = toRgb(b);
+  return toHex([x[0] + (y[0] - x[0]) * t, x[1] + (y[1] - x[1]) * t, x[2] + (y[2] - x[2]) * t]);
+}
+
+/** Status colours. Not part of the brand palette, so they do not change with it, but they live here so no component hard-codes them. */
+export const SEMANTIC = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6', purple: '#8B5CF6' } as const;
+
 export interface ContrastCheck { id: string; label: string; fg: string; bg: string; min: number; ratio: number; pass: boolean }
 
 /** The pairs that must pass for the theme to be readable. */
@@ -139,20 +148,50 @@ export function themeVars(mode: ThemeMode, p: ThemePalette): Record<string, stri
   const dark = mode === 'dark';
   const rgb = rgbTriplet(p.primary);
   const accentRgb = rgbTriplet(p.accent);
-  const accentText = ensureContrast(p.accent, p.card);
   const hero = heroColors(mode, p);
+  // Accent text is the "gold" colour made readable on cards (sale prices, small highlights).
+  const accentText = ensureContrast(dark ? p.primary : p.accent, p.card);
+  const line = mix(p.card, p.text, dark ? 0.08 : 0.1);
+  const subtle = mix(p.background, p.text, dark ? 0.08 : 0.05);
+  const teal = dark ? p.accent : p.primary;
+  const gold = dark ? p.primary : p.accent;
+  const tealDark = dark ? hero.to : p.primaryDark;
+  const goldDark = dark ? p.primaryDark : mix(p.accent, '#000000', 0.08);
+  const channels: Record<string, string> = {
+    text: p.text, 'text-2': p.textSecondary, muted: p.muted, line, subtle, bg: p.background, card: p.card,
+    teal, gold, white: '#FFFFFF', black: '#000000', ...SEMANTIC,
+  };
+  const extra: Record<string, string> = {
+    '--brand-line': line, '--brand-subtle': subtle, '--brand-white': '#FFFFFF', '--brand-black': '#000000',
+    '--brand-teal-dark': tealDark, '--brand-gold-dark': goldDark,
+  };
+  for (const [name, hex] of Object.entries(channels)) extra[`--brand-${name}-rgb`] = rgbTriplet(hex);
+  for (const [name, hex] of Object.entries(SEMANTIC)) {
+    extra[`--brand-${name}`] = hex;
+    extra[`--brand-${name}-text`] = ensureContrast(hex, p.card);
+  }
   return {
+    ...extra,
     '--brand-primary': p.primary, '--brand-primary-dark': p.primaryDark, '--brand-accent': p.accent, '--brand-accent-text': accentText,
     '--brand-bg': p.background, '--brand-bg-alt': p.backgroundAlt, '--brand-card': p.card,
     '--brand-text': p.text, '--brand-text-2': p.textSecondary, '--brand-muted': p.muted,
     '--brand-on-primary': onColor(p.primary),
     '--brand-teal': dark ? p.accent : p.primary, '--brand-gold': dark ? p.primary : p.accent,
     '--brand-primary-rgb': rgb, '--brand-accent-rgb': accentRgb,
-    '--sp-bg-primary': p.background, '--sp-bg-secondary': p.backgroundAlt, '--sp-bg-card': p.card, '--sp-bg-card-hover': p.card, '--sp-bg-input': p.card, '--sp-bg-elevated': p.card,
+    '--sp-bg-primary': p.background, '--sp-bg-secondary': p.backgroundAlt, '--sp-bg-card': p.card, '--sp-bg-card-hover': dark ? mix(p.card, p.text, 0.04) : p.background, '--sp-bg-input': p.card, '--sp-bg-elevated': p.card,
     '--sp-text-primary': p.text, '--sp-text-secondary': p.textSecondary, '--sp-text-muted': p.muted, '--sp-text-subtle': p.muted,
     '--sp-primary': p.primary, '--sp-primary-dark': p.primaryDark, '--sp-primary-light': `rgba(${rgb}, ${dark ? 0.15 : 0.08})`,
     '--sp-accent': p.accent, '--sp-accent-dark': p.accent, '--sp-accent-light': `rgba(${accentRgb}, 0.15)`, '--sp-accent-text': accentText,
     '--sp-on-primary': onColor(p.primary), '--sp-hero-from': hero.from, '--sp-hero-to': hero.to, '--sp-hero-accent': ensureContrast('#F5C875', hero.from, 3),
+    '--sp-shadow-sm': dark ? '0 4px 12px rgba(0, 0, 0, 0.3)' : `0 4px 12px rgba(${rgb}, 0.05)`,
+    '--sp-shadow-md': dark ? '0 8px 24px rgba(0, 0, 0, 0.4)' : `0 8px 24px rgba(${rgb}, 0.08)`,
+    '--sp-shadow-lg': dark ? '0 20px 40px rgba(0, 0, 0, 0.5)' : `0 20px 40px rgba(${rgb}, 0.15)`,
+    '--sp-tag-bg': dark ? 'rgba(255, 255, 255, 0.05)' : p.background,
+    '--sp-tag-border': dark ? 'rgba(255, 255, 255, 0.05)' : `rgba(${rgb}, 0.06)`,
+    '--sp-tag-text': p.textSecondary,
+    '--sp-overlay-gradient': dark
+      ? 'linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.2) 40%, rgba(0, 0, 0, 0.7) 100%)'
+      : 'linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.05) 40%, rgba(0, 0, 0, 0.5) 100%)',
     '--sp-border': `rgba(${rgb}, ${dark ? 0.1 : 0.08})`, '--sp-border-hover': `rgba(${rgb}, ${dark ? 0.25 : 0.2})`, '--sp-border-strong': `rgba(${rgb}, 0.15)`,
     '--primary': p.primary, '--primary-dark': p.primaryDark, '--primary-light': `rgba(${rgb}, 0.1)`,
     '--text': p.text, '--text-light': p.textSecondary, '--bg-solid': dark ? p.background : p.card, '--border': `rgba(${rgb}, 0.15)`,
@@ -164,22 +203,18 @@ export function themeVars(mode: ThemeMode, p: ThemePalette): Record<string, stri
 const block = (selector: string, vars: Record<string, string>) => `${selector}{${Object.entries(vars).map(([k, v]) => `${k}:${v}`).join(';')}}`;
 
 /**
- * Stylesheet for the saved overrides, or '' when nothing changed. Selectors are
- * more specific than the built-in `:root` and `[data-theme]` rules so they win
- * without !important.
+ * The theme stylesheet: both themes, built from the built-in palette plus any
+ * overrides saved in Admin > Settings > Branding. This is the single source of
+ * the brand variables, so no stylesheet or component needs its own copy of a colour.
+ * Selectors are more specific than the built-in `:root` and `[data-theme]` rules.
  */
 export function buildThemeCss(overrides: ThemeOverrides): string {
   const parts: string[] = [];
-  if (overrides.light && Object.keys(overrides.light).length) {
-    const p = paletteFor('light', overrides);
-    parts.push(block('html:not([data-theme]),html[data-theme="bright"]', themeVars('light', p)));
-    parts.push(`html:not([data-theme]) body,html[data-theme="bright"] body{background-color:${p.background};color:${p.text}}`);
-  }
-  if (overrides.dark && Object.keys(overrides.dark).length) {
-    const p = paletteFor('dark', overrides);
-    parts.push(block('html[data-theme="dim"],html[data-theme="dark"]', themeVars('dark', p)));
-    parts.push(`html[data-theme="dim"] body,html[data-theme="dark"] body{background-color:${p.background};color:${p.text}}`);
-    parts.push(`html[data-theme="dim"] .bg-white,html[data-theme="dark"] .bg-white{background-color:${p.card} !important}`);
-  }
+  const light = paletteFor('light', overrides);
+  parts.push(block(':root,html:not([data-theme]),html[data-theme="bright"]', themeVars('light', light)));
+  parts.push(`html:not([data-theme]) body,html[data-theme="bright"] body{background-color:${light.background};color:${light.text}}`);
+  const dark = paletteFor('dark', overrides);
+  parts.push(block('html[data-theme="dim"],html[data-theme="dark"]', themeVars('dark', dark)));
+  parts.push(`html[data-theme="dim"] body,html[data-theme="dark"] body{background-color:${dark.background};color:${dark.text}}`);
   return parts.join('\n');
 }
