@@ -59,7 +59,7 @@ export default async function RentalPage({ params }: Params) {
 
   return (
     <ServiceTheme>
-      <main style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
+      <div style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
         <JsonLd
           data={[
             {
@@ -136,7 +136,7 @@ export default async function RentalPage({ params }: Params) {
             </aside>
           </div>
         </div>
-      </main>
+      </div>
     </ServiceTheme>
   );
 }

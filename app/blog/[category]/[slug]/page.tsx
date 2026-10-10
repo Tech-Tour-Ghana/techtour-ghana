@@ -79,7 +79,7 @@ export default async function BlogPostPage({ params }: Params) {
 
   return (
     <ServiceTheme>
-      <main style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
+      <div style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
         <JsonLd
           data={[
             articleJsonLd({ resolved, headline: post.title, author: post.author, imageUrl: post.image_url, publishedAt: post.published_at, modifiedAt: post.updated_at, site }),
@@ -165,7 +165,7 @@ export default async function BlogPostPage({ params }: Params) {
             </section>
           )}
         </div>
-      </main>
+      </div>
     </ServiceTheme>
   );
 }

@@ -95,7 +95,7 @@ export default async function TourPage({ params }: Params) {
 
   return (
     <ServiceTheme>
-      <main className="pb-28 lg:pb-0" style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
+      <div className="pb-28 lg:pb-0" style={{ background: 'var(--sp-bg-primary)', color: 'var(--sp-text-primary)' }}>
         <CrumbLabel label={tour.title} />
         <JsonLd
           data={[
@@ -207,7 +207,7 @@ export default async function TourPage({ params }: Params) {
             <Button href="#reserve-mobile">{departures.length ? 'Check dates' : 'Enquire'}</Button>
           </div>
         </div>
-      </main>
+      </div>
     </ServiceTheme>
   );
 }

@@ -178,7 +178,7 @@ export default function ContactUsPage() {
 
   return (
     <ServiceTheme>
-      <main className="contact-page">
+      <div className="contact-page">
         {/* ===== HERO , COMPACT ===== */}
         <section className="contact-hero">
           <div className="contact-hero-bg" />
@@ -466,7 +466,7 @@ export default function ContactUsPage() {
           }
 
           .contact-hero-title {
-            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-size: clamp(1.6rem, 1.2rem + 2vw, 2.8rem);
             font-weight: 800;
             color: #FFFFFF;
             margin: 0 0 14px 0;
@@ -479,7 +479,7 @@ export default function ContactUsPage() {
           }
 
           .contact-hero-subtitle {
-            font-size: clamp(0.9rem, 1.4vw, 1.05rem);
+            font-size: clamp(0.85rem, 0.8rem + 0.35vw, 1.05rem);
             color: rgba(255, 255, 255, 0.9);
             line-height: 1.6;
             margin: 0 auto;
@@ -987,12 +987,10 @@ export default function ContactUsPage() {
             }
 
             .contact-hero-title {
-              font-size: 1.6rem;
               margin-bottom: 12px;
             }
 
             .contact-hero-subtitle {
-              font-size: 0.85rem;
               line-height: 1.55;
             }
 
@@ -1197,7 +1195,7 @@ export default function ContactUsPage() {
             }
           }
         `}</style>
-      </main>
+      </div>
     </ServiceTheme>
   );
 }

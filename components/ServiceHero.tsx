@@ -105,7 +105,7 @@ const ServiceHero: React.FC<ServiceHeroProps> = ({
         }
 
         .service-title {
-          font-size: clamp(2.4rem, 5.5vw, 4rem);
+          font-size: clamp(2rem, 1.4rem + 3.2vw, 4rem);
           font-weight: 800;
           color: #FFFFFF;
           margin: 0 0 20px 0;
@@ -120,7 +120,7 @@ const ServiceHero: React.FC<ServiceHeroProps> = ({
         }
 
         .service-description {
-          font-size: clamp(1rem, 1.5vw, 1.2rem);
+          font-size: clamp(0.95rem, 0.9rem + 0.35vw, 1.2rem);
           color: rgba(255, 255, 255, 0.95);
           max-width: 720px;
           line-height: 1.7;
@@ -151,12 +151,6 @@ const ServiceHero: React.FC<ServiceHeroProps> = ({
           }
           .service-hero-container {
             padding: 0 20px;
-          }
-          .service-title {
-            font-size: 2rem;
-          }
-          .service-description {
-            font-size: 0.95rem;
           }
         }
       `}</style>
