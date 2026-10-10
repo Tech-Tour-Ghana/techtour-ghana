@@ -47,7 +47,7 @@ export default function TeamProfileCard({ member, contactHref = '/about/contact-
           <span aria-hidden className="absolute bottom-1.5 right-1.5 h-4 w-4 rounded-full bg-emerald-500" style={{ border: '3px solid var(--sp-bg-card)' }} />
         </div>
         {member.badge && (
-          <span className="mb-1 inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2 py-1 text-[11px] font-semibold text-emerald-600">
+          <span className="mb-1 inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2 py-1 text-[11px] font-semibold text-emerald-700 [[data-theme=dim]_&]:text-emerald-300">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />{member.badge}
           </span>
         )}

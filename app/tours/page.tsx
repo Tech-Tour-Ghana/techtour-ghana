@@ -57,7 +57,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Search
           {destinations.map((d) => (
             <li key={d.slug}>
               <Link href={href({ destination: d.slug })} aria-current={activeDestination === d.slug ? 'page' : undefined} className="block whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium" style={chip(activeDestination === d.slug)}>
-                {d.name} <span className="opacity-70">({d.count})</span>
+                {d.name} <span className="opacity-90">({d.count})</span>
               </Link>
             </li>
           ))}
