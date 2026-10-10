@@ -96,8 +96,10 @@ export const ServiceThemeStyles = () => (
 
     /* Gold is the primary colour in dark mode. White text on it is 2.1:1, so
        anything painted with the primary colour gets dark text instead. */
-    [data-theme="dim"] [style*="background: var(--sp-primary"],
-    [data-theme="dim"] [style*="background:var(--sp-primary"] {
+    [data-theme="dim"] [style*="background: var(--sp-primary)"],
+    [data-theme="dim"] [style*="background: var(--sp-primary,"],
+    [data-theme="dim"] [style*="background: var(--sp-primary-dark"],
+    [data-theme="dim"] [style*="background:var(--sp-primary)"] {
       color: #1A1A2E !important;
     }
 
