@@ -39,7 +39,7 @@ export const ServiceThemeStyles = () => (
       
       --sp-primary: #0D7A7D;
       --sp-primary-dark: #0A5F62;
-      --sp-primary-light: rgba(13, 122, 125, 0.12);
+      --sp-primary-light: rgba(13, 122, 125, 0.08);
       
       --sp-accent: #E6A64D;
       --sp-accent-text: #8A5200;

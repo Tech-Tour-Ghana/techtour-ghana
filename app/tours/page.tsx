@@ -53,11 +53,11 @@ export default async function ToursPage({ searchParams }: { searchParams: Search
     <ContentShell wide title="Tours" titleAccent="Listings" description="Guided tours across Ghana. Pick a destination, choose a date and reserve your place.">
       <nav aria-label="Destinations" className="-mx-4 mb-5 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <ul className="flex w-max gap-2 pb-1">
-          <li><Link href={href({ destination: null })} aria-current={!activeDestination ? 'page' : undefined} className="block whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium" style={chip(!activeDestination)}>All Destinations <span className="opacity-70">({allCount})</span></Link></li>
+          <li><Link href={href({ destination: null })} aria-current={!activeDestination ? 'page' : undefined} className="block whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium" style={chip(!activeDestination)}>All Destinations <span>({allCount})</span></Link></li>
           {destinations.map((d) => (
             <li key={d.slug}>
               <Link href={href({ destination: d.slug })} aria-current={activeDestination === d.slug ? 'page' : undefined} className="block whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium" style={chip(activeDestination === d.slug)}>
-                {d.name} <span className="opacity-90">({d.count})</span>
+                {d.name} <span>({d.count})</span>
               </Link>
             </li>
           ))}
