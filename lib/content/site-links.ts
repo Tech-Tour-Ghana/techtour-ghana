@@ -6,13 +6,13 @@ export const SITE_LINK_GROUPS: { title: string; links: { label: string; href: st
     links: [
       { label: 'Home', href: '/' },
       { label: 'Tours Listings', href: '/tours' },
-      { label: 'Destinations', href: '/destinations' },
       { label: 'Blog Updates', href: '/blog' },
     ],
   },
   {
     title: 'Services',
     links: [
+      { label: 'All Services', href: '/services' },
       { label: 'Dream Vacations', href: '/services/dream-vacations' },
       { label: 'Study Abroad', href: '/services/study-abroad' },
     ],

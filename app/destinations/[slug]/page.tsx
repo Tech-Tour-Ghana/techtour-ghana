@@ -4,6 +4,9 @@ import { notFound } from 'next/navigation';
 import { cache } from 'react';
 
 import ContentShell, { cardStyle } from '@/components/content/ContentShell';
+import TourCard from '@/components/tours/TourCard';
+import Button from '@/components/ui/Button';
+import { CARD_SELECT, toCard } from '@/lib/tours/load.server';
 import JsonLd from '@/components/seo/JsonLd';
 import { breadcrumbJsonLd, destinationJsonLd, resolveSeo } from '@/lib/seo/resolve';
 import { getSeoFields, getSiteSeo, toMetadata } from '@/lib/seo/load.server';
@@ -45,6 +48,10 @@ export default async function DestinationPage({ params }: Params) {
   if (!found) notFound();
   const { destination, site, resolved } = found;
 
+  const supabase = await createClient();
+  const { data: tourRows } = await supabase.from('tours').select(CARD_SELECT).eq('is_active', true).eq('destination_id', destination.id).order('is_featured', { ascending: false }).order('rating', { ascending: false }).limit(6);
+  const tours = (tourRows ?? []).map(toCard);
+
   const highlights = destination.highlights.split('\n').map((h) => h.trim()).filter(Boolean);
 
   return (
@@ -52,7 +59,7 @@ export default async function DestinationPage({ params }: Params) {
       <JsonLd
         data={[
           destinationJsonLd({ resolved, name: destination.name }),
-          breadcrumbJsonLd([{ name: 'Destinations', path: '/destinations' }, { name: destination.name, path: `/destinations/${slug}` }], site),
+          breadcrumbJsonLd([{ name: 'Tours Listings', path: '/tours' }, { name: destination.name, path: `/destinations/${slug}` }], site),
         ]}
       />
       <div className="grid gap-6 lg:grid-cols-3">
@@ -78,10 +85,27 @@ export default async function DestinationPage({ params }: Params) {
           <div className="mt-6 flex flex-col gap-2 text-sm font-semibold">
             <Link href="/tours" style={{ color: 'var(--sp-primary)' }}>Tours Listings →</Link>
             <Link href="/services/dream-vacations" style={{ color: 'var(--sp-primary)' }}>Dream vacations →</Link>
-            <Link href="/destinations" style={{ color: 'var(--sp-primary)' }}>← All destinations</Link>
+            <Link href="/tours" style={{ color: 'var(--sp-primary)' }}>← All destinations</Link>
           </div>
         </aside>
       </div>
+
+      <section className="mt-12" aria-labelledby="dest-tours">
+        <h2 id="dest-tours" className="mb-5 text-2xl font-bold">Tours in {destination.name}</h2>
+        {tours.length === 0 ? (
+          <div className="rounded-2xl p-8 text-center" style={cardStyle}>
+            <p style={{ color: 'var(--sp-text-secondary)' }}>No tours are listed for {destination.name} yet.</p>
+            <div className="mt-4 flex justify-center"><Button href="/tours">Browse all tours</Button></div>
+          </div>
+        ) : (
+          <>
+            <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {tours.map((t) => <li key={t.id}><TourCard tour={t} /></li>)}
+            </ul>
+            <div className="mt-6 flex justify-center"><Button href={`/tours?destination=${destination.slug}`} variant="secondary">See all {destination.name} tours</Button></div>
+          </>
+        )}
+      </section>
     </ContentShell>
   );
 }
