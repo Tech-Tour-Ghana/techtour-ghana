@@ -28,8 +28,7 @@ export const SITE_LINK_GROUPS: { title: string; links: { label: string; href: st
   {
     title: 'About',
     links: [
-      { label: 'Our Story', href: '/about/our-story' },
-      { label: 'Meet the Team', href: '/about/our-team' },
+      { label: 'About Us', href: '/about' },
       { label: 'Partnerships', href: '/about/partnership' },
       { label: 'Careers', href: '/about/careers' },
       { label: 'Contact Us', href: '/about/contact-us' },
