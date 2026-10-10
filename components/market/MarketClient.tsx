@@ -400,7 +400,7 @@ const ProductCard = React.memo(({
 
         <div className="flex flex-1 flex-col p-4">
           {product.category_name && (
-            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
               {product.category_name}
             </p>
           )}
@@ -417,7 +417,7 @@ const ProductCard = React.memo(({
             <div className="mt-2 flex items-center gap-1">
               <FontAwesomeIcon icon={faStar} className="w-3 h-3" style={{ color: '#F59E0B' }} />
               <span className="text-xs font-medium" style={{ color: colors.textSecondary }}>
-                {Number(product.rating).toFixed(1)} <span style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>({product.review_count || 0})</span>
+                {Number(product.rating).toFixed(1)} <span style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>({product.review_count || 0})</span>
               </span>
             </div>
           )}
@@ -428,7 +428,7 @@ const ProductCard = React.memo(({
                 {currency.symbol}{(hasDiscount ? displayDiscountPrice : displayPrice).toFixed(2)}
               </span>
               {hasDiscount && (
-                <span className="mt-1 text-xs line-through" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+                <span className="mt-1 text-xs line-through" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
                   {currency.symbol}{displayPrice.toFixed(2)}
                 </span>
               )}
@@ -444,7 +444,7 @@ const ProductCard = React.memo(({
                   />
                 ))}
                 {product.colors.length > 4 && (
-                  <span className="text-[11px]" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>+{product.colors.length - 4}</span>
+                  <span className="text-[11px]" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>+{product.colors.length - 4}</span>
                 )}
               </div>
             )}
@@ -515,7 +515,7 @@ const ProductCard = React.memo(({
             <h3 className="font-bold text-base md:text-lg line-clamp-1" style={{ color: isDimMode ? colors.textPrimary : colors.textPrimary }}>
               {product.title}
             </h3>
-            <p className="text-[9px] md:text-[11px]" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+            <p className="text-[9px] md:text-[11px]" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
               SKU: {product.sku || 'N/A'}
             </p>
           </div>
@@ -525,7 +525,7 @@ const ProductCard = React.memo(({
                 <span className="font-bold text-base md:text-lg" style={{ color: colors.secondary }}>
                   {currency.symbol}{displayDiscountPrice.toFixed(2)}
                 </span>
-                <span className="text-[10px] line-through" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+                <span className="text-[10px] line-through" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
                   {currency.symbol}{displayPrice.toFixed(2)}
                 </span>
               </>
@@ -549,7 +549,7 @@ const ProductCard = React.memo(({
                 />
               ))}
             </div>
-            <span className="text-[9px] md:text-[11px]" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+            <span className="text-[9px] md:text-[11px]" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
               ({product.review_count || 0})
             </span>
           </div>
@@ -573,7 +573,7 @@ const ProductCard = React.memo(({
                 />
               ))}
               {product.colors.length > 6 && (
-                <span className="text-[8px] md:text-[10px] font-medium flex items-center" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+                <span className="text-[8px] md:text-[10px] font-medium flex items-center" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
                   +{product.colors.length - 6}
                 </span>
               )}
@@ -590,7 +590,7 @@ const ProductCard = React.memo(({
                   In Stock
                 </span>
                 {product.stock_quantity > 0 && (
-                  <span className="text-[8px] md:text-[10px]" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+                  <span className="text-[8px] md:text-[10px]" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
                     ({product.stock_quantity} available)
                   </span>
                 )}
@@ -1146,7 +1146,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
           <div className="relative w-full md:w-72">
-            <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }} />
+            <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }} />
             <input
               type="text"
               aria-label="Search products"
@@ -1216,7 +1216,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                 }}
               >
                 <span>{selectedCurrency.symbol}</span>
-                <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+                <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
                   {selectedCurrency.code}
                 </span>
                 <FontAwesomeIcon icon={faChevronDown} className="w-3 h-3" />
@@ -1252,7 +1252,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                       }}
                     >
                       <span>{currency.symbol} {currency.code}</span>
-                      <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#9CA3AF' }}>
+                      <span className="text-xs" style={{ color: isDimMode ? colors.textMuted : '#6B7280' }}>
                         {currency.name}
                       </span>
                     </button>
@@ -1262,7 +1262,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block px-4 py-2 text-[10px]"
-                    style={{ color: '#9CA3AF', borderTop: '1px solid rgba(128,128,128,0.2)' }}
+                    style={{ color: isDimMode ? '#9CA3AF' : '#6B7280', borderTop: '1px solid rgba(128,128,128,0.2)' }}
                   >
                     {rateInfo.live ? 'Live rates' : 'Approximate rates'} · Rates By Exchange Rate API
                   </a>
@@ -1302,7 +1302,7 @@ function MarketPage({ initial }: { initial: MarketInitial }) {
         <div className="products-section">
           <div style={{
             fontSize: '14px',
-            color: isDimMode ? colors.textMuted : '#9CA3AF',
+            color: isDimMode ? colors.textMuted : '#6B7280',
             marginBottom: '16px',
           }}>
             Showing {filteredProductsList.length > 0 ? ((currentPage - 1) * itemsPerPage) + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredProductsList.length)} of {filteredProductsList.length} products

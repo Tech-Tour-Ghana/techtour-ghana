@@ -361,7 +361,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                     href="https://www.exchangerate-api.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ display: 'block', padding: '6px 12px', fontSize: '10px', color: '#9CA3AF', borderTop: '1px solid rgba(128,128,128,0.2)' }}
+                    style={{ display: 'block', padding: '6px 12px', fontSize: '10px', color: isDimMode ? '#9CA3AF' : '#6B7280', borderTop: '1px solid rgba(128,128,128,0.2)' }}
                   >
                     {rateInfo.live ? 'Live rates' : 'Approximate rates'} · Rates By Exchange Rate API
                   </a>
