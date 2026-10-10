@@ -389,7 +389,8 @@ const Navbar = () => {
 
   if (loading) {
     return (
-      <nav className="navbar navbar-loading-state">
+      <header>
+      <nav aria-label="Main" className="navbar navbar-loading-state">
         <div className="nav-container">
           <div className="nav-logo">
             <img src={logoSrc} alt="TechTour Logo" className="nav-logo-img" />
@@ -400,6 +401,7 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
+      </header>
     );
   }
 
