@@ -189,7 +189,7 @@ export default function ContactUsPage() {
               <span className="contact-hero-accent">Conversation</span>
             </h1>
             <p className="contact-hero-subtitle">
-              Have a question, an idea, or a dream trip in mind? Our team is here to help — reach
+              Have a question, an idea, or a dream trip in mind? Our team is here to help, reach
               out and we'll be in touch shortly.
             </p>
           </div>
@@ -236,7 +236,7 @@ export default function ContactUsPage() {
                 </h2>
                 <p className="contact-info-text">
                   Whether you're planning a trip, seeking a partnership, or just curious about
-                  what we do — we'd love to hear from you.
+                  what we do, we'd love to hear from you.
                 </p>
 
                 <div className="contact-info-blocks">

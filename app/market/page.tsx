@@ -1163,7 +1163,7 @@ function MarketPage() {
                 TechTour <span style={{ color: isDimMode ? colors.primary : '#E6A64D' }}>Market</span>
               </h1>
               <p className="text-white/70 text-sm md:text-base mt-1 max-w-lg">
-                Discover authentic Ghanaian artisan products — from Kente cloth to handcrafted jewelry,
+                Discover authentic Ghanaian artisan products, from Kente cloth to handcrafted jewelry,
                 wood carvings, and more. Support local artisans.
               </p>
             </div>

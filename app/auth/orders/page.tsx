@@ -199,7 +199,7 @@ export default function OrdersPage() {
       <div className="mt-8 text-center">
         <p className="text-xs" style={{ color: themeStyles.textMuted }}>
           <FontAwesomeIcon icon={faGlobeAfrica} className="mr-1" />
-          TechTour Ghana — Redefining African Tourism Through Innovation
+          TechTour Ghana. Redefining African Tourism Through Innovation
         </p>
       </div>
     </DashboardLayout>
