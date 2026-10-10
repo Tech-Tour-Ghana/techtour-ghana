@@ -22,7 +22,6 @@ export const SITE_LINK_GROUPS: { title: string; links: { label: string; href: st
     links: [
       { label: 'TechTour Market', href: '/market' },
       { label: 'Artisan Spotlight', href: '/market/artisans' },
-      { label: 'Tech & Innovation', href: '/market/tech-innovation' },
     ],
   },
   {
