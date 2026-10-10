@@ -21,6 +21,12 @@ const OFFERINGS = [
   { title: 'Artisan marketplace', body: 'Local craftspeople selling directly to a wider audience.' },
 ];
 
+const TECHNOLOGY = [
+  { title: 'Book online', body: 'Reserve a tour date and pay securely, with a confirmation sent by email.' },
+  { title: 'Apply online', body: 'Submit a study abroad application in one form and follow up with our team.' },
+  { title: 'Shop direct', body: 'Buy crafts from named artisans, with their story beside every piece.' },
+];
+
 const VALUES = [
   { title: 'Authenticity', body: "We champion genuine cultural experiences that honor Ghana's true story." },
   { title: 'Community impact', body: 'Every booking should create real value for local people and artisans.' },
@@ -98,6 +104,19 @@ export default async function AboutPage() {
             <li key={v.title} className="rounded-2xl p-5" style={cardStyle}>
               <h3 className="font-semibold" style={heading}>{v.title}</h3>
               <p className="mt-1 text-sm" style={body}>{v.body}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section id="technology" className="mt-16 scroll-mt-28" aria-labelledby="tech-h">
+        <h2 id="tech-h" className="text-2xl font-bold sm:text-3xl" style={heading}>Technology, used plainly</h2>
+        <p className="mt-2 max-w-2xl" style={body}>We build tools that make it easier to reach Ghana and the people who work in its tourism.</p>
+        <ul className="mt-6 grid gap-4 md:grid-cols-3">
+          {TECHNOLOGY.map((t) => (
+            <li key={t.title} className="rounded-2xl p-5" style={cardStyle}>
+              <h3 className="font-semibold" style={heading}>{t.title}</h3>
+              <p className="mt-1 text-sm" style={body}>{t.body}</p>
             </li>
           ))}
         </ul>
