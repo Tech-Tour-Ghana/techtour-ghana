@@ -15,7 +15,7 @@ export default async function LatestPosts() {
       <div className="mx-auto w-full max-w-6xl px-4">
         <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--sp-primary)' }}>From the blog</p>
         <h2 id="home-blog" className="mt-2 text-[clamp(1.5rem,1.2rem+1.5vw,2.25rem)] font-bold leading-tight">Stories and travel guides</h2>
-        <ul className="mt-8 grid gap-5 md:grid-cols-3">
+        <ul className={`mt-8 grid gap-5 md:grid-cols-2 ${posts.length >= 3 ? 'lg:grid-cols-3' : ''}`}>
           {posts.map((p) => (
             <li key={`${p.category}/${p.slug}`}>
               <Link href={`/blog/${p.category}/${p.slug}`} className="group block h-full overflow-hidden rounded-3xl" style={{ background: 'var(--sp-bg-card)', border: '1px solid var(--sp-border)', boxShadow: 'var(--sp-shadow-sm)' }}>
