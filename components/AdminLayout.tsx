@@ -359,7 +359,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
         <header
-          className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b flex-shrink-0"
+          className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 sm:px-6 py-3 border-b flex-shrink-0"
           style={{ background: themeStyles.topBarBg, borderColor: themeStyles.border }}
         >
           <button
@@ -381,12 +381,12 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
           >
             <FontAwesomeIcon icon={collapsed ? faAnglesRight : faAnglesLeft} className="w-3.5 h-3.5" />
           </button>
-          <div className="min-w-0 flex-1">
+          <div className="order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">
             <h1 className="truncate text-lg font-bold leading-tight" style={{ color: themeStyles.textPrimary }}>{title}</h1>
             {subtitle && <p className="truncate text-xs" style={{ color: themeStyles.textSecondary }}>{subtitle}</p>}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-3">
             <button
               onClick={toggleTheme}
               aria-label={isDimMode ? 'Switch to light theme' : 'Switch to dark theme'}
@@ -417,7 +417,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                 >
                   <AvatarContent src={user?.avatar_url} name={user?.display_name || user?.email || 'Admin'} />
                 </div>
-                <span className="text-xs font-medium" style={{ color: themeStyles.textPrimary }}>
+                <span className="hidden text-xs font-medium sm:inline" style={{ color: themeStyles.textPrimary }}>
                   {user?.display_name || 'Admin'}
                 </span>
                 <FontAwesomeIcon icon={faChevronDown} className={`w-3 h-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} style={{ color: themeStyles.textMuted }} />
