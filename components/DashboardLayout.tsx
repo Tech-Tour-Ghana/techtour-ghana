@@ -31,7 +31,7 @@ import { useCart } from '@/context/CartContext';
 import { getAuthStatus, getNotifications, logoutUser, type Notification, type User } from '@/lib/api';
 
 const BRAND_COLORS = {
-  tropicalTeal: '#139EA2',
+  tropicalTeal: '#0D7A7D',
   sandyOrange: '#E6A64D',
 };
 
