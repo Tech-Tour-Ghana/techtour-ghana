@@ -3,6 +3,7 @@
 // The signed-in admin's own account: name, photo, password, sign out, and the
 // changes they have made recently (from the audit log, migration 0021).
 
+import MfaCard from '@/components/admin/settings/MfaCard';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -201,6 +202,7 @@ export default function AdminProfilePage() {
             </Button>
           </Card>
 
+          <MfaCard />
           </div>
 
           {actions && (

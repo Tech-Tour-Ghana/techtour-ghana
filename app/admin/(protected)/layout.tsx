@@ -20,5 +20,12 @@ export default async function AdminProtectedLayout({ children }: { children: Rea
     redirect('/admin/login');
   }
 
+  // Admins with an authenticator app must pass the code check first. nextLevel is
+  // aal2 once a verified factor exists, currentLevel is aal2 after the code.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+    redirect('/admin/mfa');
+  }
+
   return <>{children}</>;
 }
