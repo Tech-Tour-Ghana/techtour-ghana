@@ -63,8 +63,14 @@ export default async function PartnershipPage({ searchParams }: { searchParams: 
       <section id="apply" className="mt-14 scroll-mt-28" aria-labelledby="apply-h">
         <h2 id="apply-h" className="text-2xl font-bold sm:text-3xl">Start a conversation</h2>
         <p className="mt-2 max-w-2xl" style={{ color: 'var(--sp-text-secondary)' }}>Not sure which type fits? Choose &quot;Something else&quot; and tell us what you have in mind.</p>
-        <div className="mt-6 max-w-3xl">
+        <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           <PartnershipForm key={type ?? 'none'} defaultType={type} />
+          <aside className="rounded-3xl p-6" style={cardStyle} aria-label="Other ways to reach us">
+            <h3 className="font-bold">Prefer to talk?</h3>
+            <p className="mt-2 text-sm" style={{ color: 'var(--sp-text-secondary)' }}>Write to our partnerships team directly, or use the contact page for phone numbers and our address.</p>
+            <p className="mt-4 text-sm font-semibold"><a href="mailto:partners@techtourghana.com" className="underline" style={{ color: 'var(--sp-primary)' }}>partners@techtourghana.com</a></p>
+            <div className="mt-5"><Button href="/about/contact-us" variant="secondary" size="sm">Contact page</Button></div>
+          </aside>
         </div>
       </section>
     </ContentShell>
