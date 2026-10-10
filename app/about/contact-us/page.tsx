@@ -3,7 +3,7 @@
 import Button from '@/components/ui/Button';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import BackToTop from '@/components/BackToTop';
+import ServiceHero from '@/components/ServiceHero';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEnvelope,
@@ -179,21 +179,11 @@ export default function ContactUsPage() {
   return (
     <ServiceTheme>
       <div className="contact-page">
-        {/* ===== HERO , COMPACT ===== */}
-        <section className="contact-hero">
-          <div className="contact-hero-bg" />
-          <div className="contact-hero-container">
-            <span className="contact-hero-label">Contact Us</span>
-            <h1 className="contact-hero-title">
-              Let's Start a <br />
-              <span className="contact-hero-accent">Conversation</span>
-            </h1>
-            <p className="contact-hero-subtitle">
-              Have a question, an idea, or a dream trip in mind? Our team is here to help, reach
-              out and we'll be in touch shortly.
-            </p>
-          </div>
-        </section>
+        <ServiceHero
+          title="Let's start a"
+          titleAccent="conversation"
+          description="Have a question, an idea, or a dream trip in mind? Our team is here to help, reach out and we'll be in touch shortly."
+        />
 
         {/* ===== CONTACT METHODS ===== */}
         <section className="contact-methods-section">
@@ -409,81 +399,12 @@ export default function ContactUsPage() {
           </div>
         </section>
 
-        <BackToTop accentColor="teal" />
-
         <style jsx>{`
           .contact-page {
             background: var(--sp-bg-primary);
             min-height: 100vh;
             color: var(--sp-text-primary);
             transition: background 0.4s ease, color 0.4s ease;
-          }
-
-          /* ===== HERO , COMPACT ===== */
-          .contact-hero {
-            position: relative;
-            overflow: hidden;
-            padding: 64px 32px 56px;
-            background: linear-gradient(135deg, var(--brand-teal) 0%, var(--brand-teal) 100%);
-          }
-
-          .contact-hero-bg {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(
-                circle at 15% 30%,
-                rgba(var(--brand-gold-rgb), 0.25) 0%,
-                transparent 45%
-              ),
-              radial-gradient(
-                circle at 85% 70%,
-                rgba(var(--brand-white-rgb), 0.15) 0%,
-                transparent 45%
-              );
-          }
-
-          .contact-hero-container {
-            position: relative;
-            z-index: 2;
-            max-width: 900px;
-            margin: 0 auto;
-            text-align: center;
-          }
-
-          .contact-hero-label {
-            display: inline-block;
-            padding: 7px 18px;
-            background: rgba(var(--brand-white-rgb), 0.15);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(var(--brand-white-rgb), 0.25);
-            border-radius: 30px;
-            color: var(--brand-white);
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 18px;
-          }
-
-          .contact-hero-title {
-            font-size: clamp(1.6rem, 1.2rem + 2vw, 2.8rem);
-            font-weight: 800;
-            color: var(--brand-white);
-            margin: 0 0 14px 0;
-            line-height: 1.15;
-            letter-spacing: -0.02em;
-          }
-
-          .contact-hero-accent {
-            color: var(--brand-gold);
-          }
-
-          .contact-hero-subtitle {
-            font-size: clamp(0.85rem, 0.8rem + 0.35vw, 1.05rem);
-            color: rgba(var(--brand-white-rgb), 0.9);
-            line-height: 1.6;
-            margin: 0 auto;
-            max-width: 620px;
           }
 
           /* ===== CONTACT METHODS , COMPACT ===== */
@@ -976,24 +897,6 @@ export default function ContactUsPage() {
 
           /* Mobile */
           @media (max-width: 640px) {
-            .contact-hero {
-              padding: 44px 20px 44px;
-            }
-
-            .contact-hero-label {
-              font-size: 10px;
-              padding: 6px 14px;
-              margin-bottom: 14px;
-            }
-
-            .contact-hero-title {
-              margin-bottom: 12px;
-            }
-
-            .contact-hero-subtitle {
-              line-height: 1.55;
-            }
-
             /* ============================================================
                CONTACT METHODS , 2×2 GRID ON MOBILE
                ============================================================ */
