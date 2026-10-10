@@ -15,9 +15,9 @@ const ServiceHero: React.FC<ServiceHeroProps> = ({
   description,
   accentColor = 'teal',
 }) => {
-  const gradientFrom = accentColor === 'orange' ? '#E6A64D' : '#0D7A7D';
-  const gradientTo = accentColor === 'orange' ? '#D4953A' : '#0A5F62';
-  const accentTextColor = accentColor === 'orange' ? '#1A1A2E' : '#F5C875';
+  const gradientFrom = accentColor === 'orange' ? '#E6A64D' : 'var(--sp-hero-from, #0D7A7D)';
+  const gradientTo = accentColor === 'orange' ? '#D4953A' : 'var(--sp-hero-to, #0A5F62)';
+  const accentTextColor = accentColor === 'orange' ? '#1A1A2E' : 'var(--sp-hero-accent, #F5C875)';
 
   return (
     <section className={`service-hero${accentColor === 'orange' ? ' service-hero-orange' : ''}`}>

@@ -2462,6 +2462,7 @@ export type Database = {
       site_settings: {
         Row: {
           created_at: string
+          default_theme: string
           favicon_url: string
           id: string
           legacy_id: number | null
@@ -2486,10 +2487,12 @@ export type Database = {
           seo_site_name: string
           seo_social_profiles: string[]
           seo_title_pattern: string
+          theme: Json
           updated_at: string
         }
         Insert: {
           created_at?: string
+          default_theme?: string
           favicon_url?: string
           id?: string
           legacy_id?: number | null
@@ -2514,10 +2517,12 @@ export type Database = {
           seo_site_name?: string
           seo_social_profiles?: string[]
           seo_title_pattern?: string
+          theme?: Json
           updated_at?: string
         }
         Update: {
           created_at?: string
+          default_theme?: string
           favicon_url?: string
           id?: string
           legacy_id?: number | null
@@ -2542,6 +2547,7 @@ export type Database = {
           seo_site_name?: string
           seo_social_profiles?: string[]
           seo_title_pattern?: string
+          theme?: Json
           updated_at?: string
         }
         Relationships: []

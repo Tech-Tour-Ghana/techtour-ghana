@@ -7,6 +7,7 @@ import { createClient as createPublicClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import { env } from "@/lib/env";
 import { getSiteSeo } from "@/lib/seo/load.server";
+import { getSiteTheme } from "@/lib/theme/load.server";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/resolve";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -58,9 +59,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const site = await getSiteSeo();
+  const [site, theme] = await Promise.all([getSiteSeo(), getSiteTheme()]);
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-default-theme={theme.defaultTheme} suppressHydrationWarning>
+      <head>{theme.css && <style id="brand-theme" dangerouslySetInnerHTML={{ __html: theme.css }} />}</head>
       <body className={inter.className}>
         <JsonLd data={[organizationJsonLd(site), websiteJsonLd(site)]} />
         <AppShell>{children}</AppShell>

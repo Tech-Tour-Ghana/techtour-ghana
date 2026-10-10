@@ -21,8 +21,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (savedTheme) {
       isDim = savedTheme === 'dim';
     } else {
-      // If no saved theme, use system preference
-      isDim = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      // No saved choice: use the default the admin set, else the device preference.
+      const preset = document.documentElement.getAttribute('data-default-theme');
+      isDim = preset === 'dark' ? true : preset === 'light' ? false : window.matchMedia('(prefers-color-scheme: dark)').matches;
       // Save the default
       localStorage.setItem('theme', isDim ? 'dim' : 'bright');
     }
