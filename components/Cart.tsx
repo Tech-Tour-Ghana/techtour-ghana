@@ -193,7 +193,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
           width: '60px',
           height: '60px',
           borderRadius: '50%',
-          background: isDimMode ? '#E6A64D' : '#139EA2',
+          background: isDimMode ? '#E6A64D' : '#0D7A7D',
           color: isDimMode ? '#0A0A0A' : 'white',
           border: 'none',
           cursor: 'pointer',
@@ -400,7 +400,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
               <p style={{ fontSize: '48px', marginBottom: '16px' }}><FontAwesomeIcon icon={faShoppingCart} /></p>
               <p style={{ fontSize: '16px', fontWeight: '500' }}>Your cart is empty</p>
               <p style={{ fontSize: '14px', marginTop: '4px' }}>Start shopping to add items</p>
-              <Button onClick={closeCart} variant="accent" arrow={false} className="mt-5" style={{ background: isDimMode ? '#E6A64D' : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>
+              <Button onClick={closeCart} variant="accent" arrow={false} className="mt-5" style={{ background: isDimMode ? '#E6A64D' : '#0D7A7D', color: isDimMode ? '#0A0A0A' : 'white' }}>
                 Continue Shopping
               </Button>
             </div>
@@ -454,7 +454,7 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
                     <div style={{ 
                       fontWeight: '600', 
                       fontSize: '15px',
-                      color: isDimMode ? '#E6A64D' : '#139EA2',
+                      color: isDimMode ? '#E6A64D' : '#0D7A7D',
                       marginTop: '2px',
                     }}>
                       {selectedCurrency.symbol}{convertedPrice.toFixed(2)} × {item.quantity} = {selectedCurrency.symbol}{itemTotal.toFixed(2)}
@@ -534,12 +534,12 @@ export default function Cart({ onProceedToPayment }: { onProceedToPayment?: () =
               <span style={{ 
                 fontWeight: 'bold', 
                 fontSize: '20px',
-                color: isDimMode ? '#E6A64D' : '#139EA2',
+                color: isDimMode ? '#E6A64D' : '#0D7A7D',
               }}>
                 {selectedCurrency.symbol}{convertPrice(total).toFixed(2)}
               </span>
             </div>
-            <Button onClick={handleCheckout} variant="accent" full icon={faLock} style={{ background: isDimMode ? '#E6A64D' : '#139EA2', color: isDimMode ? '#0A0A0A' : 'white' }}>Proceed to Checkout</Button>
+            <Button onClick={handleCheckout} variant="accent" full icon={faLock} style={{ background: isDimMode ? '#E6A64D' : '#0D7A7D', color: isDimMode ? '#0A0A0A' : 'white' }}>Proceed to Checkout</Button>
             <Button onClick={clearCart} variant="secondary" size="sm" arrow={false} full className="mt-2" style={{ color: '#DC2626' }}>
               Clear Cart
             </Button>

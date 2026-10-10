@@ -22,7 +22,7 @@ export const ServiceThemeStyles = () => (
       
       --sp-text-primary: #1A1A2E;
       --sp-text-secondary: #4A4A4A;
-      --sp-text-muted: #9CA3AF;
+      --sp-text-muted: #6B7280;
       --sp-text-subtle: #6B7280;
       
       --sp-border: rgba(19, 158, 162, 0.08);
@@ -37,11 +37,12 @@ export const ServiceThemeStyles = () => (
       --sp-tag-border: rgba(19, 158, 162, 0.06);
       --sp-tag-text: #4A4A4A;
       
-      --sp-primary: #139EA2;
-      --sp-primary-dark: #0D7A7D;
-      --sp-primary-light: rgba(19, 158, 162, 0.12);
+      --sp-primary: #0D7A7D;
+      --sp-primary-dark: #0A5F62;
+      --sp-primary-light: rgba(13, 122, 125, 0.12);
       
       --sp-accent: #E6A64D;
+      --sp-accent-text: #8A5200;
       --sp-accent-dark: #D4953A;
       --sp-accent-light: rgba(230, 166, 77, 0.15);
       
@@ -83,6 +84,7 @@ export const ServiceThemeStyles = () => (
       --sp-primary-light: rgba(230, 166, 77, 0.15);
       
       --sp-accent: #139EA2;
+      --sp-accent-text: #E6A64D;
       --sp-accent-dark: #0D7A7D;
       --sp-accent-light: rgba(19, 158, 162, 0.15);
       

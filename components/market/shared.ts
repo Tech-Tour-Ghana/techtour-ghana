@@ -2,15 +2,15 @@
 
 export const MARKET_COLORS = {
   light: {
-    primary: '#139EA2',
-    primaryHover: '#0D7A7D',
+    primary: '#0D7A7D',
+    primaryHover: '#0A5F62',
     primaryLight: '#E6F4F5',
     secondary: '#E6A64D',
     secondaryHover: '#D4953A',
     secondaryLight: '#FDF3E6',
     textPrimary: '#000000',
     textSecondary: '#4A4A4A',
-    textMuted: '#9CA3AF',
+    textMuted: '#6B7280',
     background: '#FFFFFF',
     backgroundAlt: '#F9F9F9',
     backgroundCard: '#FFFFFF',

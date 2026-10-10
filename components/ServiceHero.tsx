@@ -15,12 +15,12 @@ const ServiceHero: React.FC<ServiceHeroProps> = ({
   description,
   accentColor = 'teal',
 }) => {
-  const gradientFrom = accentColor === 'orange' ? '#E6A64D' : '#139EA2';
-  const gradientTo = accentColor === 'orange' ? '#D4953A' : '#0D7A7D';
-  const accentTextColor = accentColor === 'orange' ? '#FFFFFF' : '#E6A64D';
+  const gradientFrom = accentColor === 'orange' ? '#E6A64D' : '#0D7A7D';
+  const gradientTo = accentColor === 'orange' ? '#D4953A' : '#0A5F62';
+  const accentTextColor = accentColor === 'orange' ? '#1A1A2E' : '#F5C875';
 
   return (
-    <section className="service-hero">
+    <section className={`service-hero${accentColor === 'orange' ? ' service-hero-orange' : ''}`}>
       <div
         className="service-hero-bg"
         style={{
@@ -127,6 +127,12 @@ const ServiceHero: React.FC<ServiceHeroProps> = ({
           margin: 0;
           font-weight: 400;
           text-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .service-hero-orange .service-title,
+        .service-hero-orange .service-description {
+          color: #1A1A2E;
+          text-shadow: none;
         }
 
         .service-hero-wave {
