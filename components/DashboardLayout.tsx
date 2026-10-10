@@ -14,6 +14,7 @@ import {
   faCalendarCheck,
   faGraduationCap,
   faHeart,
+  faHeadset,
   faCreditCard,
   faBell,
   faShieldAlt,
@@ -42,6 +43,7 @@ export const SIDEBAR_ITEMS = [
   { icon: faGraduationCap, label: 'Study', href: '/auth/study' },
   { icon: faCalendarCheck, label: 'Tours', href: '/auth/tours' },
   { icon: faHeart, label: 'Wishlist', href: '/auth/wishlist' },
+  { icon: faHeadset, label: 'Help', href: '/auth/support' },
 ];
 
 export const TOP_BAR_ITEMS = [

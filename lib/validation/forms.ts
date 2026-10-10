@@ -15,6 +15,21 @@ export const newsletterSchema = z.object({
   source: z.literal("footer").default("footer"),
 });
 
+export const SUPPORT_CATEGORIES = ["booking", "payment", "order", "study", "account", "technical", "other"] as const;
+
+export const supportTicketSchema = z.object({
+  subject: z.string().trim().min(3, "Subject must be at least 3 characters").max(140),
+  category: z.enum(SUPPORT_CATEGORIES).default("other"),
+  message: z.string().trim().min(10, "Tell us a little more, at least 10 characters").max(5_000),
+  reference: z.string().trim().max(80).default(""),
+});
+
+export const adminReplySchema = z.object({
+  ticketId: z.uuid(),
+  body: z.string().trim().min(1, "Write a reply").max(5_000),
+  internal: z.boolean().default(false),
+});
+
 /** First field-level message per field, for the API error body. */
 export function fieldErrors(error: z.ZodError): Record<string, string> {
   const out: Record<string, string> = {};

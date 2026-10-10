@@ -48,6 +48,8 @@ import {
   faTrashCan,
   faBell,
   faEnvelopeCircleCheck,
+  faHeadset,
+  faBullhorn,
   faAnglesRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from '@/context/ThemeContext';
@@ -109,6 +111,8 @@ const NAV_GROUPS = [
   {
     group: 'Inbox & Support',
     items: [
+      { icon: faHeadset, label: 'Helpdesk', href: '/admin/helpdesk' },
+      { icon: faBullhorn, label: 'Notice Board', href: '/admin/notices' },
       { icon: faEnvelope, label: 'Contact Messages', href: '/admin/contacts' },
       { icon: faCommentDots, label: 'Feedback', href: '/admin/feedback' },
       { icon: faEnvelopeCircleCheck, label: 'Email Log', href: '/admin/emails' },

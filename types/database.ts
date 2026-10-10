@@ -2762,6 +2762,124 @@ export type Database = {
           },
         ]
       }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          category: string
+          closed_at: string | null
+          created_at: string
+          id: string
+          last_activity_at: string
+          priority: string
+          reference: string
+          resolved_at: string | null
+          status: string
+          subject: string
+          ticket_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          last_activity_at?: string
+          priority?: string
+          reference?: string
+          resolved_at?: string | null
+          status?: string
+          subject: string
+          ticket_number?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string
+          closed_at?: string | null
+          last_activity_at?: string
+          priority?: string
+          resolved_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "support_tickets_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          { foreignKeyName: "support_tickets_assigned_to_fkey"; columns: ["assigned_to"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ]
+      }
+      support_messages: {
+        Row: {
+          author_id: string | null
+          body: string
+          created_at: string
+          id: string
+          is_internal: boolean
+          is_staff: boolean
+          ticket_id: string
+        }
+        Insert: {
+          author_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          is_staff?: boolean
+          ticket_id: string
+        }
+        Update: Record<string, never>
+        Relationships: [
+          { foreignKeyName: "support_messages_ticket_id_fkey"; columns: ["ticket_id"]; isOneToOne: false; referencedRelation: "support_tickets"; referencedColumns: ["id"] },
+          { foreignKeyName: "support_messages_author_id_fkey"; columns: ["author_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ]
+      }
+      notices: {
+        Row: {
+          audience: string
+          body: string
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          is_pinned: boolean
+          severity: string
+          show_banner: boolean
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: string
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          is_pinned?: boolean
+          severity?: string
+          show_banner?: boolean
+          starts_at?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          body?: string
+          ends_at?: string | null
+          is_active?: boolean
+          is_pinned?: boolean
+          severity?: string
+          show_banner?: boolean
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       study_destinations: {
         Row: {
           average_tuition: string
@@ -3879,6 +3997,12 @@ export type Database = {
         Args: { p_destination_id: string; p_scholarship_id: string | null; p_full_name: string; p_email: string; p_phone: string; p_nationality: string; p_education_level: string; p_intended_level: string; p_field_of_study: string; p_start_date: string | null; p_message: string }
         Returns: string
       }
+      create_support_ticket: {
+        Args: { p_subject: string; p_category: string; p_message: string; p_reference?: string }
+        Returns: Json
+      }
+      reply_support_ticket: { Args: { p_ticket_id: string; p_body: string }; Returns: undefined }
+      customer_update_support_ticket: { Args: { p_ticket_id: string; p_action: string }; Returns: undefined }
       restore_trash: { Args: { p_id: number }; Returns: number }
       purge_trash: { Args: { p_id?: number }; Returns: number }
       admin_tour_reviews: { Args: never; Returns: Json }

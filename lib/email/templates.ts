@@ -40,3 +40,17 @@ export const studyApplicationNotify = (a: { name: string; email: string; phone: 
     `<p><b>Applicant:</b> ${h(a.name)} (${h(a.email)}, ${h(a.phone)})</p><p><b>Destination:</b> ${h(a.country)}<br><b>Level:</b> ${h(a.level)}<br><b>Field:</b> ${h(a.field || "-")}</p>${a.message ? `<p style="white-space:pre-wrap">${h(a.message)}</p>` : ""}<p>Review it in the admin under Study Applications.</p>`,
   ),
 });
+
+export const supportTicketCreated = (t: { name: string; number: string; subject: string; url: string }) => ({
+  subject: `We received your request ${t.number}`,
+  html: wrap(
+    `<h2>Hi ${h(t.name)},</h2><p>Thanks for contacting TechTour Ghana support. Your ticket <b>${h(t.number)}</b> (${h(t.subject)}) is open and our team will reply as soon as they can.</p><p><a href="${h(t.url)}">View your ticket</a></p>`,
+  ),
+});
+
+export const supportReply = (t: { name: string; number: string; subject: string; snippet: string; url: string }) => ({
+  subject: `New reply on ${t.number}: ${t.subject}`,
+  html: wrap(
+    `<h2>Hi ${h(t.name)},</h2><p>Our team replied to your ticket <b>${h(t.number)}</b>.</p><blockquote style="border-left:3px solid #ccc;margin:12px 0;padding-left:12px;white-space:pre-wrap">${h(t.snippet)}</blockquote><p><a href="${h(t.url)}">Open the conversation</a> to reply.</p>`,
+  ),
+});
