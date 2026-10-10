@@ -19,15 +19,13 @@ export default async function PopularDestinations() {
             return (
               <li key={d.id} className="w-[78%] flex-shrink-0 snap-start sm:w-[45%] lg:w-auto">
                 <Link href={`/destinations/${d.slug}`} className="group block h-full overflow-hidden rounded-3xl" style={{ background: 'var(--sp-bg-card)', border: '1px solid var(--sp-border)', boxShadow: 'var(--sp-shadow-sm)' }}>
-                  <div className="aspect-[4/3] overflow-hidden" style={{ background: 'var(--sp-border)' }}>
-                    {d.image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
+                  {d.image_url && (
+                    <div className="aspect-[4/3] overflow-hidden" style={{ background: 'var(--sp-border)' }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={d.image_url} alt={`${d.name}, Ghana`} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    ) : (
-                      <span aria-hidden className="flex h-full w-full items-center justify-center text-5xl font-bold" style={{ color: 'var(--sp-primary)' }}>{d.name.charAt(0)}</span>
-                    )}
-                  </div>
-                  <div className="p-5">
+                    </div>
+                  )}
+                  <div className="p-5" style={d.image_url ? undefined : { borderTop: '4px solid var(--sp-primary)' }}>
                     <h3 className="text-lg font-bold">{d.name}</h3>
                     {blurb && <p className="mt-1 line-clamp-2 text-sm leading-relaxed" style={{ color: 'var(--sp-text-secondary)' }}>{blurb}</p>}
                   </div>

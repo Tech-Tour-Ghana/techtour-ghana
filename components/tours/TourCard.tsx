@@ -20,7 +20,7 @@ function DateChip({ iso }: { iso: string }) {
   );
 }
 
-export default function TourCard({ tour }: { tour: TourCardData }) {
+export default function TourCard({ tour, headingLevel: Heading = 'h2' }: { tour: TourCardData; headingLevel?: 'h2' | 'h3' }) {
   const href = `/tours/${tour.slug}`;
   const onSale = tour.discount_price !== null && tour.discount_price < tour.price;
   const place = [tour.location, tour.region].filter(Boolean).join(', ');
@@ -51,7 +51,7 @@ export default function TourCard({ tour }: { tour: TourCardData }) {
         </div>
 
         <div className="mt-2 flex items-start justify-between gap-3">
-          <h2 className="line-clamp-2 text-lg font-bold leading-snug"><Link href={href}>{tour.title}</Link></h2>
+          <Heading className="line-clamp-2 text-lg font-bold leading-snug"><Link href={href}>{tour.title}</Link></Heading>
           <p className="flex-shrink-0 text-right leading-tight">
             <span className="text-lg font-bold" style={{ color: onSale ? 'var(--sp-secondary, #E6A64D)' : 'var(--sp-primary)' }}>{tourMoney(onSale ? tour.discount_price! : tour.price, tour.currency)}</span>
             <span className="block text-[11px]" style={{ color: 'var(--sp-text-muted)' }}>{onSale && <s className="mr-1">{tourMoney(tour.price, tour.currency)}</s>}per person</span>
