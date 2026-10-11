@@ -6,7 +6,8 @@ import { ServiceTheme } from '@/components/ServiceTheme';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import StudyApplicationForm from '@/components/study/StudyApplicationForm';
 import Button from '@/components/ui/Button';
-import { LEVELS, deadlineLabel, getStudyDestination } from '@/lib/study/load.server';
+import InstitutionCard from '@/components/study/InstitutionCard';
+import { LEVELS, deadlineLabel, getStudyDestination, getStudyInstitutions } from '@/lib/study/load.server';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,7 @@ export default async function StudyDestinationPage({ params }: Params) {
   const found = await getStudyDestination(id);
   if (!found) notFound();
   const { destination: d, scholarships } = found;
+  const institutions = await getStudyInstitutions(d.id);
 
   const facts = [
     { label: 'Average tuition', value: d.average_tuition },
@@ -74,6 +76,16 @@ export default async function StudyDestinationPage({ params }: Params) {
                 </section>
               )}
 
+              {institutions.length > 0 && (
+                <section className="mt-10" aria-labelledby="uni-h">
+                  <h2 id="uni-h" className="text-xl font-bold">Universities and programmes</h2>
+                  <p className="mt-1 text-sm" style={{ color: 'var(--sp-text-secondary)' }}>Pick a programme to apply. We handle the application with the university and you follow it in your account.</p>
+                  <ul className="mt-4 space-y-5">
+                    {institutions.map((i) => <li key={i.id}><InstitutionCard institution={i} country={d.country_name} /></li>)}
+                  </ul>
+                </section>
+              )}
+
               <section className="mt-10" aria-labelledby="sch-h">
                 <h2 id="sch-h" className="text-xl font-bold">Scholarships</h2>
                 {scholarships.length === 0 ? (
@@ -96,7 +108,7 @@ export default async function StudyDestinationPage({ params }: Params) {
             </div>
 
             <aside id="apply" className="lg:sticky lg:top-24 lg:self-start" aria-label="Apply">
-              <StudyApplicationForm destination={{ id: d.id, country_name: d.country_name }} scholarships={scholarships.map((s) => ({ id: s.id, title: s.title }))} />
+              <StudyApplicationForm destination={{ id: d.id, country_name: d.country_name }} scholarships={scholarships.map((s) => ({ id: s.id, title: s.title }))} general={institutions.length > 0} />
               <div className="mt-4 flex justify-center"><Button href="/services/study-abroad" variant="secondary" arrow={false} size="sm">All destinations</Button></div>
             </aside>
           </div>

@@ -2694,6 +2694,13 @@ export type Database = {
           university: string
           updated_at: string
           user_id: string
+          institution_id: string | null
+          program_id: string | null
+          intake: string
+          reference: string
+          assigned_to: string | null
+          next_step: string
+          last_activity_at: string
         }
         Insert: {
           admin_notes?: string
@@ -2717,6 +2724,13 @@ export type Database = {
           university?: string
           updated_at?: string
           user_id: string
+          institution_id?: string | null
+          program_id?: string | null
+          intake?: string
+          reference?: string
+          assigned_to?: string | null
+          next_step?: string
+          last_activity_at?: string
         }
         Update: {
           admin_notes?: string
@@ -2740,6 +2754,13 @@ export type Database = {
           university?: string
           updated_at?: string
           user_id?: string
+          institution_id?: string | null
+          program_id?: string | null
+          intake?: string
+          reference?: string
+          assigned_to?: string | null
+          next_step?: string
+          last_activity_at?: string
         }
         Relationships: [
           {
@@ -2880,6 +2901,207 @@ export type Database = {
           starts_at?: string
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      study_institutions: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          destination_id: string | null
+          city: string
+          logo_url: string
+          image_url: string
+          website: string
+          description: string
+          is_partner: boolean
+          is_featured: boolean
+          is_active: boolean
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          destination_id?: string | null
+          city?: string
+          logo_url?: string
+          image_url?: string
+          website?: string
+          description?: string
+          is_partner?: boolean
+          is_featured?: boolean
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          destination_id?: string | null
+          city?: string
+          logo_url?: string
+          image_url?: string
+          website?: string
+          description?: string
+          is_partner?: boolean
+          is_featured?: boolean
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      study_programs: {
+        Row: {
+          id: string
+          institution_id: string
+          title: string
+          slug: string
+          level: string
+          field: string
+          duration: string
+          tuition_amount: number | null
+          tuition_currency: string
+          application_fee: number | null
+          intakes: string
+          requirements: string
+          description: string
+          is_active: boolean
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          institution_id: string
+          title: string
+          slug: string
+          level?: string
+          field?: string
+          duration?: string
+          tuition_amount?: number | null
+          tuition_currency?: string
+          application_fee?: number | null
+          intakes?: string
+          requirements?: string
+          description?: string
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          institution_id?: string
+          title?: string
+          slug?: string
+          level?: string
+          field?: string
+          duration?: string
+          tuition_amount?: number | null
+          tuition_currency?: string
+          application_fee?: number | null
+          intakes?: string
+          requirements?: string
+          description?: string
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      study_application_documents: {
+        Row: {
+          id: string
+          application_id: string
+          label: string
+          description: string
+          required: boolean
+          status: string
+          file_path: string
+          file_name: string
+          mime_type: string
+          size_bytes: number
+          staff_note: string
+          sort_order: number
+          uploaded_at: string | null
+          reviewed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          application_id: string
+          label: string
+          description?: string
+          required?: boolean
+          status?: string
+          file_path?: string
+          file_name?: string
+          mime_type?: string
+          size_bytes?: number
+          staff_note?: string
+          sort_order?: number
+          uploaded_at?: string | null
+          reviewed_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          application_id?: string
+          label?: string
+          description?: string
+          required?: boolean
+          status?: string
+          file_path?: string
+          file_name?: string
+          mime_type?: string
+          size_bytes?: number
+          staff_note?: string
+          sort_order?: number
+          uploaded_at?: string | null
+          reviewed_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      study_application_events: {
+        Row: {
+          id: string
+          application_id: string
+          kind: string
+          title: string
+          body: string
+          is_public: boolean
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          application_id: string
+          kind?: string
+          title: string
+          body?: string
+          is_public?: boolean
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          application_id?: string
+          kind?: string
+          title?: string
+          body?: string
+          is_public?: boolean
+          created_by?: string | null
+          created_at?: string
         }
         Relationships: []
       }
@@ -3999,6 +4221,14 @@ export type Database = {
       admin_sidebar_counts: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      start_study_application: {
+        Args: { p_destination_id: string | null; p_institution_id: string | null; p_program_id: string | null; p_intake: string; p_full_name: string; p_email: string; p_phone: string; p_nationality: string; p_education_level: string; p_message: string }
+        Returns: string
+      }
+      attach_study_document: {
+        Args: { p_document_id: string; p_path: string; p_name: string; p_mime: string; p_size: number }
+        Returns: undefined
       }
       create_rental_booking: {
         Args: { p_rental_id: string; p_check_in: string; p_check_out: string; p_guests: number; p_guest_name?: string; p_phone?: string; p_special_requests?: string }

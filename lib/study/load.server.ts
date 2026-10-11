@@ -61,3 +61,69 @@ export const deadlineLabel = (iso: string) =>
   iso >= OPEN_DEADLINE ? 'Open all year' : new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 
 export const LEVELS: Record<string, string> = { all: 'All levels', bachelor: 'Bachelor', master: 'Master', phd: 'PhD' };
+
+export interface StudyProgram {
+  id: string;
+  institution_id: string;
+  title: string;
+  slug: string;
+  level: string;
+  field: string;
+  duration: string;
+  tuition_amount: number | null;
+  tuition_currency: string;
+  application_fee: number | null;
+  intakes: string;
+  requirements: string;
+  description: string;
+}
+
+export interface StudyInstitution {
+  id: string;
+  slug: string;
+  name: string;
+  destination_id: string | null;
+  city: string;
+  logo_url: string;
+  image_url: string;
+  website: string;
+  description: string;
+  is_partner: boolean;
+  is_featured: boolean;
+  programs: StudyProgram[];
+}
+
+const PROGRAM_SELECT = 'id, institution_id, title, slug, level, field, duration, tuition_amount, tuition_currency, application_fee, intakes, requirements, description';
+const INSTITUTION_SELECT = `id, slug, name, destination_id, city, logo_url, image_url, website, description, is_partner, is_featured, study_programs(${PROGRAM_SELECT})`;
+
+type InstitutionRow = Omit<StudyInstitution, 'programs'> & { study_programs: StudyProgram[] | null };
+const toInstitution = ({ study_programs, ...rest }: InstitutionRow): StudyInstitution => ({
+  ...rest,
+  programs: (study_programs ?? []).sort((a, b) => a.title.localeCompare(b.title)),
+});
+
+/** Active partner institutions (optionally one country) with their active programmes. RLS hides anything inactive. */
+export const getStudyInstitutions = cache(async (destinationId?: string): Promise<StudyInstitution[]> => {
+  const supabase = await createClient();
+  let query = supabase.from('study_institutions').select(INSTITUTION_SELECT).eq('is_active', true).eq('study_programs.is_active', true).order('is_featured', { ascending: false }).order('sort_order').order('name');
+  if (destinationId) query = query.eq('destination_id', destinationId);
+  const { data } = await query;
+  return ((data as unknown as InstitutionRow[] | null) ?? []).map(toInstitution);
+});
+
+export const getStudyProgram = cache(async (id: string) => {
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const supabase = await createClient();
+  const { data: program } = await supabase.from('study_programs').select(PROGRAM_SELECT).eq('id', id).eq('is_active', true).maybeSingle();
+  if (!program) return null;
+  const { data: institution } = await supabase.from('study_institutions').select('id, slug, name, destination_id, city, logo_url, image_url, website, description, is_partner, is_featured').eq('id', program.institution_id).eq('is_active', true).maybeSingle();
+  if (!institution) return null;
+  const { data: destination } = institution.destination_id
+    ? await supabase.from('study_destinations').select(DEST_SELECT).eq('id', institution.destination_id).eq('is_active', true).maybeSingle()
+    : { data: null };
+  if (!destination) return null;
+  return { program: program as StudyProgram, institution, destination };
+});
+
+export const formatTuition = (amount: number | null, currency: string) =>
+  amount === null ? '' : `${currency} ${Number(amount).toLocaleString('en-GB', { maximumFractionDigits: 0 })} per year`;
