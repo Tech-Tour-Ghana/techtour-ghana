@@ -176,7 +176,11 @@ export default function HomepagePage() {
               </td>
               <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{v.category}</td>
               <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{v.sort_order}</td>
-              <td className="px-4 py-3"><StatusPill tone={v.is_active ? 'success' : 'neutral'}>{v.is_active ? 'Active' : 'Inactive'}</StatusPill></td>
+              <td className="px-4 py-3">
+                {v.is_active && !parseYouTubeId(v.video_url)
+                  ? <span title="The Watch Ghana section only shows videos with a YouTube link. Edit this one to add a link."><StatusPill tone="warning">Not shown: no YouTube link</StatusPill></span>
+                  : <StatusPill tone={v.is_active ? 'success' : 'neutral'}>{v.is_active ? 'Active' : 'Inactive'}</StatusPill>}
+              </td>
               <td className="px-4 py-3">
                 <div className="flex gap-2">
                   <IconButton title="Edit" onClick={() => { setYtError(''); setLegacyUrl(!!v.video_url && !parseYouTubeId(v.video_url)); setModal({ ...v }); }}><FontAwesomeIcon icon={faPen} className="h-3 w-3" /></IconButton>
