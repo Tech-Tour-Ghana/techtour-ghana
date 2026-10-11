@@ -87,6 +87,7 @@ export default function AdminTrashPage() {
   const [type, setType] = useState('all');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [preview, setPreview] = useState<Group | null>(null);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     try { if (localStorage.getItem('admin_trash_view') === 'list') setView('list'); } catch { /* storage blocked */ }
@@ -122,55 +123,86 @@ export default function AdminTrashPage() {
     return [r.i1, r.i2, r.i3, r.i4, r.i5, r.i6].find(looksLikeUrl) ?? null;
   }, [trashUrl]);
 
-  async function restore(g: Group) {
-    const also = g.rows.length - 1;
-    const name = `${kind(g.main.table_name).toLowerCase()} "${g.main.label}"`;
-    if (!(await confirmAction({ message: `Restore ${name}${also ? ` and the ${also} related item${also === 1 ? '' : 's'} deleted with it` : ''}?`, confirmLabel: 'Restore' }))) return;
-    setBusy(g.main.id);
-    const files = g.rows.filter((r) => r.table_name === 'media_assets' && r.path);
+  async function restoreGroups(gs: Group[]) {
+    if (gs.length === 0) return;
+    const related = gs.reduce((n, g) => n + g.rows.length - 1, 0);
+    const one = gs[0]!;
+    const message = gs.length === 1
+      ? `Restore ${kind(one.main.table_name).toLowerCase()} "${one.main.label}"${related ? ` and the ${related} related item${related === 1 ? '' : 's'} deleted with it` : ''}?`
+      : `Restore ${gs.length} items${related ? ` and the ${related} related item${related === 1 ? '' : 's'} deleted with them` : ''}?`;
+    if (!(await confirmAction({ message, confirmLabel: gs.length === 1 ? 'Restore' : `Restore ${gs.length}` }))) return;
+    setBusy(one.main.id);
     const bucket = supabase.storage.from('media');
-    // Put the files back first, so a restored library entry never points at nothing.
-    const moved: string[] = [];
-    for (const f of files) {
-      const { error: mv } = await bucket.move(TRASH_PREFIX + f.path!, f.path!);
-      if (mv && !/not found/i.test(mv.message)) { await Promise.all(moved.map((p) => bucket.move(p, TRASH_PREFIX + p))); setBusy(null); return notify('Could not move the file back.'); }
-      if (!mv) moved.push(f.path!);
-    }
-    const { error: err } = await supabase.rpc('restore_trash', { p_id: g.main.id });
-    if (err) {
-      await Promise.all(moved.map((p) => bucket.move(p, TRASH_PREFIX + p)));
-      setBusy(null);
-      return notify(err.message || 'Could not restore it. The item it belongs to may be missing.');
+    let restored = 0;
+    let failed = 0;
+    for (const g of gs) {
+      // Put the files back first, so a restored library entry never points at nothing.
+      const files = g.rows.filter((r) => r.table_name === 'media_assets' && r.path);
+      const moved: string[] = [];
+      let ok = true;
+      for (const f of files) {
+        const { error: mv } = await bucket.move(TRASH_PREFIX + f.path!, f.path!);
+        if (mv && !/not found/i.test(mv.message)) { ok = false; break; }
+        if (!mv) moved.push(f.path!);
+      }
+      if (ok) {
+        const { error: err } = await supabase.rpc('restore_trash', { p_id: g.main.id });
+        if (err) ok = false;
+      }
+      if (!ok) await Promise.all(moved.map((p) => bucket.move(p, TRASH_PREFIX + p)));
+      if (ok) restored += 1; else failed += 1;
     }
     setBusy(null);
-    notify('Restored.', 'success');
+    if (failed) notify(`${restored} restored, ${failed} could not be restored. The item they belong to may be missing.`);
+    else notify(restored === 1 ? 'Restored.' : `${restored} items restored.`, 'success');
     setPreview(null);
+    setSelected(new Set());
     announceAdminCounts();
     load();
   }
 
-  async function purge(g: Group | null) {
-    const msg = g ? `Permanently delete "${g.main.label}"${g.rows.length > 1 ? ` and the ${g.rows.length - 1} item${g.rows.length === 2 ? '' : 's'} deleted with it` : ''}? This cannot be undone.` : `Permanently delete everything in the trash (${groups.length} item${groups.length === 1 ? '' : 's'})? This cannot be undone.`;
-    if (!(await confirmAction({ message: msg, danger: true, confirmLabel: g ? 'Delete forever' : 'Empty trash' }))) return;
-    setBusy(g?.main.id ?? -1);
-    const target = g ? g.rows : rows;
+  /** gs null empties the whole trash. */
+  async function purgeGroups(gs: Group[] | null) {
+    const list = gs ?? groups;
+    if (list.length === 0) return;
+    const extra = list.reduce((n, g) => n + g.rows.length - 1, 0);
+    const message = gs === null
+      ? `Permanently delete everything in the trash (${list.length} item${list.length === 1 ? '' : 's'})? This cannot be undone.`
+      : list.length === 1
+        ? `Permanently delete "${list[0]!.main.label}"${extra ? ` and the ${extra} item${extra === 1 ? '' : 's'} deleted with it` : ''}? This cannot be undone.`
+        : `Permanently delete ${list.length} items${extra ? ` and the ${extra} item${extra === 1 ? '' : 's'} deleted with them` : ''}? This cannot be undone.`;
+    if (!(await confirmAction({ message, danger: true, confirmLabel: gs === null ? 'Empty trash' : list.length === 1 ? 'Delete forever' : `Delete ${list.length} forever` }))) return;
+    setBusy(gs === null ? -1 : list[0]!.main.id);
+    const target = gs === null ? rows : list.flatMap((g) => g.rows);
     const paths = target.filter((r) => r.table_name === 'media_assets' && r.path).map((r) => TRASH_PREFIX + r.path!);
     if (paths.length) await supabase.storage.from('media').remove(paths);
     let failed = false;
-    if (g) { for (const r of g.rows) { const { error: err } = await supabase.rpc('purge_trash', { p_id: r.id }); if (err) failed = true; } }
-    else { const { error: err } = await supabase.rpc('purge_trash', {}); failed = !!err; }
+    if (gs === null) { const { error: err } = await supabase.rpc('purge_trash', {}); failed = !!err; }
+    else for (const r of target) { const { error: err } = await supabase.rpc('purge_trash', { p_id: r.id }); if (err) failed = true; }
     setBusy(null);
-    if (failed) return notify('Could not delete it.');
-    notify(g ? 'Deleted permanently.' : 'Trash emptied.', 'success');
+    if (failed) return notify('Some items could not be deleted.');
+    notify(gs === null ? 'Trash emptied.' : list.length === 1 ? 'Deleted permanently.' : `${list.length} items deleted permanently.`, 'success');
     setPreview(null);
+    setSelected(new Set());
     announceAdminCounts();
     load();
   }
+  const restore = (g: Group) => restoreGroups([g]);
+  const purge = (g: Group | null) => purgeGroups(g ? [g] : null);
 
   const types = [...new Set(groups.map((g) => g.main.table_name))].sort();
   const q = search.trim().toLowerCase();
   const visible = groups.filter((g) => (tab === 'all' || tabOf(g.main.table_name) === tab) && (type === 'all' || g.main.table_name === type) && (!q || g.rows.some((r) => r.label.toLowerCase().includes(q))));
   const count = (t: Tab) => (t === 'all' ? groups.length : groups.filter((g) => tabOf(g.main.table_name) === t).length);
+
+  const chosen = groups.filter((g) => selected.has(g.batch));
+  const allShownSelected = visible.length > 0 && visible.every((g) => selected.has(g.batch));
+  const toggle = (g: Group) => setSelected((cur) => { const next = new Set(cur); if (next.has(g.batch)) next.delete(g.batch); else next.add(g.batch); return next; });
+  const toggleAllShown = () => setSelected((cur) => { const next = new Set(cur); if (allShownSelected) visible.forEach((g) => next.delete(g.batch)); else visible.forEach((g) => next.add(g.batch)); return next; });
+
+  const Check = ({ g }: { g: Group }) => (
+    <input type="checkbox" checked={selected.has(g.batch)} onChange={() => toggle(g)} aria-label={`Select ${g.main.label}`} className="h-4 w-4 cursor-pointer" style={{ accentColor: 'var(--adm-primary)' }} />
+  );
 
   const Actions = ({ g }: { g: Group }) => (
     <div className="flex gap-2">
@@ -210,6 +242,25 @@ export default function AdminTrashPage() {
         </div>
       </div>
 
+      {visible.length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-[var(--adm-radius-control)] px-4 py-2.5 text-sm" style={{ background: chosen.length ? 'var(--adm-primary-soft)' : 'var(--adm-track)', color: 'var(--adm-text)' }}>
+          <label className="flex cursor-pointer items-center gap-2 font-medium">
+            <input type="checkbox" checked={allShownSelected} onChange={toggleAllShown} className="h-4 w-4" style={{ accentColor: 'var(--adm-primary)' }} />
+            {allShownSelected ? 'Deselect all' : `Select all ${visible.length}`}
+          </label>
+          {chosen.length > 0 && (
+            <>
+              <span aria-live="polite" className="text-xs" style={{ color: 'var(--adm-text-2)' }}>{chosen.length} selected</span>
+              <div className="ml-auto flex flex-wrap gap-2">
+                <Button onClick={() => restoreGroups(chosen)} disabled={busy !== null}><FontAwesomeIcon icon={faRotateLeft} className="mr-2 h-3 w-3" />Restore {chosen.length}</Button>
+                <Button variant="danger" onClick={() => purgeGroups(chosen)} disabled={busy !== null}><FontAwesomeIcon icon={faTrash} className="mr-2 h-3 w-3" />Delete {chosen.length} forever</Button>
+                <Button variant="secondary" onClick={() => setSelected(new Set())}>Clear</Button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       {error ? (
         <p role="alert" className="rounded-[var(--adm-radius-control)] p-4 text-sm" style={{ background: 'var(--adm-error-soft)', color: 'var(--adm-error)' }}>{error}</p>
       ) : loading ? (
@@ -226,13 +277,14 @@ export default function AdminTrashPage() {
             const thumb = thumbOf(g.main);
             return (
               <li key={g.batch}>
-                <Surface className="flex h-full flex-col overflow-hidden">
+                <Surface className="relative flex h-full flex-col overflow-hidden" style={selected.has(g.batch) ? { outline: '2px solid var(--adm-primary)' } : undefined}>
+                  <div className="absolute left-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-md" style={{ background: 'var(--adm-card)', boxShadow: 'var(--adm-shadow)' }}><Check g={g} /></div>
                   <button type="button" onClick={() => setPreview(g)} aria-label={`Preview ${g.main.label}`} className="relative block aspect-[16/10] w-full overflow-hidden" style={{ background: 'var(--adm-track)' }}>
                     {thumb
                       // eslint-disable-next-line @next/next/no-img-element
                       ? <img src={thumb} alt="" loading="lazy" className="h-full w-full object-cover" />
                       : <span className="flex h-full w-full items-center justify-center"><FontAwesomeIcon icon={iconFor(g.main)} className="h-10 w-10" style={{ color: 'var(--adm-muted)' }} /></span>}
-                    <span className="absolute left-2 top-2"><StatusPill tone="neutral">{kind(g.main.table_name)}</StatusPill></span>
+                    <span className="absolute bottom-2 left-2"><StatusPill tone="neutral">{kind(g.main.table_name)}</StatusPill></span>
                     {g.rows.length > 1 && <span className="absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: 'rgba(var(--brand-black-rgb), 0.65)', color: 'var(--brand-white)' }}>+{g.rows.length - 1} related</span>}
                   </button>
                   <div className="flex flex-1 flex-col gap-3 p-4">
@@ -255,7 +307,8 @@ export default function AdminTrashPage() {
             {visible.map((g) => {
               const thumb = thumbOf(g.main);
               return (
-                <li key={g.batch} className="flex flex-wrap items-center gap-4 border-b px-4 py-3 last:border-b-0" style={{ borderColor: 'var(--adm-border)' }}>
+                <li key={g.batch} className="flex flex-wrap items-center gap-4 border-b px-4 py-3 last:border-b-0" style={{ borderColor: 'var(--adm-border)', background: selected.has(g.batch) ? 'var(--adm-primary-soft)' : undefined }}>
+                  <Check g={g} />
                   <button type="button" onClick={() => setPreview(g)} aria-label={`Preview ${g.main.label}`} className="flex h-12 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg" style={{ background: 'var(--adm-track)' }}>
                     {thumb
                       // eslint-disable-next-line @next/next/no-img-element
@@ -279,7 +332,8 @@ export default function AdminTrashPage() {
   );
 }
 
-const SKIP = new Set(['id', 'created_at', 'updated_at', 'legacy_id', 'user_id', 'content', 'storage_path']);
+const SKIP = new Set(['id', 'created_at', 'updated_at', 'legacy_id', 'user_id', 'content', 'storage_path', 'public_url']);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function PreviewModal({ group, thumb, trashUrl, onClose, onRestore, onPurge }: { group: Group; thumb: string | null; trashUrl: (p: string) => string; onClose: () => void; onRestore: () => void; onPurge: () => void }) {
   const supabase = useMemo(() => createBrowserClient(), []);
@@ -295,7 +349,7 @@ function PreviewModal({ group, thumb, trashUrl, onClose, onRestore, onPurge }: {
   const url = m.table_name === 'media_assets' && m.path ? trashUrl(m.path) : null;
   const mime = m.mime ?? '';
   const fields = Object.entries(data ?? {})
-    .filter(([k, v]) => !SKIP.has(k) && v !== null && v !== '' && typeof v !== 'object')
+    .filter(([k, v]) => !SKIP.has(k) && !k.endsWith('_id') && v !== null && v !== '' && typeof v !== 'object' && !UUID.test(String(v)))
     .slice(0, 14);
 
   return (
