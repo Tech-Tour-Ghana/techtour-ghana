@@ -8,11 +8,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCloudArrowUp, faFolder, faFolderOpen, faGrip, faList, faMagnifyingGlass, faPencil, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Button, EmptyBlock, IconButton, ListSkeleton, Modal, Surface, fieldStyle } from '@/components/admin/ui';
+import { Button, EmptyBlock, IconButton, ListSkeleton, Modal, Surface, confirmAction, fieldStyle } from '@/components/admin/ui';
 import { notify } from '@/components/admin/toast';
 import { createBrowserClient } from '@/lib/supabase/client';
 import {
-  PAGE_SIZE, TRASH_PREFIX, listFolders, listMedia,
+  PAGE_SIZE, TRASH_PREFIX, countUsage, deleteMedia, listFolders, listMedia,
   type MediaAsset, type MediaFilter, type MediaFolder, type MediaSort,
 } from '@/lib/media/client';
 import { slugify } from '@/lib/seo/slug';
@@ -81,6 +81,10 @@ export default function MediaLibrary({ mode = 'manage', onSelectionChange, onUse
   const [folderModal, setFolderModal] = useState<{ id: string | null; name: string } | null>(null);
   const [folderDelete, setFolderDelete] = useState<MediaFolder | null>(null);
   const [reload, setReload] = useState(0);
+  // Bulk mode (manage only): clicking a file ticks it instead of opening its details.
+  const [bulk, setBulk] = useState(false);
+  const [ticked, setTicked] = useState<MediaAsset[]>([]);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const wide = useMediaQuery('(min-width: 1280px)');
   const fileInput = useRef<HTMLInputElement>(null);
   const dragDepth = useRef(0);
@@ -117,6 +121,7 @@ export default function MediaLibrary({ mode = 'manage', onSelectionChange, onUse
   const uploader = useUploader(() => uploadFolder, () => { setPage(0); setSort('newest'); setReload((n) => n + 1); });
 
   const click = (a: MediaAsset) => {
+    if (bulk) { setTicked((t) => (t.some((x) => x.id === a.id) ? t.filter((x) => x.id !== a.id) : [...t, a])); return; }
     setActive(a);
     if (mode === 'single') setSelected([a]);
     if (mode === 'multiple') setSelected((s) => (s.some((x) => x.id === a.id) ? s.filter((x) => x.id !== a.id) : [...s, a]));
@@ -159,6 +164,29 @@ export default function MediaLibrary({ mode = 'manage', onSelectionChange, onUse
     loadFolders();
     setReload((n) => n + 1);
     notify('Folder deleted.', 'success');
+  }
+
+  const tickedIds = new Set(ticked.map((t) => t.id));
+  const allPageTicked = rows.length > 0 && rows.every((r) => tickedIds.has(r.id));
+  const leaveBulk = () => { setBulk(false); setTicked([]); };
+
+  async function deleteTicked() {
+    if (ticked.length === 0) return;
+    const usage = (await Promise.all(ticked.map((a) => countUsage(a).catch(() => 0)))).reduce((n, u) => n + u, 0);
+    const warn = usage > 0 ? ` They are used in ${usage} place${usage === 1 ? '' : 's'}; those images will break.` : '';
+    if (!(await confirmAction({ title: 'Move to Trash?', message: `Move ${ticked.length} file${ticked.length === 1 ? '' : 's'} to the Trash? You can restore them from there.${warn}`, danger: true, confirmLabel: `Move ${ticked.length} to Trash` }))) return;
+    setBulkBusy(true);
+    let failed = 0;
+    for (const a of ticked) {
+      try { await deleteMedia(a); } catch { failed += 1; }
+    }
+    setBulkBusy(false);
+    const done = ticked.length - failed;
+    if (failed) notify(`${done} moved to Trash, ${failed} could not be deleted.`);
+    else notify(done === 1 ? 'File moved to Trash.' : `${done} files moved to Trash.`, 'success');
+    setActive(null);
+    leaveBulk();
+    setReload((n) => n + 1);
   }
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -238,6 +266,9 @@ export default function MediaLibrary({ mode = 'manage', onSelectionChange, onUse
           <Button onClick={() => fileInput.current?.click()}>
             <FontAwesomeIcon icon={faCloudArrowUp} className="mr-2 h-3.5 w-3.5" />Upload
           </Button>
+          {mode === 'manage' && (
+            <Button variant="secondary" onClick={() => (bulk ? leaveBulk() : (setBulk(true), setActive(null)))} aria-pressed={bulk}>{bulk ? 'Done' : 'Select'}</Button>
+          )}
           <select aria-label="Filter" value={filter} onChange={(e) => setFilter(e.target.value as MediaFilter)} className="px-3 py-2 text-sm" style={fieldStyle}>
             {FILTERS.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
           </select>
@@ -263,6 +294,22 @@ export default function MediaLibrary({ mode = 'manage', onSelectionChange, onUse
           </p>
         )}
 
+        {bulk && rows.length > 0 && (
+          <div className="mb-3 flex flex-wrap items-center gap-3 rounded-[var(--adm-radius-control)] px-4 py-2.5 text-sm" style={{ background: ticked.length ? 'var(--adm-primary-soft)' : 'var(--adm-track)', color: 'var(--adm-text)' }}>
+            <label className="flex cursor-pointer items-center gap-2 font-medium">
+              <input type="checkbox" checked={allPageTicked} onChange={() => setTicked((t) => (allPageTicked ? t.filter((x) => !rows.some((r) => r.id === x.id)) : [...t, ...rows.filter((r) => !tickedIds.has(r.id))]))} className="h-4 w-4" style={{ accentColor: 'var(--adm-primary)' }} />
+              {allPageTicked ? 'Deselect this page' : `Select this page (${rows.length})`}
+            </label>
+            <span aria-live="polite" className="text-xs" style={{ color: 'var(--adm-text-2)' }}>{ticked.length} selected</span>
+            {ticked.length > 0 && (
+              <div className="ml-auto flex gap-2">
+                <Button variant="danger" onClick={deleteTicked} disabled={bulkBusy}><FontAwesomeIcon icon={faTrash} className="mr-2 h-3 w-3" />{bulkBusy ? 'Deleting...' : `Delete ${ticked.length}`}</Button>
+                <Button variant="secondary" onClick={() => setTicked([])} disabled={bulkBusy}>Clear</Button>
+              </div>
+            )}
+          </div>
+        )}
+
         {error ? (
           <p role="alert" className="rounded-[var(--adm-radius-control)] p-4 text-sm" style={{ background: 'var(--adm-error-soft)', color: 'var(--adm-error)' }}>
             {error} <button type="button" className="font-semibold underline" onClick={() => setReload((n) => n + 1)}>Try again</button>
@@ -279,7 +326,7 @@ export default function MediaLibrary({ mode = 'manage', onSelectionChange, onUse
             style={{ opacity: loading ? 0.6 : 1, ...(view === 'grid' ? { gridTemplateColumns: 'repeat(auto-fill, minmax(9.5rem, 1fr))' } : {}) }}
           >
             {rows.map((a) => (
-              <MediaCard key={a.id} asset={a} view={view} multiple={mode === 'multiple'} selected={mode === 'manage' ? active?.id === a.id : selectedIds.has(a.id)} onClick={() => click(a)} />
+              <MediaCard key={a.id} asset={a} view={view} multiple={mode === 'multiple' || bulk} selected={bulk ? tickedIds.has(a.id) : mode === 'manage' ? active?.id === a.id : selectedIds.has(a.id)} onClick={() => click(a)} />
             ))}
           </div>
         )}
