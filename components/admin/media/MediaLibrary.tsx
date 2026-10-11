@@ -12,7 +12,7 @@ import { Button, EmptyBlock, IconButton, ListSkeleton, Modal, Surface, fieldStyl
 import { notify } from '@/components/admin/toast';
 import { createBrowserClient } from '@/lib/supabase/client';
 import {
-  PAGE_SIZE, listFolders, listMedia,
+  PAGE_SIZE, TRASH_PREFIX, listFolders, listMedia,
   type MediaAsset, type MediaFilter, type MediaFolder, type MediaSort,
 } from '@/lib/media/client';
 import { slugify } from '@/lib/seo/slug';
@@ -150,7 +150,8 @@ export default function MediaLibrary({ mode = 'manage', onSelectionChange, onUse
     const supabase = createBrowserClient();
     const { data } = await supabase.from('media_assets').select('storage_path').eq('folder_id', folder.id);
     const paths = (data ?? []).map((a) => a.storage_path);
-    if (paths.length) await supabase.storage.from('media').remove(paths);
+    // Moved, not erased: the files appear in Trash with the folder and come back with it.
+    if (paths.length) await Promise.all(paths.map((path) => supabase.storage.from('media').move(path, TRASH_PREFIX + path)));
     const { error: err } = await supabase.from('media_folders').delete().eq('id', folder.id);
     if (err) return notify('Could not delete the folder.');
     setFolderDelete(null);
@@ -318,9 +319,9 @@ export default function MediaLibrary({ mode = 'manage', onSelectionChange, onUse
         </Modal>
       )}
       {folderDelete && (
-        <Modal title="Delete folder?" maxWidth="max-w-sm" onClose={() => setFolderDelete(null)}
+        <Modal title="Move folder to Trash?" maxWidth="max-w-sm" onClose={() => setFolderDelete(null)}
           footer={<><Button variant="secondary" onClick={() => setFolderDelete(null)}>Cancel</Button><Button variant="danger" onClick={() => removeFolder(folderDelete)}>Delete</Button></>}>
-          <p className="text-xs" style={{ color: 'var(--adm-text-2)' }}>“{folderDelete.name}” and every file inside it will be permanently deleted.</p>
+          <p className="text-xs" style={{ color: 'var(--adm-text-2)' }}>“{folderDelete.name}” and every file inside it will be moved to the Trash.</p>
         </Modal>
       )}
     </div>

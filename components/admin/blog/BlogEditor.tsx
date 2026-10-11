@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Button, ListSkeleton, Modal, Surface, fieldStyle } from '@/components/admin/ui';
+import { Button, ListSkeleton, Modal, Surface, Tabs, fieldStyle } from '@/components/admin/ui';
 import { notify } from '@/components/admin/toast';
 import MediaPicker from '@/components/admin/media/MediaPicker';
 import SEOEditor, { type SeoImageField } from '@/components/admin/seo/SEOEditor';
@@ -93,6 +93,7 @@ export default function BlogEditor({ postId }: { postId: string | null }) {
   const editorPick = useRef<((p: ImagePick) => void) | null>(null);
   const [preview, setPreview] = useState<null | { html: string }>(null);
   const [slugPrompt, setSlugPrompt] = useState<null | { kind: SaveKind }>(null);
+  const [seoTab, setSeoTab] = useState<'score' | 'settings' | 'preview' | 'quality'>('score');
 
   const published = persisted?.published ?? false;
   const dirty = JSON.stringify({ d: draft, s: seo }) !== snapshot;
@@ -424,12 +425,9 @@ export default function BlogEditor({ postId }: { postId: string | null }) {
             />
           </Section>
 
-          <Section title="Featured image">
+          <Section title="Details">
             <FeaturedImagePicker url={draft.image_url} alt={draft.image_alt} onChange={({ url, alt }) => patch({ image_url: url, image_alt: alt })} onChoose={() => setPicker({ target: 'featured' })} />
-          </Section>
-
-          <Section title="Category and author">
-            <div className="space-y-3">
+            <div className="mt-4 grid grid-cols-2 gap-3 border-t pt-4" style={{ borderColor: 'var(--adm-border)' }}>
               <div>
                 <label htmlFor="article-category" className="mb-1 block text-xs font-semibold" style={{ color: 'var(--adm-text-2)' }}>Category</label>
                 <select id="article-category" value={draft.category} onChange={(e) => patch({ category: e.target.value as BlogCategory })} className="w-full px-3 py-2 text-sm" style={fieldStyle}>
@@ -443,30 +441,34 @@ export default function BlogEditor({ postId }: { postId: string | null }) {
             </div>
           </Section>
 
-          <Section title="SEO score">
-            <SEOScore analysis={analysis} />
-          </Section>
-
-          <Section title="Search settings">
-            <SEOEditor
-              value={seo}
-              onChange={patchSeo}
-              fallback={{ title: draft.title, description: draft.excerpt, image: draft.image_url, canonicalPath: `${site.baseUrl}${path}` }}
-              onPickImage={(field) => setPicker({ target: field })}
-            />
-          </Section>
-
-          <Section title="Search result preview">
-            <SERPPreview siteName={site.siteName} title={resolved.title} url={resolved.canonical} description={resolved.description} />
-          </Section>
-
-          <Section title="Social preview">
-            <SocialPreview image={resolved.og.image} title={resolved.og.title} description={resolved.og.description} domain={site.baseUrl.replace(/^https?:\/\//, '')} />
-            <Button variant="secondary" className="mt-3" onClick={() => setPicker({ target: 'og_image_url' })}>Choose social image</Button>
-          </Section>
-
-          <Section title="Article quality">
-            <ArticleQuality stats={analysis.stats} hasFeatured={!!draft.image_url} />
+          {/* One panel instead of five stacked ones: the score first, then the settings and previews on demand. */}
+          <Section title="Search and social">
+            <div className="mb-3">
+              <Tabs value={seoTab} onChange={setSeoTab} tabs={[{ key: 'score' as const, label: `Score ${analysis.score}` }, { key: 'settings' as const, label: 'Settings' }, { key: 'preview' as const, label: 'Previews' }, { key: 'quality' as const, label: 'Quality' }]} />
+            </div>
+            {seoTab === 'score' && <SEOScore analysis={analysis} />}
+            {seoTab === 'settings' && (
+              <SEOEditor
+                value={seo}
+                onChange={patchSeo}
+                fallback={{ title: draft.title, description: draft.excerpt, image: draft.image_url, canonicalPath: `${site.baseUrl}${path}` }}
+                onPickImage={(field) => setPicker({ target: field })}
+              />
+            )}
+            {seoTab === 'preview' && (
+              <div className="space-y-4">
+                <div>
+                  <p className="mb-2 text-xs font-semibold" style={{ color: 'var(--adm-text-2)' }}>Search result</p>
+                  <SERPPreview siteName={site.siteName} title={resolved.title} url={resolved.canonical} description={resolved.description} />
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-semibold" style={{ color: 'var(--adm-text-2)' }}>Social share</p>
+                  <SocialPreview image={resolved.og.image} title={resolved.og.title} description={resolved.og.description} domain={site.baseUrl.replace(/^https?:\/\//, '')} />
+                  <Button variant="secondary" className="mt-3" onClick={() => setPicker({ target: 'og_image_url' })}>Choose social image</Button>
+                </div>
+              </div>
+            )}
+            {seoTab === 'quality' && <ArticleQuality stats={analysis.stats} hasFeatured={!!draft.image_url} />}
           </Section>
         </div>
       </div>

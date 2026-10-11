@@ -55,6 +55,7 @@ import { useTheme } from '@/context/ThemeContext';
 import AvatarContent from '@/components/AvatarContent';
 import { getAuthStatus, logoutUser, type User } from '@/lib/api';
 import { useSiteLogo } from '@/lib/useSiteLogo';
+import { useAdminCounts, type AdminCounts } from '@/lib/useAdminCounts';
 import NotificationBell from '@/components/notifications/NotificationBell';
 
 const BRAND_COLORS = {
@@ -134,6 +135,25 @@ const NAV_GROUPS = [
   },
 ];
 
+// Which sidebar item shows which count (see admin_sidebar_counts). Trash is informational, failed emails are a warning.
+const BADGES: Record<string, { key: keyof AdminCounts; tone: 'attention' | 'quiet' | 'alert' }> = {
+  '/admin/notifications': { key: 'notifications', tone: 'attention' },
+  '/admin/tours': { key: 'tours', tone: 'attention' },
+  '/admin/rentals': { key: 'rentals', tone: 'attention' },
+  '/admin/applications': { key: 'applications', tone: 'attention' },
+  '/admin/orders': { key: 'orders', tone: 'attention' },
+  '/admin/helpdesk': { key: 'helpdesk', tone: 'attention' },
+  '/admin/contacts': { key: 'contacts', tone: 'attention' },
+  '/admin/feedback': { key: 'feedback', tone: 'attention' },
+  '/admin/emails': { key: 'emails', tone: 'alert' },
+  '/admin/trash': { key: 'trash', tone: 'quiet' },
+};
+const badgeStyle = (tone: 'attention' | 'quiet' | 'alert') =>
+  tone === 'attention' ? { background: 'var(--brand-gold)', color: 'var(--brand-ink)' }
+  : tone === 'alert' ? { background: 'var(--brand-error)', color: 'var(--brand-white)' }
+  : { background: WHITE(0.16), color: WHITE(0.85) };
+const countLabel = (n: number) => (n > 99 ? '99+' : String(n));
+
 interface AdminLayoutProps {
   children: ReactNode;
   title: string;
@@ -146,6 +166,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
   const reduceMotion = useReducedMotion();
   const { isDimMode, toggleTheme } = useTheme();
   const siteLogo = useSiteLogo();
+  const counts = useAdminCounts();
   const [user, setUser] = useState<User | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
@@ -313,7 +334,13 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                     className={`flex w-full items-center justify-between rounded-md px-3 pt-3 pb-1 text-left text-[10px] font-semibold uppercase tracking-widest transition-colors hover:text-white ${hideWhenRail}`}
                     style={{ color: WHITE(0.4) }}
                   >
-                    <span>{group}</span>
+                    <span className="flex items-center gap-2">
+                      {group}
+                      {folded && (() => {
+                        const total = items.reduce((n, i) => { const b = BADGES[i.href]; return b && b.tone !== 'quiet' ? n + (counts[b.key] ?? 0) : n; }, 0);
+                        return total > 0 ? <span aria-label={`${total} waiting`} className="rounded-full px-1.5 text-[10px] font-bold leading-4" style={badgeStyle('attention')}>{countLabel(total)}</span> : null;
+                      })()}
+                    </span>
                     <FontAwesomeIcon icon={faChevronDown} className={`h-2.5 w-2.5 transition-transform ${folded ? '-rotate-90' : ''}`} />
                   </button>
                   {collapsed && <div className="hidden lg:block my-2 mx-3 border-t" style={{ borderColor: WHITE(0.08) }} />}
@@ -338,6 +365,20 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                     {isActive && <span aria-hidden="true" className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full" style={{ background: BRAND_COLORS.tropicalTeal }} />}
                     <FontAwesomeIcon icon={item.icon} className="w-3.5 h-3.5 flex-shrink-0" style={isActive ? { color: BRAND_COLORS.tropicalTeal } : undefined} />
                     <span className={hideWhenRail}>{item.label}</span>
+                    {(() => {
+                      const b = BADGES[item.href];
+                      const n = b ? counts[b.key] ?? 0 : 0;
+                      if (!b || n <= 0) return null;
+                      return (
+                        <span
+                          aria-label={`${n} ${b.tone === 'quiet' ? 'in trash' : b.tone === 'alert' ? 'failed' : 'waiting'}`}
+                          className={`ml-auto min-w-[1.25rem] rounded-full px-1.5 text-center text-[10px] font-bold leading-5 ${collapsed ? 'lg:absolute lg:right-1 lg:top-0.5 lg:ml-0 lg:min-w-[1rem] lg:px-1 lg:leading-4' : ''}`}
+                          style={badgeStyle(b.tone)}
+                        >
+                          {countLabel(n)}
+                        </span>
+                      );
+                    })()}
                   </Link>
                 );
               })}
