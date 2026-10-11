@@ -14,6 +14,8 @@ import { getAuthStatus } from '@/lib/api';
 interface Props {
   destination: { id: string; country_name: string };
   scholarships: { id: string; title: string }[];
+  /** The country has partner universities, so this form is for students who are not sure which programme to pick. */
+  general?: boolean;
 }
 
 const EDUCATION = ['High school', 'Diploma', 'Bachelor degree', 'Master degree', 'Other'];
@@ -21,7 +23,7 @@ const TARGET = [{ v: 'bachelor', l: 'Bachelor' }, { v: 'master', l: 'Master' }, 
 
 const tomorrow = () => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); };
 
-export default function StudyApplicationForm({ destination, scholarships }: Props) {
+export default function StudyApplicationForm({ destination, scholarships, general = false }: Props) {
   const uid = useId();
   const id = (n: string) => `${uid}-${n}`;
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
@@ -108,8 +110,8 @@ export default function StudyApplicationForm({ destination, scholarships }: Prop
 
   return (
     <form onSubmit={submit} className="rounded-3xl p-5 sm:p-8" style={panel} noValidate>
-      <h2 className="text-xl font-bold">Apply to study in {destination.country_name}</h2>
-      <p className="mt-1 text-sm" style={{ color: 'var(--sp-text-secondary)' }}>It takes about two minutes. There is no application fee.</p>
+      <h2 className="text-xl font-bold">{general ? 'Not sure which programme?' : `Apply to study in ${destination.country_name}`}</h2>
+      <p className="mt-1 text-sm" style={{ color: 'var(--sp-text-secondary)' }}>{general ? 'Tell us what you want to study and a counsellor will suggest options. It takes about two minutes.' : 'It takes about two minutes. A counsellor then guides you through the next steps.'}</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <div>

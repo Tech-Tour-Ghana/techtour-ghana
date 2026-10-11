@@ -1,245 +1,225 @@
 'use client';
 
-// Study abroad applications. Customers apply on /services/study-abroad/<country>
-// (database function submit_study_application, migration 0031) and see their
-// status under Study in their account. Staff review, change the status, keep
-// private notes, or record an application taken by phone or in person.
+// Study abroad applications, handled by TechTour on the student's behalf. A board
+// of stages (enquiry to ready to enrol); open a card to review documents, post
+// updates and move it along. Students follow the same stages in their dashboard.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClipboardCheck, faClock, faDownload, faEye, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faClipboardCheck, faFileCircleCheck, faGraduationCap, faPassport, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 import AdminLayout from '@/components/AdminLayout';
+import ApplicationDrawer, { staffName, type AdminApplication, type StaffUser } from '@/components/admin/study/ApplicationDrawer';
 import { notify } from '@/components/admin/toast';
-import {
-  Button, IconButton, Modal, SearchInput, StatTile, StatusPill, TableCard, Toolbar,
-  confirmAction, downloadCsv, fieldStyle, fmtDate, reportError, rowClass, type Tone,
-} from '@/components/admin/ui';
+import { Button, EmptyBlock, ListSkeleton, Modal, SearchInput, StatTile, Toolbar, confirmAction, fieldStyle, reportError } from '@/components/admin/ui';
 import { createBrowserClient } from '@/lib/supabase/client';
+import { STUDY_ENDED, STUDY_META, STUDY_STAGES, asStudyStatus, isEnded, type StudyStatus } from '@/lib/study/meta';
+import { announceAdminCounts } from '@/lib/useAdminCounts';
 
-const STATUSES = ['pending', 'reviewing', 'approved', 'rejected', 'completed'] as const;
-type Status = (typeof STATUSES)[number];
-const TONE: Record<Status, Tone> = { pending: 'warning', reviewing: 'info', approved: 'success', rejected: 'danger', completed: 'neutral' };
+const SELECT = 'id, user_id, reference, status, program_name, university, location, intake, created_at, last_activity_at, assigned_to, next_step, admin_notes, full_name, email, phone, nationality, education_level, intended_level, message, study_application_documents(id, status, required)';
+const soft = (color: string, pct = 14) => `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 
-interface Application {
-  id: string;
-  user_id: string;
-  program_name: string;
-  location: string;
-  start_date: string | null;
-  status: string;
-  created_at: string;
-  full_name: string;
-  email: string;
-  phone: string;
-  nationality: string;
-  education_level: string;
-  intended_level: string;
-  field_of_study: string;
-  message: string;
-  admin_notes: string;
-  study_destinations: { country_name: string } | null;
-  scholarships: { title: string } | null;
-  profiles: { email: string } | null;
-}
+const ago = (iso: string) => {
+  const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+  return d < 1 ? 'Today' : d === 1 ? 'Yesterday' : d < 30 ? `${d} days ago` : new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+};
 
-const SELECT = 'id, user_id, program_name, location, start_date, status, created_at, full_name, email, phone, nationality, education_level, intended_level, field_of_study, message, admin_notes, study_destinations(country_name), scholarships(title), profiles(email)';
-const EMPTY = { user_id: '', destination_id: '', program_name: '', start_date: '', phone: '' };
-
-const asStatus = (s: string): Status => ((STATUSES as readonly string[]).includes(s) ? (s as Status) : 'pending');
+interface ProgramOption { id: string; title: string; institution_id: string; study_institutions: { name: string; destination_id: string | null } | null }
 
 export default function AdminApplicationsPage() {
   const supabase = useMemo(() => createBrowserClient(), []);
-  const [apps, setApps] = useState<Application[]>([]);
-  const [customers, setCustomers] = useState<{ id: string; email: string }[]>([]);
-  const [destinations, setDestinations] = useState<{ id: string; country_name: string }[]>([]);
+  const [apps, setApps] = useState<AdminApplication[]>([]);
+  const [staff, setStaff] = useState<StaffUser[]>([]);
+  const [me, setMe] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'all' | Status>('all');
-  const [open, setOpen] = useState<Application | null>(null);
-  const [notes, setNotes] = useState('');
+  const [mine, setMine] = useState(false);
+  const [showEnded, setShowEnded] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overCol, setOverCol] = useState<StudyStatus | null>(null);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState(EMPTY);
-  const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
-    const [a, c, d] = await Promise.all([
-      supabase.from('study_applications').select(SELECT).order('created_at', { ascending: false }),
-      supabase.from('profiles').select('id, email').eq('is_admin', false).order('email'),
-      supabase.from('study_destinations').select('id, country_name').order('country_name'),
+    const [a, b, c] = await Promise.all([
+      supabase.from('study_applications').select(SELECT).order('last_activity_at', { ascending: false }),
+      supabase.from('profiles').select('id, email, first_name, last_name').eq('is_admin', true).eq('is_active', true),
+      supabase.auth.getUser(),
     ]);
-    if (a.error) setError('Could not load applications.'); else setError('');
-    setApps((a.data as unknown as Application[]) ?? []);
-    setCustomers(c.data ?? []);
-    setDestinations(d.data ?? []);
+    if (a.error) setError('Could not load applications. Please refresh.'); else setError('');
+    setApps((a.data as unknown as AdminApplication[] | null) ?? []);
+    setStaff((b.data as StaffUser[] | null) ?? []);
+    setMe(c.data.user?.id ?? null);
     setLoading(false);
   }, [supabase]);
 
   useEffect(() => { load(); }, [load]);
 
-  async function setStatus(app: Application, status: Status) {
-    if (reportError((await supabase.from('study_applications').update({ status }).eq('id', app.id)).error)) return;
-    setApps((prev) => prev.map((x) => (x.id === app.id ? { ...x, status } : x)));
-    setOpen((o) => (o && o.id === app.id ? { ...o, status } : o));
-    notify('Status updated.', 'success');
-  }
+  const q = search.trim().toLowerCase();
+  const visible = apps.filter((a) => (!mine || a.assigned_to === me) && (!q || [a.full_name, a.email, a.reference, a.program_name, a.university, a.location].some((t) => t.toLowerCase().includes(q))));
+  const columns: StudyStatus[] = showEnded ? [...STUDY_STAGES, ...STUDY_ENDED] : [...STUDY_STAGES];
+  const open = apps.find((a) => a.id === openId) ?? null;
 
-  async function saveNotes() {
-    if (!open) return;
-    if (reportError((await supabase.from('study_applications').update({ admin_notes: notes.trim() }).eq('id', open.id)).error)) return;
-    setApps((prev) => prev.map((x) => (x.id === open.id ? { ...x, admin_notes: notes.trim() } : x)));
-    notify('Notes saved.', 'success');
-    setOpen(null);
-  }
+  const docsToReview = apps.reduce((n, a) => n + a.study_application_documents.filter((d) => d.status === 'uploaded').length, 0);
+  const active = apps.filter((a) => !isEnded(a.status) && a.status !== 'enrolled').length;
+  const offers = apps.filter((a) => a.status === 'offer' || a.status === 'accepted').length;
+  const ready = apps.filter((a) => a.status === 'enrolled').length;
 
-  async function remove(app: Application) {
-    if (!(await confirmAction({ message: `Delete the application from ${app.full_name || app.email || app.profiles?.email || 'this applicant'}? You can restore it from Trash.`, danger: true, confirmLabel: 'Delete' }))) return;
-    if (reportError((await supabase.from('study_applications').delete().eq('id', app.id)).error)) return;
-    setApps((prev) => prev.filter((x) => x.id !== app.id));
-    setOpen(null);
-    notify('Moved to Trash.', 'success');
-  }
-
-  async function add(e: React.FormEvent) {
-    e.preventDefault();
-    const customer = customers.find((c) => c.id === form.user_id);
-    const dest = destinations.find((d) => d.id === form.destination_id);
-    if (!customer) return notify('Choose the customer this application belongs to.');
-    if (!form.program_name.trim() && !dest) return notify('Enter a programme or choose a destination.');
-    setSaving(true);
-    const { error: err } = await supabase.from('study_applications').insert({
-      user_id: customer.id,
-      destination_id: dest?.id ?? null,
-      program_name: form.program_name.trim() || `Study in ${dest?.country_name}`,
-      location: dest?.country_name ?? '',
-      start_date: form.start_date || null,
-      email: customer.email,
-      phone: form.phone.trim(),
-    });
-    setSaving(false);
+  async function move(a: AdminApplication, next: StudyStatus) {
+    if (asStudyStatus(a.status) === next) return;
+    if (next === 'rejected' && !(await confirmAction({ message: `Mark ${a.full_name || 'this application'} as not successful? The student is notified.`, confirmLabel: 'Mark not successful', danger: true }))) { await load(); return; }
+    const { error: err } = await supabase.from('study_applications').update({ status: next }).eq('id', a.id);
     if (reportError(err)) return;
-    setAdding(false);
-    setForm(EMPTY);
+    notify('Stage updated. The student was notified.', 'success');
+    announceAdminCounts();
     load();
   }
 
-  const q = search.trim().toLowerCase();
-  const visible = apps.filter((a) => {
-    if (filter !== 'all' && asStatus(a.status) !== filter) return false;
-    if (!q) return true;
-    return [a.full_name, a.email, a.profiles?.email, a.phone, a.program_name, a.location, a.study_destinations?.country_name].some((v) => (v ?? '').toLowerCase().includes(q));
-  });
-  const count = (s: Status) => apps.filter((a) => asStatus(a.status) === s).length;
-  const who = (a: Application) => a.full_name || a.profiles?.email || a.email || '-';
-
   return (
-    <AdminLayout title="Study Applications" subtitle="Review applications from the study abroad pages">
+    <AdminLayout title="Study Applications" subtitle="Applications TechTour handles for students, from enquiry to enrolment">
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile icon={faClock} label="Pending" value={count('pending')} tone="warning" />
-        <StatTile icon={faEye} label="Reviewing" value={count('reviewing')} tone="info" />
-        <StatTile icon={faClipboardCheck} label="Approved" value={count('approved')} tone="success" />
-        <StatTile icon={faClipboardCheck} label="All applications" value={apps.length} tone="neutral" />
+        <StatTile icon={faGraduationCap} label="In progress" value={active} tone="info" />
+        <StatTile icon={faFileCircleCheck} label="Documents to review" value={docsToReview} tone="warning" />
+        <StatTile icon={faClipboardCheck} label="Offers" value={offers} tone="success" />
+        <StatTile icon={faPassport} label="Ready to enrol" value={ready} tone="neutral" />
       </div>
 
-      <Toolbar
-        actions={
-          <>
-            <Button variant="secondary" disabled={visible.length === 0} onClick={() => downloadCsv('study-applications.csv', ['Name', 'Email', 'Phone', 'Nationality', 'Destination', 'Programme', 'Level', 'Start', 'Status', 'Applied'], visible.map((a) => [a.full_name, a.email || a.profiles?.email, a.phone, a.nationality, a.study_destinations?.country_name ?? a.location, a.field_of_study || a.program_name, a.intended_level, a.start_date, a.status, a.created_at]))}>
-              <FontAwesomeIcon icon={faDownload} className="mr-2 h-3 w-3" />Export CSV
-            </Button>
-            <Button onClick={() => setAdding(true)}><FontAwesomeIcon icon={faPlus} className="mr-2 h-3 w-3" />Add application</Button>
-          </>
-        }
-      >
-        <SearchInput className="min-w-[14rem] flex-1 sm:max-w-sm" value={search} onChange={setSearch} placeholder="Search name, email, country" label="Search applications" />
-        <select aria-label="Filter by status" value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)} className="px-3 py-2 text-sm capitalize" style={fieldStyle}>
-          <option value="all">All statuses</option>
-          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
+      <Toolbar actions={<Button onClick={() => setAdding(true)}><FontAwesomeIcon icon={faPlus} className="mr-2 h-3 w-3" />Record application</Button>}>
+        <SearchInput className="min-w-[14rem] flex-1 sm:max-w-sm" value={search} onChange={setSearch} placeholder="Search name, reference, university" label="Search applications" />
+        <label className="flex items-center gap-2 text-xs font-medium" style={{ color: 'var(--adm-text-2)' }}><input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} style={{ accentColor: 'var(--adm-primary)' }} />Assigned to me</label>
+        <label className="flex items-center gap-2 text-xs font-medium" style={{ color: 'var(--adm-text-2)' }}><input type="checkbox" checked={showEnded} onChange={(e) => setShowEnded(e.target.checked)} style={{ accentColor: 'var(--adm-primary)' }} />Show closed</label>
       </Toolbar>
 
-      {error ? (
-        <p role="alert" className="rounded-[var(--adm-radius-control)] p-4 text-sm" style={{ background: 'var(--adm-error-soft)', color: 'var(--adm-error)' }}>{error}</p>
-      ) : (
-        <TableCard loading={loading} empty={visible.length === 0} emptyTitle={apps.length === 0 ? 'No applications yet' : 'Nothing matches'} emptyBody={apps.length === 0 ? 'Applications from the study abroad pages appear here.' : 'Try another search or status.'} headers={['Applicant', 'Destination', 'Starts', 'Status', 'Applied', '']}>
-          {visible.map((a) => (
-            <tr key={a.id} className={rowClass} style={{ borderColor: 'var(--adm-border)' }}>
-              <td className="px-4 py-3">
-                <div className="font-medium" style={{ color: 'var(--adm-text)' }}>{who(a)}</div>
-                <div className="text-xs" style={{ color: 'var(--adm-muted)' }}>{[a.email || a.profiles?.email, a.phone].filter(Boolean).join(' · ')}</div>
-              </td>
-              <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>
-                {a.study_destinations?.country_name ?? (a.location || '-')}
-                {(a.field_of_study || a.program_name) && <div style={{ color: 'var(--adm-muted)' }}>{a.field_of_study || a.program_name}</div>}
-              </td>
-              <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-muted)' }}>{a.start_date ? fmtDate(a.start_date) : '-'}</td>
-              <td className="px-4 py-3">
-                <select aria-label={`Status for ${who(a)}`} value={asStatus(a.status)} onChange={(e) => setStatus(a, e.target.value as Status)} className="px-2 py-1 text-xs capitalize" style={fieldStyle}>
-                  {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </td>
-              <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-muted)' }}>{fmtDate(a.created_at)}</td>
-              <td className="px-4 py-3">
-                <div className="flex gap-2">
-                  <IconButton title="View details" onClick={() => { setOpen(a); setNotes(a.admin_notes); }}><FontAwesomeIcon icon={faEye} className="h-3 w-3" /></IconButton>
-                  <IconButton title="Delete" color="var(--adm-error)" onClick={() => remove(a)}><FontAwesomeIcon icon={faTrash} className="h-3 w-3" /></IconButton>
+      {error && <p role="alert" className="mb-4 rounded-[var(--adm-radius-control)] p-4 text-sm" style={{ background: 'var(--adm-error-soft)', color: 'var(--adm-error)' }}>{error}</p>}
+
+      {loading ? <ListSkeleton /> : (
+        <div className="flex w-full max-w-full snap-x snap-mandatory items-start gap-3 overflow-x-auto pb-3" role="group" aria-label="Applications board">
+          {columns.map((col) => {
+            const meta = STUDY_META[col];
+            const list = visible.filter((a) => asStudyStatus(a.status) === col);
+            const over = overCol === col && dragId !== null;
+            return (
+              <section
+                key={col}
+                aria-label={`${meta.label}, ${list.length} applications`}
+                onDragOver={(e) => { if (dragId) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setOverCol(col); } }}
+                onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOverCol((c) => (c === col ? null : c)); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const a = apps.find((x) => x.id === (dragId ?? e.dataTransfer.getData('text/plain')));
+                  setDragId(null); setOverCol(null);
+                  if (a) move(a, col);
+                }}
+                className="flex w-full min-w-full flex-shrink-0 snap-start flex-col rounded-[var(--adm-radius-card)] sm:w-72 sm:min-w-0 lg:w-72"
+                style={{ background: over ? soft(meta.color, 12) : 'var(--adm-track)', border: `2px ${over ? 'dashed' : 'solid'} ${over ? meta.color : 'transparent'}` }}
+              >
+                <header className="flex items-center gap-2 px-3 py-2.5">
+                  <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: meta.color }} />
+                  <h2 className="text-sm font-bold" style={{ color: 'var(--adm-text)' }}>{meta.short}</h2>
+                  <span className="rounded-full px-2 text-xs font-bold" style={{ background: 'var(--adm-card)', color: 'var(--adm-text-2)' }}>{list.length}</span>
+                </header>
+                <div className="max-h-[65vh] min-h-[7rem] space-y-2 overflow-y-auto px-2 pb-2">
+                  {list.length === 0 ? <EmptyBlock title="None" body={over ? 'Drop here' : undefined} /> : list.map((a) => {
+                    const docs = a.study_application_documents;
+                    const uploaded = docs.filter((d) => d.status === 'uploaded' || d.status === 'approved').length;
+                    const review = docs.filter((d) => d.status === 'uploaded').length;
+                    const owner = staff.find((s) => s.id === a.assigned_to);
+                    return (
+                      <article
+                        key={a.id}
+                        draggable
+                        onDragStart={(e) => { e.dataTransfer.setData('text/plain', a.id); e.dataTransfer.effectAllowed = 'move'; setDragId(a.id); }}
+                        onDragEnd={() => { setDragId(null); setOverCol(null); }}
+                        className="cursor-grab rounded-[var(--adm-radius-control)] p-3 active:cursor-grabbing"
+                        style={{ background: 'var(--adm-card)', border: '1px solid var(--adm-border)', borderLeft: `4px solid ${meta.color}`, boxShadow: 'var(--adm-shadow)', opacity: dragId === a.id ? 0.5 : 1 }}
+                      >
+                        <button type="button" onClick={() => setOpenId(a.id)} className="block min-h-[44px] w-full rounded text-left" aria-label={`Open ${a.full_name}, ${a.reference}`}>
+                          <span className="flex items-center justify-between gap-2 text-[11px] font-semibold" style={{ color: 'var(--adm-muted)' }}><span>{a.reference}</span><span>{ago(a.last_activity_at)}</span></span>
+                          <span className="mt-1 block truncate text-sm font-semibold" style={{ color: 'var(--adm-text)' }}>{a.full_name || a.email}</span>
+                          <span className="mt-0.5 line-clamp-2 block text-xs" style={{ color: 'var(--adm-text-2)' }}>{a.program_name}{a.university ? `, ${a.university}` : ''}</span>
+                          {a.location && <span className="mt-0.5 block text-[11px]" style={{ color: 'var(--adm-muted)' }}>{a.location}{a.intake ? ` · ${a.intake}` : ''}</span>}
+                        </button>
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
+                          {docs.length > 0 && <span className="rounded-full px-2 py-0.5 font-semibold" style={{ background: soft(meta.color, 12), color: 'var(--adm-text)' }}>{uploaded}/{docs.length} documents</span>}
+                          {review > 0 && <span className="rounded-full px-2 py-0.5 font-bold" style={{ background: 'var(--brand-gold)', color: 'var(--brand-ink)' }}>{review} to review</span>}
+                          <span className="ml-auto" style={{ color: 'var(--adm-muted)' }}>{owner ? staffName(owner) : 'Unassigned'}</span>
+                        </div>
+                        <select aria-label={`Move ${a.full_name} to another stage`} value={asStudyStatus(a.status)} onChange={(e) => move(a, e.target.value as StudyStatus)} className="mt-2 w-full px-2 py-1.5 text-xs" style={fieldStyle}>
+                          {[...STUDY_STAGES, ...STUDY_ENDED].map((s) => <option key={s} value={s}>{STUDY_META[s].label}</option>)}
+                        </select>
+                      </article>
+                    );
+                  })}
                 </div>
-              </td>
-            </tr>
-          ))}
-        </TableCard>
+              </section>
+            );
+          })}
+        </div>
       )}
 
-      {open && (
-        <Modal title={who(open)} subtitle={`Applied ${fmtDate(open.created_at)}`} maxWidth="max-w-xl" onClose={() => setOpen(null)}
-          footer={<><Button variant="secondary" onClick={() => setOpen(null)}>Close</Button><Button onClick={saveNotes}>Save notes</Button></>}>
-          <div className="space-y-4 text-sm">
-            <div className="flex items-center gap-3">
-              <StatusPill tone={TONE[asStatus(open.status)]}><span className="capitalize">{asStatus(open.status)}</span></StatusPill>
-              <select aria-label="Change status" value={asStatus(open.status)} onChange={(e) => setStatus(open, e.target.value as Status)} className="px-2 py-1 text-xs capitalize" style={fieldStyle}>
-                {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
-              {([
-                ['Email', open.email || open.profiles?.email], ['Phone', open.phone], ['Nationality', open.nationality],
-                ['Destination', open.study_destinations?.country_name ?? open.location], ['Studying', open.intended_level], ['Field', open.field_of_study || open.program_name],
-                ['Education so far', open.education_level], ['Preferred start', open.start_date ? fmtDate(open.start_date) : ''], ['Scholarship', open.scholarships?.title],
-              ] as [string, string | null | undefined][]).map(([k, v]) => (
-                <div key={k}><dt className="text-xs" style={{ color: 'var(--adm-muted)' }}>{k}</dt><dd style={{ color: 'var(--adm-text)' }}>{v || '-'}</dd></div>
-              ))}
-            </dl>
-            {open.message && (
-              <div><div className="text-xs" style={{ color: 'var(--adm-muted)' }}>Message from the applicant</div><p className="mt-1 whitespace-pre-wrap" style={{ color: 'var(--adm-text)' }}>{open.message}</p></div>
-            )}
-            <div>
-              <label htmlFor="app-notes" className="text-xs" style={{ color: 'var(--adm-muted)' }}>Private notes (staff only)</label>
-              <textarea id="app-notes" rows={4} className="mt-1 w-full px-3 py-2 text-sm" style={fieldStyle} value={notes} onChange={(e) => setNotes(e.target.value)} />
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      {adding && (
-        <Modal title="Add an application" subtitle="For applications taken by phone or in person" maxWidth="max-w-md" onClose={() => setAdding(false)}
-          footer={<><Button variant="secondary" onClick={() => setAdding(false)}>Cancel</Button><Button disabled={saving} onClick={(e) => add(e as unknown as React.FormEvent)}>{saving ? 'Saving...' : 'Add'}</Button></>}>
-          <form onSubmit={add} className="space-y-3">
-            <select required aria-label="Customer" value={form.user_id} onChange={(e) => setForm({ ...form, user_id: e.target.value })} className="w-full px-3 py-2 text-sm" style={fieldStyle}>
-              <option value="">Choose a customer</option>
-              {customers.map((c) => <option key={c.id} value={c.id}>{c.email}</option>)}
-            </select>
-            <select aria-label="Destination" value={form.destination_id} onChange={(e) => setForm({ ...form, destination_id: e.target.value })} className="w-full px-3 py-2 text-sm" style={fieldStyle}>
-              <option value="">Destination (optional)</option>
-              {destinations.map((d) => <option key={d.id} value={d.id}>{d.country_name}</option>)}
-            </select>
-            <input aria-label="Programme" value={form.program_name} onChange={(e) => setForm({ ...form, program_name: e.target.value })} placeholder="Programme or field of study" className="w-full px-3 py-2 text-sm" style={fieldStyle} />
-            <input aria-label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Phone" className="w-full px-3 py-2 text-sm" style={fieldStyle} />
-            <input aria-label="Start date" type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} className="w-full px-3 py-2 text-sm" style={fieldStyle} />
-            <button type="submit" className="hidden" aria-hidden tabIndex={-1} />
-          </form>
-        </Modal>
-      )}
+      {open && <ApplicationDrawer key={open.id} app={open} staff={staff} onClose={() => setOpenId(null)} onChanged={load} />}
+      {adding && <RecordApplication onClose={() => setAdding(false)} onSaved={async (id) => { setAdding(false); await load(); setOpenId(id); }} />}
     </AdminLayout>
+  );
+}
+
+/** Applications taken by phone or in person: pick the customer and the programme. */
+function RecordApplication({ onClose, onSaved }: { onClose: () => void; onSaved: (id: string) => void }) {
+  const supabase = useMemo(() => createBrowserClient(), []);
+  const [customers, setCustomers] = useState<{ id: string; email: string; first_name: string | null; last_name: string | null; phone_number?: string | null }[]>([]);
+  const [programs, setPrograms] = useState<ProgramOption[]>([]);
+  const [form, setForm] = useState({ user_id: '', program_id: '', intake: '', phone: '' });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    supabase.from('profiles').select('id, email, first_name, last_name').eq('is_admin', false).eq('is_active', true).order('email').then(({ data }) => setCustomers((data as typeof customers | null) ?? []));
+    supabase.from('study_programs').select('id, title, institution_id, study_institutions(name, destination_id)').eq('is_active', true).order('title').then(({ data }) => setPrograms((data as unknown as ProgramOption[] | null) ?? []));
+  }, [supabase]);
+
+  async function save() {
+    const customer = customers.find((c) => c.id === form.user_id);
+    const program = programs.find((p) => p.id === form.program_id);
+    if (!customer) return notify('Choose the customer.');
+    if (!program) return notify('Choose the programme.');
+    if (form.phone.trim().length < 6) return notify('Add a phone number.');
+    setSaving(true);
+    const { data: dest } = await supabase.from('study_destinations').select('id, country_name').eq('id', program.study_institutions?.destination_id ?? '').maybeSingle();
+    const { data, error } = await supabase.from('study_applications').insert({
+      user_id: customer.id, destination_id: dest?.id ?? null, institution_id: program.institution_id, program_id: program.id,
+      program_name: program.title, university: program.study_institutions?.name ?? '', location: dest?.country_name ?? '', intake: form.intake.trim(),
+      full_name: [customer.first_name, customer.last_name].filter(Boolean).join(' ') || customer.email, email: customer.email, phone: form.phone.trim(),
+    }).select('id').single();
+    setSaving(false);
+    if (reportError(error) || !data) return;
+    notify('Application recorded.', 'success');
+    onSaved(data.id);
+  }
+
+  return (
+    <Modal title="Record an application" subtitle="For a student who applied by phone or in person" maxWidth="max-w-lg" onClose={onClose}
+      footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button onClick={save} disabled={saving}>{saving ? 'Saving...' : 'Record application'}</Button></>}>
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="ra-user" className="mb-1 block text-xs font-semibold" style={{ color: 'var(--adm-text-2)' }}>Customer</label>
+          <select id="ra-user" value={form.user_id} onChange={(e) => setForm({ ...form, user_id: e.target.value })} className="w-full px-3 py-2 text-sm" style={fieldStyle}>
+            <option value="">Choose a customer</option>
+            {customers.map((c) => <option key={c.id} value={c.id}>{[c.first_name, c.last_name].filter(Boolean).join(' ') ? `${[c.first_name, c.last_name].filter(Boolean).join(' ')} (${c.email})` : c.email}</option>)}
+          </select>
+          <p className="mt-1 text-[11px]" style={{ color: 'var(--adm-muted)' }}>They need an account so they can follow progress. Ask them to register first if they do not have one.</p>
+        </div>
+        <div>
+          <label htmlFor="ra-prog" className="mb-1 block text-xs font-semibold" style={{ color: 'var(--adm-text-2)' }}>Programme</label>
+          <select id="ra-prog" value={form.program_id} onChange={(e) => setForm({ ...form, program_id: e.target.value })} className="w-full px-3 py-2 text-sm" style={fieldStyle}>
+            <option value="">Choose a programme</option>
+            {programs.map((p) => <option key={p.id} value={p.id}>{p.title} ({p.study_institutions?.name ?? ''})</option>)}
+          </select>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div><label htmlFor="ra-intake" className="mb-1 block text-xs font-semibold" style={{ color: 'var(--adm-text-2)' }}>Intake</label><input id="ra-intake" value={form.intake} onChange={(e) => setForm({ ...form, intake: e.target.value })} placeholder="e.g. September 2027" className="w-full px-3 py-2 text-sm" style={fieldStyle} /></div>
+          <div><label htmlFor="ra-phone" className="mb-1 block text-xs font-semibold" style={{ color: 'var(--adm-text-2)' }}>Phone</label><input id="ra-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} inputMode="tel" className="w-full px-3 py-2 text-sm" style={fieldStyle} /></div>
+        </div>
+      </div>
+    </Modal>
   );
 }

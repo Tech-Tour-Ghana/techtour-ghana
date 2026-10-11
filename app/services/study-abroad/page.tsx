@@ -2,31 +2,34 @@ import type { Metadata } from 'next';
 
 import ContentShell, { cardStyle } from '@/components/content/ContentShell';
 import Button from '@/components/ui/Button';
-import { LEVELS, deadlineLabel, getOpenScholarships, getStudyDestinations } from '@/lib/study/load.server';
+import InstitutionCard from '@/components/study/InstitutionCard';
+import { LEVELS, deadlineLabel, getOpenScholarships, getStudyDestinations, getStudyInstitutions } from '@/lib/study/load.server';
 
 export const metadata: Metadata = {
   title: 'Study Abroad',
-  description: 'Study abroad with TechTour Ghana: pick a destination, see the costs and scholarships, and apply online.',
+  description: 'Study abroad from Ghana with TechTour: choose a partner university, and we handle your application with the university while you follow every step online.',
   alternates: { canonical: '/services/study-abroad' },
 };
 
 export const dynamic = 'force-dynamic';
 
 const STEPS = [
-  { n: '1', title: 'Choose a destination', body: 'Compare costs, language and tuition for each country.' },
-  { n: '2', title: 'Send your application', body: 'Tell us about your studies and goals. It takes two minutes.' },
-  { n: '3', title: 'We guide you through', body: 'Our team contacts you about programmes, scholarships and visas.' },
+  { n: '1', title: 'Choose a programme', body: 'Browse our partner universities and pick the course and intake you want.' },
+  { n: '2', title: 'Apply with us', body: 'Share your details once. We deal with the university for you.' },
+  { n: '3', title: 'Upload your documents', body: 'A clear checklist shows what is needed. Our team reviews each file.' },
+  { n: '4', title: 'We submit and follow up', body: 'We send your application to the university and keep chasing it.' },
+  { n: '5', title: 'Track every step', body: 'See your stage, what we are waiting for and what is next, any time in your account.' },
 ];
 
 export default async function StudyAbroadPage() {
-  const [destinations, scholarships] = await Promise.all([getStudyDestinations(), getOpenScholarships()]);
+  const [destinations, scholarships, institutions] = await Promise.all([getStudyDestinations(), getOpenScholarships(), getStudyInstitutions()]);
   const nameOf = (id: string) => destinations.find((d) => d.id === id)?.country_name ?? '';
 
   return (
-    <ContentShell wide title="Study" titleAccent="Abroad" description="Pick a destination, see what it costs and which scholarships are open, then apply online.">
-      <ol className="mb-12 grid gap-4 md:grid-cols-3">
+    <ContentShell wide title="Study" titleAccent="Abroad" description="Choose a partner university. We handle your application with the university, and you follow every step from your account.">
+      <ol className="mb-12 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {STEPS.map((s) => (
-          <li key={s.n} className="flex gap-4 rounded-3xl p-5" style={cardStyle}>
+          <li key={s.n} className="flex gap-4 rounded-3xl p-5 lg:flex-col lg:gap-3" style={cardStyle}>
             <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white" style={{ background: 'var(--sp-primary)' }}>{s.n}</span>
             <div>
               <h2 className="font-semibold">{s.title}</h2>
@@ -36,8 +39,18 @@ export default async function StudyAbroadPage() {
         ))}
       </ol>
 
+      {institutions.length > 0 && (
+        <section aria-labelledby="partners-h" className="mb-14">
+          <h2 id="partners-h" className="mb-2 text-2xl font-bold">Partner universities</h2>
+          <p className="mb-5 max-w-2xl text-sm" style={{ color: 'var(--sp-text-secondary)' }}>Choose a programme and start your application. Everything after that, from documents to the university&apos;s decision, shows up in your account.</p>
+          <ul className="grid gap-5 lg:grid-cols-2">
+            {institutions.map((i) => <li key={i.id}><InstitutionCard institution={i} country={destinations.find((d) => d.id === i.destination_id)?.country_name} /></li>)}
+          </ul>
+        </section>
+      )}
+
       <section aria-labelledby="destinations-h">
-        <h2 id="destinations-h" className="mb-5 text-2xl font-bold">Destinations</h2>
+        <h2 id="destinations-h" className="mb-5 text-2xl font-bold">Study destinations</h2>
         {destinations.length === 0 ? (
           <div className="rounded-3xl p-10 text-center" style={cardStyle}>
             <h3 className="text-lg font-semibold">Destinations are being added</h3>
