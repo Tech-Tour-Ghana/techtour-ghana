@@ -139,14 +139,14 @@ export default function MediaDetails({
       </div>
 
       {confirm && (
-        <Modal title="Delete file?" maxWidth="max-w-sm" onClose={() => setConfirm(null)}
+        <Modal title="Move file to Trash?" maxWidth="max-w-sm" onClose={() => setConfirm(null)}
           footer={<>
             <Button variant="secondary" onClick={() => setConfirm(null)}>Cancel</Button>
             <Button variant="danger" onClick={remove} disabled={deleting}>{deleting ? 'Deleting…' : 'Delete'}</Button>
           </>}
         >
           <p className="text-xs" style={{ color: 'var(--adm-text-2)' }}>
-            “{asset.name}” will be permanently deleted from storage.
+            “{asset.name}” will be moved to the Trash. You can restore it from there.
             {confirm.usage > 0 && <strong style={{ color: 'var(--adm-error)' }}> It is used in {confirm.usage} article{confirm.usage > 1 ? 's' : ''}; those images will break.</strong>}
           </p>
         </Modal>

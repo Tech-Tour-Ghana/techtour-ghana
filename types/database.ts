@@ -3996,6 +3996,10 @@ export type Database = {
         Args: { p_participants: number; p_phone?: string; p_schedule_id: string; p_special_requests?: string }
         Returns: string
       }
+      admin_sidebar_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       create_rental_booking: {
         Args: { p_rental_id: string; p_check_in: string; p_check_out: string; p_guests: number; p_guest_name?: string; p_phone?: string; p_special_requests?: string }
         Returns: string

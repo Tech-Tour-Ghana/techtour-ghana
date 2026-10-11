@@ -131,12 +131,19 @@ export async function countUsage(asset: MediaAsset): Promise<number> {
   return (featured.count ?? 0) + (inline.count ?? 0);
 }
 
+/** Deleted files are moved here, not erased, so Trash can preview and restore them. */
+export const TRASH_PREFIX = "_trash/";
+
 export async function deleteMedia(asset: MediaAsset): Promise<void> {
   const supabase = createBrowserClient();
-  const { error: storageError } = await supabase.storage.from("media").remove([asset.storage_path]);
-  if (storageError) throw new Error("Could not delete the file from storage.");
+  const bucket = supabase.storage.from("media");
+  const { error: moveError } = await bucket.move(asset.storage_path, TRASH_PREFIX + asset.storage_path);
+  if (moveError) throw new Error("Could not move the file to the trash.");
   const { error } = await supabase.from("media_assets").delete().eq("id", asset.id);
-  if (error) throw new Error("The file was removed but its library entry could not be deleted.");
+  if (error) {
+    await bucket.move(TRASH_PREFIX + asset.storage_path, asset.storage_path);
+    throw new Error("The file could not be deleted.");
+  }
 }
 
 /** Upload straight into the default "General" folder, for editors that have no folder chooser. */
