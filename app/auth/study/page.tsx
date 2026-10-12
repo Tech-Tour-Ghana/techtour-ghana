@@ -40,14 +40,19 @@ export default function StudyPage() {
   const load = useCallback(() => {
     setFailed(false);
     const supabase = createBrowserClient();
-    supabase
-      .from('study_applications')
-      .select(SELECT)
-      .order('last_activity_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (error) setFailed(true);
-        else setRows((data as unknown as Row[]) ?? []);
-      });
+    // Admins can read every application, so ask for this member's own.
+    supabase.auth.getUser().then(({ data: auth }) => {
+      if (!auth.user) return setRows([]);
+      supabase
+        .from('study_applications')
+        .select(SELECT)
+        .eq('user_id', auth.user.id)
+        .order('last_activity_at', { ascending: false })
+        .then(({ data, error }) => {
+          if (error) setFailed(true);
+          else setRows((data as unknown as Row[]) ?? []);
+        });
+    });
     supabase.from('study_application_balances').select('application_id, currency, balance').gt('balance', 0).then(({ data }) => {
       const o: Record<string, string[]> = {};
       for (const r of data ?? []) if (r.application_id) (o[r.application_id] ??= []).push(formatMoney(r.balance ?? 0, r.currency ?? ''));

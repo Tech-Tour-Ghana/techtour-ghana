@@ -29,7 +29,11 @@ export default function SupportPage() {
   const load = useCallback(async () => {
     setFailed(false);
     setLoading(true);
-    const { data, error } = await createBrowserClient().from('support_tickets').select(COLUMNS).order('last_activity_at', { ascending: false });
+    const supabase = createBrowserClient();
+    // Staff can read every ticket, so ask for this member's own.
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) { setTickets([]); setLoading(false); return; }
+    const { data, error } = await supabase.from('support_tickets').select(COLUMNS).eq('user_id', auth.user.id).order('last_activity_at', { ascending: false });
     if (error) setFailed(true);
     else setTickets((data ?? []) as SupportTicket[]);
     setLoading(false);

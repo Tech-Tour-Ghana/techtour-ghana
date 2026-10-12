@@ -92,7 +92,7 @@ export default function NotificationCenter({ tone }: { tone: Tone }) {
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs" style={{ color: t.muted }}>
                   <time dateTime={n.date}>{timeAgo(n.date)}</time>
                   {n.link && (
-                    <Link href={n.link} onClick={() => !n.read && setRead(n.id, true)} className="inline-flex items-center gap-1 font-medium" style={{ color: 'var(--brand-teal)' }}>
+                    <Link href={n.link} onClick={() => !n.read && setRead(n.id, true)} className="inline-flex min-h-[2.75rem] items-center gap-1 font-medium" style={{ color: 'var(--brand-teal)' }}>
                       Open <FontAwesomeIcon icon={faChevronRight} className="h-2.5 w-2.5" />
                     </Link>
                   )}

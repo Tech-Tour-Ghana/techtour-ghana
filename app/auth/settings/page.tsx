@@ -14,7 +14,7 @@ import { getProfile, updateNotificationPreferences } from '@/lib/api';
 type Notifications = { email_notifications: boolean; sms_notifications: boolean; marketing_emails: boolean };
 
 const NOTIFICATION_LABELS: Record<keyof Notifications, { title: string; description: string }> = {
-  email_notifications: { title: 'Email notifications', description: 'Booking, order and payment updates by email.' },
+  email_notifications: { title: 'Email notifications', description: 'Booking, order, payment and study application updates by email.' },
   sms_notifications: { title: 'SMS notifications', description: 'Important updates by text message.' },
   marketing_emails: { title: 'Offers and news', description: 'Promotions and travel news by email.' },
 };
