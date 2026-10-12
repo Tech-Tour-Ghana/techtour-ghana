@@ -10,7 +10,7 @@ const card = { background: 'var(--brand-card)', border: '1px solid var(--brand-l
 const soft = (color: string, pct = 14) => `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 const day = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
-export default function StudentLedger({ entries, reference }: { entries: LedgerEntry[]; reference: string }) {
+export default function StudentLedger({ entries, reference, instructions }: { entries: LedgerEntry[]; reference: string; instructions: string }) {
   if (entries.length === 0) return null;
   // A currency with only university payments has nothing the student owes or paid.
   const balances = ledgerBalances(entries).filter((b) => b.charged || b.waived || b.paid || b.refunded);
@@ -43,9 +43,17 @@ export default function StudentLedger({ entries, reference }: { entries: LedgerE
       })}
 
       {balances.some((b) => b.balance > 0) && (
-        <p className="mt-4 text-sm" style={{ color: 'var(--brand-text-2)' }}>
-          To pay, <Link href="/auth/support" className="font-semibold underline" style={{ color: 'var(--brand-teal)' }}>contact us</Link> and quote {reference}. We confirm each payment here as soon as we receive it.
-        </p>
+        instructions ? (
+          <div className="mt-4 rounded-xl p-4" style={{ border: '1px solid var(--brand-line)' }}>
+            <p className="text-sm font-semibold" style={{ color: 'var(--brand-text)' }}>How to pay</p>
+            <p className="mt-1 whitespace-pre-wrap text-sm" style={{ color: 'var(--brand-text-2)' }}>{instructions}</p>
+            <p className="mt-2 text-xs" style={{ color: 'var(--brand-muted)' }}>Quote {reference} when you pay. We confirm each payment here as soon as we receive it.</p>
+          </div>
+        ) : (
+          <p className="mt-4 text-sm" style={{ color: 'var(--brand-text-2)' }}>
+            To pay, <Link href="/auth/support" className="font-semibold underline" style={{ color: 'var(--brand-teal)' }}>contact us</Link> and quote {reference}. We confirm each payment here as soon as we receive it.
+          </p>
+        )
       )}
 
       <ul className="mt-5 divide-y" style={{ borderColor: 'var(--brand-line)' }}>

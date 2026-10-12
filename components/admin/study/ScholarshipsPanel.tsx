@@ -9,24 +9,26 @@ import { Button, IconButton, Modal, SearchInput, StatusPill, TableCard, Toggle, 
 import { Field, Section, inputCls, slugify } from '@/components/admin/tours/shared';
 import { createBrowserClient } from '@/lib/supabase/client';
 import type { Database } from '@/types/database';
+import type { Institution } from './InstitutionsPanel';
+import type { Program } from './ProgramsPanel';
 import { LEVELS, LEVEL_LABELS, LEVEL_TONE, OPEN_DEADLINE, copySlug, type Destination, type Level, type Scholarship } from './shared';
 
 type Insert = Database['public']['Tables']['scholarships']['Insert'];
 
 interface Form {
-  title: string; slug: string; destination_id: string; level: Level; description: string; deadline: string; amount: string;
+  title: string; slug: string; destination_id: string; institution_id: string; program_id: string; level: Level; description: string; deadline: string; amount: string;
   is_active: boolean; is_featured: boolean;
 }
 
-const EMPTY: Form = { title: '', slug: '', destination_id: '', level: 'all', description: '', deadline: '', amount: '', is_active: true, is_featured: false };
+const EMPTY: Form = { title: '', slug: '', destination_id: '', institution_id: '', program_id: '', level: 'all', description: '', deadline: '', amount: '', is_active: true, is_featured: false };
 
 const toForm = (s: Scholarship): Form => ({
-  title: s.title, slug: s.slug, destination_id: s.destination_id, level: s.level, description: s.description,
+  title: s.title, slug: s.slug, destination_id: s.destination_id, institution_id: s.institution_id ?? '', program_id: s.program_id ?? '', level: s.level, description: s.description,
   deadline: s.deadline >= OPEN_DEADLINE ? '' : s.deadline, amount: s.amount, is_active: s.is_active, is_featured: s.is_featured,
 });
 
-export default function ScholarshipsPanel({ scholarships, destinations, loading, reload }: {
-  scholarships: Scholarship[]; destinations: Destination[]; loading: boolean; reload: () => Promise<void>;
+export default function ScholarshipsPanel({ scholarships, destinations, institutions, programs, loading, reload }: {
+  scholarships: Scholarship[]; destinations: Destination[]; institutions: Institution[]; programs: Program[]; loading: boolean; reload: () => Promise<void>;
 }) {
   const supabase = useMemo(() => createBrowserClient(), []);
   const [search, setSearch] = useState('');
@@ -68,7 +70,7 @@ export default function ScholarshipsPanel({ scholarships, destinations, loading,
     const own = editing && editing !== 'new' ? editing.id : null;
     if (scholarships.some((s) => s.slug === slug && s.id !== own)) return notify('Another scholarship already uses that web address. Pick a different slug.');
     const row: Insert = {
-      destination_id: form.destination_id, title: form.title.trim(), slug, level: form.level, description: form.description.trim(),
+      destination_id: form.destination_id, institution_id: form.institution_id || null, program_id: form.program_id || null, title: form.title.trim(), slug, level: form.level, description: form.description.trim(),
       deadline: form.deadline || OPEN_DEADLINE, amount: form.amount.trim(), is_active: form.is_active, is_featured: form.is_featured,
     };
     setSaving(true);
@@ -157,7 +159,7 @@ export default function ScholarshipsPanel({ scholarships, destinations, loading,
               <td className="w-8 px-4 py-3"><input type="checkbox" aria-label={`Select ${s.title}`} checked={selected.has(s.id)} onChange={() => setSelected((p) => { const n = new Set(p); if (n.has(s.id)) n.delete(s.id); else n.add(s.id); return n; })} style={{ accentColor: 'var(--adm-primary)' }} /></td>
               <td className="px-4 py-3">
                 <p className="font-medium" style={{ color: 'var(--adm-text)' }}>{s.title}</p>
-                <p className="text-xs" style={{ color: 'var(--adm-muted)' }}>{s.amount || 'No amount set'}</p>
+                <p className="text-xs" style={{ color: 'var(--adm-muted)' }}>{[s.amount || 'No amount set', s.program_id ? programs.find((p) => p.id === s.program_id)?.title : s.institution_id ? institutions.find((i) => i.id === s.institution_id)?.name : ''].filter(Boolean).join(' · ')}</p>
               </td>
               <td className="px-4 py-3 text-xs" style={{ color: 'var(--adm-text-2)' }}>{destName(s.destination_id)}</td>
               <td className="px-4 py-3"><StatusPill tone={LEVEL_TONE[s.level]}>{LEVEL_LABELS[s.level]}</StatusPill></td>
@@ -200,6 +202,18 @@ export default function ScholarshipsPanel({ scholarships, destinations, loading,
               <select className={inputCls} style={fieldStyle} value={form.destination_id} onChange={(e) => set('destination_id', e.target.value)}>
                 <option value="">Choose a destination</option>
                 {destinations.map((d) => <option key={d.id} value={d.id}>{d.country_name}</option>)}
+              </select>
+            </Field>
+            <Field label="University (optional)" hint="Leave empty if it is open to the whole country.">
+              <select className={inputCls} style={fieldStyle} value={form.institution_id} onChange={(e) => setForm((f) => ({ ...f, institution_id: e.target.value, program_id: '' }))}>
+                <option value="">Any university</option>
+                {institutions.filter((i) => !form.destination_id || i.destination_id === form.destination_id).map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+              </select>
+            </Field>
+            <Field label="Programme (optional)" hint="Only for one programme at that university.">
+              <select className={inputCls} style={fieldStyle} value={form.program_id} disabled={!form.institution_id} onChange={(e) => set('program_id', e.target.value)}>
+                <option value="">Any programme</option>
+                {programs.filter((p) => p.institution_id === form.institution_id).map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
               </select>
             </Field>
             <Field label="Description" className="sm:col-span-2"><textarea rows={4} className={inputCls} style={fieldStyle} value={form.description} onChange={(e) => set('description', e.target.value)} /></Field>

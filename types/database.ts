@@ -2305,6 +2305,8 @@ export type Database = {
           deadline: string
           description: string
           destination_id: string
+          institution_id: string | null
+          program_id: string | null
           id: string
           is_active: boolean
           is_featured: boolean
@@ -2320,6 +2322,8 @@ export type Database = {
           deadline: string
           description?: string
           destination_id: string
+          institution_id?: string | null
+          program_id?: string | null
           id?: string
           is_active?: boolean
           is_featured?: boolean
@@ -2335,6 +2339,8 @@ export type Database = {
           deadline?: string
           description?: string
           destination_id?: string
+          institution_id?: string | null
+          program_id?: string | null
           id?: string
           is_active?: boolean
           is_featured?: boolean
@@ -3103,6 +3109,12 @@ export type Database = {
           created_by?: string | null
           created_at?: string
         }
+        Relationships: []
+      }
+      study_settings: {
+        Row: { id: boolean; payment_instructions: string; updated_at: string }
+        Insert: { id?: boolean; payment_instructions?: string; updated_at?: string }
+        Update: { payment_instructions?: string }
         Relationships: []
       }
       study_ledger: {
@@ -4192,6 +4204,10 @@ export type Database = {
       }
     }
     Views: {
+      study_awaiting_reply: {
+        Row: { application_id: string | null }
+        Relationships: []
+      }
       study_application_balances: {
         Row: {
           application_id: string | null
@@ -4273,6 +4289,10 @@ export type Database = {
     Functions: {
       create_tour_booking: {
         Args: { p_participants: number; p_phone?: string; p_schedule_id: string; p_special_requests?: string }
+        Returns: string
+      }
+      send_study_message: {
+        Args: { p_application_id: string; p_body: string }
         Returns: string
       }
       submit_testimonial: {

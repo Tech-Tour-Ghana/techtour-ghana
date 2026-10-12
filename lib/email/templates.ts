@@ -54,3 +54,10 @@ export const supportReply = (t: { name: string; number: string; subject: string;
     `<h2>Hi ${h(t.name)},</h2><p>Our team replied to your ticket <b>${h(t.number)}</b>.</p><blockquote style="border-left:3px solid #ccc;margin:12px 0;padding-left:12px;white-space:pre-wrap">${h(t.snippet)}</blockquote><p><a href="${h(t.url)}">Open the conversation</a> to reply.</p>`,
   ),
 });
+
+export const studyUpdate = (u: { name: string; reference: string; program: string; title: string; detail: string; nextStep: string; url: string }) => ({
+  subject: `${u.title} (${u.reference})`,
+  html: wrap(
+    `<h2>Hi ${h(u.name)},</h2><p>There is an update on your application for <b>${h(u.program)}</b> (${h(u.reference)}).</p><p style="font-size:16px"><b>${h(u.title)}</b></p>${u.detail ? `<p style="white-space:pre-wrap">${h(u.detail)}</p>` : ""}${u.nextStep ? `<p style="background:#fdf3e1;padding:10px 12px;border-radius:8px"><b>Your next step:</b> ${h(u.nextStep)}</p>` : ""}<p><a href="${h(u.url)}">See your application</a></p>`,
+  ),
+});

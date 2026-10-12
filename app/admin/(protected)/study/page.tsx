@@ -11,12 +11,13 @@ import AdminLayout from '@/components/AdminLayout';
 import DestinationsPanel from '@/components/admin/study/DestinationsPanel';
 import InstitutionsPanel, { type Institution } from '@/components/admin/study/InstitutionsPanel';
 import ProgramsPanel, { type Program } from '@/components/admin/study/ProgramsPanel';
+import PaymentSettingsPanel from '@/components/admin/study/PaymentSettingsPanel';
 import ScholarshipsPanel from '@/components/admin/study/ScholarshipsPanel';
 import type { Destination, Scholarship } from '@/components/admin/study/shared';
 import { StatTile, Tabs } from '@/components/admin/ui';
 import { createBrowserClient } from '@/lib/supabase/client';
 
-type Tab = 'destinations' | 'institutions' | 'programs' | 'scholarships';
+type Tab = 'destinations' | 'institutions' | 'programs' | 'scholarships' | 'payments';
 
 export default function AdminStudyPage() {
   const supabase = useMemo(() => createBrowserClient(), []);
@@ -80,6 +81,7 @@ export default function AdminStudyPage() {
             { key: 'programs' as Tab, label: 'Programmes', count: programs.length },
             { key: 'destinations' as Tab, label: 'Destinations', count: destinations.length },
             { key: 'scholarships' as Tab, label: 'Scholarships', count: scholarships.length },
+            { key: 'payments' as Tab, label: 'Payment details' },
           ]}
         />
       </div>
@@ -89,7 +91,8 @@ export default function AdminStudyPage() {
       {tab === 'institutions' && <InstitutionsPanel institutions={institutions} destinations={destinations} programCounts={programCounts} loading={loading} reload={load} />}
       {tab === 'programs' && <ProgramsPanel programs={programs} institutions={institutions} applicationCounts={programApps} loading={loading} reload={load} />}
       {tab === 'destinations' && <DestinationsPanel destinations={destinations} scholarships={scholarships} applications={applications} loading={loading} reload={load} />}
-      {tab === 'scholarships' && <ScholarshipsPanel scholarships={scholarships} destinations={destinations} loading={loading} reload={load} />}
+      {tab === 'scholarships' && <ScholarshipsPanel scholarships={scholarships} destinations={destinations} institutions={institutions} programs={programs} loading={loading} reload={load} />}
+      {tab === 'payments' && <PaymentSettingsPanel />}
     </AdminLayout>
   );
 }

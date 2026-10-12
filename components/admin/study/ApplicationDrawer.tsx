@@ -14,6 +14,7 @@ import { Button, ListSkeleton, Modal, StatusPill, Tabs, confirmAction, fieldStyl
 import LedgerPanel from '@/components/admin/study/LedgerPanel';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { DOC_STATUS_META, STUDY_BUCKET, STUDY_META, STUDY_STATUSES, asStudyStatus, type StudyDocument, type StudyEvent, type StudyStatus } from '@/lib/study/meta';
+import { emailStudent } from '@/lib/study/notify.client';
 import { announceAdminCounts } from '@/lib/useAdminCounts';
 
 export interface AdminApplication {
@@ -93,12 +94,13 @@ export default function ApplicationDrawer({ app, staff, onClose, onChanged }: {
   async function changeStage(next: StudyStatus) {
     if (next === status) return;
     if (next === 'rejected' && !(await confirmAction({ message: 'Mark this application as not successful? The student is notified.', confirmLabel: 'Mark not successful', danger: true }))) return;
-    await patch({ status: next }, 'Stage updated. The student was notified.');
+    if (await patch({ status: next }, 'Stage updated. The student was notified.')) emailStudent(app.id, 'stage');
   }
 
   async function review(d: StudyDocument, next: 'approved' | 'rejected', note = '') {
     if (reportError((await supabase.from('study_application_documents').update({ status: next, staff_note: note }).eq('id', d.id)).error)) return;
     notify(next === 'approved' ? 'Document approved.' : 'Sent back to the student.', 'success');
+    if (next === 'rejected') emailStudent(app.id, 'document');
     setRejecting(null);
     announceAdminCounts();
     await Promise.all([loadDocs(), loadEvents(), onChanged()]);
@@ -146,6 +148,7 @@ export default function ApplicationDrawer({ app, staff, onClose, onChanged }: {
     if (reportError((await supabase.from('study_application_events').insert({ application_id: app.id, kind: 'note', title: update.trim(), is_public: visible, created_by: auth.user?.id ?? null })).error)) return;
     setUpdate('');
     notify(visible ? 'Update posted. The student was notified.' : 'Internal note saved.', 'success');
+    if (visible) emailStudent(app.id, 'note');
     await Promise.all([loadEvents(), onChanged()]);
   }
 
@@ -264,7 +267,7 @@ export default function ApplicationDrawer({ app, staff, onClose, onChanged }: {
           </div>
         )}
 
-        {tab === 'payments' && <LedgerPanel applicationId={app.id} onChanged={async () => { await Promise.all([onChanged(), loadEvents()]); }} />}
+        {tab === 'payments' && <LedgerPanel applicationId={app.id} onChanged={async () => { await Promise.all([onChanged(), loadEvents()]); }} onRecorded={() => emailStudent(app.id, 'system')} />}
 
         {tab === 'timeline' && (
           <div>
@@ -280,9 +283,9 @@ export default function ApplicationDrawer({ app, staff, onClose, onChanged }: {
               <ol className="relative space-y-4 border-l pl-5" style={{ borderColor: 'var(--adm-border)' }}>
                 {events.map((e) => (
                   <li key={e.id} className="relative">
-                    <span aria-hidden className="absolute -left-[26px] top-1 h-3 w-3 rounded-full" style={{ background: e.kind === 'stage' ? 'var(--adm-primary)' : e.is_public ? 'var(--adm-muted)' : 'var(--adm-warning, var(--brand-warning))' }} />
-                    <p className="text-sm font-semibold" style={{ color: 'var(--adm-text)' }}>{e.title}{!e.is_public && <span className="ml-2 rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: soft('var(--brand-warning)', 22), color: 'var(--adm-text)' }}>Internal</span>}</p>
-                    {e.body && <p className="mt-0.5 text-xs" style={{ color: 'var(--adm-text-2)' }}>{e.body}</p>}
+                    <span aria-hidden className="absolute -left-[26px] top-1 h-3 w-3 rounded-full" style={{ background: e.kind === 'message' ? 'var(--brand-info)' : e.kind === 'stage' ? 'var(--adm-primary)' : e.is_public ? 'var(--adm-muted)' : 'var(--adm-warning, var(--brand-warning))' }} />
+                    <p className="text-sm font-semibold" style={{ color: 'var(--adm-text)' }}>{e.kind === 'message' ? 'Message from the student' : e.title}{e.kind === 'message' && <span className="ml-2 rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: soft('var(--brand-info)', 22), color: 'var(--adm-text)' }}>Reply with an update</span>}{!e.is_public && <span className="ml-2 rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: soft('var(--brand-warning)', 22), color: 'var(--adm-text)' }}>Internal</span>}</p>
+                    {e.body && <p className={e.kind === 'message' ? 'mt-1 whitespace-pre-wrap rounded-[var(--adm-radius-control)] p-2.5 text-sm' : 'mt-0.5 text-xs'} style={{ color: 'var(--adm-text-2)', background: e.kind === 'message' ? soft('var(--brand-info)', 10) : undefined }}>{e.body}</p>}
                     <p className="mt-0.5 text-[11px]" style={{ color: 'var(--adm-muted)' }}>{when(e.created_at)}</p>
                   </li>
                 ))}

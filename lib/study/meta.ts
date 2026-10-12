@@ -60,7 +60,7 @@ export interface StudyDocument {
 
 export interface StudyEvent {
   id: string;
-  kind: 'stage' | 'document' | 'note' | 'system';
+  kind: 'stage' | 'document' | 'note' | 'system' | 'message';
   title: string;
   body: string;
   is_public: boolean;

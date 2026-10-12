@@ -6,7 +6,7 @@ import { cardStyle } from '@/components/content/ContentShell';
 import { ServiceTheme } from '@/components/ServiceTheme';
 import ProgramApplyForm from '@/components/study/ProgramApplyForm';
 import Button from '@/components/ui/Button';
-import { formatTuition, getStudyProgram } from '@/lib/study/load.server';
+import { deadlineLabel, formatTuition, getProgramScholarships, getStudyProgram } from '@/lib/study/load.server';
 import { levelLabel } from '@/lib/study/meta';
 
 export const dynamic = 'force-dynamic';
@@ -31,6 +31,7 @@ export default async function ApplyPage({ searchParams }: Props) {
   const intakes = p.intakes.split(/[,;\n]+/).map((x) => x.trim()).filter(Boolean);
   const requirements = p.requirements.split(/\r?\n+/).map((x) => x.trim()).filter(Boolean);
   const tuition = formatTuition(p.tuition_amount, p.tuition_currency);
+  const scholarships = await getProgramScholarships(p.id, i.id);
 
   return (
     <ServiceTheme>
@@ -58,6 +59,22 @@ export default async function ApplyPage({ searchParams }: Props) {
                 <section className="mt-6" aria-labelledby="req-h">
                   <h2 id="req-h" className="text-lg font-bold">Entry requirements</h2>
                   <ul className="mt-2 list-disc space-y-1 pl-5 text-sm" style={{ color: 'var(--sp-text-secondary)' }}>{requirements.map((r) => <li key={r}>{r}</li>)}</ul>
+                </section>
+              )}
+
+              {scholarships.length > 0 && (
+                <section className="mt-6" aria-labelledby="sch-h">
+                  <h2 id="sch-h" className="text-lg font-bold">Scholarships you can ask about</h2>
+                  <ul className="mt-2 space-y-2">
+                    {scholarships.map((sc) => (
+                      <li key={sc.id} className="rounded-2xl p-4" style={cardStyle}>
+                        <p className="text-sm font-semibold">{sc.title}{sc.amount ? ' · ' + sc.amount : ''}</p>
+                        <p className="mt-0.5 text-xs" style={{ color: 'var(--sp-text-muted)' }}>Deadline: {deadlineLabel(sc.deadline)}</p>
+                        {sc.description && <p className="mt-1 text-sm" style={{ color: 'var(--sp-text-secondary)' }}>{sc.description}</p>}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-2 text-xs" style={{ color: 'var(--sp-text-muted)' }}>Mention a scholarship in your message when you apply, or message your counsellor afterwards.</p>
                 </section>
               )}
 
