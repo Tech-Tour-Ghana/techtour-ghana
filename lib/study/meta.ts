@@ -70,3 +70,65 @@ export interface StudyEvent {
 export const STUDY_BUCKET = 'study-documents';
 export const MAX_DOC_BYTES = 10 * 1024 * 1024;
 export const DOC_ACCEPT = '.pdf,.jpg,.jpeg,.png,.webp,.doc,.docx';
+
+// ---------------------------------------------------------------------------
+// Payments ledger (migration 0049). Students pay TechTour; staff pay the
+// university offline and record it. The ledger moves no money, it is the record.
+// ---------------------------------------------------------------------------
+export const LEDGER_KINDS = {
+  charge: { label: 'Fee', hint: 'A fee the student owes', sign: 1 },
+  payment: { label: 'Payment received', hint: 'Money the student paid TechTour', sign: -1 },
+  refund: { label: 'Refund', hint: 'Money paid back to the student', sign: 1 },
+  waiver: { label: 'Waiver', hint: 'A fee TechTour removes', sign: -1 },
+  remittance: { label: 'Paid to university', hint: 'Money TechTour paid the university for the student', sign: 0 },
+} as const;
+export type LedgerKind = keyof typeof LEDGER_KINDS;
+
+export const LEDGER_CATEGORIES = [
+  { value: 'application_fee', label: 'Application fee' },
+  { value: 'tuition', label: 'Tuition' },
+  { value: 'deposit', label: 'Tuition deposit' },
+  { value: 'service_fee', label: 'TechTour service fee' },
+  { value: 'visa_fee', label: 'Visa fee' },
+  { value: 'insurance', label: 'Health insurance' },
+  { value: 'other', label: 'Other' },
+] as const;
+export const LEDGER_CURRENCIES = ['GHS', 'USD', 'CAD', 'GBP', 'EUR'] as const;
+export const PAYMENT_METHODS = ['Mobile money', 'Bank transfer', 'Cash', 'Card', 'Other'] as const;
+
+export interface LedgerEntry {
+  id: string;
+  application_id: string;
+  kind: LedgerKind;
+  category: string;
+  description: string;
+  amount: number;
+  currency: string;
+  method: string;
+  reference: string;
+  occurred_on: string;
+  created_at: string;
+  voided_at: string | null;
+}
+
+export interface LedgerBalance { currency: string; charged: number; waived: number; paid: number; refunded: number; remitted: number; balance: number }
+
+export const formatMoney = (amount: number, currency: string) =>
+  `${currency} ${Number(amount).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+/** Totals per currency from live (not voided) entries. Same rules as the study_application_balances view. */
+export function ledgerBalances(entries: LedgerEntry[]): LedgerBalance[] {
+  const by = new Map<string, LedgerBalance>();
+  for (const e of entries) {
+    if (e.voided_at) continue;
+    const b = by.get(e.currency) ?? { currency: e.currency, charged: 0, waived: 0, paid: 0, refunded: 0, remitted: 0, balance: 0 };
+    const n = Number(e.amount);
+    if (e.kind === 'charge') b.charged += n;
+    else if (e.kind === 'waiver') b.waived += n;
+    else if (e.kind === 'payment') b.paid += n;
+    else if (e.kind === 'refund') b.refunded += n;
+    else b.remitted += n;
+    by.set(e.currency, b);
+  }
+  return [...by.values()].map((b) => ({ ...b, balance: Math.round((b.charged - b.waived - b.paid + b.refunded) * 100) / 100 }));
+}

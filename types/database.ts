@@ -3105,6 +3105,44 @@ export type Database = {
         }
         Relationships: []
       }
+      study_ledger: {
+        Row: {
+          id: string
+          application_id: string
+          kind: string
+          category: string
+          description: string
+          amount: number
+          currency: string
+          method: string
+          reference: string
+          occurred_on: string
+          created_by: string | null
+          created_at: string
+          voided_at: string | null
+          voided_by: string | null
+        }
+        Insert: {
+          id?: string
+          application_id: string
+          kind: string
+          category?: string
+          description?: string
+          amount: number
+          currency?: string
+          method?: string
+          reference?: string
+          occurred_on?: string
+          created_by?: string | null
+          created_at?: string
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Update: {
+          voided_at?: string | null
+        }
+        Relationships: []
+      }
       study_destinations: {
         Row: {
           average_tuition: string
@@ -4148,6 +4186,19 @@ export type Database = {
       }
     }
     Views: {
+      study_application_balances: {
+        Row: {
+          application_id: string | null
+          currency: string | null
+          charged: number | null
+          waived: number | null
+          paid: number | null
+          refunded: number | null
+          remitted: number | null
+          balance: number | null
+        }
+        Relationships: []
+      }
       analytics_paid_checkouts: {
         Row: {
           amount: number | null

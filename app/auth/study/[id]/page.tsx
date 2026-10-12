@@ -12,8 +12,9 @@ import { faArrowLeft, faCheckCircle, faFile, faHeadset, faTriangleExclamation, f
 
 import DashboardLayout from '@/components/DashboardLayout';
 import StageTracker from '@/components/study/StageTracker';
+import StudentLedger from '@/components/study/StudentLedger';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { DOC_ACCEPT, DOC_STATUS_META, MAX_DOC_BYTES, STUDY_BUCKET, STUDY_META, asStudyStatus, isEnded, type StudyDocument, type StudyEvent } from '@/lib/study/meta';
+import { DOC_ACCEPT, DOC_STATUS_META, MAX_DOC_BYTES, STUDY_BUCKET, STUDY_META, asStudyStatus, isEnded, type LedgerEntry, type StudyDocument, type StudyEvent } from '@/lib/study/meta';
 
 interface App {
   id: string;
@@ -38,6 +39,7 @@ export default function StudyApplicationPage({ params }: { params: Promise<{ id:
   const [app, setApp] = useState<App | null>(null);
   const [docs, setDocs] = useState<StudyDocument[]>([]);
   const [events, setEvents] = useState<StudyEvent[]>([]);
+  const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [state, setState] = useState<'loading' | 'ready' | 'missing' | 'failed'>('loading');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ id: string; text: string } | null>(null);
@@ -45,16 +47,18 @@ export default function StudyApplicationPage({ params }: { params: Promise<{ id:
 
   const load = useCallback(async () => {
     const supabase = createBrowserClient();
-    const [a, d, e] = await Promise.all([
+    const [a, d, e, l] = await Promise.all([
       supabase.from('study_applications').select('id, user_id, reference, status, program_name, university, location, intake, next_step, created_at').eq('id', id).maybeSingle(),
       supabase.from('study_application_documents').select('*').eq('application_id', id).order('sort_order'),
       supabase.from('study_application_events').select('id, kind, title, body, is_public, created_at').eq('application_id', id).order('created_at', { ascending: false }),
+      supabase.from('study_ledger').select('*').eq('application_id', id).order('occurred_on', { ascending: false }).order('created_at', { ascending: false }),
     ]);
     if (a.error) return setState('failed');
     if (!a.data) return setState('missing');
     setApp(a.data as App);
     setDocs((d.data as StudyDocument[] | null) ?? []);
     setEvents((e.data as StudyEvent[] | null) ?? []);
+    setLedger((l.data as LedgerEntry[] | null) ?? []);
     setState('ready');
   }, [id]);
 
@@ -195,6 +199,8 @@ export default function StudyApplicationPage({ params }: { params: Promise<{ id:
           })}
         </ul>
       </section>
+
+      <StudentLedger entries={ledger} reference={app.reference} />
 
       <section className="mt-6 rounded-2xl p-5 sm:p-6" style={card} aria-labelledby="time-h">
         <h2 id="time-h" className="mb-4 text-lg font-bold" style={{ color: 'var(--brand-text)' }}>What has happened so far</h2>
