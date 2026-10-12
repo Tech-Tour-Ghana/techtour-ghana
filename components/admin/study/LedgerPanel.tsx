@@ -54,7 +54,7 @@ export default function LedgerPanel({ applicationId, onChanged }: { applicationI
   }
 
   async function voidEntry(en: LedgerEntry) {
-    if (!(await confirmAction({ message: `Void this ${LEDGER_KINDS[en.kind].label.toLowerCase()} of ${formatMoney(en.amount, en.currency)}? It disappears from the student's view and from the totals. Add a corrected entry afterwards.`, confirmLabel: 'Void entry', danger: true }))) return;
+    if (!(await confirmAction({ message: `Void this entry (${LEDGER_KINDS[en.kind].label}, ${formatMoney(en.amount, en.currency)})? It disappears from the student's view and from the totals. Add a corrected entry afterwards.`, confirmLabel: 'Void entry', danger: true }))) return;
     if (reportError((await supabase.from('study_ledger').update({ voided_at: new Date().toISOString() }).eq('id', en.id)).error)) return;
     notify('Entry voided.', 'success');
     await Promise.all([load(), onChanged()]);

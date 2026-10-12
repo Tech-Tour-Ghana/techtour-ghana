@@ -12,7 +12,8 @@ const day = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'numer
 
 export default function StudentLedger({ entries, reference }: { entries: LedgerEntry[]; reference: string }) {
   if (entries.length === 0) return null;
-  const balances = ledgerBalances(entries);
+  // A currency with only university payments has nothing the student owes or paid.
+  const balances = ledgerBalances(entries).filter((b) => b.charged || b.waived || b.paid || b.refunded);
 
   return (
     <section className="mt-6 rounded-2xl p-5 sm:p-6" style={card} aria-labelledby="pay-h">
