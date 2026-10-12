@@ -3538,7 +3538,9 @@ export type Database = {
           is_featured: boolean
           legacy_id: number | null
           rating: number
+          status: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           author_image_path?: string | null
@@ -3551,7 +3553,9 @@ export type Database = {
           is_featured?: boolean
           legacy_id?: number | null
           rating?: number
+          status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           author_image_path?: string | null
@@ -3564,7 +3568,9 @@ export type Database = {
           is_featured?: boolean
           legacy_id?: number | null
           rating?: number
+          status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -4267,6 +4273,10 @@ export type Database = {
     Functions: {
       create_tour_booking: {
         Args: { p_participants: number; p_phone?: string; p_schedule_id: string; p_special_requests?: string }
+        Returns: string
+      }
+      submit_testimonial: {
+        Args: { p_author_name: string; p_author_position: string; p_rating: number; p_content: string }
         Returns: string
       }
       admin_sidebar_counts: {

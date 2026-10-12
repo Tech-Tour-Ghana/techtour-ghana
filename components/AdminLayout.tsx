@@ -145,6 +145,7 @@ const BADGES: Record<string, { key: keyof AdminCounts; tone: 'attention' | 'quie
   '/admin/helpdesk': { key: 'helpdesk', tone: 'attention' },
   '/admin/contacts': { key: 'contacts', tone: 'attention' },
   '/admin/feedback': { key: 'feedback', tone: 'attention' },
+  '/admin/testimonials': { key: 'testimonials', tone: 'attention' },
   '/admin/emails': { key: 'emails', tone: 'alert' },
   '/admin/trash': { key: 'trash', tone: 'quiet' },
 };

@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 
-export type AdminCounts = Partial<Record<'trash' | 'helpdesk' | 'contacts' | 'orders' | 'tours' | 'rentals' | 'applications' | 'feedback' | 'emails' | 'notifications', number>>;
+export type AdminCounts = Partial<Record<'trash' | 'helpdesk' | 'contacts' | 'orders' | 'tours' | 'rentals' | 'applications' | 'feedback' | 'testimonials' | 'emails' | 'notifications', number>>;
 
 const CHANGED = 'admin:counts-changed';
 

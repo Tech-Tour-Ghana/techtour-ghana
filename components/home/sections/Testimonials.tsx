@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faChevronRight, faPenToSquare, faStar } from '@fortawesome/free-solid-svg-icons';
 
 import type { Testimonial } from '@/lib/home/map';
 
@@ -43,6 +44,10 @@ export default function Testimonials({ items }: { items: Testimonial[] }) {
           <h2 id="testimonials-heading" className="font-bold"  style={{ color: 'var(--sp-text-primary)', fontSize: 'clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem)' }}>
             What travellers say
           </h2>
+          <div className="flex items-center gap-3">
+          <Link href="/auth/testimonials" className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-full border px-4 text-sm font-semibold" style={{ borderColor: 'var(--sp-border)', color: 'var(--sp-text-primary)' }}>
+            <FontAwesomeIcon icon={faPenToSquare} className="h-3.5 w-3.5" />Share your experience
+          </Link>
           {items.length > 1 && overflowing && (
             <div className="hidden md:flex gap-2">
               <button type="button" onClick={prev} aria-label="Previous testimonial" className="flex h-10 w-10 items-center justify-center rounded-full border" style={{ borderColor: 'var(--sp-border)', color: 'var(--sp-text-primary)' }}>
@@ -53,6 +58,7 @@ export default function Testimonials({ items }: { items: Testimonial[] }) {
               </button>
             </div>
           )}
+          </div>
         </div>
         <ul ref={track} onScroll={onScroll} className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-6">
           {items.map((t, i) => {

@@ -9,6 +9,7 @@ import { notify } from '@/components/admin/toast';
 import { Avatar, Button, IconButton, Modal, SearchInput, TableCard, Toggle, Toolbar, confirmAction, fieldStyle, fmtDate, reportError, rowClass } from '@/components/admin/ui';
 import { Field, Section, inputCls } from '@/components/admin/tours/shared';
 import { createBrowserClient } from '@/lib/supabase/client';
+import { announceAdminCounts } from '@/lib/useAdminCounts';
 import type { Database } from '@/types/database';
 
 export type Testimonial = Database['public']['Tables']['testimonials']['Row'];
@@ -34,7 +35,7 @@ function Stars({ rating }: { rating: number }) {
 export default function TestimonialsPanel({ rows, loading, reload }: { rows: Testimonial[]; loading: boolean; reload: () => Promise<void> }) {
   const supabase = useMemo(() => createBrowserClient(), []);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'featured'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'active' | 'inactive' | 'featured'>('all');
   const [ratingFilter, setRatingFilter] = useState('all');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<'new' | Testimonial | null>(null);
@@ -43,6 +44,7 @@ export default function TestimonialsPanel({ rows, loading, reload }: { rows: Tes
 
   const q = search.trim().toLowerCase();
   const shown = rows.filter((t) => {
+    if (statusFilter === 'pending' && t.status !== 'pending') return false;
     if (statusFilter === 'active' && !t.is_active) return false;
     if (statusFilter === 'inactive' && t.is_active) return false;
     if (statusFilter === 'featured' && !t.is_featured) return false;
@@ -76,8 +78,11 @@ export default function TestimonialsPanel({ rows, loading, reload }: { rows: Tes
     await reload();
   }
 
-  async function patch(t: Testimonial, change: Partial<Pick<Testimonial, 'is_active' | 'is_featured'>>) {
-    if (reportError((await supabase.from('testimonials').update(change).eq('id', t.id)).error)) return;
+  async function patch(t: Testimonial, change: Partial<Pick<Testimonial, 'is_active' | 'is_featured' | 'status'>>) {
+    // Showing a pending testimonial is the same as approving it.
+    const next = change.is_active && t.status === 'pending' ? { ...change, status: 'approved' } : change;
+    if (reportError((await supabase.from('testimonials').update(next).eq('id', t.id)).error)) return;
+    announceAdminCounts();
     await reload();
   }
 
@@ -91,8 +96,9 @@ export default function TestimonialsPanel({ rows, loading, reload }: { rows: Tes
   }
 
   async function bulkActive(active: boolean) {
-    if (reportError((await supabase.from('testimonials').update({ is_active: active }).in('id', chosen.map((t) => t.id))).error)) return;
+    if (reportError((await supabase.from('testimonials').update(active ? { is_active: true, status: 'approved' } : { is_active: false }).in('id', chosen.map((t) => t.id))).error)) return;
     setSelected(new Set());
+    announceAdminCounts();
     await reload();
   }
 
@@ -102,6 +108,7 @@ export default function TestimonialsPanel({ rows, loading, reload }: { rows: Tes
         <SearchInput className="min-w-[14rem] flex-1 sm:max-w-xs" value={search} onChange={setSearch} placeholder="Search name, role or quote" label="Search testimonials" />
         <select aria-label="Status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)} className="px-3 py-2 text-sm" style={fieldStyle}>
           <option value="all">Any status</option>
+          <option value="pending">Waiting for review</option>
           <option value="active">Active</option>
           <option value="inactive">Hidden</option>
           <option value="featured">Featured</option>
@@ -142,7 +149,7 @@ export default function TestimonialsPanel({ rows, loading, reload }: { rows: Tes
                 <Avatar name={t.author_name} src={t.author_image_path} size={36} />
                 <div className="min-w-0">
                   <p className="truncate font-medium" style={{ color: 'var(--adm-text)' }}>{t.author_name}</p>
-                  <p className="truncate text-xs" style={{ color: 'var(--adm-muted)' }}>{t.author_position || '-'}</p>
+                  <p className="truncate text-xs" style={{ color: 'var(--adm-muted)' }}>{t.author_position || '-'}{t.user_id ? ' · customer' : ''}</p>
                 </div>
               </div>
             </td>
@@ -150,8 +157,17 @@ export default function TestimonialsPanel({ rows, loading, reload }: { rows: Tes
             <td className="px-4 py-3"><Stars rating={t.rating} /></td>
             <td className="px-4 py-3">
               <div className="flex gap-1.5">
-                <Toggle on={t.is_active} label={t.is_active ? 'Active' : 'Hidden'} onClick={() => patch(t, { is_active: !t.is_active })} />
-                <Toggle on={t.is_featured} label="Featured" onClick={() => patch(t, { is_featured: !t.is_featured })} />
+                {t.status === 'pending' ? (
+                  <>
+                    <Button onClick={() => patch(t, { status: 'approved' })}>Approve</Button>
+                    <Button variant="secondary" onClick={() => patch(t, { status: 'rejected' })}>Decline</Button>
+                  </>
+                ) : (
+                  <>
+                    <Toggle on={t.is_active} label={t.is_active ? 'Active' : t.status === 'rejected' ? 'Declined' : 'Hidden'} onClick={() => patch(t, { is_active: !t.is_active })} />
+                    <Toggle on={t.is_featured} label="Featured" onClick={() => patch(t, { is_featured: !t.is_featured })} />
+                  </>
+                )}
               </div>
             </td>
             <td className="whitespace-nowrap px-4 py-3 text-xs" style={{ color: 'var(--adm-muted)' }}>{fmtDate(t.created_at)}</td>
