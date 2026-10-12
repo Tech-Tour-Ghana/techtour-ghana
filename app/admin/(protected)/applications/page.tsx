@@ -14,6 +14,7 @@ import { notify } from '@/components/admin/toast';
 import { Button, EmptyBlock, ListSkeleton, Modal, SearchInput, StatTile, Toolbar, confirmAction, fieldStyle, reportError } from '@/components/admin/ui';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { STUDY_ENDED, STUDY_META, STUDY_STAGES, asStudyStatus, formatMoney, isEnded, type StudyStatus } from '@/lib/study/meta';
+import { emailStudent } from '@/lib/study/notify.client';
 import { announceAdminCounts } from '@/lib/useAdminCounts';
 
 const SELECT = 'id, user_id, reference, status, program_name, university, location, intake, created_at, last_activity_at, assigned_to, next_step, admin_notes, full_name, email, phone, nationality, education_level, intended_level, message, study_application_documents(id, status, required)';
@@ -41,14 +42,17 @@ export default function AdminApplicationsPage() {
   const [overCol, setOverCol] = useState<StudyStatus | null>(null);
   const [adding, setAdding] = useState(false);
   const [owed, setOwed] = useState<Record<string, string[]>>({});
+  const [waiting, setWaiting] = useState<Set<string>>(new Set());
 
   const load = useCallback(async () => {
-    const [a, b, c, d] = await Promise.all([
+    const [a, b, c, d, w] = await Promise.all([
       supabase.from('study_applications').select(SELECT).order('last_activity_at', { ascending: false }),
       supabase.from('profiles').select('id, email, first_name, last_name').eq('is_admin', true).eq('is_active', true),
       supabase.auth.getUser(),
       supabase.from('study_application_balances').select('application_id, currency, balance').gt('balance', 0),
+      supabase.from('study_awaiting_reply').select('application_id'),
     ]);
+    setWaiting(new Set((w.data ?? []).map((r) => r.application_id).filter((x): x is string => !!x)));
     const o: Record<string, string[]> = {};
     for (const r of d.data ?? []) if (r.application_id) (o[r.application_id] ??= []).push(formatMoney(r.balance ?? 0, r.currency ?? ''));
     setOwed(o);
@@ -77,6 +81,7 @@ export default function AdminApplicationsPage() {
     const { error: err } = await supabase.from('study_applications').update({ status: next }).eq('id', a.id);
     if (reportError(err)) return;
     notify('Stage updated. The student was notified.', 'success');
+    emailStudent(a.id, 'stage');
     announceAdminCounts();
     load();
   }
@@ -148,6 +153,7 @@ export default function AdminApplicationsPage() {
                         </button>
                         <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
                           {docs.length > 0 && <span className="rounded-full px-2 py-0.5 font-semibold" style={{ background: soft(meta.color, 12), color: 'var(--adm-text)' }}>{uploaded}/{docs.length} documents</span>}
+                          {waiting.has(a.id) && <span className="rounded-full px-2 py-0.5 font-bold" style={{ background: soft('var(--brand-info)', 24), color: 'var(--adm-text)' }}>Message waiting</span>}
                           {owes && <span className="rounded-full px-2 py-0.5 font-semibold" style={{ background: soft('var(--brand-warning)', 22), color: 'var(--adm-text)' }}>Owes {owes.join(', ')}</span>}
                           {review > 0 && <span className="rounded-full px-2 py-0.5 font-bold" style={{ background: 'var(--brand-gold)', color: 'var(--brand-ink)' }}>{review} to review</span>}
                           <span className="ml-auto" style={{ color: 'var(--adm-muted)' }}>{owner ? staffName(owner) : 'Unassigned'}</span>

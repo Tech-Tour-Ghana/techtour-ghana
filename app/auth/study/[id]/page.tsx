@@ -40,6 +40,10 @@ export default function StudyApplicationPage({ params }: { params: Promise<{ id:
   const [docs, setDocs] = useState<StudyDocument[]>([]);
   const [events, setEvents] = useState<StudyEvent[]>([]);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
+  const [payHow, setPayHow] = useState('');
+  const [draft, setDraft] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const [state, setState] = useState<'loading' | 'ready' | 'missing' | 'failed'>('loading');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ id: string; text: string } | null>(null);
@@ -47,11 +51,12 @@ export default function StudyApplicationPage({ params }: { params: Promise<{ id:
 
   const load = useCallback(async () => {
     const supabase = createBrowserClient();
-    const [a, d, e, l] = await Promise.all([
+    const [a, d, e, l, ps] = await Promise.all([
       supabase.from('study_applications').select('id, user_id, reference, status, program_name, university, location, intake, next_step, created_at').eq('id', id).maybeSingle(),
       supabase.from('study_application_documents').select('*').eq('application_id', id).order('sort_order'),
       supabase.from('study_application_events').select('id, kind, title, body, is_public, created_at').eq('application_id', id).order('created_at', { ascending: false }),
       supabase.from('study_ledger').select('*').eq('application_id', id).order('occurred_on', { ascending: false }).order('created_at', { ascending: false }),
+      supabase.from('study_settings').select('payment_instructions').eq('id', true).maybeSingle(),
     ]);
     if (a.error) return setState('failed');
     if (!a.data) return setState('missing');
@@ -59,6 +64,7 @@ export default function StudyApplicationPage({ params }: { params: Promise<{ id:
     setDocs((d.data as StudyDocument[] | null) ?? []);
     setEvents((e.data as StudyEvent[] | null) ?? []);
     setLedger((l.data as LedgerEntry[] | null) ?? []);
+    setPayHow(ps.data?.payment_instructions ?? '');
     setState('ready');
   }, [id]);
 
@@ -88,6 +94,19 @@ export default function StudyApplicationPage({ params }: { params: Promise<{ id:
     // The old file of a replaced document is no longer needed.
     if (doc.file_path) await supabase.storage.from(STUDY_BUCKET).remove([doc.file_path]);
     setBusyId(null);
+    await load();
+  }
+
+  async function sendMessage(e: React.FormEvent) {
+    e.preventDefault();
+    if (sending || !app) return;
+    setSendError('');
+    if (draft.trim().length < 2) return setSendError('Write your message first.');
+    setSending(true);
+    const { error } = await createBrowserClient().rpc('send_study_message', { p_application_id: app.id, p_body: draft });
+    setSending(false);
+    if (error) return setSendError(error.message || 'We could not send that. Please try again.');
+    setDraft('');
     await load();
   }
 
@@ -200,7 +219,7 @@ export default function StudyApplicationPage({ params }: { params: Promise<{ id:
         </ul>
       </section>
 
-      <StudentLedger entries={ledger} reference={app.reference} />
+      <StudentLedger entries={ledger} reference={app.reference} instructions={payHow} />
 
       <section className="mt-6 rounded-2xl p-5 sm:p-6" style={card} aria-labelledby="time-h">
         <h2 id="time-h" className="mb-4 text-lg font-bold" style={{ color: 'var(--brand-text)' }}>What has happened so far</h2>
@@ -208,22 +227,37 @@ export default function StudyApplicationPage({ params }: { params: Promise<{ id:
           {events.map((e) => (
             <li key={e.id} className="relative">
               <span aria-hidden className="absolute -left-[31px] top-1 h-3 w-3 rounded-full" style={{ background: e.kind === 'stage' ? 'var(--brand-teal)' : 'var(--brand-muted)' }} />
-              <p className="text-sm font-semibold" style={{ color: 'var(--brand-text)' }}>{e.title}</p>
-              {e.body && <p className="mt-0.5 text-sm" style={{ color: 'var(--brand-text-2)' }}>{e.body}</p>}
+              {e.kind === 'message' ? (
+                <>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--brand-text)' }}>You sent a message</p>
+                  <p className="mt-0.5 whitespace-pre-wrap rounded-xl p-3 text-sm" style={{ background: soft('var(--brand-teal)', 8), color: 'var(--brand-text)' }}>{e.body}</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--brand-text)' }}>{e.title}</p>
+                  {e.body && <p className="mt-0.5 text-sm" style={{ color: 'var(--brand-text-2)' }}>{e.body}</p>}
+                </>
+              )}
               <p className="mt-0.5 text-xs" style={{ color: 'var(--brand-muted)' }}>{when(e.created_at)}</p>
             </li>
           ))}
         </ol>
       </section>
 
-      <section className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl p-5" style={card}>
-        <div>
-          <p className="text-sm font-semibold" style={{ color: 'var(--brand-text)' }}>Questions about this application?</p>
-          <p className="text-xs" style={{ color: 'var(--brand-text-2)' }}>Send us a message and quote {app.reference}. Replies appear in your notifications.</p>
-        </div>
-        <Link href="/auth/support" className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-full px-4 text-sm font-semibold" style={{ border: '1px solid var(--brand-line)', color: 'var(--brand-text)' }}>
-          <FontAwesomeIcon icon={faHeadset} className="h-3.5 w-3.5" />Contact support
-        </Link>
+      <section className="mt-6 rounded-2xl p-5 sm:p-6" style={card} aria-labelledby="msg-h">
+        <h2 id="msg-h" className="text-lg font-bold" style={{ color: 'var(--brand-text)' }}>Message your counsellor</h2>
+        <p className="mt-1 text-xs" style={{ color: 'var(--brand-text-2)' }}>Ask a question about this application. Replies appear in your timeline and notifications.</p>
+        <form onSubmit={sendMessage} className="mt-4">
+          <label htmlFor="study-msg" className="sr-only">Your message</label>
+          <textarea id="study-msg" rows={3} maxLength={1500} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Type your question" className="w-full rounded-xl px-4 py-3 text-sm" style={{ background: 'var(--brand-bg)', border: '1px solid var(--brand-line)', color: 'var(--brand-text)' }} />
+          {sendError && <p role="alert" className="mt-2 text-xs font-medium" style={{ color: 'var(--brand-error-text)' }}>{sendError}</p>}
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <button type="submit" disabled={sending || draft.trim().length < 2} className="inline-flex min-h-[2.75rem] items-center rounded-full px-5 text-sm font-semibold disabled:opacity-60" style={{ background: 'var(--brand-primary)', color: 'var(--brand-on-primary)' }}>{sending ? 'Sending...' : 'Send message'}</button>
+            <Link href="/auth/support" className="inline-flex items-center gap-2 text-xs font-semibold underline" style={{ color: 'var(--brand-text-2)' }}>
+              <FontAwesomeIcon icon={faHeadset} className="h-3 w-3" />Something else? Contact support
+            </Link>
+          </div>
+        </form>
       </section>
     </DashboardLayout>
   );

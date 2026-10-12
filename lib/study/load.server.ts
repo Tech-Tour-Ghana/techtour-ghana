@@ -44,7 +44,7 @@ export const getStudyDestinations = cache(async (): Promise<StudyDestination[]> 
 export const getOpenScholarships = cache(async (): Promise<Scholarship[]> => {
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
-  const { data } = await supabase.from('scholarships').select(SCHOLAR_SELECT).eq('is_active', true).gte('deadline', today).order('deadline');
+  const { data } = await supabase.from('scholarships').select(SCHOLAR_SELECT).eq('is_active', true).is('institution_id', null).gte('deadline', today).order('deadline');
   return data ?? [];
 });
 
@@ -53,7 +53,7 @@ export const getStudyDestination = cache(async (slug: string) => {
   const { data: destination } = await supabase.from('study_destinations').select(DEST_SELECT).eq('slug', slug).eq('is_active', true).maybeSingle();
   if (!destination) return null;
   const today = new Date().toISOString().slice(0, 10);
-  const { data: scholarships } = await supabase.from('scholarships').select(SCHOLAR_SELECT).eq('destination_id', destination.id).eq('is_active', true).gte('deadline', today).order('deadline');
+  const { data: scholarships } = await supabase.from('scholarships').select(SCHOLAR_SELECT).eq('destination_id', destination.id).eq('is_active', true).is('institution_id', null).gte('deadline', today).order('deadline');
   return { destination, scholarships: scholarships ?? [] };
 });
 
@@ -123,6 +123,16 @@ export const getStudyProgram = cache(async (id: string) => {
     : { data: null };
   if (!destination) return null;
   return { program: program as StudyProgram, institution, destination };
+});
+
+/** Open scholarships for one programme: its own, plus ones for the whole university. */
+export const getProgramScholarships = cache(async (programId: string, institutionId: string): Promise<Scholarship[]> => {
+  if (!/^[0-9a-f-]{36}$/i.test(programId) || !/^[0-9a-f-]{36}$/i.test(institutionId)) return [];
+  const supabase = await createClient();
+  const today = new Date().toISOString().slice(0, 10);
+  const { data } = await supabase.from('scholarships').select(SCHOLAR_SELECT).eq('is_active', true).gte('deadline', today)
+    .or(`program_id.eq.${programId},and(institution_id.eq.${institutionId},program_id.is.null)`).order('deadline');
+  return data ?? [];
 });
 
 export const formatTuition = (amount: number | null, currency: string) =>

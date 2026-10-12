@@ -19,7 +19,7 @@ const when = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'nume
 const today = () => new Date().toISOString().slice(0, 10);
 const blank = { kind: 'charge' as LedgerKind, category: 'application_fee', description: '', amount: '', currency: 'GHS', method: '', reference: '', occurred_on: today() };
 
-export default function LedgerPanel({ applicationId, onChanged }: { applicationId: string; onChanged: () => Promise<void> }) {
+export default function LedgerPanel({ applicationId, onChanged, onRecorded }: { applicationId: string; onChanged: () => Promise<void>; onRecorded?: () => void }) {
   const supabase = useMemo(() => createBrowserClient(), []);
   const [entries, setEntries] = useState<LedgerEntry[] | null>(null);
   const [form, setForm] = useState(blank);
@@ -49,6 +49,7 @@ export default function LedgerPanel({ applicationId, onChanged }: { applicationI
     setSaving(false);
     if (reportError(error)) return;
     notify('Recorded. The student was notified.', 'success');
+    onRecorded?.();
     setForm({ ...blank, kind: form.kind, currency: form.currency });
     await Promise.all([load(), onChanged()]);
   }
