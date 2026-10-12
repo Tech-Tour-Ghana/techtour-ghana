@@ -62,13 +62,13 @@ export default function DashboardPage() {
   };
 
   const StatCard = ({ icon, label, value, color }: { icon: typeof faCalendarCheck; label: string; value: number; color: string }) => (
-    <div className="rounded-2xl p-5" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
-      <div className="flex items-start justify-between">
+    <div className="rounded-2xl p-4 sm:p-5" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
+      <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-sm font-medium" style={{ color: themeStyles.textSecondary }}>{label}</p>
+          <p className="text-xs font-medium sm:text-sm" style={{ color: themeStyles.textSecondary }}>{label}</p>
           <p className="text-2xl font-bold mt-1" style={{ color: themeStyles.textPrimary }}>{value}</p>
         </div>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `color-mix(in srgb, ${color} 12%, transparent)` }}>
+        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10" style={{ background: `color-mix(in srgb, ${color} 12%, transparent)` }}>
           <FontAwesomeIcon icon={icon} style={{ color }} />
         </div>
       </div>
@@ -98,7 +98,7 @@ export default function DashboardPage() {
 
       <NoticeBoard />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard icon={faCalendarCheck} label="Tours Booked" value={stats?.tours_booked || 0} color={BRAND_COLORS.tropicalTeal} />
         <StatCard icon={faShoppingBag} label="Purchases" value={stats?.orders_placed || 0} color={BRAND_COLORS.sandyOrange} />
         <StatCard icon={faGraduationCap} label="Study Apps" value={stats?.study_applications || 0} color="var(--brand-purple)" />
