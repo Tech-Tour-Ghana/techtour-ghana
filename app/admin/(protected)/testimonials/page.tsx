@@ -30,7 +30,8 @@ export default function AdminTestimonialsPage() {
 
   return (
     <AdminLayout title="Testimonials" subtitle="Customer quotes shown on the homepage">
-      <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-3">
+      <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile icon={faQuoteLeft} label="Waiting for review" value={rows.filter((r) => r.status === 'pending').length} tone="warning" />
         <StatTile icon={faQuoteLeft} label="Total quotes" value={rows.length} tone="neutral" />
         <StatTile icon={faCircleCheck} label="Shown on the homepage" value={rows.filter((r) => r.is_active).length} tone="success" />
         <StatTile icon={faStar} label="Featured" value={rows.filter((r) => r.is_active && r.is_featured).length} tone="warning" />

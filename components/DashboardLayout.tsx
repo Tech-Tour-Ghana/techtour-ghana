@@ -13,6 +13,7 @@ import {
   faShoppingBag,
   faCalendarCheck,
   faGraduationCap,
+  faQuoteLeft,
   faHeart,
   faHeadset,
   faCreditCard,
@@ -45,6 +46,7 @@ export const SIDEBAR_ITEMS = [
   { icon: faGraduationCap, label: 'Study', href: '/auth/study' },
   { icon: faCalendarCheck, label: 'Tours', href: '/auth/tours' },
   { icon: faHeart, label: 'Wishlist', href: '/auth/wishlist' },
+  { icon: faQuoteLeft, label: 'Testimonials', href: '/auth/testimonials' },
   { icon: faBell, label: 'Notifications', href: '/auth/notifications' },
   { icon: faHeadset, label: 'Help', href: '/auth/support' },
 ];

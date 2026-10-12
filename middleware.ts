@@ -12,7 +12,7 @@ import { env } from "@/lib/env";
 import { DEFAULT_MAINTENANCE, isMaintenanceExempt, maintenanceFrom, type MaintenanceSettings } from "@/lib/maintenance";
 import type { Database } from "@/types/database";
 
-const PROTECTED = ["/auth/dashboard", "/auth/orders", "/auth/payments", "/auth/profile", "/auth/settings", "/auth/tours", "/auth/study", "/auth/wishlist", "/auth/notifications", "/auth/security"];
+const PROTECTED = ["/auth/dashboard", "/auth/orders", "/auth/payments", "/auth/profile", "/auth/settings", "/auth/tours", "/auth/study", "/auth/wishlist", "/auth/notifications", "/auth/security", "/auth/testimonials"];
 const GUEST_ONLY = ["/auth/login", "/auth/register"];
 
 const matches = (path: string, prefixes: string[]) =>
