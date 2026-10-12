@@ -43,7 +43,11 @@ export default function TestimonialsPage() {
   const [sent, setSent] = useState(false);
 
   const load = useCallback(async () => {
-    const { data } = await createBrowserClient().from('testimonials').select('id, author_name, author_position, content, rating, status, created_at').order('created_at', { ascending: false });
+    const supabase = createBrowserClient();
+    const { data: auth } = await supabase.auth.getUser();
+    // Published testimonials are readable by everyone, so ask for this member's own.
+    if (!auth.user) return setMine([]);
+    const { data } = await supabase.from('testimonials').select('id, author_name, author_position, content, rating, status, created_at').eq('user_id', auth.user.id).order('created_at', { ascending: false });
     setMine((data as Mine[] | null) ?? []);
   }, []);
 
