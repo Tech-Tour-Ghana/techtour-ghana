@@ -11,6 +11,7 @@ import { faCheck, faEye, faPlus, faTrash, faTriangleExclamation, faUpload } from
 
 import { notify } from '@/components/admin/toast';
 import { Button, ListSkeleton, Modal, StatusPill, Tabs, confirmAction, fieldStyle, fmtDate, reportError } from '@/components/admin/ui';
+import LedgerPanel from '@/components/admin/study/LedgerPanel';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { DOC_STATUS_META, STUDY_BUCKET, STUDY_META, STUDY_STATUSES, asStudyStatus, type StudyDocument, type StudyEvent, type StudyStatus } from '@/lib/study/meta';
 import { announceAdminCounts } from '@/lib/useAdminCounts';
@@ -47,7 +48,7 @@ const soft = (color: string, pct = 14) => `color-mix(in srgb, ${color} ${pct}%, 
 const fileSize = (n: number) => (n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`);
 const when = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
-type Tab = 'overview' | 'documents' | 'timeline';
+type Tab = 'overview' | 'documents' | 'payments' | 'timeline';
 
 export default function ApplicationDrawer({ app, staff, onClose, onChanged }: {
   app: AdminApplication;
@@ -164,7 +165,7 @@ export default function ApplicationDrawer({ app, staff, onClose, onChanged }: {
         </div>
 
         <div className="mb-4">
-          <Tabs value={tab} onChange={setTab} tabs={[{ key: 'overview' as Tab, label: 'Overview' }, { key: 'documents' as Tab, label: 'Documents', count: toReview || undefined }, { key: 'timeline' as Tab, label: 'Timeline', count: events?.length }]} />
+          <Tabs value={tab} onChange={setTab} tabs={[{ key: 'overview' as Tab, label: 'Overview' }, { key: 'documents' as Tab, label: 'Documents', count: toReview || undefined }, { key: 'payments' as Tab, label: 'Payments' }, { key: 'timeline' as Tab, label: 'Timeline', count: events?.length }]} />
         </div>
 
         {tab === 'overview' && (
@@ -262,6 +263,8 @@ export default function ApplicationDrawer({ app, staff, onClose, onChanged }: {
             </div>
           </div>
         )}
+
+        {tab === 'payments' && <LedgerPanel applicationId={app.id} onChanged={async () => { await Promise.all([onChanged(), loadEvents()]); }} />}
 
         {tab === 'timeline' && (
           <div>

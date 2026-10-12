@@ -21,7 +21,6 @@ interface Props {
 const EDUCATION = ['High school', 'Diploma', 'Bachelor degree', 'Master degree', 'Other'];
 const TARGET = [{ v: 'bachelor', l: 'Bachelor' }, { v: 'master', l: 'Master' }, { v: 'phd', l: 'PhD' }, { v: 'diploma', l: 'Diploma or short course' }];
 
-const tomorrow = () => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); };
 
 export default function StudyApplicationForm({ destination, scholarships, general = false }: Props) {
   const uid = useId();
@@ -62,7 +61,7 @@ export default function StudyApplicationForm({ destination, scholarships, genera
           education_level: f.education,
           intended_level: f.target,
           field_of_study: f.field,
-          start_date: f.start || null,
+          start_date: f.start ? `${f.start}-01-01` : null, // the column is a date; only the year is asked
           message: f.message,
         }),
       });
@@ -148,8 +147,11 @@ export default function StudyApplicationForm({ destination, scholarships, genera
           <input id={id('field')} value={f.field} onChange={set('field')} placeholder="e.g. Computer Science" className={input} style={field} />
         </div>
         <div>
-          <label htmlFor={id('start')} className={label}>Preferred start date</label>
-          <input id={id('start')} type="date" min={tomorrow()} value={f.start} onChange={set('start')} className={input} style={field} />
+          <label htmlFor={id('start')} className={label}>Preferred start year</label>
+          <select id={id('start')} value={f.start} onChange={set('start')} className={input} style={field}>
+            <option value="">Choose a year</option>
+            {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() + i).map((y) => <option key={y} value={String(y)}>{y}</option>)}
+          </select>
         </div>
         {scholarships.length > 0 && (
           <div className="sm:col-span-2">

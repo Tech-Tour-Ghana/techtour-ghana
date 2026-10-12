@@ -13,7 +13,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import Button from '@/components/ui/Button';
 import StageTracker from '@/components/study/StageTracker';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { STUDY_META, asStudyStatus, isEnded } from '@/lib/study/meta';
+import { STUDY_META, asStudyStatus, formatMoney, isEnded } from '@/lib/study/meta';
 
 interface Row {
   id: string;
@@ -35,10 +35,12 @@ const card = { background: 'var(--brand-card)', border: '1px solid var(--brand-l
 export default function StudyPage() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [failed, setFailed] = useState(false);
+  const [owed, setOwed] = useState<Record<string, string[]>>({});
 
   const load = useCallback(() => {
     setFailed(false);
-    createBrowserClient()
+    const supabase = createBrowserClient();
+    supabase
       .from('study_applications')
       .select(SELECT)
       .order('last_activity_at', { ascending: false })
@@ -46,6 +48,11 @@ export default function StudyPage() {
         if (error) setFailed(true);
         else setRows((data as unknown as Row[]) ?? []);
       });
+    supabase.from('study_application_balances').select('application_id, currency, balance').gt('balance', 0).then(({ data }) => {
+      const o: Record<string, string[]> = {};
+      for (const r of data ?? []) if (r.application_id) (o[r.application_id] ??= []).push(formatMoney(r.balance ?? 0, r.currency ?? ''));
+      setOwed(o);
+    });
   }, []);
 
   useEffect(() => {
@@ -88,6 +95,7 @@ export default function StudyPage() {
             const required = docs.filter((d) => d.required);
             const have = required.filter((d) => d.status === 'uploaded' || d.status === 'approved').length;
             const attention = docs.filter((d) => d.status === 'rejected').length;
+            const owes = owed[a.id];
             return (
               <li key={a.id}>
                 <Link href={`/auth/study/${a.id}`} className="block rounded-2xl p-5 transition hover:shadow-lg sm:p-6" style={card}>
@@ -116,6 +124,7 @@ export default function StudyPage() {
 
                   <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs" style={{ color: 'var(--brand-text-2)' }}>
                     {required.length > 0 && <span>{have} of {required.length} required documents uploaded</span>}
+                    {owes && <span className="font-semibold" style={{ color: 'var(--brand-text)' }}>Balance to pay: {owes.join(', ')}</span>}
                     {attention > 0 && <span className="inline-flex items-center gap-1 font-semibold" style={{ color: 'var(--brand-error-text)' }}><FontAwesomeIcon icon={faTriangleExclamation} className="h-3 w-3" />{attention} need{attention === 1 ? 's' : ''} attention</span>}
                     <span className="ml-auto inline-flex items-center gap-1 font-semibold" style={{ color: 'var(--brand-teal)' }}>View progress <FontAwesomeIcon icon={faChevronRight} className="h-2.5 w-2.5" /></span>
                   </div>
