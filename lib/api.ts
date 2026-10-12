@@ -191,12 +191,25 @@ export interface TourBooking {
   status: string;
 }
 
-/** The account area's own reads. RLS scopes every query to the caller's own rows (0013: <table>_select_own). */
+/**
+ * The signed-in user's id. Every read below filters on it. RLS alone is not enough
+ * here: admins may read every customer's rows, so an admin opening their own
+ * account pages would otherwise see everyone's orders, bookings and applications.
+ */
+async function ownUserId(): Promise<string | null> {
+  const { data } = await createBrowserClient().auth.getUser();
+  return data.user?.id ?? null;
+}
+
+/** The account area's own reads, each scoped to the caller's own rows. */
 export async function getUserOrders(): Promise<Order[]> {
   const supabase = createBrowserClient();
+  const uid = await ownUserId();
+  if (!uid) return [];
   const { data, error } = await supabase
     .from('orders')
     .select('id, order_number, quantity, unit_price, total_price, currency, order_status, payment_status, shipping_address, shipping_city, shipping_region, shipping_country, phone_number, tracking_number, created_at, updated_at, market_products(title)')
+    .eq('user_id', uid)
     .order('created_at', { ascending: false });
 
   if (error || !data) throw new Error(error?.message ?? 'Request failed');
@@ -228,9 +241,12 @@ export async function getUserOrders(): Promise<Order[]> {
  */
 export async function getUserPayments(): Promise<Payment[]> {
   const supabase = createBrowserClient();
+  const uid = await ownUserId();
+  if (!uid) return [];
   const { data, error } = await supabase
     .from('paystack_transactions')
     .select('id, reference, amount, currency, status, channel, created_at, paid_at')
+    .eq('user_id', uid)
     .order('created_at', { ascending: false });
 
   if (error || !data) throw new Error(error?.message ?? 'Request failed');
@@ -239,9 +255,12 @@ export async function getUserPayments(): Promise<Payment[]> {
 
 export async function getUserTours(): Promise<TourBooking[]> {
   const supabase = createBrowserClient();
+  const uid = await ownUserId();
+  if (!uid) return [];
   const { data, error } = await supabase
     .from('bookings')
     .select('id, booking_reference, participants, total_price, currency, status, tour_schedules(start_date), tours(title, location, duration_days)')
+    .eq('user_id', uid)
     .order('created_at', { ascending: false });
 
   if (error || !data) throw new Error(error?.message ?? 'Request failed');
@@ -262,8 +281,9 @@ export async function getUserTours(): Promise<TourBooking[]> {
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const supabase = createBrowserClient();
+  const uid = await ownUserId();
   const count = (table: 'bookings' | 'orders' | 'study_applications' | 'wishlist_items') =>
-    supabase.from(table).select('id', { count: 'exact', head: true });
+    supabase.from(table).select('id', { count: 'exact', head: true }).eq('user_id', uid ?? '');
 
   const [{ count: toursBooked }, { count: ordersPlaced }, { count: studyApps }, { count: wishlisted }, profile, orders] =
     await Promise.all([count('bookings'), count('orders'), count('study_applications'), count('wishlist_items'), getProfile(), getUserOrders()]);
@@ -380,12 +400,14 @@ export interface StudyApplication {
   created_at: string;
 }
 
-// RLS (0016) scopes both tables to the signed in user, so no user filter here.
 export async function getUserWishlist(): Promise<WishlistItem[]> {
   const supabase = createBrowserClient();
+  const uid = await ownUserId();
+  if (!uid) return [];
   const { data, error } = await supabase
     .from('wishlist_items')
     .select('id, product_id, created_at, market_products(title, price, discount_price, image_url)')
+    .eq('user_id', uid)
     .order('created_at', { ascending: false });
 
   if (error || !data) throw new Error(error?.message ?? 'Request failed');
@@ -401,7 +423,9 @@ export async function getUserWishlist(): Promise<WishlistItem[]> {
 }
 
 export async function getWishlistProductIds(): Promise<string[]> {
-  const { data } = await createBrowserClient().from('wishlist_items').select('product_id');
+  const uid = await ownUserId();
+  if (!uid) return [];
+  const { data } = await createBrowserClient().from('wishlist_items').select('product_id').eq('user_id', uid);
   return (data ?? []).map((row) => row.product_id);
 }
 
@@ -426,9 +450,12 @@ export async function removeWishlistItem(id: string): Promise<boolean> {
 }
 
 export async function getUserStudy(): Promise<StudyApplication[]> {
+  const uid = await ownUserId();
+  if (!uid) return [];
   const { data, error } = await createBrowserClient()
     .from('study_applications')
     .select('id, program_name, university, location, start_date, status, duration, created_at')
+    .eq('user_id', uid)
     .order('created_at', { ascending: false });
 
   if (error || !data) throw new Error(error?.message ?? 'Request failed');

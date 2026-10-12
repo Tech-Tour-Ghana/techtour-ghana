@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import DashboardLayout from '@/components/DashboardLayout';
+import StudyFeesDue from '@/components/study/StudyFeesDue';
 import { getUserPayments, type Payment } from '@/lib/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCreditCard, faGlobeAfrica, faCheckCircle, faClock, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
@@ -84,6 +85,7 @@ export default function PaymentsPage() {
 
   return (
     <DashboardLayout title="Payments" subtitle="Your transaction history">
+      <StudyFeesDue />
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="rounded-2xl p-4" style={{ background: themeStyles.cardBg, border: `1px solid ${themeStyles.border}` }}>
           <p className="text-sm" style={{ color: themeStyles.textSecondary }}>Total Spent</p>

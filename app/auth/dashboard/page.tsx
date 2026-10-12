@@ -87,7 +87,7 @@ export default function DashboardPage() {
           <div className="mt-4" role="group" aria-label="Profile completeness">
             <div className="mb-1.5 flex items-center justify-between text-xs" style={{ color: themeStyles.textSecondary }}>
               <span>Profile {stats?.profile_complete || 0}% complete</span>
-              {(stats?.profile_complete || 0) < 100 && <Link href="/auth/profile" className="font-semibold underline" style={{ color: BRAND_COLORS.tropicalTeal }}>Finish your profile</Link>}
+              {(stats?.profile_complete || 0) < 100 && <Link href="/auth/profile" className="inline-flex min-h-[2.75rem] items-center font-semibold underline" style={{ color: BRAND_COLORS.tropicalTeal }}>Finish your profile</Link>}
             </div>
             <div className="h-2 overflow-hidden rounded-full" style={{ background: isDimMode ? 'rgba(var(--brand-white-rgb), 0.08)' : 'var(--brand-line)' }}>
               <div className="h-full rounded-full" style={{ width: `${stats?.profile_complete || 0}%`, background: BRAND_COLORS.tropicalTeal }} />
