@@ -111,7 +111,7 @@ export default function AdminApplicationsPage() {
                   setDragId(null); setOverCol(null);
                   if (a) move(a, col);
                 }}
-                className="flex w-full min-w-full flex-shrink-0 snap-start flex-col rounded-[var(--adm-radius-card)] sm:w-72 sm:min-w-0 lg:w-72"
+                className={`${list.length === 0 && visible.length > 0 ? 'hidden sm:flex' : 'flex'} w-full min-w-full flex-shrink-0 snap-start flex-col rounded-[var(--adm-radius-card)] sm:w-72 sm:min-w-0 lg:w-72`}
                 style={{ background: over ? soft(meta.color, 12) : 'var(--adm-track)', border: `2px ${over ? 'dashed' : 'solid'} ${over ? meta.color : 'transparent'}` }}
               >
                 <header className="flex items-center gap-2 px-3 py-2.5">
