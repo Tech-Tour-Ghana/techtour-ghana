@@ -286,7 +286,7 @@ export default function AdminSearch({ pages }: { pages: SearchPage[] }) {
         className="relative flex h-full w-full flex-col overflow-hidden sm:h-auto sm:max-h-[78vh] sm:max-w-3xl sm:rounded-2xl"
         style={{ background: 'var(--adm-card)', border: '1px solid var(--adm-border)', boxShadow: 'var(--adm-shadow)' }}
       >
-        <div className="flex items-center gap-3 border-b px-4" style={{ borderColor: 'var(--adm-border)' }}>
+        <div className="flex items-center gap-3 border-b px-4 transition-shadow focus-within:shadow-[inset_0_-2px_0_0_var(--adm-primary)]" style={{ borderColor: 'var(--adm-border)' }}>
           <FontAwesomeIcon icon={faMagnifyingGlass} className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--adm-muted)' }} />
           <input
             ref={inputRef}
@@ -301,8 +301,9 @@ export default function AdminSearch({ pages }: { pages: SearchPage[] }) {
             placeholder="Search tours, students, orders, users, pages..."
             autoComplete="off"
             spellCheck={false}
-            className="min-h-[3.5rem] w-full flex-1 bg-transparent text-base outline-none"
-            style={{ color: 'var(--adm-text)' }}
+            className="min-h-[3.5rem] min-w-0 flex-1 bg-transparent text-base"
+            // The site-wide :focus-visible ring would draw over the neighbouring buttons; the row shows focus instead.
+            style={{ color: 'var(--adm-text)', outline: 'none', boxShadow: 'none', border: 0 }}
           />
           {query && (
             <button type="button" aria-label="Clear search" onClick={() => { setQuery(''); inputRef.current?.focus(); }} className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ color: 'var(--adm-muted)' }}>
@@ -312,14 +313,14 @@ export default function AdminSearch({ pages }: { pages: SearchPage[] }) {
           <button type="button" onClick={close} className="rounded-lg px-2 py-1 text-xs font-semibold" style={{ background: 'var(--adm-track)', color: 'var(--adm-text-2)' }}>Esc</button>
         </div>
 
-        <div className="flex gap-1.5 overflow-x-auto border-b px-3 py-2" style={{ borderColor: 'var(--adm-border)' }} role="group" aria-label="Narrow the search">
+        <div className="flex flex-wrap gap-2 border-b px-4 py-3" style={{ borderColor: 'var(--adm-border)' }} role="group" aria-label="Narrow the search">
           {FILTERS.map((f) => (
             <button
               key={f.key}
               type="button"
               aria-pressed={filter === f.key}
               onClick={() => { setFilter(f.key); inputRef.current?.focus(); }}
-              className="min-h-[2rem] flex-shrink-0 rounded-full px-3 text-xs font-semibold"
+              className="min-h-[2.25rem] flex-shrink-0 rounded-full px-3.5 text-xs font-semibold"
               style={filter === f.key ? { background: 'var(--adm-primary)', color: 'rgb(var(--brand-white-rgb))' } : { background: 'var(--adm-track)', color: 'var(--adm-text-2)' }}
             >
               {f.label}
