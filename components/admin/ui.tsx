@@ -367,6 +367,17 @@ export function SearchInput({
   label?: string;
   className?: string;
 }) {
+  // A link such as /admin/tours?q=accra (from the admin search) opens the list already filtered.
+  // The event covers searching while already on the page, where nothing remounts.
+  const apply = useRef(onChange);
+  apply.current = onChange;
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get('q');
+    if (fromUrl) apply.current(fromUrl);
+    const onEvent = (e: Event) => apply.current(String((e as CustomEvent<string>).detail ?? ''));
+    window.addEventListener('admin:q', onEvent);
+    return () => window.removeEventListener('admin:q', onEvent);
+  }, []);
   return (
     <div className={`relative ${className}`}>
       <FontAwesomeIcon icon={faMagnifyingGlass} className="pointer-events-none absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2" style={{ color: 'var(--adm-muted)' }} />

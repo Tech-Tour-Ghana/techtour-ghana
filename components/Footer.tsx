@@ -5,15 +5,7 @@ import Button from '@/components/ui/Button';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faFacebookF as faFacebookBrand,
-  faInstagram as faInstagramBrand,
-  faLinkedinIn as faLinkedinBrand,
-  faYoutube as faYoutubeBrand,
-  faTiktok as faTiktokBrand,
-  faWhatsapp as faWhatsappBrand,
-  faTwitter as faTwitterBrand
-} from '@fortawesome/free-brands-svg-icons';
+import { socialBrand } from '@/lib/social/brands';
 import './Footer.css';
 
 // Types for API data
@@ -57,21 +49,6 @@ interface FooterSettings {
 }
 
 import { createBrowserClient } from '@/lib/supabase/client';
-
-// Helper to get FontAwesome brand icon for social platforms
-const getSocialIcon = (platform: string) => {
-  const p = platform.toLowerCase();
-  const icons: Record<string, any> = {
-    'facebook': faFacebookBrand,
-    'instagram': faInstagramBrand,
-    'linkedin': faLinkedinBrand,
-    'youtube': faYoutubeBrand,
-    'tiktok': faTiktokBrand,
-    'whatsapp': faWhatsappBrand,
-    'twitter': faTwitterBrand,
-  };
-  return icons[p] || faFacebookBrand;
-};
 
 const Footer = () => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -297,12 +274,12 @@ const Footer = () => {
                       key={index}
                       href={social.url}
                       className="social-icon-circle"
-                      style={{ backgroundColor: social.color }}
-                      aria-label={social.platform}
+                      style={{ backgroundColor: socialBrand(social.platform).color }}
+                      aria-label={socialBrand(social.platform).label}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <FontAwesomeIcon icon={getSocialIcon(social.platform)} />
+                      <FontAwesomeIcon icon={socialBrand(social.platform).icon} />
                     </a>
                   ))}
                 </div>
