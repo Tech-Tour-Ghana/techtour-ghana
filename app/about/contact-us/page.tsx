@@ -18,27 +18,9 @@ import {
   faBriefcase,
   faGlobeAfrica,
 } from '@fortawesome/free-solid-svg-icons';
-import {
-  faFacebook,
-  faInstagram,
-  faTwitter,
-  faLinkedin,
-  faYoutube,
-  faTiktok,
-  faWhatsapp,
-} from '@fortawesome/free-brands-svg-icons';
 import { ServiceTheme } from '@/components/ServiceTheme';
+import { socialBrand } from '@/lib/social/brands';
 import { createBrowserClient } from '@/lib/supabase/client';
-
-const SOCIAL_ICONS: Record<string, typeof faFacebook> = {
-  facebook: faFacebook,
-  instagram: faInstagram,
-  twitter: faTwitter,
-  linkedin: faLinkedin,
-  youtube: faYoutube,
-  tiktok: faTiktok,
-  whatsapp: faWhatsapp,
-};
 
 const departmentContacts = [
   {
@@ -281,10 +263,11 @@ export default function ContactUsPage() {
                         href={social.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label={social.platform}
+                        aria-label={socialBrand(social.platform).label}
                         className="contact-social-btn"
+                        style={{ background: socialBrand(social.platform).color, borderColor: socialBrand(social.platform).color, color: 'rgb(var(--brand-white-rgb))' }}
                       >
-                        <FontAwesomeIcon icon={SOCIAL_ICONS[social.platform] || faFacebook} />
+                        <FontAwesomeIcon icon={socialBrand(social.platform).icon} />
                       </a>
                     ))}
                   </div>

@@ -57,6 +57,7 @@ import { getAuthStatus, logoutUser, type User } from '@/lib/api';
 import { useSiteLogo } from '@/lib/useSiteLogo';
 import { useAdminCounts, type AdminCounts } from '@/lib/useAdminCounts';
 import NotificationBell from '@/components/notifications/NotificationBell';
+import AdminSearch from '@/components/admin/AdminSearch';
 
 const BRAND_COLORS = {
   tropicalTeal: 'var(--adm-primary)',
@@ -134,6 +135,9 @@ const NAV_GROUPS = [
     ],
   },
 ];
+
+// Every sidebar page, for the admin search.
+const SEARCH_PAGES = NAV_GROUPS.flatMap((g) => g.items.map((i) => ({ label: i.label, href: i.href, group: g.group, icon: i.icon })));
 
 // Which sidebar item shows which count (see admin_sidebar_counts). Trash is informational, failed emails are a warning.
 const BADGES: Record<string, { key: keyof AdminCounts; tone: 'attention' | 'quiet' | 'alert' }> = {
@@ -429,6 +433,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
           </div>
 
           <div className="ml-auto flex items-center gap-3">
+            <AdminSearch pages={SEARCH_PAGES} />
             <button
               onClick={toggleTheme}
               aria-label={isDimMode ? 'Switch to light theme' : 'Switch to dark theme'}

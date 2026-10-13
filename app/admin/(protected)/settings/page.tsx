@@ -13,6 +13,7 @@ import { createBrowserClient } from '@/lib/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
 import UrlWithPicker from '@/components/admin/UrlWithPicker';
 import BrandColors from '@/components/admin/settings/BrandColors';
+import ContactSocial from '@/components/admin/settings/ContactSocial';
 import { checkPalette, cleanOverrides, isDefaultTheme, paletteFor, type DefaultTheme, type ThemeMode, type ThemeOverrides } from '@/lib/theme/tokens';
 import { Card, Field, textClass } from '@/components/admin/settings/parts';
 import { notify } from '@/components/admin/toast';
@@ -25,17 +26,18 @@ const SITE_KEYS = [
 
 type SiteForm = Record<(typeof SITE_KEYS)[number], string>;
 interface FooterForm { company_name: string; tagline: string }
-type Tab = 'general' | 'branding' | 'screens' | 'more';
+type Tab = 'general' | 'contact' | 'branding' | 'screens' | 'more';
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'general', label: 'General' },
+  { key: 'contact', label: 'Contact and social' },
   { key: 'branding', label: 'Branding' },
   { key: 'screens', label: 'Sign-in screens' },
   { key: 'more', label: 'Related settings' },
 ];
 
 const SHORTCUTS = [
-  { href: '/admin/navigation', title: 'Social links', body: 'Social profiles, footer contacts, menus and legal links.' },
+  { href: '/admin/navigation', title: 'Menus and footer links', body: 'Navbar menus, footer links and legal links.' },
   { href: '/admin/maintenance', title: 'Maintenance mode', body: 'Show visitors a maintenance page while you work.' },
   { href: '/admin/seo', title: 'SEO', body: 'Site-wide title pattern, default description and share image.' },
 ];
@@ -145,7 +147,7 @@ export default function SettingsAdminPage() {
   }
 
   return (
-    <AdminLayout title="Settings" subtitle="Site identity, brand colours and sign-in screens">
+    <AdminLayout title="Settings" subtitle="Site identity, contact details, social links, brand colours and sign-in screens">
       {loading ? (
         <ListSkeleton />
       ) : error ? (
@@ -159,10 +161,12 @@ export default function SettingsAdminPage() {
               <Field id="site-name" label="Site name"><input id="site-name" className={textClass} style={fieldStyle} value={footer.company_name} onChange={(e) => setF('company_name', e.target.value)} /></Field>
               <Field id="site-tagline" label="Tagline"><input id="site-tagline" className={textClass} style={fieldStyle} value={footer.tagline} onChange={(e) => setF('tagline', e.target.value)} /></Field>
               <p className="text-xs" style={{ color: 'var(--adm-muted)' }}>
-                Contact email, phone and address are managed with the footer contacts in <Link href="/admin/navigation" className="font-semibold underline">Navigation</Link>.
+                Contact email, phone, address and social links are in the <button type="button" onClick={() => setTab('contact')} className="font-semibold underline">Contact and social</button> tab.
               </p>
             </Card>
           )}
+
+          {tab === 'contact' && <ContactSocial />}
 
           {tab === 'branding' && (
             <Card title="Logo and icon" description="Your logo and the small icon shown in browser tabs. A new favicon can take up to an hour to appear.">
@@ -205,7 +209,7 @@ export default function SettingsAdminPage() {
             </div>
           )}
 
-          {tab !== 'more' && (
+          {tab !== 'more' && tab !== 'contact' && (
             <div className="sticky bottom-0 -mx-1 flex flex-wrap items-center gap-3 rounded-[var(--adm-radius-control)] px-4 py-3" style={{ background: 'var(--adm-card)', border: '1px solid var(--adm-border)', boxShadow: 'var(--adm-shadow)' }}>
               <Button onClick={save} disabled={saving || !dirty}>
                 <FontAwesomeIcon icon={faFloppyDisk} className="mr-2 h-3 w-3" />{saving ? 'Saving…' : 'Save settings'}
